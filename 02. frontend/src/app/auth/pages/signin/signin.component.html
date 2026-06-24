@@ -2,8 +2,8 @@
   <div class="container-fluid my-5 my-lg-0">
     <div class="row">
       <div class="col-12 col-md-8 col-lg-6 col-xl-5 col-xxl-4 mx-auto">
-        <div class="card rounded-4 mb-0 border-0 shadow sigre-auth-card">
-          <div class="card-body p-4 p-sm-5">
+        <div class="card rounded-4 mb-0">
+          <div class="card-body p-5">
 
             <div class="sigre-auth-brand mb-4">
               <img
@@ -30,14 +30,17 @@
                 <div class="row g-3">
                   <div class="col-12">
                     <label for="sigre-usuario" class="form-label">Usuario o correo</label>
-                    <input
-                      id="sigre-usuario"
-                      type="text"
-                      class="form-control"
-                      formControlName="usuario"
-                      autocomplete="username"
-                      placeholder="usuario&#64;empresa.com"
-                      [class.is-invalid]="campoInvalido('usuario')" />
+                    <sigre-validated-field [control]="loginForm.get('usuario')" variant="bootstrap">
+                      <input
+                        id="sigre-usuario"
+                        type="text"
+                        class="form-control"
+                        formControlName="usuario"
+                        autocomplete="username"
+                        placeholder="usuario&#64;empresa.com"
+                        [class.is-invalid]="campoInvalido('usuario')"
+                        [class.is-valid]="campoValido('usuario')" />
+                    </sigre-validated-field>
                     @if (campoInvalido('usuario')) {
                       <div class="invalid-feedback d-block">El usuario es requerido</div>
                     }
@@ -45,23 +48,26 @@
 
                   <div class="col-12">
                     <label for="sigre-clave" class="form-label">Contraseña</label>
-                    <div class="input-group" id="show_hide_password">
-                      <input
-                        id="sigre-clave"
-                        [type]="mostrarClave ? 'text' : 'password'"
-                        class="form-control border-end-0"
-                        formControlName="clave"
-                        autocomplete="current-password"
-                        placeholder="Ingrese su contraseña"
-                        [class.is-invalid]="campoInvalido('clave')" />
-                      <button
-                        type="button"
-                        class="input-group-text bg-transparent border-start-0"
-                        (click)="toggleClave()"
-                        aria-label="Mostrar u ocultar contraseña">
-                        <i class="material-icons-outlined fs-6">{{ mostrarClave ? 'visibility_off' : 'visibility' }}</i>
-                      </button>
-                    </div>
+                    <sigre-validated-field [control]="loginForm.get('clave')" variant="password">
+                      <div class="input-group" id="show_hide_password">
+                        <input
+                          id="sigre-clave"
+                          [type]="mostrarClave ? 'text' : 'password'"
+                          class="form-control border-end-0"
+                          formControlName="clave"
+                          autocomplete="current-password"
+                          placeholder="Ingrese su contraseña"
+                          [class.is-invalid]="campoInvalido('clave')"
+                          [class.is-valid]="campoValido('clave')" />
+                        <button
+                          type="button"
+                          class="input-group-text bg-transparent border-start-0"
+                          (click)="toggleClave()"
+                          aria-label="Mostrar u ocultar contraseña">
+                          <i class="material-icons-outlined fs-6">{{ mostrarClave ? 'visibility_off' : 'visibility' }}</i>
+                        </button>
+                      </div>
+                    </sigre-validated-field>
                     @if (campoInvalido('clave')) {
                       <div class="invalid-feedback d-block">La contraseña es requerida</div>
                     }
@@ -92,7 +98,7 @@
                     <div class="d-grid">
                       <button
                         type="submit"
-                        class="btn btn-primary sigre-auth-submit"
+                        class="btn btn-primary"
                         [disabled]="isLoading || (turnstileEnabled && !turnstileToken)">
                         @if (isLoading) {
                           <span class="d-inline-flex align-items-center justify-content-center gap-2">

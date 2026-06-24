@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 import { SigreValidationBadgeComponent } from './sigre-validation-badge.component';
 
-export type SigreValidatedFieldVariant = 'text' | 'select' | 'date';
+export type SigreValidatedFieldVariant = 'text' | 'select' | 'date' | 'bootstrap' | 'password';
 
 @Component({
   selector: 'sigre-validated-field',
@@ -12,7 +12,9 @@ export type SigreValidatedFieldVariant = 'text' | 'select' | 'date';
     <div
       class="sigre-validated-field"
       [class.sigre-validated-field--select]="variant === 'select'"
-      [class.sigre-validated-field--date]="variant === 'date'">
+      [class.sigre-validated-field--date]="variant === 'date'"
+      [class.sigre-validated-field--bootstrap]="variant === 'bootstrap'"
+      [class.sigre-validated-field--password]="variant === 'password'">
       <ng-content></ng-content>
       @if (control) {
         <sigre-validation-badge [control]="control" />

@@ -8,6 +8,7 @@ import { PostAuthIntentService } from '../../../admin/services/post-auth-intent.
 import { ErpLayoutService } from '../../../erp/services/erp-layout.service';
 import { CryptoService } from '@core/services/crypto.service';
 import { ConfigService } from '../../../services/config.service';
+import { estadoValidacionCampo } from '@sigre-common';
 
 declare global {
   interface Window {
@@ -125,8 +126,11 @@ export class SignInComponent implements OnInit, AfterViewInit, OnDestroy, ViewWi
   }
 
   campoInvalido(nombre: string): boolean {
-    const control = this.loginForm.get(nombre);
-    return !!(control && control.invalid && (control.dirty || control.touched));
+    return estadoValidacionCampo(this.loginForm.get(nombre)) === 'invalid';
+  }
+
+  campoValido(nombre: string): boolean {
+    return estadoValidacionCampo(this.loginForm.get(nombre)) === 'valid';
   }
 
   private renderTurnstile(): void {

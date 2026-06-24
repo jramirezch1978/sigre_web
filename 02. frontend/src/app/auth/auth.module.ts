@@ -22,6 +22,7 @@ import { SesionValidaGuard } from './guards/sesion-valida.guard';
 import { SesionNoValidaGuard } from './guards/sesion-no-valida.guard';
 import { AdminUiModule } from '../ui/admin-ui.module';
 import { VerificacionContraseniaComponent } from './components/verificacion-contrasenia/verificacion-contrasenia.component';
+import { SigreValidatedFieldComponent } from '@sigre-common';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { VerificacionContraseniaComponent } from './components/verificacion-cont
     MatIconModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
+    SigreValidatedFieldComponent,
   ],
   providers: [
     AuthService,
