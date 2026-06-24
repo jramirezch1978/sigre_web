@@ -1,15 +1,14 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
 import { ErpLayoutService } from '../../services/erp-layout.service';
-import { fusionarModulosConCatalogo } from '../../shared/erp-modulos-catalog.config';
+import { ERP_MODULOS_CATALOGO, fusionarModulosConCatalogo } from '../../shared/erp-modulos-catalog.config';
+import { iconoModulo } from '../../shared/modulos-iconos';
 
-interface ModuloGrid {
+interface ModuloAcceso {
   codigo: string;
   nombre: string;
-  icono: string;
   iconoSvg: string;
   moduloReal: MenuModulo | null;
 }
@@ -17,7 +16,7 @@ interface ModuloGrid {
 @Component({
   selector: 'app-erp-dashboard',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule],
   templateUrl: './erp-dashboard.component.html',
   styleUrls: ['./erp-dashboard.component.scss'],
 })
@@ -26,30 +25,30 @@ export class ErpDashboardComponent implements OnInit {
   private readonly layout = inject(ErpLayoutService);
   private readonly router = inject(Router);
 
-  modulos: ModuloGrid[] = [];
+  accesosRapidos: ModuloAcceso[] = [];
+  resumen = { modulosActivos: ERP_MODULOS_CATALOGO.length };
 
   ngOnInit(): void {
     this.layout.seleccionarModulo(null);
     this.menuService.obtenerMiMenu().subscribe({
       next: modulosApi => {
         const fusionados = fusionarModulosConCatalogo(modulosApi, false);
-        this.modulos = fusionados.map(m => ({
+        this.accesosRapidos = fusionados.slice(0, 5).map(m => ({
           codigo: m.codigo,
           nombre: m.nombre,
-          icono: m.icono,
-          iconoSvg: m.iconoSvg,
+          iconoSvg: m.iconoSvg || iconoModulo(m.codigo),
           moduloReal: m.secciones.length > 0 ? m : null,
         }));
       },
     });
   }
 
-  abrirModulo(modulo: ModuloGrid): void {
+  abrirModulo(modulo: ModuloAcceso): void {
     const mod = modulo.moduloReal ?? {
       moduloId: 0,
       codigo: modulo.codigo,
       nombre: modulo.nombre,
-      icono: modulo.icono,
+      icono: 'apps',
       iconoSvg: modulo.iconoSvg,
       secciones: [],
     };

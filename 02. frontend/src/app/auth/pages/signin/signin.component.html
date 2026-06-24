@@ -1,72 +1,99 @@
-<div class="admin-login-page">
-  <div class="admin-login-panel">
-    <div class="admin-login-brand">
-      <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE" class="admin-login-brand__logo" />
-      <p class="admin-login-brand__tagline">Solución Integral de Gestión de Recursos Empresariales</p>
+<div class="section-authentication-cover sigre-auth-metoxi">
+  <div class="row g-0 min-vh-100">
+
+    <div class="col-12 col-xl-7 col-xxl-8 auth-cover-left align-items-center justify-content-center d-none d-xl-flex border-end">
+      <div class="card rounded-0 mb-0 border-0 shadow-none bg-transparent">
+        <div class="card-body text-center">
+          <img src="assets/metoxi/images/auth/login1.png" class="img-fluid auth-img-cover-login" width="650" alt="SIGRE ERP" />
+        </div>
+      </div>
     </div>
 
-    @if (!vistaVerif) {
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="admin-login-form">
-        <h2>Acceso al ERP</h2>
-        <p class="admin-login-subtitle">Ingrese sus credenciales para continuar al módulo operativo.</p>
+    <div class="col-12 col-xl-5 col-xxl-4 auth-cover-right align-items-center justify-content-center d-flex">
+      <div class="card rounded-0 m-3 mb-0 border-0 shadow-none w-100">
+        <div class="card-body p-sm-5">
+          <img src="assets/imagenes/auth/logo-sigre.png" class="mb-4 sigre-auth-logo" alt="SIGRE" />
+          <h4 class="fw-bold">Acceso al ERP</h4>
+          <p class="mb-0">Ingrese sus credenciales para continuar al módulo operativo.</p>
 
-        @if (errorMessage) {
-          <div class="admin-login-error" role="alert">{{ errorMessage }}</div>
-        }
+          @if (!vistaVerif) {
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="form-body mt-4">
+              @if (errorMessage) {
+                <div class="alert alert-danger py-2" role="alert">{{ errorMessage }}</div>
+              }
 
-        <mat-form-field appearance="outline" class="admin-login-field">
-          <mat-label>Usuario o correo</mat-label>
-          <input matInput formControlName="usuario" autocomplete="username" />
-          @if (campoInvalido('usuario')) {
-            <mat-error>El usuario es requerido</mat-error>
-          }
-        </mat-form-field>
+              <div class="row g-3">
+                <div class="col-12">
+                  <label for="sigre-usuario" class="form-label">Usuario o correo</label>
+                  <input id="sigre-usuario" type="text" class="form-control" formControlName="usuario" autocomplete="username"
+                         [class.is-invalid]="campoInvalido('usuario')" />
+                  @if (campoInvalido('usuario')) {
+                    <div class="invalid-feedback d-block">El usuario es requerido</div>
+                  }
+                </div>
 
-        <mat-form-field appearance="outline" class="admin-login-field">
-          <mat-label>Contraseña</mat-label>
-          <input matInput [type]="mostrarClave ? 'text' : 'password'" formControlName="clave" autocomplete="current-password" />
-          <button mat-icon-button matSuffix type="button" (click)="toggleClave()" [attr.aria-label]="mostrarClave ? 'Ocultar' : 'Mostrar'">
-            <mat-icon>{{ mostrarClave ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
-          @if (campoInvalido('clave')) {
-            <mat-error>La contraseña es requerida</mat-error>
-          }
-        </mat-form-field>
+                <div class="col-12">
+                  <label for="sigre-clave" class="form-label">Contraseña</label>
+                  <div class="input-group">
+                    <input id="sigre-clave" [type]="mostrarClave ? 'text' : 'password'" class="form-control"
+                           formControlName="clave" autocomplete="current-password"
+                           [class.is-invalid]="campoInvalido('clave')" />
+                    <button type="button" class="input-group-text bg-transparent" (click)="toggleClave()">
+                      <i class="material-icons-outlined fs-6">{{ mostrarClave ? 'visibility_off' : 'visibility' }}</i>
+                    </button>
+                  </div>
+                  @if (campoInvalido('clave')) {
+                    <div class="invalid-feedback d-block">La contraseña es requerida</div>
+                  }
+                </div>
 
-        <div class="admin-login-forgot">
-          <button type="button" class="admin-login-forgot-link" (click)="cambioVistaVerif()">
-            ¿Olvidaste tu contraseña?
-          </button>
-        </div>
+                <div class="col-md-6">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="sigre-recordar" formControlName="recordar" />
+                    <label class="form-check-label" for="sigre-recordar">Recordar usuario</label>
+                  </div>
+                </div>
+                <div class="col-md-6 text-end">
+                  <button type="button" class="btn btn-link p-0" (click)="cambioVistaVerif()">¿Olvidaste tu contraseña?</button>
+                </div>
 
-        <mat-checkbox formControlName="recordar" class="admin-login-remember">Recordar usuario</mat-checkbox>
+                @if (turnstileEnabled) {
+                  <div class="col-12">
+                    <div id="cf-turnstile-container"></div>
+                    @if (turnstileError) {
+                      <span class="text-danger small">Debe completar la verificación de seguridad</span>
+                    }
+                  </div>
+                }
 
-        @if (turnstileEnabled) {
-        <div class="admin-login-turnstile">
-          <div id="cf-turnstile-container"></div>
-          @if (turnstileError) {
-            <span class="turnstile-error">Debe completar la verificación de seguridad</span>
-          }
-        </div>
-        }
-
-        <button mat-flat-button color="primary" type="submit" class="admin-login-submit" [disabled]="isLoading || (turnstileEnabled && !turnstileToken)">
-          @if (isLoading) {
-            <span class="admin-login-submit__loading">
-              <mat-spinner diameter="22"></mat-spinner>
-              <span>Ingresando…</span>
-            </span>
+                <div class="col-12">
+                  <div class="d-grid">
+                    <button type="submit" class="btn btn-primary" [disabled]="isLoading || (turnstileEnabled && !turnstileToken)">
+                      @if (isLoading) {
+                        <span class="d-inline-flex align-items-center justify-content-center gap-2">
+                          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                          Ingresando…
+                        </span>
+                      } @else {
+                        Iniciar sesión
+                      }
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
           } @else {
-            Iniciar sesión
+            <div class="mt-4">
+              <app-verificacion-contrasenia (volverLogin)="cambioVistaVerif()"></app-verificacion-contrasenia>
+            </div>
           }
-        </button>
-      </form>
-    } @else {
-      <app-verificacion-contrasenia (volverLogin)="cambioVistaVerif()"></app-verificacion-contrasenia>
-    }
 
-    <footer class="admin-login-footer">
-      <a routerLink="/admin/login">Consola de administración →</a>
-    </footer>
+          <div class="text-start mt-4">
+            <a routerLink="/admin/login" class="small">Consola de administración →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>

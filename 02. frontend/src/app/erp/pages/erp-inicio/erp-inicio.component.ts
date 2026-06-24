@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, HostListener } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
@@ -11,6 +11,19 @@ import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
 import { ErpLayoutService } from '../../services/erp-layout.service';
 import { fusionarModulosConCatalogo } from '../../shared/erp-modulos-catalog.config';
 import { iconoModulo } from '../../shared/modulos-iconos';
+
+interface CeldaAppsLauncher {
+  codigo: string;
+  modulo: MenuModulo | null;
+}
+
+interface NotificacionDemo {
+  titulo: string;
+  descripcion: string;
+  tiempo: string;
+  iniciales: string;
+  badgeClass: string;
+}
 
 @Component({
   selector: 'app-erp-inicio',
@@ -36,10 +49,36 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   cargandoMenu = true;
   errorMenu = '';
 
-  dropdownAbiertoId: number | null = null;
-  private dropdownTimeout: ReturnType<typeof setTimeout> | null = null;
+  dropdownActivo: 'apps' | 'notificaciones' | 'usuario' | null = null;
+  seccionExpandidaId: number | null = null;
+
+  readonly notificacionesDemo: NotificacionDemo[] = [
+    {
+      titulo: 'Stock bajo',
+      descripcion: 'Hay artículos por debajo del mínimo en almacén.',
+      tiempo: 'Hoy',
+      iniciales: 'ST',
+      badgeClass: 'bg-warning text-warning bg-opacity-10',
+    },
+    {
+      titulo: 'OC pendiente',
+      descripcion: 'Una orden de compra espera aprobación.',
+      tiempo: 'Ayer',
+      iniciales: 'OC',
+      badgeClass: 'bg-primary text-primary bg-opacity-10',
+    },
+    {
+      titulo: 'Planilla',
+      descripcion: 'Periodo de planilla abierto para revisión.',
+      tiempo: '2d',
+      iniciales: 'RH',
+      badgeClass: 'bg-success text-success bg-opacity-10',
+    },
+  ];
 
   ngOnInit(): void {
+    document.body.classList.add('sigre-metoxi-body');
+
     const user = this.storage.getUser<{
       nombreCompleto?: string;
       nombres?: string;
@@ -68,12 +107,39 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.limpiarTimeout();
+    document.body.classList.remove('sigre-metoxi-body', 'toggled');
   }
 
   @HostListener('document:click')
   onDocumentClick(): void {
-    this.dropdownAbiertoId = null;
+    this.dropdownActivo = null;
+  }
+
+  get filasAppsLauncher(): CeldaAppsLauncher[][] {
+    const celdas: CeldaAppsLauncher[] = this.modulos.map(m => ({
+      codigo: m.codigo,
+      modulo: m,
+    }));
+    const total = celdas.length;
+    const resto = total % 3;
+    if (resto > 0) {
+      for (let i = 0; i < 3 - resto; i++) {
+        celdas.push({ codigo: `empty-${i}`, modulo: null });
+      }
+    }
+    const filas: CeldaAppsLauncher[][] = [];
+    for (let i = 0; i < celdas.length; i += 3) {
+      filas.push(celdas.slice(i, i + 3));
+    }
+    return filas;
+  }
+
+  toggleSidebar(): void {
+    document.body.classList.toggle('toggled');
+  }
+
+  toggleDropdown(tipo: 'apps' | 'notificaciones' | 'usuario'): void {
+    this.dropdownActivo = this.dropdownActivo === tipo ? null : tipo;
   }
 
   cargarMenu(): void {
@@ -94,26 +160,31 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
 
   seleccionarModulo(modulo: MenuModulo): void {
     this.layout.seleccionarModulo(modulo);
-    this.dropdownAbiertoId = null;
+    this.dropdownActivo = null;
+    this.seccionExpandidaId = null;
     void this.router.navigateByUrl(this.menuService.rutaDashboardModulo(modulo.codigo));
+  }
+
+  abrirModuloDesdeApps(modulo: MenuModulo): void {
+    this.seleccionarModulo(modulo);
+  }
+
+  onClickModuloSidebar(modulo: MenuModulo): void {
+    if (this.moduloActivo?.codigo === modulo.codigo && modulo.secciones.length > 0) {
+      return;
+    }
+    this.seleccionarModulo(modulo);
+  }
+
+  toggleSeccionSidebar(seccionId: number): void {
+    this.seccionExpandidaId = this.seccionExpandidaId === seccionId ? null : seccionId;
   }
 
   irADashboard(): void {
     this.layout.seleccionarModulo(null);
-    this.dropdownAbiertoId = null;
+    this.dropdownActivo = null;
+    this.seccionExpandidaId = null;
     void this.router.navigate(['/sigre/dashboard']);
-  }
-
-  abrirDropdown(seccionId: number): void {
-    this.limpiarTimeout();
-    this.dropdownAbiertoId = seccionId;
-  }
-
-  cerrarDropdown(): void {
-    this.limpiarTimeout();
-    this.dropdownTimeout = setTimeout(() => {
-      this.dropdownAbiertoId = null;
-    }, 150);
   }
 
   navegarOpcion(event: Event, ruta: string | null, codigo?: string): void {
@@ -123,7 +194,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
       ? this.menuService.resolverRutaFrontend(codigo, ruta)
       : this.menuService.normalizarRutaFrontend(ruta);
     if (!destino) return;
-    this.dropdownAbiertoId = null;
+    this.dropdownActivo = null;
     void this.router.navigateByUrl(destino);
   }
 
@@ -162,13 +233,6 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
       return JSON.parse(atob(base64));
     } catch {
       return null;
-    }
-  }
-
-  private limpiarTimeout(): void {
-    if (this.dropdownTimeout) {
-      clearTimeout(this.dropdownTimeout);
-      this.dropdownTimeout = null;
     }
   }
 }

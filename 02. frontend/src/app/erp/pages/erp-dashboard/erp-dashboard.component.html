@@ -1,16 +1,101 @@
-<div class="erp-dashboard">
-  <div class="erp-dashboard__grid">
-    @for (modulo of modulos; track modulo.codigo) {
-      <div class="erp-dashboard__card" (click)="abrirModulo(modulo)">
-        <div class="erp-dashboard__card-icon">
-          @if (modulo.iconoSvg) {
-            <img [src]="modulo.iconoSvg" [alt]="modulo.nombre" />
-          } @else {
-            <mat-icon>{{ modulo.icono }}</mat-icon>
-          }
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+  <div class="breadcrumb-title pe-3">Dashboard</div>
+  <div class="ps-3">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0 p-0">
+        <li class="breadcrumb-item active" aria-current="page">Resumen SIGRE</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-xl-4 d-flex">
+    <div class="card rounded-4 w-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <h2 class="mb-0">{{ resumen.modulosActivos }}</h2>
+          <p class="dash-lable d-flex align-items-center gap-1 rounded mb-0 bg-success text-success bg-opacity-10">
+            <span class="material-icons-outlined fs-6">arrow_upward</span>ERP
+          </p>
         </div>
-        <span class="erp-dashboard__card-name">{{ modulo.nombre }}</span>
+        <p class="mb-0">Módulos disponibles</p>
+        <div class="sigre-dash-placeholder-chart mt-3"></div>
       </div>
-    }
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-8 d-flex">
+    <div class="card rounded-4 w-100">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-around flex-wrap gap-4 p-2 p-md-4">
+          <div class="d-flex flex-column align-items-center justify-content-center gap-2 text-center">
+            <span class="mb-2 wh-48 bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center">
+              <i class="material-icons-outlined">inventory_2</i>
+            </span>
+            <h3 class="mb-0">—</h3>
+            <p class="mb-0">Almacén</p>
+          </div>
+          <div class="vr d-none d-md-block"></div>
+          <div class="d-flex flex-column align-items-center justify-content-center gap-2 text-center">
+            <span class="mb-2 wh-48 bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center">
+              <i class="material-icons-outlined">shopping_cart</i>
+            </span>
+            <h3 class="mb-0">—</h3>
+            <p class="mb-0">Compras</p>
+          </div>
+          <div class="vr d-none d-md-block"></div>
+          <div class="d-flex flex-column align-items-center justify-content-center gap-2 text-center">
+            <span class="mb-2 wh-48 bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center">
+              <i class="material-icons-outlined">groups</i>
+            </span>
+            <h3 class="mb-0">—</h3>
+            <p class="mb-0">RR.HH.</p>
+          </div>
+          <div class="vr d-none d-md-block"></div>
+          <div class="d-flex flex-column align-items-center justify-content-center gap-2 text-center">
+            <span class="mb-2 wh-48 bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center">
+              <i class="material-icons-outlined">storefront</i>
+            </span>
+            <h3 class="mb-0">—</h3>
+            <p class="mb-0">Ventas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-8 d-flex">
+    <div class="card rounded-4 w-100">
+      <div class="card-body">
+        <div class="d-flex align-items-start justify-content-between mb-3">
+          <div>
+            <h5 class="mb-1">Bienvenido a SIGRE</h5>
+            <p class="mb-0 text-muted">Use el icono <strong>apps</strong> en la barra superior para abrir cualquier módulo, o el menú lateral.</p>
+          </div>
+        </div>
+        <div class="sigre-dash-placeholder-bars"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-4 d-flex">
+    <div class="card rounded-4 w-100">
+      <div class="card-body">
+        <h5 class="mb-3">Accesos rápidos</h5>
+        <ul class="list-group list-group-flush">
+          @for (modulo of accesosRapidos; track modulo.codigo) {
+            <li class="list-group-item px-0 d-flex align-items-center gap-3">
+              <img [src]="modulo.iconoSvg" width="28" height="28" [alt]="modulo.nombre" />
+              <div class="flex-grow-1">
+                <div class="fw-semibold">{{ modulo.nombre }}</div>
+                <div class="small text-muted">Módulo ERP</div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="abrirModulo(modulo)">Abrir</button>
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
   </div>
 </div>
