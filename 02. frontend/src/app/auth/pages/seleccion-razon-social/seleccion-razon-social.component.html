@@ -1,137 +1,157 @@
-<div class="seleccion-page">
-  <div class="seleccion-card">
+<div class="auth-basic-wrapper sigre-auth-basic bg-login d-flex align-items-center justify-content-center">
+  <div class="container-fluid my-5 my-lg-0">
+    <div class="row">
+      <div class="col-12 col-md-10 col-lg-8 col-xl-6 col-xxl-5 mx-auto">
+        <div class="card rounded-4 mb-0 sigre-auth-card-list">
+          <div class="card-body p-4 p-sm-5">
 
-    <!-- Header con logo -->
-    <div class="seleccion-header">
-      <img src="assets/imagenes/auth/logo-sigre-horizontal.png" alt="SIGRE ERP" class="seleccion-header__logo" />
-      <p class="seleccion-header__tagline">Solución Integral de Gestión de Recursos Empresariales</p>
-    </div>
-
-    <!-- Contenido -->
-    <div class="seleccion-body">
-
-      <!-- Paso 1: Selección de Empresa -->
-      @if (paso === 'empresa') {
-        <div class="seleccion-body__title-row">
-          <h2 class="seleccion-body__title">Seleccionar Empresa</h2>
-          <button type="button" class="seleccion-logout" (click)="logout()" title="Cerrar sesión">
-            <ion-icon name="log-out-outline"></ion-icon>
-            <span>Salir</span>
-          </button>
-        </div>
-        <p class="seleccion-body__subtitle">Haz click en una empresa para ingresar al sistema</p>
-
-        @if (empresas.length > 1) {
-          <div class="seleccion-search">
-            <ion-icon name="search-outline" class="seleccion-search__icon"></ion-icon>
-            <input type="text"
-              class="seleccion-search__input"
-              placeholder="Buscar por razón social o RUC"
-              [(ngModel)]="searchQuery" />
-          </div>
-        }
-
-        @if (loading) {
-          <div class="seleccion-loading">
-            <ion-spinner name="crescent"></ion-spinner>
-          </div>
-        }
-
-        @if (!loading && getEmpresasFiltradas().length > 0) {
-          <div class="seleccion-list">
-            @for (empresa of getEmpresasFiltradas(); track empresa.empresaId) {
-              <div class="seleccion-list__item"
-                   [class.seleccion-list__item--disabled]="isSelecting"
-                   (click)="onEmpresaClick(empresa)">
-                <div class="seleccion-list__icon seleccion-list__icon--empresa">
-                  <ion-icon name="business-outline"></ion-icon>
-                </div>
-                <div class="seleccion-list__info">
-                  <span class="seleccion-list__name">{{ empresa.razonSocial }}</span>
-                  <span class="seleccion-list__detail">RUC: {{ empresa.ruc }}</span>
-                </div>
-                <ion-icon name="chevron-forward-outline" class="seleccion-list__arrow"></ion-icon>
+            <div class="sigre-auth-brand mb-4">
+              <img
+                src="assets/imagenes/auth/logo-sigre.png"
+                class="sigre-auth-brand__logo"
+                alt="SIGRE" />
+              <div class="sigre-auth-brand__copy">
+                <h1 class="sigre-auth-brand__title mb-1">SIGRE</h1>
+                <p class="sigre-auth-brand__tagline mb-0">
+                  Solución Integral de Gestión de Recursos Empresariales
+                </p>
               </div>
-            }
-          </div>
-        }
+            </div>
 
-        @if (!loading && getEmpresasFiltradas().length === 0 && !searchQuery) {
-          <div class="seleccion-empty">
-            <ion-icon name="alert-circle-outline" class="seleccion-empty__icon"></ion-icon>
-            <p class="seleccion-empty__title">No tiene empresas asignadas</p>
-            <p class="seleccion-empty__desc">Coordine con el administrador del sistema</p>
-          </div>
-        }
+            <div class="sigre-auth-card-list__scroll">
+              @if (paso === 'empresa') {
+                <div class="d-flex align-items-start justify-content-between gap-3 mb-1">
+                  <h4 class="fw-bold mb-0">Seleccionar Empresa</h4>
+                  <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" (click)="logout()">
+                    <i class="material-icons-outlined fs-6">logout</i>
+                    Salir
+                  </button>
+                </div>
+                <p class="text-muted mb-4">Haz click en una empresa para ingresar al sistema</p>
 
-        @if (!loading && getEmpresasFiltradas().length === 0 && searchQuery) {
-          <div class="seleccion-empty">
-            <ion-icon name="search-outline" class="seleccion-empty__icon"></ion-icon>
-            <p class="seleccion-empty__title">No se encontraron empresas</p>
-            <p class="seleccion-empty__desc">Verifica el criterio de búsqueda e intenta nuevamente</p>
-          </div>
-        }
-      }
+                @if (empresas.length > 1) {
+                  <div class="position-relative mb-3">
+                    <span class="position-absolute top-50 start-0 translate-middle-y ps-3 text-muted">
+                      <i class="material-icons-outlined fs-6">search</i>
+                    </span>
+                    <input
+                      type="text"
+                      class="form-control rounded-5 ps-5"
+                      placeholder="Buscar por razón social o RUC"
+                      [(ngModel)]="searchQuery" />
+                  </div>
+                }
 
-      <!-- Paso 2: Selección de Sucursal -->
-      @if (paso === 'sucursal') {
-        <div class="seleccion-body__title-row">
-          <div class="seleccion-body__back-group">
-            <button type="button" class="seleccion-back" (click)="volverAEmpresas()">
-              <ion-icon name="arrow-back-outline"></ion-icon>
-            </button>
-            <h2 class="seleccion-body__title">Seleccionar Sucursal</h2>
+                @if (loading) {
+                  <div class="d-flex justify-content-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando…</span>
+                    </div>
+                  </div>
+                }
+
+                @if (!loading && getEmpresasFiltradas().length > 0) {
+                  <div class="list-group list-group-flush">
+                    @for (empresa of getEmpresasFiltradas(); track empresa.empresaId) {
+                      <button
+                        type="button"
+                        class="list-group-item list-group-item-action sigre-selection-item rounded-3 mb-2 d-flex align-items-center gap-3"
+                        [disabled]="isSelecting"
+                        (click)="onEmpresaClick(empresa)">
+                        <span class="sigre-selection-item__icon bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0">
+                          <i class="material-icons-outlined">business</i>
+                        </span>
+                        <span class="flex-grow-1 min-width-0 text-start">
+                          <span class="d-block fw-semibold text-truncate">{{ empresa.razonSocial }}</span>
+                          <span class="d-block small text-muted">RUC: {{ empresa.ruc }}</span>
+                        </span>
+                        <i class="material-icons-outlined text-muted flex-shrink-0">chevron_right</i>
+                      </button>
+                    }
+                  </div>
+                }
+
+                @if (!loading && getEmpresasFiltradas().length === 0 && !searchQuery) {
+                  <div class="text-center py-5">
+                    <i class="material-icons-outlined text-muted mb-2" style="font-size: 3rem;">error_outline</i>
+                    <p class="fw-semibold mb-1">No tiene empresas asignadas</p>
+                    <p class="text-muted small mb-0">Coordine con el administrador del sistema</p>
+                  </div>
+                }
+
+                @if (!loading && getEmpresasFiltradas().length === 0 && searchQuery) {
+                  <div class="text-center py-5">
+                    <i class="material-icons-outlined text-muted mb-2" style="font-size: 3rem;">search_off</i>
+                    <p class="fw-semibold mb-1">No se encontraron empresas</p>
+                    <p class="text-muted small mb-0">Verifica el criterio de búsqueda e intenta nuevamente</p>
+                  </div>
+                }
+              }
+
+              @if (paso === 'sucursal') {
+                <div class="d-flex align-items-start justify-content-between gap-3 mb-1">
+                  <div class="d-flex align-items-center gap-2 min-width-0">
+                    <button type="button" class="btn btn-sm btn-outline-secondary p-1" (click)="volverAEmpresas()" aria-label="Volver">
+                      <i class="material-icons-outlined fs-6">arrow_back</i>
+                    </button>
+                    <h4 class="fw-bold mb-0 text-truncate">Seleccionar Sucursal</h4>
+                  </div>
+                  <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1 flex-shrink-0" (click)="logout()">
+                    <i class="material-icons-outlined fs-6">logout</i>
+                    Salir
+                  </button>
+                </div>
+                <p class="text-muted mb-4 d-flex align-items-center gap-1 flex-wrap">
+                  <i class="material-icons-outlined fs-6 text-primary">business</i>
+                  <span>{{ empresaSeleccionada?.razonSocial }} — RUC: {{ empresaSeleccionada?.ruc }}</span>
+                </p>
+
+                @if (loadingSucursales) {
+                  <div class="d-flex justify-content-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Cargando…</span>
+                    </div>
+                  </div>
+                }
+
+                @if (!loadingSucursales && sucursales.length > 0) {
+                  <div class="list-group list-group-flush">
+                    @for (sucursal of sucursales; track sucursal.id) {
+                      <button
+                        type="button"
+                        class="list-group-item list-group-item-action sigre-selection-item rounded-3 mb-2 d-flex align-items-center gap-3"
+                        [disabled]="isSelecting"
+                        (click)="seleccionarSucursal(sucursal)">
+                        <span class="sigre-selection-item__icon bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center flex-shrink-0">
+                          <i class="material-icons-outlined">storefront</i>
+                        </span>
+                        <span class="flex-grow-1 min-width-0 text-start">
+                          <span class="d-block fw-semibold text-truncate">{{ sucursal.nombre }}</span>
+                          <span class="d-block small text-muted text-truncate">{{ sucursal.codigo }} — {{ sucursal.direccion || '—' }}</span>
+                        </span>
+                        <i class="material-icons-outlined text-muted flex-shrink-0">chevron_right</i>
+                      </button>
+                    }
+                  </div>
+                }
+
+                @if (!loadingSucursales && sucursales.length === 0) {
+                  <div class="text-center py-5">
+                    <i class="material-icons-outlined text-muted mb-2" style="font-size: 3rem;">storefront</i>
+                    <p class="fw-semibold mb-1">No hay sucursales registradas</p>
+                    <p class="text-muted small mb-0">Esta empresa no tiene sucursales configuradas</p>
+                  </div>
+                }
+              }
+            </div>
+
+            <div class="text-center pt-4 mt-2 border-top">
+              <span class="small text-muted">&copy; {{ currentYear }} SIGRE ERP — Todos los derechos reservados</span>
+            </div>
+
           </div>
-          <button type="button" class="seleccion-logout" (click)="logout()" title="Cerrar sesión">
-            <ion-icon name="log-out-outline"></ion-icon>
-            <span>Salir</span>
-          </button>
         </div>
-        <p class="seleccion-body__subtitle">
-          <ion-icon name="business-outline"></ion-icon>
-          {{ empresaSeleccionada?.razonSocial }} — RUC: {{ empresaSeleccionada?.ruc }}
-        </p>
-
-        @if (loadingSucursales) {
-          <div class="seleccion-loading">
-            <ion-spinner name="crescent"></ion-spinner>
-          </div>
-        }
-
-        @if (!loadingSucursales && sucursales.length > 0) {
-          <div class="seleccion-list">
-            @for (sucursal of sucursales; track sucursal.id) {
-              <div class="seleccion-list__item"
-                   [class.seleccion-list__item--disabled]="isSelecting"
-                   (click)="seleccionarSucursal(sucursal)">
-                <div class="seleccion-list__icon seleccion-list__icon--sucursal">
-                  <ion-icon name="storefront-outline"></ion-icon>
-                </div>
-                <div class="seleccion-list__info">
-                  <span class="seleccion-list__name">{{ sucursal.nombre }}</span>
-                  <span class="seleccion-list__detail">{{ sucursal.codigo }} — {{ sucursal.direccion || '—' }}</span>
-                </div>
-                <ion-icon name="chevron-forward-outline" class="seleccion-list__arrow"></ion-icon>
-              </div>
-            }
-          </div>
-        }
-
-        @if (!loadingSucursales && sucursales.length === 0) {
-          <div class="seleccion-empty">
-            <ion-icon name="alert-circle-outline" class="seleccion-empty__icon"></ion-icon>
-            <p class="seleccion-empty__title">No hay sucursales registradas</p>
-            <p class="seleccion-empty__desc">Esta empresa no tiene sucursales configuradas</p>
-          </div>
-        }
-      }
-
+      </div>
     </div>
-
-    <!-- Footer -->
-    <div class="seleccion-footer">
-      <span>&copy; {{ currentYear }} SIGRE ERP — Todos los derechos reservados</span>
-    </div>
-
   </div>
 </div>

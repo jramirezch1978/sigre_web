@@ -1,34 +1,49 @@
 <div class="almacen-page">
-  <header class="almacen-page__header">
-    <div>
-      <h1>{{ titulo }}</h1>
-      @if (subtitulo) {
-        <p class="almacen-page__subtitle">{{ subtitulo }}</p>
-      }
+  <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Almacén</div>
+    <div class="ps-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 p-0">
+          <li class="breadcrumb-item active" aria-current="page">{{ titulo }}</li>
+        </ol>
+      </nav>
     </div>
-    <div class="almacen-page__actions">
-      @if (puedeGestionar) {
-        <button mat-flat-button color="primary" type="button" (click)="anadir()" [disabled]="cargando">
-          <mat-icon>add</mat-icon>
-          Añadir
-        </button>
-      }
-      <button mat-stroked-button type="button" (click)="recargar()" [disabled]="cargando">
-        <mat-icon>refresh</mat-icon>
-        Actualizar
-      </button>
-    </div>
-  </header>
+  </div>
 
-  <app-erp-data-table
-    [columnas]="columnas"
-    [filas]="filas"
-    [cargando]="cargando"
-    [error]="error"
-    [totalRegistros]="filas.length"
-    [mostrarAcciones]="puedeGestionar"
-    (editar)="editarRegistro($event)"
-    (anular)="anularRegistro($event)"
-    (eliminar)="eliminarRegistro($event)"
-  />
+  <div class="card rounded-4 mb-0">
+    <div class="card-body">
+      <header class="almacen-page__header">
+        <div>
+          <h4 class="mb-1">{{ titulo }}</h4>
+          @if (subtitulo) {
+            <p class="text-muted mb-0">{{ subtitulo }}</p>
+          }
+        </div>
+        <div class="almacen-page__actions">
+          @if (puedeGestionar) {
+            <button mat-flat-button color="primary" type="button" (click)="anadir()" [disabled]="cargando">
+              <mat-icon>add</mat-icon>
+              Añadir
+            </button>
+          }
+          <button mat-stroked-button type="button" (click)="recargar()" [disabled]="cargando">
+            <mat-icon>refresh</mat-icon>
+            Actualizar
+          </button>
+        </div>
+      </header>
+
+      <app-erp-data-table
+        [columnas]="columnas"
+        [filas]="filas"
+        [cargando]="cargando"
+        [error]="error"
+        [totalRegistros]="filas.length"
+        [mostrarAcciones]="puedeGestionar"
+        (editar)="editarRegistro($event)"
+        (anular)="anularRegistro($event)"
+        (eliminar)="eliminarRegistro($event)"
+      />
+    </div>
+  </div>
 </div>

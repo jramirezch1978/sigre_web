@@ -1,75 +1,102 @@
 <div class="almacen-dashboard">
-  <section class="almacen-dashboard__hero">
-    <div class="almacen-dashboard__hero-visual">
-      <img src="assets/imagenes/modulos/almacen.svg" alt="Almacén" />
+  <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Almacén</div>
+    <div class="ps-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 p-0">
+          <li class="breadcrumb-item active" aria-current="page">Panel de control</li>
+        </ol>
+      </nav>
     </div>
-    <div class="almacen-dashboard__hero-text">
-      <h1>Almacén</h1>
-      <p>Panel de control — resumen de movimientos e inventario {{ anio }}</p>
-    </div>
-  </section>
+  </div>
 
-  @if (errorCarga) {
-    <div class="almacen-dashboard__error">
-      <mat-icon>error_outline</mat-icon>
-      <span>{{ errorCarga }}</span>
-    </div>
-  }
-
-  <div class="almacen-dashboard__kpis">
-    @for (kpi of kpis; track kpi.label) {
-      <div class="almacen-dashboard__kpi">
-        <div class="almacen-dashboard__kpi-icon" [style.background]="kpi.color + '18'" [style.color]="kpi.color">
-          <mat-icon>{{ kpi.icon }}</mat-icon>
+  <div class="row g-3">
+    <div class="col-12">
+      <div class="card rounded-4 mb-0">
+        <div class="card-body almacen-dashboard__hero">
+          <div class="almacen-dashboard__hero-visual">
+            <img src="assets/imagenes/modulos/almacen.svg" alt="Almacén" />
+          </div>
+          <div class="almacen-dashboard__hero-text">
+            <h4 class="mb-1">Almacén</h4>
+            <p class="text-muted mb-0">Panel de control — resumen de movimientos e inventario {{ anio }}</p>
+          </div>
         </div>
-        <div>
-          <span class="almacen-dashboard__kpi-value">{{ cargando ? '…' : kpi.value }}</span>
-          <span class="almacen-dashboard__kpi-label">{{ kpi.label }}</span>
+      </div>
+    </div>
+
+    @if (errorCarga) {
+      <div class="col-12">
+        <div class="alert alert-danger d-flex align-items-center gap-2 mb-0" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorCarga }}</span>
         </div>
       </div>
     }
-  </div>
 
-  <div class="almacen-dashboard__charts">
-    <article class="almacen-dashboard__chart-card almacen-dashboard__chart-card--wide">
-      <header class="almacen-dashboard__chart-head">
-        <div>
-          <h2>Ingresos por mes</h2>
-          <p>Movimientos de ingreso registrados durante {{ anio }}</p>
-        </div>
-        <mat-icon>bar_chart</mat-icon>
-      </header>
-      <div class="almacen-dashboard__chart">
-        @if (!cargando) {
-          <canvas baseChart type="bar" [data]="ingresosBarData" [options]="ingresosBarOptions"></canvas>
-        } @else {
-          <div class="almacen-dashboard__chart-loading">Cargando…</div>
-        }
-      </div>
-    </article>
-
-    <article class="almacen-dashboard__chart-card almacen-dashboard__chart-card--full">
-      <header class="almacen-dashboard__chart-head">
-        <div>
-          <h2>Valorización por almacén</h2>
-          <p>Stock actual × costo promedio en soles (sldo_total × costo_prom_sol)</p>
-        </div>
-        <mat-icon>stacked_bar_chart</mat-icon>
-      </header>
-      <div class="almacen-dashboard__chart almacen-dashboard__chart--valorizacion"
-           [style.height.px]="valorizacionChartAltura">
-        @if (!cargando && !sinValorizacion) {
-          <canvas baseChart type="bar" [data]="valorizacionBarData" [options]="valorizacionBarOptions"></canvas>
-        } @else if (!cargando && sinValorizacion) {
-          <div class="almacen-dashboard__chart-empty">
-            <mat-icon>inventory</mat-icon>
-            <p>Sin stock valorizado en almacén.</p>
-            <span>La valorización se calcula desde <strong>articulo_almacen</strong> (cantidad × costo promedio).</span>
+    @for (kpi of kpis; track kpi.label) {
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card rounded-4 h-100 mb-0">
+          <div class="card-body almacen-dashboard__kpi">
+            <div class="almacen-dashboard__kpi-icon" [style.background]="kpi.color + '18'" [style.color]="kpi.color">
+              <mat-icon>{{ kpi.icon }}</mat-icon>
+            </div>
+            <div>
+              <span class="almacen-dashboard__kpi-value">{{ cargando ? '…' : kpi.value }}</span>
+              <span class="almacen-dashboard__kpi-label">{{ kpi.label }}</span>
+            </div>
           </div>
-        } @else {
-          <div class="almacen-dashboard__chart-loading">Cargando…</div>
-        }
+        </div>
       </div>
-    </article>
+    }
+
+    <div class="col-12 col-xl-8">
+      <div class="card rounded-4 h-100 mb-0">
+        <div class="card-body">
+          <header class="almacen-dashboard__chart-head">
+            <div>
+              <h5 class="mb-1">Ingresos por mes</h5>
+              <p class="text-muted small mb-0">Movimientos de ingreso registrados durante {{ anio }}</p>
+            </div>
+            <mat-icon>bar_chart</mat-icon>
+          </header>
+          <div class="almacen-dashboard__chart">
+            @if (!cargando) {
+              <canvas baseChart type="bar" [data]="ingresosBarData" [options]="ingresosBarOptions"></canvas>
+            } @else {
+              <div class="almacen-dashboard__chart-loading">Cargando…</div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card rounded-4 mb-0">
+        <div class="card-body">
+          <header class="almacen-dashboard__chart-head">
+            <div>
+              <h5 class="mb-1">Valorización por almacén</h5>
+              <p class="text-muted small mb-0">Stock actual × costo promedio en soles (sldo_total × costo_prom_sol)</p>
+            </div>
+            <mat-icon>stacked_bar_chart</mat-icon>
+          </header>
+          <div class="almacen-dashboard__chart almacen-dashboard__chart--valorizacion"
+               [style.height.px]="valorizacionChartAltura">
+            @if (!cargando && !sinValorizacion) {
+              <canvas baseChart type="bar" [data]="valorizacionBarData" [options]="valorizacionBarOptions"></canvas>
+            } @else if (!cargando && sinValorizacion) {
+              <div class="almacen-dashboard__chart-empty">
+                <mat-icon>inventory</mat-icon>
+                <p>Sin stock valorizado en almacén.</p>
+                <span>La valorización se calcula desde <strong>articulo_almacen</strong> (cantidad × costo promedio).</span>
+              </div>
+            } @else {
+              <div class="almacen-dashboard__chart-loading">Cargando…</div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

@@ -1,63 +1,92 @@
 <div class="module-dash">
   @if (cargando) {
-    <p class="module-dash__loading">Cargando módulo…</p>
+    <div class="card rounded-4">
+      <div class="card-body module-dash__loading">Cargando módulo…</div>
+    </div>
   } @else if (!modulo) {
-    <p class="module-dash__loading">Módulo no disponible.</p>
+    <div class="card rounded-4">
+      <div class="card-body module-dash__loading">Módulo no disponible.</div>
+    </div>
   } @else {
-    <section class="module-dash__hero">
-      <div class="module-dash__hero-visual">
-        @if (modulo.iconoSvg) {
-          <img [src]="modulo.iconoSvg" [alt]="modulo.nombre" />
-        } @else {
-          <mat-icon>{{ modulo.icono }}</mat-icon>
-        }
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+      <div class="breadcrumb-title pe-3">{{ modulo.nombre }}</div>
+      <div class="ps-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0 p-0">
+            <li class="breadcrumb-item active" aria-current="page">Panel de control</li>
+          </ol>
+        </nav>
       </div>
-      <div class="module-dash__hero-text">
-        <h1>{{ modulo.nombre }}</h1>
-        <p>Panel de control — resumen del módulo {{ anio }}</p>
-      </div>
-    </section>
+    </div>
 
-    <div class="module-dash__kpis">
-      @for (kpi of kpis; track kpi.label) {
-        <div class="module-dash__kpi">
-          <div class="module-dash__kpi-icon" [style.background]="kpi.color + '18'" [style.color]="kpi.color">
-            <mat-icon>{{ kpi.icon }}</mat-icon>
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="card rounded-4 mb-0">
+          <div class="card-body module-dash__hero">
+            <div class="module-dash__hero-visual">
+              @if (modulo.iconoSvg) {
+                <img [src]="modulo.iconoSvg" [alt]="modulo.nombre" />
+              } @else {
+                <mat-icon>{{ modulo.icono }}</mat-icon>
+              }
+            </div>
+            <div class="module-dash__hero-text">
+              <h4 class="mb-1">{{ modulo.nombre }}</h4>
+              <p class="text-muted mb-0">Panel de control — resumen del módulo {{ anio }}</p>
+            </div>
           </div>
-          <div>
-            <span class="module-dash__kpi-value">{{ kpi.value }}</span>
-            <span class="module-dash__kpi-label">{{ kpi.label }}</span>
+        </div>
+      </div>
+
+      @for (kpi of kpis; track kpi.label) {
+        <div class="col-12 col-sm-6 col-xl-3">
+          <div class="card rounded-4 h-100 mb-0">
+            <div class="card-body module-dash__kpi">
+              <div class="module-dash__kpi-icon" [style.background]="kpi.color + '18'" [style.color]="kpi.color">
+                <mat-icon>{{ kpi.icon }}</mat-icon>
+              </div>
+              <div>
+                <span class="module-dash__kpi-value">{{ kpi.value }}</span>
+                <span class="module-dash__kpi-label">{{ kpi.label }}</span>
+              </div>
+            </div>
           </div>
         </div>
       }
-    </div>
 
-    <div class="module-dash__charts">
-      <article class="module-dash__chart-card">
-        <header class="module-dash__chart-head">
-          <div>
-            <h2>Opciones por sección</h2>
-            <p>Distribución del menú de {{ modulo.nombre }}</p>
+      <div class="col-12 col-lg-8">
+        <div class="card rounded-4 h-100 mb-0">
+          <div class="card-body">
+            <header class="module-dash__chart-head">
+              <div>
+                <h5 class="mb-1">Opciones por sección</h5>
+                <p class="text-muted small mb-0">Distribución del menú de {{ modulo.nombre }}</p>
+              </div>
+              <mat-icon>bar_chart</mat-icon>
+            </header>
+            <div class="module-dash__chart">
+              <canvas baseChart type="bar" [data]="seccionesBarData" [options]="seccionesBarOptions"></canvas>
+            </div>
           </div>
-          <mat-icon>bar_chart</mat-icon>
-        </header>
-        <div class="module-dash__chart">
-          <canvas baseChart type="bar" [data]="seccionesBarData" [options]="seccionesBarOptions"></canvas>
         </div>
-      </article>
+      </div>
 
-      <article class="module-dash__chart-card">
-        <header class="module-dash__chart-head">
-          <div>
-            <h2>Estado de opciones</h2>
-            <p>Disponibles vs próximamente</p>
+      <div class="col-12 col-lg-4">
+        <div class="card rounded-4 h-100 mb-0">
+          <div class="card-body">
+            <header class="module-dash__chart-head">
+              <div>
+                <h5 class="mb-1">Estado de opciones</h5>
+                <p class="text-muted small mb-0">Disponibles vs próximamente</p>
+              </div>
+              <mat-icon>donut_large</mat-icon>
+            </header>
+            <div class="module-dash__chart module-dash__chart--donut">
+              <canvas baseChart type="doughnut" [data]="opcionesDonutData" [options]="opcionesDonutOptions"></canvas>
+            </div>
           </div>
-          <mat-icon>donut_large</mat-icon>
-        </header>
-        <div class="module-dash__chart module-dash__chart--donut">
-          <canvas baseChart type="doughnut" [data]="opcionesDonutData" [options]="opcionesDonutOptions"></canvas>
         </div>
-      </article>
+      </div>
     </div>
   }
 </div>

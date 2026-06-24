@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, HostBinding, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ModalController } from '@ionic/angular';
 import { ModalConfirmationComponent } from '@sigre-common';
@@ -25,7 +25,9 @@ export interface Sucursal {
   styleUrls: ['./seleccion-razon-social.component.scss'],
   standalone: false,
 })
-export class SeleccionRazonSocialComponent implements OnInit, CanComponentDeactivate {
+export class SeleccionRazonSocialComponent implements OnInit, OnDestroy, CanComponentDeactivate {
+
+  @HostBinding('class.sigre-auth-page') readonly authPageClass = true;
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
@@ -47,6 +49,7 @@ export class SeleccionRazonSocialComponent implements OnInit, CanComponentDeacti
   private ipAddress = '';
 
   ngOnInit() {
+    document.body.classList.add('sigre-auth-body');
     this.obtenerIpPublica();
 
     const user = this.storageService.getUser<LoginData>();
@@ -60,6 +63,10 @@ export class SeleccionRazonSocialComponent implements OnInit, CanComponentDeacti
     }
 
     this.cargarEmpresas();
+  }
+
+  ngOnDestroy(): void {
+    document.body.classList.remove('sigre-auth-body');
   }
 
   private obtenerIpPublica(): void {

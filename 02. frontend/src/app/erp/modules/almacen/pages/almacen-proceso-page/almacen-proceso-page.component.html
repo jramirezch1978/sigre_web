@@ -1,27 +1,44 @@
 <div class="almacen-proceso">
-  <header class="almacen-proceso__header">
-    <h1>{{ titulo }}</h1>
-    @if (subtitulo) {
-      <p>{{ subtitulo }}</p>
-    }
-  </header>
-
-  <div class="almacen-proceso__panel">
-    <p>Ejecute el proceso batch sobre el tenant activo. La operación puede tardar según el volumen de datos.</p>
-    <button mat-flat-button color="primary" type="button" [disabled]="ejecutando" (click)="ejecutar()">
-      @if (ejecutando) {
-        <mat-icon class="spin">sync</mat-icon>
-        Procesando…
-      } @else {
-        <mat-icon>play_arrow</mat-icon>
-        Ejecutar proceso
-      }
-    </button>
+  <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Almacén</div>
+    <div class="ps-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 p-0">
+          <li class="breadcrumb-item active" aria-current="page">{{ titulo }}</li>
+        </ol>
+      </nav>
+    </div>
   </div>
 
-  @if (mensaje) {
-    <div class="almacen-proceso__result" [class.almacen-proceso__result--error]="esError">
-      {{ mensaje }}
+  <div class="card rounded-4 mb-0">
+    <div class="card-body">
+      <header class="almacen-proceso__header">
+        <h4 class="mb-1">{{ titulo }}</h4>
+        @if (subtitulo) {
+          <p class="text-muted mb-0">{{ subtitulo }}</p>
+        }
+      </header>
+
+      <div class="almacen-proceso__panel">
+        <p class="mb-0">Ejecute el proceso batch sobre el tenant activo. La operación puede tardar según el volumen de datos.</p>
+        <div>
+          <button mat-flat-button color="primary" type="button" [disabled]="ejecutando" (click)="ejecutar()">
+            @if (ejecutando) {
+              <mat-icon class="spin">sync</mat-icon>
+              Procesando…
+            } @else {
+              <mat-icon>play_arrow</mat-icon>
+              Ejecutar proceso
+            }
+          </button>
+        </div>
+      </div>
+
+      @if (mensaje) {
+        <div class="alert mt-3 mb-0" [class.alert-danger]="esError" [class.alert-success]="!esError" role="alert">
+          {{ mensaje }}
+        </div>
+      }
     </div>
-  }
+  </div>
 </div>
