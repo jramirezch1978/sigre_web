@@ -1,8 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable, map, of } from 'rxjs';
 import { ErpDataTableComponent } from '../../../../shared/erp-data-table/erp-data-table.component';
@@ -28,7 +26,7 @@ import {
 @Component({
   selector: 'app-almacen-tabla-page',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule, MatDialogModule, ErpDataTableComponent],
+  imports: [CommonModule, MatDialogModule, ErpDataTableComponent],
   templateUrl: './almacen-tabla-page.component.html',
   styleUrls: ['./almacen-tabla-page.component.scss'],
 })

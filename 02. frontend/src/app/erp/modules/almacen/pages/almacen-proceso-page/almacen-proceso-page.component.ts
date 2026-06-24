@@ -1,15 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { AlmacenVistaDef, ALMACEN_VISTAS_POR_RUTA } from '../../config/almacen-vistas.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 
 @Component({
   selector: 'app-almacen-proceso-page',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule],
   templateUrl: './almacen-proceso-page.component.html',
   styleUrls: ['./almacen-proceso-page.component.scss'],
 })

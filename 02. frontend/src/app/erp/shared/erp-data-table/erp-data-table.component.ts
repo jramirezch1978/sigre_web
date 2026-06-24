@@ -1,27 +1,15 @@
-import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { TablaColumna } from '../models/api-page.model';
 
 @Component({
   selector: 'app-erp-data-table',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatTableModule,
-    MatProgressSpinnerModule,
-    MatIconModule,
-    MatButtonModule,
-    MatTooltipModule,
-  ],
+  imports: [CommonModule],
   templateUrl: './erp-data-table.component.html',
   styleUrls: ['./erp-data-table.component.scss'],
 })
-export class ErpDataTableComponent implements OnChanges {
+export class ErpDataTableComponent {
   @Input({ required: true }) columnas: TablaColumna[] = [];
   @Input() filas: Record<string, unknown>[] = [];
   @Input() cargando = false;
@@ -33,12 +21,9 @@ export class ErpDataTableComponent implements OnChanges {
   @Output() anular = new EventEmitter<Record<string, unknown>>();
   @Output() eliminar = new EventEmitter<Record<string, unknown>>();
 
-  displayedColumns: string[] = [];
-  readonly columnaAcciones = '__acciones';
-
-  ngOnChanges(): void {
-    const cols = this.columnas.map(c => c.key);
-    this.displayedColumns = this.mostrarAcciones ? [...cols, this.columnaAcciones] : cols;
+  trackFila(row: Record<string, unknown>, index: number): string | number {
+    const id = row['id'] ?? row['codigo'] ?? row['codMotivoTraslado'];
+    return id != null ? String(id) : index;
   }
 
   valorCelda(fila: Record<string, unknown>, col: TablaColumna): string {
@@ -64,6 +49,10 @@ export class ErpDataTableComponent implements OnChanges {
 
   estaActivo(fila: Record<string, unknown>): boolean {
     const estado = fila['flagEstado'];
-    return estado === '1' || estado === 1 || estado === true;
+    return this.estaActivoValor(estado);
+  }
+
+  estaActivoValor(valor: unknown): boolean {
+    return valor === '1' || valor === 1 || valor === true;
   }
 }
