@@ -48,23 +48,58 @@ body.toggled .sigre-sidebar-header .logo-icon {
   object-fit: contain;
 }
 
+/* Dropdowns del header: posicionamiento manual (sin Popper de Bootstrap JS) */
+.top-header .sigre-nav-dropdown {
+  position: relative;
+
+  > .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    left: auto;
+    margin: 0;
+    transform: none;
+    inset: auto 0 auto auto;
+  }
+
+  > .dropdown-menu.show {
+    display: block;
+  }
+}
+
+.top-header .dropdown-apps {
+  width: min(420px, calc(100vw - 1.5rem));
+  max-height: min(72vh, 560px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 .sigre-apps-grid {
-  min-width: 280px;
-  max-width: 360px;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  max-height: min(68vh, 520px);
+  overflow-x: hidden;
+  overflow-y: auto;
 
   .app-wrapper {
-    padding: 0.75rem 0.5rem;
+    padding: 0.85rem 0.45rem;
+    min-height: 92px;
     cursor: pointer;
     transition: background-color 0.15s ease;
 
     &:hover {
-      background-color: rgba(13, 110, 253, 0.06);
+      background-color: rgba(var(--bs-primary-rgb), 0.06);
     }
   }
 
   .app-name p {
     font-size: 0.72rem;
-    line-height: 1.2;
+    line-height: 1.25;
+    word-break: break-word;
+    hyphens: auto;
+    padding: 0 0.15rem;
   }
 }
 
@@ -72,10 +107,6 @@ body.toggled .sigre-sidebar-header .logo-icon {
   display: flex;
   justify-content: center;
   padding: 1rem;
-}
-
-.dropdown-menu.show {
-  display: block;
 }
 
 .dropdown-toggle.show {
@@ -92,4 +123,11 @@ body.sigre-metoxi-body .main-wrapper {
 
 body.sigre-metoxi-body app-erp-inicio {
   display: block;
+}
+
+@media (max-width: 575.98px) {
+  .top-header .dropdown-apps {
+    width: min(360px, calc(100vw - 1rem));
+    right: -0.5rem;
+  }
 }
