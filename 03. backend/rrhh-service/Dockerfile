@@ -9,7 +9,7 @@ COPY rrhh-service/pom.xml ./rrhh-service/pom.xml
 COPY sigre-common/src ./sigre-common/src
 COPY rrhh-service/src ./rrhh-service/src
 
-RUN mvn clean package -Dmaven.test.skip=true -pl rrhh-service -am
+RUN mvn clean package -DskipTests -pl rrhh-service -am
 
 # Etapa de produccion
 FROM eclipse-temurin:17-jre-jammy
