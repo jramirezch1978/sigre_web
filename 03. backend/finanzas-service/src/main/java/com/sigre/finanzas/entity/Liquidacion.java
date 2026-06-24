@@ -12,6 +12,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Liquidación de orden de giro / fondo fijo (rendición de gastos).
+ * <p>
+ * Mapea {@code finanzas.liquidacion} (legacy LIQUIDACION).
+ * No confundir con {@code rrhh.liquidacion_benef} (liquidación de beneficios sociales al cese),
+ * gestionada por rrhh-service.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

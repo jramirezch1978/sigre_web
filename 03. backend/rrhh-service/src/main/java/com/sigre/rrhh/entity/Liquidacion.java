@@ -14,6 +14,8 @@ import java.time.LocalDate;
  * Extiende {@link BaseEntity} porque la tabla {@code rrhh.liquidacion_benef}
  * posee {@code flag_estado}, igual que {@link Contrato} y {@link Trabajador}.
  * <p>
+ * No confundir con {@code finanzas.liquidacion} (liquidación de orden de giro / fondo fijo).
+ * <p>
  * Semántica de {@code flagEstado}: {@code "1"}=Pendiente, {@code "2"}=Aprobada,
  * {@code "0"}=Anulada.
  */

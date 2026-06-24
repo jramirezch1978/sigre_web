@@ -174,5 +174,27 @@ NOTAS DE IMPLEMENTACIÓN
 - Commits: sin coautor Cursor; subir a Git cuando se complete cada fase.
 
 ================================================================================
-FIN DEL PROMPT — actualizado 2026-06-17
+NOTAS DE DOMINIO — LIQUIDACIÓN (dos tablas, dos esquemas)
+================================================================================
+
+NO confundir estos dos conceptos; coexisten en el tenant:
+
+1) finanzas.liquidacion (+ finanzas.liquidacion_det)
+   - Liquidación de ORDEN DE GIRO / fondo fijo (legacy LIQUIDACION).
+   - Rendición de gastos contra finanzas.solicitud_giro.
+   - Ventanas PB: FI323, FI324, FI333, etc.
+   - API: finanzas-service → /api/finanzas/liquidaciones
+   - Contabilidad: cntbl_asiento_det.liquidacion_id → finanzas.liquidacion
+
+2) rrhh.liquidacion_benef
+   - Liquidación de BENEFICIOS SOCIALES al cese (legacy LIQUIDACION_BENEF / LBS).
+   - CTS, vacaciones truncas, gratificación trunca, indemnización, neto a pagar.
+   - Ventanas PB: RH415, RH423, etc.
+   - API: rrhh-service → /api/rrhh/liquidaciones (tabla rrhh.liquidacion_benef)
+   - Cuenta corriente: cnta_crrte_det.liquidacion_benef_id → rrhh.liquidacion_benef
+
+Regla: nunca unificar ni renombrar una en la otra; esquemas finanzas vs rrhh.
+
+================================================================================
+FIN DEL PROMPT — actualizado 2026-06-24
 ================================================================================

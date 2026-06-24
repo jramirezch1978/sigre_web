@@ -921,6 +921,10 @@ CREATE TABLE rrhh.liquidacion_benef (
     CONSTRAINT FK_LIQUIDACION_BENEF_01 FOREIGN KEY (trabajador_id) REFERENCES rrhh.trabajador(id)
 );
 
+COMMENT ON TABLE rrhh.liquidacion_benef IS
+    'Liquidación de beneficios sociales al cese (legacy LIQUIDACION_BENEF / LBS: CTS, vacaciones truncas, gratificación, indemnización). '
+    'No confundir con finanzas.liquidacion (rendición de orden de giro / fondo fijo).';
+
 CREATE TABLE rrhh.prestamo (
     id BIGSERIAL NOT NULL,
     trabajador_id BIGINT NOT NULL,

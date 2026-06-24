@@ -24,7 +24,8 @@
 --   conciliacion_bancaria → banco_cnta
 --   conciliacion_det → conciliacion_bancaria, caja_bancos
 --   solicitud_giro → core.entidad_contribuyente, auth.usuario (modalidad G/F; tipo ADELANTO/DEVOLUCION; devolución con auditoría)
---   liquidacion → solicitud_giro, core.doc_tipo, core.entidad_contribuyente, core.moneda, concepto_financiero (obligatorio), auth.usuario
+--   liquidacion → solicitud_giro, ... (rendición de orden de giro / fondo fijo; legacy LIQUIDACION)
+--     NO confundir con rrhh.liquidacion_benef (liquidación de beneficios sociales al cese).
 --   liquidacion_det → liquidacion, core.moneda, concepto_financiero (obligatorio), cntas_pagar, ventas.cntas_cobrar
 --   autorizador_giro → auth.usuario (FK a contabilidad.centros_costo se agrega en 06-contabilidad.sql)
 
@@ -482,6 +483,10 @@ CREATE TABLE finanzas.liquidacion (
     CONSTRAINT FK_LIQUIDACION_05 FOREIGN KEY (concepto_financiero_id) REFERENCES finanzas.concepto_financiero(id),
     CONSTRAINT FK_LIQUIDACION_06 FOREIGN KEY (usuario_id) REFERENCES auth.usuario(id)
 );
+
+COMMENT ON TABLE finanzas.liquidacion IS
+    'Liquidación de orden de giro / fondo fijo (legacy LIQUIDACION). Rendición de gastos contra solicitud_giro. '
+    'No confundir con rrhh.liquidacion_benef (liquidación de beneficios sociales al cese del trabajador).';
 
 -- FK diferidas: solicitud_giro y liquidacion se crean después de caja_bancos_det en este script
 ALTER TABLE finanzas.caja_bancos_det
