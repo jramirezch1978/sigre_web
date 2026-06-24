@@ -1,0 +1,78 @@
+<div [class]="colClass">
+  <label [attr.for]="fieldId" class="form-label">{{ labelText }}</label>
+
+  @if (type === 'switch') {
+    <div class="form-check form-switch sigre-metoxi-form-field__switch">
+      <input
+        class="form-check-input"
+        type="checkbox"
+        role="switch"
+        [id]="fieldId"
+        [formControl]="$any(control)" />
+      <label class="form-check-label" [attr.for]="fieldId">{{ switchLabel }}</label>
+    </div>
+  } @else if (type === 'select') {
+    @if (layout === 'input-group') {
+      <sigre-validated-field [control]="control" variant="bootstrap">
+        <div class="input-group">
+          <span class="input-group-text">
+            <i class="material-icons-outlined fs-5">{{ iconName }}</i>
+          </span>
+          <select class="form-select" [id]="fieldId" [formControl]="$any(control)">
+            <option value="" disabled>Seleccione…</option>
+            @for (opt of options; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+      </sigre-validated-field>
+    } @else {
+      <sigre-validated-field [control]="control" variant="bootstrap">
+        <select class="form-select" [id]="fieldId" [formControl]="$any(control)">
+          <option value="" disabled>Seleccione…</option>
+          @for (opt of options; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </sigre-validated-field>
+    }
+  } @else if (layout === 'input-group') {
+    <sigre-validated-field [control]="control" variant="bootstrap">
+      <div class="input-group">
+        <span class="input-group-text">
+          <i class="material-icons-outlined fs-5">{{ iconName }}</i>
+        </span>
+        @if (type === 'date') {
+          <input class="form-control" type="date" [id]="fieldId" [formControl]="$any(control)" />
+        } @else {
+          <input
+            class="form-control"
+            [type]="type === 'number' ? 'number' : 'text'"
+            [id]="fieldId"
+            [formControl]="$any(control)"
+            [maxlength]="maxLength ?? null"
+            [placeholder]="placeholder" />
+        }
+      </div>
+    </sigre-validated-field>
+  } @else {
+    <sigre-validated-field [control]="control" variant="bootstrap">
+      <div class="position-relative input-icon">
+        @if (type === 'date') {
+          <input class="form-control" type="date" [id]="fieldId" [formControl]="$any(control)" />
+        } @else {
+          <input
+            class="form-control"
+            [type]="type === 'number' ? 'number' : 'text'"
+            [id]="fieldId"
+            [formControl]="$any(control)"
+            [maxlength]="maxLength ?? null"
+            [placeholder]="placeholder" />
+        }
+        <span class="position-absolute top-50 translate-middle-y">
+          <i class="material-icons-outlined fs-5">{{ iconName }}</i>
+        </span>
+      </div>
+    </sigre-validated-field>
+  }
+</div>

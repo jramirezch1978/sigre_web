@@ -7,7 +7,9 @@ import { TablaCrudCampo, TablaCrudConfig } from '../../config/almacen-tabla-crud
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService, SelectOptionDto } from '../../services/core-api.service';
-import { extraerMensajeErrorApi, SigreValidatedFieldComponent } from '@sigre-common';
+import { extraerMensajeErrorApi } from '@sigre-common';
+import { ErpMetoxiFormFieldComponent } from '../../../../shared/erp-metoxi-form-field/erp-metoxi-form-field.component';
+import { colClassMetoxiCampo } from '../../../../shared/utils/erp-metoxi-form-icons.util';
 
 export interface AlmacenRegistroDialogData {
   titulo: string;
@@ -18,7 +20,7 @@ export interface AlmacenRegistroDialogData {
 @Component({
   selector: 'app-almacen-registro-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, SigreValidatedFieldComponent],
+  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, ErpMetoxiFormFieldComponent],
   templateUrl: './almacen-registro-dialog.component.html',
   styleUrls: ['./almacen-registro-dialog.component.scss'],
 })
@@ -104,6 +106,18 @@ export class AlmacenRegistroDialogComponent implements OnInit {
 
   etiquetaCampo(campo: TablaCrudCampo): string {
     return campo.required ? `${campo.label} *` : campo.label;
+  }
+
+  colClassDe(campo: TablaCrudCampo): string {
+    return colClassMetoxiCampo(campo.key, campo.type);
+  }
+
+  placeholderDe(campo: TablaCrudCampo): string {
+    return `Ingrese ${campo.label.toLowerCase()}…`;
+  }
+
+  layoutDe(campo: TablaCrudCampo): 'icon-inside' | 'input-group' {
+    return campo.type === 'select' ? 'input-group' : 'icon-inside';
   }
 
   private valorInicial(campo: TablaCrudCampo): unknown {
