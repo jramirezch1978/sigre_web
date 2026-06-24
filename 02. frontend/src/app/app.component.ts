@@ -61,10 +61,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private updatePublicScrollClass(url: string): void {
-    this.isPublicScrollPage =
-      url.startsWith('/sigre/inicio') ||
-      url.startsWith('/sigre/modulo') ||
-      url.startsWith('/sigre/registro');
+    const path = url.split('?')[0];
+    this.isPublicScrollPage = path.startsWith('/sigre');
 
     document.body.classList.toggle('public-scroll-page', this.isPublicScrollPage);
     document.documentElement.classList.toggle('public-scroll-page', this.isPublicScrollPage);

@@ -16,6 +16,7 @@ export class MetoxiInitService {
     document.body.classList.add('sigre-metoxi-body');
     this.initPerfectScrollbar('.notify-list');
     this.initPerfectScrollbar('.search-content');
+    this.initPerfectScrollbar('.sidebar-nav');
     this.initMetisMenu();
   }
 
