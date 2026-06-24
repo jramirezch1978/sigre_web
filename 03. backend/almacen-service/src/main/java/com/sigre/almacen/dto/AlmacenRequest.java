@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,6 +21,12 @@ public class AlmacenRequest extends FlagEstadoRequest {
 
     private Long almacenTipoId;
 
+    private Long centrosCostoId;
+
+    private Long proveedorEntidadId;
+
+    private Long responsableUsuarioId;
+
     @NotBlank
     @Size(max = 20)
     private String codigo;
@@ -26,4 +34,44 @@ public class AlmacenRequest extends FlagEstadoRequest {
     @NotBlank
     @Size(max = 150)
     private String nombre;
+
+    @Size(max = 80)
+    private String direccion;
+
+    private BigDecimal areaTotal;
+
+    private BigDecimal volTotal;
+
+    private Long corrGuia;
+
+    @Size(max = 2)
+    private String codOrigen;
+
+    @Size(max = 1)
+    private String flagCntrlLote;
+
+    @Size(max = 1)
+    private String flagReplicacion;
+
+    @Size(max = 25)
+    private String distrito;
+
+    @Size(max = 25)
+    private String provincia;
+
+    @Size(max = 25)
+    private String departamento;
+
+    private Long distritoId;
+
+    private Integer anoApertura;
+
+    @Size(max = 4)
+    private String codSunat;
+
+    @Size(max = 1)
+    private String flagVirtual;
+
+    @Size(max = 6)
+    private String ubigeo;
 }

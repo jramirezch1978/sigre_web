@@ -86,6 +86,41 @@ export class CoreApiService {
       .pipe(map(res => res.data ?? []));
   }
 
+  listarCentrosCosto(): Observable<SelectOptionDto[]> {
+    const finanzasBase = `${this.apiBase.getApiBaseUrl()}/finanzas`;
+    return this.http
+      .get<ApiResponse<{ id: number; nombre: string; cencos?: string }[]>>(`${finanzasBase}/centros-costo`)
+      .pipe(
+        map(res =>
+          (res.data ?? []).map(item => ({
+            value: Number(item.id),
+            label: String(item.nombre ?? item.id),
+          }))
+        )
+      );
+  }
+
+  listarProveedores(): Observable<SelectOptionDto[]> {
+    const params = new HttpParams()
+      .set('esProveedor', 'true')
+      .set('activo', 'true')
+      .set('page', '0')
+      .set('size', '500');
+    return this.http
+      .get<ApiResponse<PageData<{ id: number; razonSocial?: string; nombreComercial?: string; nroDocumento?: string }>>>(
+        `${this.base}/relaciones-comerciales`,
+        { params }
+      )
+      .pipe(
+        map(res =>
+          (res.data?.content ?? []).map(p => ({
+            value: p.id,
+            label: `${p.nroDocumento ?? p.id} — ${p.razonSocial ?? p.nombreComercial ?? 'Proveedor'}`,
+          }))
+        )
+      );
+  }
+
   listarParametrosAlmacenConValor(): Observable<Record<string, unknown>[]> {
     const empresaId = this.leerEmpresaId();
     if (!empresaId) {

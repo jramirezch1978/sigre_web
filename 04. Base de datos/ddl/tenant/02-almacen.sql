@@ -63,8 +63,26 @@ CREATE TABLE almacen.almacen (
     id BIGSERIAL PRIMARY KEY,
     sucursal_id BIGINT NOT NULL REFERENCES auth.sucursal(id),
     almacen_tipo_id BIGINT REFERENCES almacen.almacen_tipo(id),
+    centros_costo_id BIGINT,
+    proveedor_entidad_id BIGINT REFERENCES core.entidad_contribuyente(id),
+    responsable_usuario_id BIGINT,
     codigo VARCHAR(20) NOT NULL,
     nombre VARCHAR(150) NOT NULL,
+    direccion VARCHAR(80),
+    area_total NUMERIC(7, 2),
+    vol_total NUMERIC(7, 2),
+    corr_guia BIGINT,
+    cod_origen VARCHAR(2),
+    flag_cntrl_lote VARCHAR(1) DEFAULT '1',
+    flag_replicacion VARCHAR(1) DEFAULT '1',
+    distrito VARCHAR(25),
+    provincia VARCHAR(25),
+    departamento VARCHAR(25),
+    distrito_id BIGINT REFERENCES core.distrito(id),
+    ano_apertura INTEGER,
+    cod_sunat VARCHAR(4) NOT NULL DEFAULT '0001',
+    flag_virtual VARCHAR(1) DEFAULT '0',
+    ubigeo VARCHAR(6),
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1',
     created_by          BIGINT,
     fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),
@@ -72,6 +90,10 @@ CREATE TABLE almacen.almacen (
     fec_modificacion    TIMESTAMPTZ,
     UNIQUE (sucursal_id, codigo)
 );
+
+CREATE INDEX IF NOT EXISTS ix_almacen_centros_costo ON almacen.almacen (centros_costo_id);
+CREATE INDEX IF NOT EXISTS ix_almacen_proveedor ON almacen.almacen (proveedor_entidad_id);
+CREATE INDEX IF NOT EXISTS ix_almacen_distrito ON almacen.almacen (distrito_id);
 
 -- Almacén tácito: almacén por defecto según la clase del artículo y la sucursal.
 -- Consumido (solo lectura) por ms-compras en GET /ordenes-compra/datos-articulo

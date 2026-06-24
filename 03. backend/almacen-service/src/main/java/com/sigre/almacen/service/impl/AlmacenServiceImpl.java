@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sigre.almacen.entity.Almacen;
 import com.sigre.almacen.repository.AlmacenRepository;
 import com.sigre.almacen.repository.AlmacenTipoRepository;
+import com.sigre.almacen.repository.CentrosCostoRefRepository;
+import com.sigre.almacen.repository.EntidadContribuyenteRefRepository;
 import com.sigre.almacen.service.AlmacenService;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
@@ -23,6 +25,8 @@ public class AlmacenServiceImpl implements AlmacenService {
 
     private final AlmacenRepository repository;
     private final AlmacenTipoRepository almacenTipoRepository;
+    private final CentrosCostoRefRepository centrosCostoRefRepository;
+    private final EntidadContribuyenteRefRepository entidadContribuyenteRefRepository;
 
     @Timed(value = "app.db.query", extraTags = {"table", "almacen", "operation", "findAll"})
     @Override
@@ -64,10 +68,7 @@ public class AlmacenServiceImpl implements AlmacenService {
         Almacen existing = findById(id);
         validateForeignKeys(entity);
         validateUniqueSucursalCodigo(entity.getSucursalId(), entity.getCodigo(), id);
-        existing.setSucursalId(entity.getSucursalId());
-        existing.setAlmacenTipoId(entity.getAlmacenTipoId());
-        existing.setCodigo(entity.getCodigo());
-        existing.setNombre(entity.getNombre());
+        copiarDatosNegocio(entity, existing);
         if (entity.getFlagEstado() != null) {
             existing.setFlagEstado(entity.getFlagEstado());
         }
@@ -123,6 +124,39 @@ public class AlmacenServiceImpl implements AlmacenService {
                 && !almacenTipoRepository.existsById(entity.getAlmacenTipoId())) {
             throw new ResourceNotFoundException("AlmacenTipo", entity.getAlmacenTipoId());
         }
+        if (entity.getCentrosCostoId() != null
+                && !centrosCostoRefRepository.existsById(entity.getCentrosCostoId())) {
+            throw new ResourceNotFoundException("CentrosCosto", entity.getCentrosCostoId());
+        }
+        if (entity.getProveedorEntidadId() != null
+                && !entidadContribuyenteRefRepository.existsById(entity.getProveedorEntidadId())) {
+            throw new ResourceNotFoundException("EntidadContribuyente", entity.getProveedorEntidadId());
+        }
+    }
+
+    private void copiarDatosNegocio(Almacen origen, Almacen destino) {
+        destino.setSucursalId(origen.getSucursalId());
+        destino.setAlmacenTipoId(origen.getAlmacenTipoId());
+        destino.setCentrosCostoId(origen.getCentrosCostoId());
+        destino.setProveedorEntidadId(origen.getProveedorEntidadId());
+        destino.setResponsableUsuarioId(origen.getResponsableUsuarioId());
+        destino.setCodigo(origen.getCodigo());
+        destino.setNombre(origen.getNombre());
+        destino.setDireccion(origen.getDireccion());
+        destino.setAreaTotal(origen.getAreaTotal());
+        destino.setVolTotal(origen.getVolTotal());
+        destino.setCorrGuia(origen.getCorrGuia());
+        destino.setCodOrigen(origen.getCodOrigen());
+        destino.setFlagCntrlLote(origen.getFlagCntrlLote());
+        destino.setFlagReplicacion(origen.getFlagReplicacion());
+        destino.setDistrito(origen.getDistrito());
+        destino.setProvincia(origen.getProvincia());
+        destino.setDepartamento(origen.getDepartamento());
+        destino.setDistritoId(origen.getDistritoId());
+        destino.setAnoApertura(origen.getAnoApertura());
+        destino.setCodSunat(origen.getCodSunat());
+        destino.setFlagVirtual(origen.getFlagVirtual());
+        destino.setUbigeo(origen.getUbigeo());
     }
 
     private void validateUniqueSucursalCodigo(Long sucursalId, String codigo, Long excludeId) {

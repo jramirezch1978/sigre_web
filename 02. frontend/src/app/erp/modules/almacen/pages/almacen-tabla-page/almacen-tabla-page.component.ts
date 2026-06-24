@@ -143,8 +143,8 @@ export class AlmacenTablaPageComponent implements OnInit {
     this.dialog
       .open(AlmacenRegistroDialogComponent, {
         data,
-        width: '720px',
-        maxWidth: '95vw',
+        width: '960px',
+        maxWidth: '98vw',
         disableClose: true,
         panelClass: 'sigre-metoxi-dialog-panel',
       })

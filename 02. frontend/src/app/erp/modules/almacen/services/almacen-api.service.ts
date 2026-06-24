@@ -8,10 +8,30 @@ export interface AlmacenDto {
   id: number;
   sucursalId: number;
   sucursalNombre?: string;
-  almacenTipoId: number;
+  almacenTipoId?: number;
   almacenTipoNombre?: string;
+  centrosCostoId?: number;
+  centrosCostoNombre?: string;
+  proveedorEntidadId?: number;
+  proveedorNombre?: string;
+  responsableUsuarioId?: number;
   codigo: string;
   nombre: string;
+  direccion?: string;
+  areaTotal?: number;
+  volTotal?: number;
+  corrGuia?: number;
+  codOrigen?: string;
+  flagCntrlLote?: string;
+  flagReplicacion?: string;
+  distrito?: string;
+  provincia?: string;
+  departamento?: string;
+  distritoId?: number;
+  anoApertura?: number;
+  codSunat?: string;
+  flagVirtual?: string;
+  ubigeo?: string;
   flagEstado: string;
 }
 

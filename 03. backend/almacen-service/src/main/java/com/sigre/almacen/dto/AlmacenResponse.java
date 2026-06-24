@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -18,8 +19,28 @@ public class AlmacenResponse {
     private String sucursalNombre;
     private Long almacenTipoId;
     private String almacenTipoNombre;
+    private Long centrosCostoId;
+    private String centrosCostoNombre;
+    private Long proveedorEntidadId;
+    private String proveedorNombre;
+    private Long responsableUsuarioId;
     private String codigo;
     private String nombre;
+    private String direccion;
+    private BigDecimal areaTotal;
+    private BigDecimal volTotal;
+    private Long corrGuia;
+    private String codOrigen;
+    private String flagCntrlLote;
+    private String flagReplicacion;
+    private String distrito;
+    private String provincia;
+    private String departamento;
+    private Long distritoId;
+    private Integer anoApertura;
+    private String codSunat;
+    private String flagVirtual;
+    private String ubigeo;
     private String flagEstado;
     private Long createdBy;
     private UsuarioResumenDto createdByUsuario;

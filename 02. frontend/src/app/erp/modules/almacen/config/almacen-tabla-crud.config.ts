@@ -22,7 +22,7 @@ export interface TablaCrudCampo {
   required?: boolean;
   maxLength?: number;
   readonlyOnEdit?: boolean;
-  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento';
+  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento' | 'centros-costo' | 'proveedores';
   /** Etiqueta cuando el switch está encendido (flag_estado = 1). */
   switchOnLabel?: string;
   /** Etiqueta cuando el switch está apagado (flag_estado = 0). */
@@ -58,6 +58,23 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
       { key: 'nombre', label: 'Nombre', type: 'text', required: true, maxLength: 150 },
       { key: 'almacenTipoId', label: 'Tipo de almacén', type: 'select', optionsFrom: 'tipos-almacen' },
       { key: 'sucursalId', label: 'Sucursal', type: 'select', optionsFrom: 'sucursales', required: true },
+      { key: 'centrosCostoId', label: 'Centro de costo', type: 'select', optionsFrom: 'centros-costo' },
+      { key: 'proveedorEntidadId', label: 'Proveedor', type: 'select', optionsFrom: 'proveedores' },
+      { key: 'responsableUsuarioId', label: 'Responsable (usuario ID)', type: 'number' },
+      { key: 'direccion', label: 'Dirección', type: 'text', maxLength: 80 },
+      { key: 'ubigeo', label: 'Ubigeo', type: 'text', maxLength: 6 },
+      { key: 'distrito', label: 'Distrito', type: 'text', maxLength: 25 },
+      { key: 'provincia', label: 'Provincia', type: 'text', maxLength: 25 },
+      { key: 'departamento', label: 'Departamento', type: 'text', maxLength: 25 },
+      { key: 'areaTotal', label: 'Área total (m²)', type: 'number' },
+      { key: 'volTotal', label: 'Volumen total (m³)', type: 'number' },
+      { key: 'anoApertura', label: 'Año apertura', type: 'number' },
+      { key: 'codOrigen', label: 'Código origen', type: 'text', maxLength: 2 },
+      { key: 'codSunat', label: 'Código SUNAT', type: 'text', maxLength: 4 },
+      { key: 'corrGuia', label: 'Correlativo guía', type: 'number' },
+      { key: 'flagCntrlLote', label: 'Control de lote', type: 'switch', switchOnLabel: 'Sí', switchOffLabel: 'No' },
+      { key: 'flagReplicacion', label: 'Replicación', type: 'switch', switchOnLabel: 'Sí', switchOffLabel: 'No' },
+      { key: 'flagVirtual', label: 'Almacén virtual', type: 'switch', switchOnLabel: 'Sí', switchOffLabel: 'No' },
       CAMPO_FLAG_ESTADO,
     ],
   },

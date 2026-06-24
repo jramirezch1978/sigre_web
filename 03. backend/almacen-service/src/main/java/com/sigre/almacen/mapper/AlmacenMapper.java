@@ -22,6 +22,8 @@ public interface AlmacenMapper {
 
     @Mapping(target = "sucursalNombre", ignore = true)
     @Mapping(target = "almacenTipoNombre", ignore = true)
+    @Mapping(target = "centrosCostoNombre", ignore = true)
+    @Mapping(target = "proveedorNombre", ignore = true)
     @Mapping(target = "createdByUsuario", ignore = true)
     @Mapping(target = "updatedByUsuario", ignore = true)
     AlmacenResponse toResponse(Almacen entity);

@@ -123,7 +123,12 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   private valorInicial(campo: TablaCrudCampo): unknown {
     const reg = this.data.registro;
     if (!reg) {
-      if (campo.type === 'switch') return true;
+      if (campo.type === 'switch') {
+        if (campo.key === 'flagVirtual') return false;
+        if (['flagCntrlLote', 'flagReplicacion'].includes(campo.key)) return true;
+        return true;
+      }
+      if (campo.key === 'codSunat') return '0001';
       if (campo.key === 'ano') return new Date().getFullYear();
       if (campo.key === 'fechaMov' || campo.key === 'fecha' || campo.key === 'fechaConteo') {
         return new Date().toISOString().slice(0, 10);
@@ -154,8 +159,11 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     const necesitaSucursales = campos.some(c => c.optionsFrom === 'sucursales');
     const necesitaAlmacenes = campos.some(c => c.optionsFrom === 'almacenes');
     const necesitaTiposMov = campos.some(c => c.optionsFrom === 'tipos-movimiento');
+    const necesitaCentrosCosto = campos.some(c => c.optionsFrom === 'centros-costo');
+    const necesitaProveedores = campos.some(c => c.optionsFrom === 'proveedores');
 
-    if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov) {
+    if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov
+        && !necesitaCentrosCosto && !necesitaProveedores) {
       this.cargandoOpciones = false;
       return;
     }
@@ -165,8 +173,10 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       sucursales: necesitaSucursales ? this.coreApi.listarMisSucursales() : of([]),
       almacenes: necesitaAlmacenes ? this.almacenApi.listarAlmacenes() : of([]),
       tiposMov: necesitaTiposMov ? this.almacenApi.listarTiposMovimiento() : of([]),
+      centrosCosto: necesitaCentrosCosto ? this.coreApi.listarCentrosCosto() : of([]),
+      proveedores: necesitaProveedores ? this.coreApi.listarProveedores() : of([]),
     }).subscribe({
-      next: ({ tipos, sucursales, almacenes, tiposMov }) => {
+      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores }) => {
         if (necesitaTipos) {
           this.opciones['tipos-almacen'] = tipos.map(t => ({
             value: t.id,
@@ -190,6 +200,12 @@ export class AlmacenRegistroDialogComponent implements OnInit {
             value: t.id,
             label: `${t.tipoMov} — ${t.descTipoMov}`,
           }));
+        }
+        if (necesitaCentrosCosto) {
+          this.opciones['centros-costo'] = centrosCosto;
+        }
+        if (necesitaProveedores) {
+          this.opciones['proveedores'] = proveedores;
         }
         this.cargandoOpciones = false;
       },

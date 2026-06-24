@@ -9,8 +9,12 @@ import com.sigre.almacen.dto.AlmacenResponse;
 import com.sigre.almacen.dto.UsuarioResumenDto;
 import com.sigre.almacen.entity.Almacen;
 import com.sigre.almacen.entity.AlmacenTipo;
+import com.sigre.almacen.entity.CentrosCostoRef;
+import com.sigre.almacen.entity.EntidadContribuyenteRef;
 import com.sigre.almacen.entity.SucursalRef;
 import com.sigre.almacen.repository.AlmacenTipoRepository;
+import com.sigre.almacen.repository.CentrosCostoRefRepository;
+import com.sigre.almacen.repository.EntidadContribuyenteRefRepository;
 import com.sigre.almacen.repository.SucursalRefRepository;
 
 import java.util.Map;
@@ -26,6 +30,8 @@ import static com.sigre.almacen.TestDataFactory.almacen;
 class AlmacenResponseEnricherTest {
 
     @Mock private AlmacenTipoRepository almacenTipoRepository;
+    @Mock private CentrosCostoRefRepository centrosCostoRefRepository;
+    @Mock private EntidadContribuyenteRefRepository entidadContribuyenteRefRepository;
     @Mock private SucursalRefRepository sucursalRefRepository;
     @Mock private UsuarioResumenLoader usuarioResumenLoader;
     @InjectMocks private AlmacenResponseEnricher enricher;
@@ -40,10 +46,14 @@ class AlmacenResponseEnricherTest {
     void enrich_completaNombresYUsuarios() {
         Almacen entity = almacen(1L);
         entity.setAlmacenTipoId(5L);
+        entity.setCentrosCostoId(7L);
+        entity.setProveedorEntidadId(9L);
         AlmacenResponse dto = new AlmacenResponse();
         dto.setId(1L);
         dto.setSucursalId(10L);
         dto.setAlmacenTipoId(5L);
+        dto.setCentrosCostoId(7L);
+        dto.setProveedorEntidadId(9L);
         dto.setCreatedBy(100L);
         dto.setUpdatedBy(101L);
 
@@ -54,16 +64,27 @@ class AlmacenResponseEnricherTest {
         tipo.setId(5L);
         tipo.setNombre("Tipo Principal");
 
+        CentrosCostoRef cencos = org.mockito.Mockito.mock(CentrosCostoRef.class);
+        when(cencos.getCencos()).thenReturn("CC001");
+        when(cencos.getDescCencos()).thenReturn("Centro operaciones");
+
+        EntidadContribuyenteRef proveedor = org.mockito.Mockito.mock(EntidadContribuyenteRef.class);
+        when(proveedor.getNombreCompleto()).thenReturn("Proveedor SAC");
+
         UsuarioResumenDto u1 = UsuarioResumenDto.builder().id(100L).nombreCompleto("Creador").build();
         UsuarioResumenDto u2 = UsuarioResumenDto.builder().id(101L).nombreCompleto("Editor").build();
         when(usuarioResumenLoader.loadByIds(any(Set.class))).thenReturn(Map.of(100L, u1, 101L, u2));
         when(sucursalRefRepository.findById(10L)).thenReturn(Optional.of(sucursal));
         when(almacenTipoRepository.findById(5L)).thenReturn(Optional.of(tipo));
+        when(centrosCostoRefRepository.findById(7L)).thenReturn(Optional.of(cencos));
+        when(entidadContribuyenteRefRepository.findById(9L)).thenReturn(Optional.of(proveedor));
 
         enricher.enrich(entity, dto);
 
         assertThat(dto.getSucursalNombre()).isEqualTo("Sucursal Lima");
         assertThat(dto.getAlmacenTipoNombre()).isEqualTo("Tipo Principal");
+        assertThat(dto.getCentrosCostoNombre()).isEqualTo("CC001 — Centro operaciones");
+        assertThat(dto.getProveedorNombre()).isEqualTo("Proveedor SAC");
         assertThat(dto.getCreatedByUsuario().getNombreCompleto()).isEqualTo("Creador");
         assertThat(dto.getUpdatedByUsuario().getNombreCompleto()).isEqualTo("Editor");
     }

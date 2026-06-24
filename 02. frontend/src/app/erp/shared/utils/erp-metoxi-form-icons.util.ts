@@ -20,6 +20,23 @@ const ICONOS_POR_CAMPO: Record<string, string> = {
   nombreTabla: 'table_chart',
   prefijo: 'text_fields',
   correlativo: 'numbers',
+  centrosCostoId: 'account_balance',
+  proveedorEntidadId: 'local_shipping',
+  responsableUsuarioId: 'person',
+  direccion: 'location_on',
+  ubigeo: 'map',
+  distrito: 'place',
+  provincia: 'map',
+  departamento: 'public',
+  areaTotal: 'square_foot',
+  volTotal: 'inventory_2',
+  corrGuia: 'receipt_long',
+  codOrigen: 'flag',
+  codSunat: 'gavel',
+  anoApertura: 'calendar_today',
+  flagCntrlLote: 'inventory',
+  flagReplicacion: 'sync',
+  flagVirtual: 'cloud',
   flagEstado: 'toggle_on',
 };
 
@@ -47,6 +64,9 @@ export function colClassMetoxiCampo(fieldKey: string, type: ErpMetoxiFormFieldTy
   }
   if (['pasillo', 'estante', 'nivel'].includes(fieldKey)) {
     return 'col-md-4';
+  }
+  if (fieldKey === 'direccion') {
+    return 'col-12';
   }
   if (type === 'select') {
     return 'col-12';
