@@ -382,12 +382,16 @@ echo %GREEN%[OK]%RESET% Docker local limpio para !SVC!
 exit /b 0
 
 :cleanupRemoteImages
-REM Elimina imagenes dangling (sin tag = versiones anteriores reemplazadas) del servidor cronos
+REM Elimina TODAS las imagenes no usadas por ningun contenedor en cronos + build cache
 call :useRemoteContext >nul 2>&1
 if errorlevel 1 exit /b 0
-echo %CYAN%[CRONOS CLEANUP]%RESET% Limpiando imagenes sin uso en cronos...
-for /f "delims=" %%r in ('docker --context %DOCKER_CTX% image prune -f 2^>^&1') do (
-    echo %GREEN%  %%r%RESET%
+echo %CYAN%[CRONOS CLEANUP]%RESET% Eliminando imagenes sin uso en cronos...
+for /f "delims=" %%r in ('docker --context %DOCKER_CTX% image prune -a -f 2^>^&1') do (
+    if not "%%r"=="" echo %GREEN%  %%r%RESET%
+)
+echo %CYAN%[CRONOS CLEANUP]%RESET% Eliminando build cache en cronos...
+for /f "tokens=1,2 delims=	" %%a in ('docker --context %DOCKER_CTX% builder prune -f 2^>^&1 ^| findstr /i "Total"') do (
+    echo %GREEN%  Total liberado: %%b%RESET%
 )
 exit /b 0
 
