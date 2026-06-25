@@ -56,15 +56,25 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routerSub?.unsubscribe();
-    document.body.classList.remove('public-scroll-page');
-    document.documentElement.classList.remove('public-scroll-page');
+    document.body.classList.remove('public-scroll-page', 'erp-shell-active');
+    document.documentElement.classList.remove('public-scroll-page', 'erp-shell-active');
   }
 
   private updatePublicScrollClass(url: string): void {
     const path = url.split('?')[0];
-    this.isPublicScrollPage = path.startsWith('/sigre');
 
-    document.body.classList.toggle('public-scroll-page', this.isPublicScrollPage);
-    document.documentElement.classList.toggle('public-scroll-page', this.isPublicScrollPage);
+    // Páginas ERP públicas (sin sidebar/header fijos) que necesitan scroll de cuerpo completo
+    const erpPublicPrefixes = ['/sigre/inicio', '/sigre/registro', '/sigre/modulo/'];
+    const isErpPublicPage = erpPublicPrefixes.some(prefix => path.startsWith(prefix));
+
+    // ERP shell = rutas autenticadas con sidebar + header fijos (solo .main-wrapper debe scrollear)
+    const isErpShell = path.startsWith('/sigre') && !isErpPublicPage;
+
+    this.isPublicScrollPage = !isErpShell;
+
+    document.body.classList.toggle('public-scroll-page', !isErpShell);
+    document.documentElement.classList.toggle('public-scroll-page', !isErpShell);
+    document.body.classList.toggle('erp-shell-active', isErpShell);
+    document.documentElement.classList.toggle('erp-shell-active', isErpShell);
   }
 }
