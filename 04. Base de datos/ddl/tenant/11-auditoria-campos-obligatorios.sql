@@ -283,6 +283,25 @@ BEGIN
     RAISE NOTICE '[DDL tenant] auth.sucursal ahora referencia moneda_defult_id (PEN por defecto).';
 END $$;
 
+-- ============================================================
+-- Migracion: columnas de negocio añadidas al DDL despues del
+-- despliegue inicial. Usar ADD COLUMN IF NOT EXISTS para que
+-- sea idempotente en bases ya actualizadas.
+-- ============================================================
+
+-- almacen.almacen: columnas añadidas en v2
+DO $$
+BEGIN
+    -- ano_apertura: año de apertura del almacen
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'almacen' AND table_name = 'almacen' AND column_name = 'ano_apertura'
+    ) THEN
+        EXECUTE 'ALTER TABLE almacen.almacen ADD COLUMN ano_apertura INTEGER';
+        RAISE NOTICE '[DDL tenant] almacen.almacen: columna ano_apertura agregada.';
+    END IF;
+END $$;
+
 -- Ajuste puntual: ejercicio_periodo es por tenant (sin empresa_id)
 DO $$
 BEGIN
