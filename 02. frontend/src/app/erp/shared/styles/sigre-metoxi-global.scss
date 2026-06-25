@@ -82,6 +82,50 @@ body.sigre-metoxi-body {
   }
 }
 
+/* ─── Header dropdowns: posicionamiento manual sin Popper.js ─────────────── */
+/* NOTA: estos estilos van en el CSS global (NO en component.scss) para evitar   */
+/* que el scoping de Angular (_ngcontent-xxx) interfiera con la aplicación.        */
+.top-header .navbar .nav-item.sigre-nav-dropdown {
+  position: relative !important;
+
+  > .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 0.35rem) !important;
+    bottom: auto !important;
+    right: 0;
+    left: auto;
+    margin: 0;
+    transform: none !important;
+    z-index: 1050;
+  }
+
+  > .dropdown-menu:not(.show) {
+    display: none !important;
+  }
+
+  > .dropdown-menu.show {
+    display: block;
+  }
+}
+
+/* Dropdown de apps: ancho extendido y scroll interno */
+.top-header .navbar .nav-item.sigre-nav-dropdown > .dropdown-menu.dropdown-apps.show {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Pequeña flecha decorativa para el dropdown de usuario */
+.top-header .navbar .nav-item.sigre-nav-dropdown > .dropdown-menu.dropdown-user::after {
+  right: 1rem;
+}
+
+@media (max-width: 575.98px) {
+  .top-header .navbar .nav-item.sigre-nav-dropdown > .dropdown-menu.dropdown-apps {
+    width: min(360px, calc(100vw - 1rem));
+    right: -0.5rem;
+  }
+}
+
 ion-modal.sigre-metoxi-ion-modal {
   --width: fit-content;
   --max-width: min(480px, 92vw);
