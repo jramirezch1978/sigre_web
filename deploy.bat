@@ -79,6 +79,7 @@ if /i "%~1"=="context" goto :checkContext
 if /i "%~1"=="help" goto :showHelp
 if /i "%~1"=="retag-images" goto :retagImagesOnly
 if /i "%~1"=="list" goto :listServices
+if /i "%~1"=="prune" goto :pruneRemote
 if /i "%~1"=="infra" goto :deployInfra
 if /i "%~1"=="core" goto :deployCore
 if /i "%~1"=="commerce" goto :deployCommerce
@@ -115,6 +116,7 @@ echo   6. Pull remoto (sin build)
 echo   7. Estado contenedores en cronos
 echo   8. Verificar contexto Docker
 echo   9. Listar microservicios (deploy.bat list)
+echo   P. Limpiar imagenes sin uso en cronos (prune)
 echo   0. Salir
 echo.
 set /p "OPTION=  Seleccione: "
@@ -127,6 +129,7 @@ if "%OPTION%"=="6" goto :pullRemote
 if "%OPTION%"=="7" goto :remoteStatus
 if "%OPTION%"=="8" goto :checkContext
 if "%OPTION%"=="9" goto :listServices
+if /i "%OPTION%"=="P" goto :pruneRemote
 if "%OPTION%"=="0" goto :endScript
 goto :showMenu
 
@@ -206,6 +209,7 @@ for %%s in (!GROUP!) do (
     )
     call :remoteUp "%%s" || goto :endScript
 )
+call :cleanupRemoteImages
 echo %GREEN%[OK]%RESET% Grupo !GROUP! procesado.
 goto :endScript
 
@@ -255,10 +259,17 @@ for %%s in (%SECURITY_SERVICES%) do (
 call :ensureEnv || goto :endScript
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-security-!DEPLOY_LOG_TS!.log"
 call :composeUpServices "%SECURITY_SERVICES%" || goto :endScript
+call :cleanupRemoteImages
 echo %GREEN%[OK]%RESET% Modulo seguridad desplegado.
 echo   Discovery: http://%SSH_HOST%:8761
 echo   Auth:      http://%SSH_HOST%:9080/api/auth/
 echo   Gateway:   http://%SSH_HOST%:9080
+goto :endScript
+
+:pruneRemote
+echo %CYAN%[PRUNE]%RESET% Limpieza manual de imagenes sin uso en cronos...
+call :cleanupRemoteImages
+echo %GREEN%[OK]%RESET% Limpieza completada.
 goto :endScript
 
 :retagImagesOnly
@@ -370,6 +381,16 @@ docker --context %DOCKER_CTX_BUILD% image prune -f >> "!DEPLOY_LOG!" 2>&1
 echo %GREEN%[OK]%RESET% Docker local limpio para !SVC!
 exit /b 0
 
+:cleanupRemoteImages
+REM Elimina imagenes dangling (sin tag = versiones anteriores reemplazadas) del servidor cronos
+call :useRemoteContext >nul 2>&1
+if errorlevel 1 exit /b 0
+echo %CYAN%[CRONOS CLEANUP]%RESET% Limpiando imagenes sin uso en cronos...
+for /f "delims=" %%r in ('docker --context %DOCKER_CTX% image prune -f 2^>^&1') do (
+    echo %GREEN%  %%r%RESET%
+)
+exit /b 0
+
 :retagLegacyImagesOnCronos
 REM Migra tags ghcr.io -> sigre en cronos sin rebuild (contenedores ya desplegados)
 set "LEGACY_REG=ghcr.io/jramirezch1978/sigre"
@@ -446,6 +467,7 @@ if "!NO_BUILD!"=="0" (
     call :pushImage "!SERVICE!" || goto :endScript
 )
 call :remoteUp "!SERVICE!" || goto :endScript
+call :cleanupRemoteImages
 goto :endScript
 
 :deployBackend
@@ -459,6 +481,7 @@ for %%s in (%BACKEND_SERVICES%) do (
 call :ensureEnv || goto :endScript
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-backend-!DEPLOY_LOG_TS!.log"
 call :composeUpServices "%BACKEND_SERVICES%" || goto :endScript
+call :cleanupRemoteImages
 echo %GREEN%[OK]%RESET% Backend desplegado.
 echo   API Gateway: http://%SSH_HOST%:9080
 goto :endScript
@@ -474,6 +497,7 @@ for %%s in (%BACKEND_SERVICES% %FRONTEND_SERVICE%) do (
 call :ensureEnv || goto :endScript
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-all-!DEPLOY_LOG_TS!.log"
 call :composeUpServices "%BACKEND_SERVICES% %FRONTEND_SERVICE%" || goto :endScript
+call :cleanupRemoteImages
 echo %GREEN%[OK]%RESET% Backend + frontend desplegados.
 echo   Frontend: http://%SSH_HOST%:8080
 echo   API Gateway: http://%SSH_HOST%:9080
@@ -560,6 +584,7 @@ echo   stack               Infra PG + SonarQube
 echo   pull [servicio]     Pull remoto sin build
 echo   status              docker ps en cronos
 echo   context             Verificar contexto cronos
+echo   prune               Limpiar imagenes sin uso en cronos ^(dangling^)
 echo.
 echo %YELLOW%Servicios individuales (ejemplos):%RESET%
 echo   seguridad-service    api-gateway       discovery-server    config-server
