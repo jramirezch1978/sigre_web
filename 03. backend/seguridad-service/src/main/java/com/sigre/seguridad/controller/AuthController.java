@@ -25,6 +25,16 @@ public class AuthController {
         return ApiResponse.ok(authService.login(request), "Login exitoso");
     }
 
+    /**
+     * Login sin verificación Turnstile.
+     * Solo disponible cuando {@code app.auth.dev-login-enabled=true} (variable {@code DEV_LOGIN_ENABLED=true}).
+     * Usar exclusivamente desde Postman / entornos de desarrollo.
+     */
+    @PostMapping("/login/dev")
+    public ApiResponse<LoginResponse> loginDev(@Valid @RequestBody LoginRequest request) {
+        return ApiResponse.ok(authService.loginDev(request), "Login dev exitoso");
+    }
+
     @GetMapping("/empresas")
     public ApiResponse<List<EmpresaUsuarioDto>> listarEmpresas(
             @RequestHeader("Authorization") String authHeader) {

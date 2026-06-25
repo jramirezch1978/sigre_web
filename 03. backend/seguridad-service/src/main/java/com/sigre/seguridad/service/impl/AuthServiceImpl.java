@@ -94,11 +94,31 @@ public class AuthServiceImpl implements AuthService {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    @Value("${app.auth.dev-login-enabled:false}")
+    private boolean devLoginEnabled;
+
     @Override
     @Transactional
     public LoginResponse login(LoginRequest request) {
         turnstileVerificationService.requireValid(request.getTurnstileToken(), request.getIpAddress());
+        return doLogin(request);
+    }
 
+    @Override
+    @Transactional
+    public LoginResponse loginDev(LoginRequest request) {
+        if (!devLoginEnabled) {
+            throw new BusinessException(
+                    "El endpoint de login dev no está habilitado en este entorno.",
+                    HttpStatus.FORBIDDEN,
+                    "DEV_LOGIN_DESHABILITADO");
+        }
+        log.warn("[DEV-LOGIN] Autenticación sin Turnstile: email={} ip={}",
+                request.getEmail(), request.getIpAddress());
+        return doLogin(request);
+    }
+
+    private LoginResponse doLogin(LoginRequest request) {
         Usuario usuario = findUsuario(request.getEmail());
 
         checkBloqueo(usuario);
