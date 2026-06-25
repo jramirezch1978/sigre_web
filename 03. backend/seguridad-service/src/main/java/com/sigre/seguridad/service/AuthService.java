@@ -9,8 +9,8 @@ public interface AuthService {
     LoginResponse login(LoginRequest request);
 
     /**
-     * Login sin verificación Turnstile, habilitado solo cuando {@code app.auth.dev-login-enabled=true}.
-     * Exclusivo para pruebas con Postman / entornos de desarrollo.
+     * Login sin verificación Turnstile. Útil para pruebas con Postman.
+     * Requiere credenciales válidas (email + contraseña). No omite bloqueo por intentos fallidos.
      */
     LoginResponse loginDev(LoginRequest request);
 
