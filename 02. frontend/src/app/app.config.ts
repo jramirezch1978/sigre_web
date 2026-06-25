@@ -1,4 +1,4 @@
-import { ApplicationConfig, importProvidersFrom, APP_INITIALIZER, LOCALE_ID } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, APP_INITIALIZER, LOCALE_ID, ErrorHandler } from '@angular/core';
 import { provideRouter, RouteReuseStrategy } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -10,6 +10,7 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { routes } from './app.routes';
 import { ConfigService } from './services/config.service';
 import { AuthInterceptor } from './auth/interceptors/auth.interceptor';
+import { ChunkLoadErrorHandler } from './core/handlers/chunk-load-error.handler';
 
 registerLocaleData(localeEsPe);
 
@@ -22,6 +23,7 @@ export function initializeApp(configService: ConfigService): () => Promise<unkno
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    { provide: ErrorHandler, useClass: ChunkLoadErrorHandler },
     provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(withInterceptorsFromDi()),
