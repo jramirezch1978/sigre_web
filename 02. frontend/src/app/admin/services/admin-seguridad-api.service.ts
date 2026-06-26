@@ -6,7 +6,7 @@ import {
   ModuloDto, OpcionMenuDto, AccionDto, RolDto,
   RolUsuarioDto, RolOpcionMenuDto, RolOpcionAccionDto,
   UsuarioAdminDto, AdminDashboardTelemetry, EmpresaAdminDto,
-  EmpresaAdminUpdatePayload
+  EmpresaAdminUpdatePayload, GrupoUsuarioDto, GrupoUsuarioMiembroDto
 } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
@@ -183,6 +183,52 @@ export class AdminSeguridadApiService extends AbstractAuthenticatedApiService {
     return this.http.put<ApiResponse<RolOpcionAccionDto>>(
       this.buildUrl(`/auth/seguridad/empresas/${empresaId}/roles/${rolId}/opciones-menu/${opcionMenuId}/acciones/${accionId}`),
       body, { headers: this.bearerHeaders() }
+    );
+  }
+
+  // ── Grupos de usuario por empresa ──
+
+  listarGruposUsuario(empresaId: number): Observable<ApiResponse<GrupoUsuarioDto[]>> {
+    return this.http.get<ApiResponse<GrupoUsuarioDto[]>>(
+      this.buildUrl(`/auth/seguridad/empresas/${empresaId}/grupos-usuario`),
+      { headers: this.bearerHeaders() }
+    );
+  }
+
+  crearGrupoUsuario(empresaId: number, body: { codigo: string; descripcion: string; activo?: boolean }): Observable<ApiResponse<GrupoUsuarioDto>> {
+    return this.http.post<ApiResponse<GrupoUsuarioDto>>(
+      this.buildUrl(`/auth/seguridad/empresas/${empresaId}/grupos-usuario`),
+      body, { headers: this.bearerHeaders() }
+    );
+  }
+
+  actualizarGrupoUsuario(empresaId: number, grupoId: number, body: { codigo: string; descripcion: string; activo?: boolean }): Observable<ApiResponse<GrupoUsuarioDto>> {
+    return this.http.put<ApiResponse<GrupoUsuarioDto>>(
+      this.buildUrl(`/auth/seguridad/empresas/${empresaId}/grupos-usuario/${grupoId}`),
+      body, { headers: this.bearerHeaders() }
+    );
+  }
+
+  // ── Grupo ↔ miembros ──
+
+  listarMiembrosGrupo(empresaId: number, grupoId: number): Observable<ApiResponse<GrupoUsuarioMiembroDto[]>> {
+    return this.http.get<ApiResponse<GrupoUsuarioMiembroDto[]>>(
+      this.buildUrl(`/auth/seguridad/empresas/${empresaId}/grupos-usuario/${grupoId}/miembros`),
+      { headers: this.bearerHeaders() }
+    );
+  }
+
+  asignarMiembroGrupo(empresaId: number, grupoId: number, body: { usuarioId: number; activo?: boolean }): Observable<ApiResponse<GrupoUsuarioMiembroDto>> {
+    return this.http.post<ApiResponse<GrupoUsuarioMiembroDto>>(
+      this.buildUrl(`/auth/seguridad/empresas/${empresaId}/grupos-usuario/${grupoId}/miembros`),
+      body, { headers: this.bearerHeaders() }
+    );
+  }
+
+  quitarMiembroGrupo(empresaId: number, grupoId: number, usuarioId: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(
+      this.buildUrl(`/auth/seguridad/empresas/${empresaId}/grupos-usuario/${grupoId}/miembros/${usuarioId}`),
+      { headers: this.bearerHeaders() }
     );
   }
 

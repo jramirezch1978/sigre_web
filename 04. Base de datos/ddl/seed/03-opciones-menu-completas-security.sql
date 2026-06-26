@@ -1,4 +1,4 @@
--- PATCH: Catálogo completo auth.opcion_menu desde opciones_menu.txt
+-- SEED: Catálogo completo auth.opcion_menu desde opciones_menu.txt
 -- Generado por scripts/gen_opciones_menu_security.py
 -- Incluye 18 módulos ERP + SEGURIDAD (19 en menú PB). ASISTENCIA es módulo aparte en auth.modulo.
 BEGIN;

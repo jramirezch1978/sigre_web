@@ -1,4 +1,4 @@
--- PATCH: Definición comercial y técnica de ediciones SIGRE y módulos por edición
+-- SEED: Definición comercial y técnica de ediciones SIGRE y módulos por edición
 
 INSERT INTO auth.modulo (codigo, nombre, flag_estado)
 VALUES ('ASISTENCIA', 'Asistencia', '1')

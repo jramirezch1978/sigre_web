@@ -1,0 +1,136 @@
+<div class="admin-page ion-padding admin-page--fluid">
+  <div class="admin-page__head">
+    <div>
+      <h1 class="admin-page__title">Grupos de usuario</h1>
+      <p class="admin-page__subtitle">Grupos de la empresa en sesión. Sirven como destino colectivo de notificaciones.</p>
+    </div>
+    @if (empresaId) {
+      <ion-button color="primary" (click)="abrirCrear()">
+        <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+        Nuevo grupo
+      </ion-button>
+    }
+  </div>
+
+  @if (!empresaId) {
+    <ion-text color="danger"><p>No hay empresa en el token. Seleccione empresa e ingrese al admin de nuevo.</p></ion-text>
+  }
+
+  @if (empresaId) {
+
+    <ion-searchbar [(ngModel)]="filtro" placeholder="Buscar grupo..." animated="true" class="admin-search"></ion-searchbar>
+
+    @if (loading) {
+      <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+    }
+
+    @if (!loading) {
+      <div class="admin-table-wrapper">
+        <table class="admin-table admin-table--plain">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Código</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th class="admin-acciones-col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (g of gruposFiltrados; track g.id) {
+              <tr (dblclick)="abrirEditar(g)">
+                <td>{{ g.id }}</td>
+                <td>{{ g.codigo }}</td>
+                <td>{{ g.descripcion }}</td>
+                <td>
+                  @if (g.activo) {
+                    <span class="badge-estado badge-activo">Activo</span>
+                  } @else {
+                    <span class="badge-estado badge-inactivo">Inactivo</span>
+                  }
+                </td>
+                <td class="admin-acciones-col">
+                  <div class="admin-acciones-wrap" (click)="$event.stopPropagation()">
+                    <ion-button fill="clear" size="small" class="admin-acciones-btn" title="Editar grupo (también doble clic)"
+                      (click)="abrirEditar(g)">
+                      <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                    </ion-button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" style="text-align:center;color:#6b7280">No hay grupos registrados.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>
+
+<ion-modal [isOpen]="mostrandoForm" (didDismiss)="cancelar()"
+  style="--width:800px;--max-width:95vw;--height:90vh;--border-radius:16px">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>{{ editandoId != null ? 'Editar grupo' : 'Nuevo grupo' }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cancelar()"><ion-icon slot="icon-only" name="close-outline"></ion-icon></ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <form [formGroup]="form" (ngSubmit)="guardar()">
+        <div class="form-row">
+          <ion-item><ion-label position="stacked">Código <span class="req">*</span></ion-label><ion-input formControlName="codigo" maxlength="80"></ion-input></ion-item>
+          <ion-item><ion-label position="stacked">Descripción <span class="req">*</span></ion-label><ion-input formControlName="descripcion" maxlength="220"></ion-input></ion-item>
+        </div>
+        <ion-item lines="none"><ion-checkbox formControlName="activo" labelPlacement="end">Activo</ion-checkbox></ion-item>
+        <div class="form-actions">
+          <ion-button type="submit" color="primary">Guardar</ion-button>
+          <ion-button type="button" fill="outline" color="medium" (click)="cancelar()">Cancelar</ion-button>
+        </div>
+      </form>
+
+      @if (editandoId != null) {
+        <div class="rol-detalle-section">
+          <h2 class="rol-detalle-section__title">Miembros del grupo</h2>
+          <p class="rol-detalle-section__subtitle">Usuarios de la empresa que pertenecen a este grupo.</p>
+
+          <div class="form-row" style="align-items:flex-end;margin-bottom:1rem">
+            <ion-item style="flex:1">
+              <ion-select [(ngModel)]="usuarioIdAsignar" placeholder="Seleccione usuario" label="Agregar miembro" labelPlacement="stacked">
+                @for (u of usuariosDisponibles; track u.id) {
+                  <ion-select-option [value]="u.id">{{ u.nombreCompleto }} ({{ u.username }})</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+            <ion-button [disabled]="!usuarioIdAsignar" (click)="asignarMiembro()" color="primary" size="default">Asignar</ion-button>
+          </div>
+
+          @if (loadingMiembros) {
+            <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+          }
+
+          @if (!loadingMiembros) {
+            <ion-list>
+              @for (m of miembros; track m.id) {
+                <ion-item>
+                  <ion-label>
+                    <strong>{{ m.nombreCompleto }}</strong> — {{ m.username }}
+                    @if (m.email) { <span style="color:#6b7280"> · {{ m.email }}</span> }
+                  </ion-label>
+                  <ion-button slot="end" fill="clear" color="danger" size="small" (click)="quitarMiembro(m.usuarioId)">
+                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                  </ion-button>
+                </ion-item>
+              } @empty {
+                <ion-item><ion-label color="medium">Sin miembros asignados.</ion-label></ion-item>
+              }
+            </ion-list>
+          }
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

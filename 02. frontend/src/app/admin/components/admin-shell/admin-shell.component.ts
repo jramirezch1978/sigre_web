@@ -41,6 +41,7 @@ export class AdminShellComponent implements OnInit {
     { label: 'Opciones de menú', icon: 'list-outline', route: '/admin/opciones-menu' },
     { label: 'Acciones', icon: 'flash-outline', route: '/admin/acciones' },
     { label: 'Roles x Usuario', icon: 'person-add-outline', route: '/admin/roles-usuario' },
+    { label: 'Grupos de usuario', icon: 'people-circle-outline', route: '/admin/grupos-usuario' },
     { label: 'Sucursales', icon: 'storefront-outline', route: '/admin/sucursales' },
     { label: 'Usuarios x Sucursal', icon: 'git-network-outline', route: '/admin/usuarios-sucursales' },
   ];

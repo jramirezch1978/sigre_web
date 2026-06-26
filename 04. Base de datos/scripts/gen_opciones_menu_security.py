@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genera patch SQL con todas las opciones de menu desde opciones_menu.txt."""
+"""Genera seed SQL con todas las opciones de menu desde opciones_menu.txt."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TXT_PATH = ROOT / "opciones_menu.txt"
-OUT_PATH = ROOT / "04. Base de datos" / "ddl" / "patches" / "20260619-opciones-menu-completas.sql"
+OUT_PATH = ROOT / "04. Base de datos" / "ddl" / "seed" / "03-opciones-menu-completas-security.sql"
 
 MODULE_MAP = {
     "VENTAS": "COMERCIALIZACION",
@@ -241,7 +241,7 @@ def group_parents(items: list[dict]) -> list[dict]:
 
 def render_patch(parents: list[dict], items: list[dict]) -> str:
     lines = [
-        "-- PATCH: Catálogo completo auth.opcion_menu desde opciones_menu.txt",
+        "-- SEED: Catálogo completo auth.opcion_menu desde opciones_menu.txt",
         "-- Generado por scripts/gen_opciones_menu_security.py",
         "-- Incluye 18 módulos ERP + SEGURIDAD (19 en menú PB). ASISTENCIA es módulo aparte en auth.modulo.",
         "BEGIN;",

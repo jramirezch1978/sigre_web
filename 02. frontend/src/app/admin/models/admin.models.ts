@@ -57,6 +57,24 @@ export interface RolOpcionAccionDto {
   activo?: boolean;
 }
 
+export interface GrupoUsuarioDto {
+  id: number;
+  empresaId?: number;
+  codigo: string;
+  descripcion: string;
+  activo?: boolean;
+}
+
+export interface GrupoUsuarioMiembroDto {
+  id: number;
+  grupoUsuarioId: number;
+  usuarioId: number;
+  nombreCompleto?: string;
+  username?: string;
+  email?: string;
+  activo?: boolean;
+}
+
 export interface UsuarioAdminDto {
   id: number;
   email: string;

@@ -753,6 +753,142 @@ public class SeguridadService {
                 usuarioId, rolId);
     }
 
+    // --- Grupos de usuario ---
+
+    public List<GrupoUsuarioDto> listarGruposUsuario(long empresaId) {
+        return jdbcTemplate.query(
+                """
+                SELECT id, empresa_id, codigo, descripcion, flag_estado FROM auth.grupo_usuario
+                WHERE empresa_id = ? ORDER BY codigo
+                """,
+                (rs, i) -> mapGrupoUsuario(rs),
+                empresaId);
+    }
+
+    private GrupoUsuarioDto mapGrupoUsuario(java.sql.ResultSet rs) throws java.sql.SQLException {
+        return GrupoUsuarioDto.builder()
+                .id(rs.getLong("id"))
+                .empresaId(rs.getLong("empresa_id"))
+                .codigo(rs.getString("codigo"))
+                .descripcion(rs.getString("descripcion"))
+                .activo(fromFlag(rs.getString("flag_estado")))
+                .build();
+    }
+
+    public GrupoUsuarioDto obtenerGrupoUsuario(long empresaId, long grupoId) {
+        List<GrupoUsuarioDto> list = jdbcTemplate.query(
+                """
+                SELECT id, empresa_id, codigo, descripcion, flag_estado FROM auth.grupo_usuario
+                WHERE id = ? AND empresa_id = ?
+                """,
+                (rs, i) -> mapGrupoUsuario(rs),
+                grupoId, empresaId);
+        if (list.isEmpty()) {
+            throw new BusinessException("Grupo de usuarios no encontrado", HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        }
+        return list.get(0);
+    }
+
+    @Transactional
+    public GrupoUsuarioDto crearGrupoUsuario(long empresaId, GrupoUsuarioRequest req) {
+        GeneratedKeyHolder kh = new GeneratedKeyHolder();
+        jdbcTemplate.update(con -> {
+            PreparedStatement ps = con.prepareStatement(
+                    """
+                    INSERT INTO auth.grupo_usuario (empresa_id, codigo, descripcion, flag_estado)
+                    VALUES (?,?,?,?)
+                    """,
+                    Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1, empresaId);
+            ps.setString(2, req.getCodigo());
+            ps.setString(3, req.getDescripcion());
+            ps.setString(4, toFlag(req.getActivo()));
+            return ps;
+        }, kh);
+        Number key = kh.getKey();
+        return obtenerGrupoUsuario(empresaId, key != null ? key.longValue() : null);
+    }
+
+    @Transactional
+    public GrupoUsuarioDto actualizarGrupoUsuario(long empresaId, long grupoId, GrupoUsuarioRequest req) {
+        int u = jdbcTemplate.update(
+                """
+                UPDATE auth.grupo_usuario SET codigo = ?, descripcion = ?, flag_estado = ?
+                WHERE id = ? AND empresa_id = ?
+                """,
+                req.getCodigo(), req.getDescripcion(), toFlag(req.getActivo()), grupoId, empresaId);
+        if (u == 0) {
+            throw new BusinessException("Grupo de usuarios no encontrado", HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND");
+        }
+        return obtenerGrupoUsuario(empresaId, grupoId);
+    }
+
+    // --- Grupo ↔ miembros (usuarios) ---
+
+    public List<GrupoUsuarioMiembroDto> listarMiembrosGrupo(long empresaId, long grupoId) {
+        obtenerGrupoUsuario(empresaId, grupoId);
+        return jdbcTemplate.query(
+                """
+                SELECT d.id, d.grupo_usuario_id, d.usuario_id, d.flag_estado,
+                       u.nombre_completo, u.username, u.email
+                FROM auth.grupo_usuario_det d
+                JOIN auth.usuario u ON u.id = d.usuario_id
+                WHERE d.grupo_usuario_id = ?
+                ORDER BY u.nombre_completo
+                """,
+                (rs, i) -> mapMiembro(rs),
+                grupoId);
+    }
+
+    private GrupoUsuarioMiembroDto mapMiembro(java.sql.ResultSet rs) throws java.sql.SQLException {
+        return GrupoUsuarioMiembroDto.builder()
+                .id(rs.getLong("id"))
+                .grupoUsuarioId(rs.getLong("grupo_usuario_id"))
+                .usuarioId(rs.getLong("usuario_id"))
+                .nombreCompleto(rs.getString("nombre_completo"))
+                .username(rs.getString("username"))
+                .email(rs.getString("email"))
+                .activo(fromFlag(rs.getString("flag_estado")))
+                .build();
+    }
+
+    @Transactional
+    public GrupoUsuarioMiembroDto asignarMiembroGrupo(long empresaId, long grupoId, long usuarioId, boolean activo) {
+        obtenerGrupoUsuario(empresaId, grupoId);
+        Integer ue = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auth.usuario_empresa WHERE usuario_id = ? AND empresa_id = ? AND flag_estado = '1'",
+                Integer.class, usuarioId, empresaId);
+        if (ue == null || ue == 0) {
+            throw new BusinessException("El usuario no pertenece a la empresa.",
+                    HttpStatus.UNPROCESSABLE_ENTITY, "USUARIO_SIN_EMPRESA");
+        }
+        jdbcTemplate.update(
+                """
+                INSERT INTO auth.grupo_usuario_det (grupo_usuario_id, usuario_id, flag_estado)
+                VALUES (?,?,?)
+                ON CONFLICT (grupo_usuario_id, usuario_id) DO UPDATE SET flag_estado = EXCLUDED.flag_estado
+                """,
+                grupoId, usuarioId, activo ? "1" : "0");
+        return jdbcTemplate.query(
+                """
+                SELECT d.id, d.grupo_usuario_id, d.usuario_id, d.flag_estado,
+                       u.nombre_completo, u.username, u.email
+                FROM auth.grupo_usuario_det d
+                JOIN auth.usuario u ON u.id = d.usuario_id
+                WHERE d.grupo_usuario_id = ? AND d.usuario_id = ?
+                """,
+                (rs, i) -> mapMiembro(rs),
+                grupoId, usuarioId).get(0);
+    }
+
+    @Transactional
+    public void quitarMiembroGrupo(long empresaId, long grupoId, long usuarioId) {
+        obtenerGrupoUsuario(empresaId, grupoId);
+        jdbcTemplate.update(
+                "DELETE FROM auth.grupo_usuario_det WHERE grupo_usuario_id = ? AND usuario_id = ?",
+                grupoId, usuarioId);
+    }
+
     // --- Usuario ↔ sucursal ---
 
     @Transactional(readOnly = true)

@@ -597,12 +597,12 @@ ON CONFLICT (codigo) DO UPDATE SET
 
 COMMIT;
 
--- TX 3: Notificaciones por usuario y empresa (seed base)
+-- TX 3: Notificacion demo (origen usuario 1 -> destino usuario 3)
 BEGIN;
 
 DELETE FROM auth.notificacion
-WHERE usuario_id = 3
-  AND empresa_id = 2;
+WHERE empresa_id = 2
+  AND titulo = 'Vencimiento próximo de periodo contable';
 
 INSERT INTO auth.notificacion (
     usuario_id,
@@ -611,7 +611,7 @@ INSERT INTO auth.notificacion (
     descripcion,
     tipo,
     destino_tipo,
-    origen_usuario_id,
+    usuario_destino_id,
     leido,
     leido_en,
     enviado_en,
@@ -619,7 +619,7 @@ INSERT INTO auth.notificacion (
     fec_creacion
 )
 VALUES
-    (3, 2, 'Vencimiento próximo de periodo contable', 'Te quedan 5 días para presentar la declaración correspondiente al periodo Enero 2026.', 'WARNING', 'USUARIO', 1, FALSE, NULL, NOW() - INTERVAL '2 hours', '1', NOW() - INTERVAL '2 hours');
+    (1, 2, 'Vencimiento próximo de periodo contable', 'Te quedan 5 días para presentar la declaración correspondiente al periodo Enero 2026.', 'W', 'U', 3, FALSE, NULL, NOW() - INTERVAL '2 hours', '1', NOW() - INTERVAL '2 hours');
 
 COMMIT;
 

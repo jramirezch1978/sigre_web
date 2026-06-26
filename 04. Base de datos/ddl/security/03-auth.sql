@@ -51,6 +51,8 @@ CREATE SCHEMA IF NOT EXISTS auditoria;
 DROP TABLE IF EXISTS auth.token_uso_log CASCADE;
 DROP TABLE IF EXISTS auth.codigo_recuperacion CASCADE;
 DROP TABLE IF EXISTS auth.notificacion CASCADE;
+DROP TABLE IF EXISTS auth.grupo_usuario_det CASCADE;
+DROP TABLE IF EXISTS auth.grupo_usuario CASCADE;
 DROP TABLE IF EXISTS auth.log_acceso CASCADE;
 DROP TABLE IF EXISTS auth.plan_suscripcion CASCADE;
 DROP TABLE IF EXISTS auth.edicion_modulo CASCADE;
@@ -256,7 +258,7 @@ CREATE TABLE auth.log_acceso (
     empresa_id BIGINT NOT NULL REFERENCES master.empresa(id),
     evento VARCHAR(60) NOT NULL,
     exito BOOLEAN NOT NULL,
-    nivel VARCHAR(10) NOT NULL DEFAULT 'INFO',
+    flag_nivel VARCHAR(1) NOT NULL DEFAULT 'I' CHECK (flag_nivel IN ('I', 'W', 'E')),
     ip VARCHAR(64),
     ip_privada VARCHAR(64),
     sistema_operativo VARCHAR(120),
@@ -265,16 +267,37 @@ CREATE TABLE auth.log_acceso (
     fecha_logout TIMESTAMPTZ
 );
 
+-- Grupos de usuarios: destino colectivo de notificaciones.
+CREATE TABLE auth.grupo_usuario (
+    id BIGSERIAL PRIMARY KEY,
+    empresa_id BIGINT NOT NULL REFERENCES master.empresa(id),
+    codigo VARCHAR(80) NOT NULL,
+    descripcion VARCHAR(220) NOT NULL,
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
+    UNIQUE (empresa_id, codigo)
+);
+
+-- Detalle: usuarios que pertenecen a cada grupo.
+CREATE TABLE auth.grupo_usuario_det (
+    id BIGSERIAL PRIMARY KEY,
+    grupo_usuario_id BIGINT NOT NULL REFERENCES auth.grupo_usuario(id),
+    usuario_id BIGINT NOT NULL REFERENCES auth.usuario(id),
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
+    UNIQUE (grupo_usuario_id, usuario_id)
+);
+
 CREATE TABLE auth.notificacion (
     id BIGSERIAL PRIMARY KEY,
+    -- usuario_id: ORIGEN de la notificación (usuario que la genera). Siempre un usuario.
     usuario_id BIGINT NOT NULL REFERENCES auth.usuario(id),
     empresa_id BIGINT NOT NULL REFERENCES master.empresa(id),
     titulo VARCHAR(220) NOT NULL,
     descripcion TEXT NOT NULL,
-    tipo VARCHAR(30) NOT NULL DEFAULT 'INFO',
-    destino_tipo VARCHAR(20) NOT NULL DEFAULT 'USUARIO',
-    grupo_codigo VARCHAR(80),
-    origen_usuario_id BIGINT REFERENCES auth.usuario(id),
+    tipo VARCHAR(1) NOT NULL DEFAULT 'I' CHECK (tipo IN ('I', 'S', 'W', 'E')),
+    destino_tipo VARCHAR(1) NOT NULL DEFAULT 'U' CHECK (destino_tipo IN ('U', 'G')),
+    -- DESTINO (quién debe verla): usuario_destino_id si destino_tipo='U', grupo si destino_tipo='G'.
+    usuario_destino_id BIGINT REFERENCES auth.usuario(id),
+    grupo_usuario_destino_id BIGINT REFERENCES auth.grupo_usuario(id),
     leido BOOLEAN NOT NULL DEFAULT FALSE,
     leido_en TIMESTAMPTZ,
     enviado_en TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -311,7 +334,11 @@ CREATE INDEX IX_USUARIO_OPCION_MENU_01 ON auth.usuario_opcion_menu (empresa_id, 
 CREATE INDEX IX_LOG_ACCESO_01 ON auth.log_acceso (empresa_id, usuario_id, fecha_login DESC);
 CREATE INDEX IX_NOTIFICACION_01 ON auth.notificacion (usuario_id, empresa_id, flag_estado, enviado_en DESC);
 CREATE INDEX IX_NOTIFICACION_02 ON auth.notificacion (empresa_id, leido, enviado_en DESC);
-CREATE INDEX IX_NOTIFICACION_03 ON auth.notificacion (destino_tipo, grupo_codigo);
+CREATE INDEX IX_NOTIFICACION_03 ON auth.notificacion (destino_tipo, grupo_usuario_destino_id);
+CREATE INDEX IX_NOTIFICACION_04 ON auth.notificacion (usuario_destino_id);
+CREATE INDEX IX_GRUPO_USUARIO_01 ON auth.grupo_usuario (empresa_id, flag_estado);
+CREATE INDEX IX_GRUPO_USUARIO_DET_01 ON auth.grupo_usuario_det (grupo_usuario_id, flag_estado);
+CREATE INDEX IX_GRUPO_USUARIO_DET_02 ON auth.grupo_usuario_det (usuario_id);
 CREATE INDEX IX_SESION_01 ON auth.sesion (usuario_id, flag_estado);
 CREATE INDEX IX_TOKENS_SESSION_01 ON auth.tokens_session (usuario_id, empresa_id, flag_estado);
 CREATE INDEX IX_TOKENS_SESSION_02 ON auth.tokens_session (empresa_id);

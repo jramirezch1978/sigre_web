@@ -10,6 +10,7 @@ import { AdminAccionesComponent } from './pages/admin-acciones/admin-acciones.co
 import { AdminRolesComponent } from './pages/admin-roles/admin-roles.component';
 import { AdminUsuariosComponent } from './pages/admin-usuarios/admin-usuarios.component';
 import { AdminRolesUsuarioComponent } from './pages/admin-roles-usuario/admin-roles-usuario.component';
+import { AdminGruposUsuarioComponent } from './pages/admin-grupos-usuario/admin-grupos-usuario.component';
 import { AdminSucursalesComponent } from './pages/admin-sucursales/admin-sucursales.component';
 import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursales/admin-usuario-sucursales.component';
 import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
@@ -41,6 +42,7 @@ const routes: Routes = [
       { path: 'asignar-acciones-rol', redirectTo: 'roles', pathMatch: 'full' },
       { path: 'usuarios', component: AdminUsuariosComponent, canActivate: [adminOperativeSessionGuard] },
       { path: 'roles-usuario', component: AdminRolesUsuarioComponent, canActivate: [adminOperativeSessionGuard] },
+      { path: 'grupos-usuario', component: AdminGruposUsuarioComponent, canActivate: [adminOperativeSessionGuard] },
       { path: 'sucursales', component: AdminSucursalesComponent, canActivate: [adminZoneGuard] },
       { path: 'usuarios-sucursales', component: AdminUsuarioSucursalesComponent, canActivate: [adminZoneGuard] },
       {

@@ -20,7 +20,9 @@ public class LogAccesoService {
     }
 
     /**
-     * @param nivel {@code INFO}, {@code WARN} o {@code ERROR} (columna {@code auth.log_acceso.nivel})
+     * @param nivel severidad del evento: {@code INFO}, {@code WARN} o {@code ERROR}.
+     *              Se persiste como flag de un caracter en {@code auth.log_acceso.flag_nivel}
+     *              (I = INFO, W = WARN, E = ERROR).
      */
     public void registrar(
             Long usuarioId,
@@ -35,14 +37,14 @@ public class LogAccesoService {
         try {
             jdbcTemplate.update(
                     """
-                    INSERT INTO auth.log_acceso (usuario_id, empresa_id, evento, exito, nivel, ip, ip_privada, sistema_operativo, user_agent, fecha_login)
+                    INSERT INTO auth.log_acceso (usuario_id, empresa_id, evento, exito, flag_nivel, ip, ip_privada, sistema_operativo, user_agent, fecha_login)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
                     """,
                     usuarioId,
                     empresaId,
                     evento,
                     exito,
-                    nivel != null ? nivel : "INFO",
+                    toFlagNivel(nivel),
                     ip,
                     ipPrivada,
                     sistemaOperativo,
@@ -50,5 +52,19 @@ public class LogAccesoService {
         } catch (Exception e) {
             log.warn("No se pudo registrar auth.log_acceso evento={}: {}", evento, e.getMessage());
         }
+    }
+
+    /**
+     * Normaliza la severidad (texto o flag) al flag de un caracter de {@code auth.log_acceso.flag_nivel}.
+     */
+    private static String toFlagNivel(String nivel) {
+        if (nivel == null) {
+            return "I";
+        }
+        return switch (nivel.trim().toUpperCase()) {
+            case "WARN", "WARNING", "W" -> "W";
+            case "ERROR", "E" -> "E";
+            default -> "I"; // INFO
+        };
     }
 }

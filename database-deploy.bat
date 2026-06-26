@@ -336,13 +336,14 @@ call :run_sql "security/01-master.sql" || exit /b 1
 call :run_sql "security/02-config.sql" || exit /b 1
 call :run_sql "security/03-auth.sql" || exit /b 1
 call :run_sql "security/04-auditoria-schema-sync.sql" || exit /b 1
+call :run_sql "security/05-funciones-procedimientos.sql" || exit /b 1
 call :run_sql "security/99-auditoria-security.sql" || exit /b 1
 call :run_sql "99-auditoria-global.sql" || exit /b 1
 call :run_sql "99-auditoria-triggers-fechas.sql" || exit /b 1
 call :run_sql "security/99-auditoria-security-post.sql" || exit /b 1
 call :run_sql "seed/01-carga-inicial-security.sql" || exit /b 1
-call :run_sql "patches/20260625-edicion-erp-contenido-modulos.sql" || exit /b 1
-call :run_sql "patches/20260619-opciones-menu-completas.sql" || exit /b 1
+call :run_sql "seed/02-edicion-erp-contenido-modulos-security.sql" || exit /b 1
+call :run_sql "seed/03-opciones-menu-completas-security.sql" || exit /b 1
 set "PGDATABASE=!SAVED_PGDATABASE!"
 echo.
 echo ^>^> create-security: DDL de seguridad ejecutado en !PGSECURITY!

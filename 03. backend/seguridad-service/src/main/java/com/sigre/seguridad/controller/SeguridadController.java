@@ -194,6 +194,82 @@ public class SeguridadController {
         return ApiResponse.ok(seguridadService.actualizarRol(empresaId, rolId, body), "Rol actualizado");
     }
 
+    // --- Grupos de usuario ---
+
+    @GetMapping("/empresas/{empresaId}/grupos-usuario")
+    public ApiResponse<List<GrupoUsuarioDto>> listarGruposUsuario(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable long empresaId) {
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        contextHelper.requireEmpresaEnToken(auth, empresaId);
+        seguridadService.requireUsuarioEmpresa(uid, empresaId);
+        return ApiResponse.ok(seguridadService.listarGruposUsuario(empresaId), "Grupos de usuario");
+    }
+
+    @PostMapping("/empresas/{empresaId}/grupos-usuario")
+    public ApiResponse<GrupoUsuarioDto> crearGrupoUsuario(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable long empresaId,
+            @Valid @RequestBody GrupoUsuarioRequest body) {
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        contextHelper.requireEmpresaEnToken(auth, empresaId);
+        seguridadService.requireAdmin(uid, empresaId);
+        return ApiResponse.ok(seguridadService.crearGrupoUsuario(empresaId, body), "Grupo creado");
+    }
+
+    @PutMapping("/empresas/{empresaId}/grupos-usuario/{grupoId}")
+    public ApiResponse<GrupoUsuarioDto> actualizarGrupoUsuario(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable long empresaId,
+            @PathVariable long grupoId,
+            @Valid @RequestBody GrupoUsuarioRequest body) {
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        contextHelper.requireEmpresaEnToken(auth, empresaId);
+        seguridadService.requireAdmin(uid, empresaId);
+        return ApiResponse.ok(seguridadService.actualizarGrupoUsuario(empresaId, grupoId, body), "Grupo actualizado");
+    }
+
+    // --- Grupo ↔ miembros ---
+
+    @GetMapping("/empresas/{empresaId}/grupos-usuario/{grupoId}/miembros")
+    public ApiResponse<List<GrupoUsuarioMiembroDto>> listarMiembrosGrupo(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable long empresaId,
+            @PathVariable long grupoId) {
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        contextHelper.requireEmpresaEnToken(auth, empresaId);
+        seguridadService.requireUsuarioEmpresa(uid, empresaId);
+        return ApiResponse.ok(seguridadService.listarMiembrosGrupo(empresaId, grupoId), "Miembros del grupo");
+    }
+
+    @PostMapping("/empresas/{empresaId}/grupos-usuario/{grupoId}/miembros")
+    public ApiResponse<GrupoUsuarioMiembroDto> asignarMiembroGrupo(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable long empresaId,
+            @PathVariable long grupoId,
+            @Valid @RequestBody AsignarMiembroGrupoRequest body) {
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        contextHelper.requireEmpresaEnToken(auth, empresaId);
+        seguridadService.requireAdmin(uid, empresaId);
+        return ApiResponse.ok(
+                seguridadService.asignarMiembroGrupo(empresaId, grupoId, body.getUsuarioId(),
+                        !Boolean.FALSE.equals(body.getActivo())),
+                "Miembro asignado");
+    }
+
+    @DeleteMapping("/empresas/{empresaId}/grupos-usuario/{grupoId}/miembros/{usuarioId}")
+    public ApiResponse<Void> quitarMiembroGrupo(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable long empresaId,
+            @PathVariable long grupoId,
+            @PathVariable long usuarioId) {
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        contextHelper.requireEmpresaEnToken(auth, empresaId);
+        seguridadService.requireAdmin(uid, empresaId);
+        seguridadService.quitarMiembroGrupo(empresaId, grupoId, usuarioId);
+        return ApiResponse.ok(null, "Miembro quitado del grupo");
+    }
+
     // --- Rol ↔ opción menú ---
 
     @GetMapping("/empresas/{empresaId}/roles/{rolId}/opciones-menu")
