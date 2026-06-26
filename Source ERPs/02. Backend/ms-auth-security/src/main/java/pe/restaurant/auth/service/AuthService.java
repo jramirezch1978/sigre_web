@@ -1,0 +1,26 @@
+package pe.restaurant.auth.service;
+
+import pe.restaurant.auth.dto.*;
+
+import java.util.List;
+
+public interface AuthService {
+
+    LoginResponse login(LoginRequest request);
+
+    List<EmpresaUsuarioDto> listarEmpresas(Long usuarioId);
+
+    LoginResponse seleccionarEmpresa(Long usuarioId, SeleccionEmpresaRequest request);
+
+    /**
+     * Valida email/contraseña como en {@link #login(LoginRequest)} sin emitir token temporal.
+     * Usado por {@code POST /seleccionar-empresa} cuando no se envía {@code Authorization}.
+     */
+    Long authenticateCredentialsForSeleccionEmpresa(SeleccionEmpresaRequest request);
+
+    void logout(Long usuarioId, String bearerToken);
+
+    RefreshTokenResponse refreshToken(RefreshTokenRequest request);
+
+    AuthMeResponse getProfile(String accessToken);
+}

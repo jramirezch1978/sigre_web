@@ -1,0 +1,2394 @@
+{
+    "info":  {
+                 "_postman_id":  "6dcbc1ff-b294-4287-85e4-1cef4c3d4c69",
+                 "name":  "ms-activos-fijos — API",
+                 "description":  "Colección Postman (JSON v2.1) para los controladores REST de ms-activos-fijos.\\n\\n- **baseUrl:** http://localhost:9008 (puerto por defecto en application.yml).\\n- **accessToken:** JWT Bearer si aplica seguridad o gateway.\\n- Variables {{...Id}} y cuerpos son ejemplos; ajustar a datos y validaciones reales.\\n\\nOpenAPI (si está expuesto): típicamente /v3/api-docs según configuración SpringDoc.",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "auth":  {
+                 "type":  "bearer",
+                 "bearer":  [
+                                {
+                                    "key":  "token",
+                                    "value":  "{{accessToken}}",
+                                    "type":  "string"
+                                }
+                            ]
+             },
+    "variable":  [
+                     {
+                         "key":  "baseUrl",
+                         "value":  "http://localhost:9008"
+                     },
+                     {
+                         "key":  "contabilidadBaseUrl",
+                         "value":  "http://localhost:9006"
+                     },
+                     {
+                         "key":  "accessToken",
+                         "value":  ""
+                     },
+                     {
+                         "key":  "claseId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "subClaseId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "matrizId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "ubicacionId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "maestroId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "aseguradoraId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "polizaId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "polizaActivoId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "documentoId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "historialId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "usuarioId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "operacionId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "trasladoId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "calculoId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "devengoId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "ordenCompraId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "ordenCompraLineaId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "valuacionId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "ventaId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "adaptacionId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "adaptacionDetId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "adaptacionDepId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "depreciacionId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "asientoId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "tipoOperacionId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "accesorioId",
+                         "value":  "1"
+                     },
+                     {
+                         "key":  "recepcionId",
+                         "value":  "1"
+                     }
+                 ],
+    "item":  [
+                 {
+                     "name":  "00 Admin — seed",
+                     "description":  "POST seed solo si app.testdata.enabled=true (APP_TESTDATA_ENABLED). Requiere JWT y tenant con auth.sucursal. Borra/recrea filas con prefijo SEED-AF.",
+                     "item":  [
+                                  {
+                                      "name":  "POST Seed demo activos",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/admin/test-data/seed",
+                                                      "description":  "Si el controlador no está registrado (testdata false), Postman recibe 404. Respuesta: mapa tabla → filas insertadas."
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Clases",
+                     "description":  "Base: /api/activos/clases",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/clases?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/clases/{{claseId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/clases",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"codigo\": \"CLZ01\",\n  \"nombre\": \"Clase ejemplo\",\n  \"metodoDepreciacion\": \"LINEAL\",\n  \"vidaUtilMeses\": 60\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/clases/{{claseId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"codigo\": \"CLZ01\",\n  \"nombre\": \"Clase actualizada\",\n  \"metodoDepreciacion\": \"LINEAL\",\n  \"vidaUtilMeses\": 60\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Desactivar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/clases/{{claseId}}/desactivar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Activar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/clases/{{claseId}}/activar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/clases/{{claseId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Subclases",
+                     "description":  "Base: /api/activos/sub-clases",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/sub-clases?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/sub-clases/{{subClaseId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/sub-clases",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afClaseId\": 1,\n  \"codigo\": \"SCL01\",\n  \"nombre\": \"Subclase ejemplo\",\n  \"vidaUtilMeses\": 60\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/sub-clases/{{subClaseId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afClaseId\": 1,\n  \"codigo\": \"SCL01\",\n  \"nombre\": \"Subclase actualizada\",\n  \"vidaUtilMeses\": 60\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Desactivar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/sub-clases/{{subClaseId}}/desactivar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Activar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/sub-clases/{{subClaseId}}/activar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/sub-clases/{{subClaseId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Matrices Subclase",
+                     "description":  "Base: /api/activos/matrices-subclase",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/matrices-subclase?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/matrices-subclase/{{matrizId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por subclase",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/matrices-subclase/por-subclase/{{subClaseId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/matrices-subclase",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afSubClaseId\": 1,\n  \"cuentaActivoId\": 100,\n  \"cuentaDepAcumId\": 101,\n  \"cuentaGastoDepId\": 102\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/matrices-subclase/{{matrizId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afSubClaseId\": 1,\n  \"cuentaActivoId\": 100,\n  \"cuentaDepAcumId\": 101,\n  \"cuentaGastoDepId\": 102\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/matrices-subclase/{{matrizId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Ubicaciones",
+                     "description":  "Base: /api/activos/ubicaciones",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ubicaciones?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ubicaciones/{{ubicacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ubicaciones",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"sucursalId\": 1,\n  \"codigo\": \"UBI01\",\n  \"nombre\": \"Almacén central\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ubicaciones/{{ubicacionId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"sucursalId\": 1,\n  \"codigo\": \"UBI01\",\n  \"nombre\": \"Ubicación actualizada\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Desactivar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ubicaciones/{{ubicacionId}}/desactivar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Activar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ubicaciones/{{ubicacionId}}/activar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ubicaciones/{{ubicacionId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Maestro de activos",
+                     "description":  "Base: /api/activos/maestro. Opcional: unidadesProduccionTotales y unidadesProduccionPeriodo (método de clase UNIDADES_PRODUCIDAS; el período también puede enviarse en calcular-mensual).",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro/{{maestroId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"codigo\": \"ACT001\",\n  \"nombre\": \"Activo ejemplo\",\n  \"afSubClaseId\": 1,\n  \"afUbicacionId\": 1,\n  \"fechaAdquisicion\": \"2026-01-15\",\n  \"valorAdquisicion\": \"10000.00\",\n  \"valorResidual\": \"1000.00\",\n  \"proveedorId\": 1,\n  \"unidadesProduccionTotales\": 50000,\n  \"unidadesProduccionPeriodo\": 1200\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro/{{maestroId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"codigo\": \"ACT001\",\n  \"nombre\": \"Activo actualizado\",\n  \"afSubClaseId\": 1,\n  \"afUbicacionId\": 1,\n  \"fechaAdquisicion\": \"2026-01-15\",\n  \"valorAdquisicion\": \"10000.00\",\n  \"valorResidual\": \"1000.00\",\n  \"proveedorId\": 1,\n  \"unidadesProduccionTotales\": 50000,\n  \"unidadesProduccionPeriodo\": 1200\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Desactivar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro/{{maestroId}}/desactivar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Activar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro/{{maestroId}}/activar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro/{{maestroId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Listar por subclase",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro/por-subclase/{{subClaseId}}?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Listar por ubicación",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro/por-ubicacion/{{ubicacionId}}?page=0\u0026size=10"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Distribución CC",
+                     "item":  [
+                                  {
+                                      "name":  "Distribución CC — listar",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro/{{maestroId}}/distribucion-cc"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Distribución CC — reemplazar (suma 100%)",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/maestro/{{maestroId}}/distribucion-cc",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "[\n  { \"centroCostoId\": 10, \"porcentaje\": 70 },\n  { \"centroCostoId\": 20, \"porcentaje\": 30 }\n]"
+                                                               }
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Aseguradoras",
+                     "description":  "Base: /api/activos/aseguradoras",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/aseguradoras?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/aseguradoras/{{aseguradoraId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/aseguradoras",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nombre\": \"Aseguradora SA\",\n  \"ruc\": \"20100070970\",\n  \"contacto\": \"Ventas\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/aseguradoras/{{aseguradoraId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"nombre\": \"Aseguradora SA\",\n  \"ruc\": \"20100070970\",\n  \"contacto\": \"Ventas\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Desactivar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/aseguradoras/{{aseguradoraId}}/desactivar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Activar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/aseguradoras/{{aseguradoraId}}/activar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/aseguradoras/{{aseguradoraId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Pólizas de seguro",
+                     "description":  "Base: /api/activos/polizas",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas/{{polizaId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afAseguradoraId\": 1,\n  \"numeroPoliza\": \"POL-2026-001\",\n  \"fechaInicio\": \"2026-01-01\",\n  \"fechaFin\": \"2026-12-31\",\n  \"prima\": \"5000.00\",\n  \"cobertura\": \"100000.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas/{{polizaId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afAseguradoraId\": 1,\n  \"numeroPoliza\": \"POL-2026-001\",\n  \"fechaInicio\": \"2026-01-01\",\n  \"fechaFin\": \"2026-12-31\",\n  \"prima\": \"5000.00\",\n  \"cobertura\": \"100000.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas/{{polizaId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Vigentes (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas/vigentes?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por vencer (días)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas/por-vencer/30"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por aseguradora (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas/aseguradora/{{aseguradoraId}}?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Renovar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas/{{polizaId}}/renovar",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afAseguradoraId\": 1,\n  \"numeroPoliza\": \"POL-2027-001\",\n  \"fechaInicio\": \"2027-01-01\",\n  \"fechaFin\": \"2027-12-31\",\n  \"prima\": \"5500.00\",\n  \"cobertura\": \"100000.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Registrar devengo mensual prima",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas/{{polizaId}}/devengo-mensual?anio=2026\u0026mes=5"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Listar devengos de póliza",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas/{{polizaId}}/devengos"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Póliza–activo",
+                     "description":  "Base: /api/activos/polizas-activos",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas-activos?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas-activos/{{polizaActivoId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas-activos",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afPolizaSeguroId\": 1,\n  \"afMaestroId\": 1,\n  \"valorAsegurado\": \"50000.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas-activos/{{polizaActivoId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afPolizaSeguroId\": 1,\n  \"afMaestroId\": 1,\n  \"valorAsegurado\": \"50000.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas-activos/{{polizaActivoId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por póliza",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas-activos/poliza/{{polizaId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por activo (maestro)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/polizas-activos/activo/{{maestroId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Documentos",
+                     "description":  "Base: /api/activos/documentos",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/documentos?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/documentos/{{documentoId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/documentos",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"tipoDocumento\": \"FACTURA\",\n  \"nombreArchivo\": \"fac-001.pdf\",\n  \"rutaArchivo\": \"/docs/activos/fac-001.pdf\",\n  \"descripcion\": \"Factura compra\",\n  \"fechaCarga\": \"2026-05-01\",\n  \"tamanioBytes\": 1024,\n  \"extension\": \"pdf\",\n  \"usuarioCargaId\": 1\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/documentos/{{documentoId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"tipoDocumento\": \"FACTURA\",\n  \"nombreArchivo\": \"fac-001.pdf\",\n  \"rutaArchivo\": \"/docs/activos/fac-001.pdf\",\n  \"descripcion\": \"Factura compra\",\n  \"fechaCarga\": \"2026-05-01\",\n  \"tamanioBytes\": 1024,\n  \"extension\": \"pdf\",\n  \"usuarioCargaId\": 1\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/documentos/{{documentoId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por activo",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/documentos/activo/{{maestroId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por tipo documento",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/documentos/tipo/FACTURA"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Historial",
+                     "description":  "Base: /api/activos/historial",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/historial?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/historial/{{historialId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/historial",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"tipoEvento\": \"ALTA\",\n  \"descripcion\": \"Registro de evento\",\n  \"valorAnterior\": null,\n  \"valorNuevo\": null,\n  \"usuarioId\": 1,\n  \"fechaEvento\": \"2026-05-14T10:00:00\",\n  \"ipOrigen\": \"127.0.0.1\",\n  \"modulo\": \"ACTIVOS\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/historial/{{historialId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por activo",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/historial/activo/{{maestroId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por tipo evento",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/historial/tipo/ALTA"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por usuario",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/historial/usuario/{{usuarioId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por rango fechas (ISO-8601)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/historial/rango-fechas?fechaInicio=2026-01-01T00:00:00\u0026fechaFin=2026-12-31T23:59:59"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Operaciones",
+                     "description":  "Base: /api/activos/operaciones",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/operaciones?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/operaciones/{{operacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/operaciones",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"tipo\": \"MANTENIMIENTO\",\n  \"fechaProgramada\": \"2026-06-01\",\n  \"fechaEjecucion\": null,\n  \"costo\": \"100.00\",\n  \"proveedorServicio\": \"Proveedor SA\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/operaciones/{{operacionId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"tipo\": \"MANTENIMIENTO\",\n  \"fechaProgramada\": \"2026-06-01\",\n  \"fechaEjecucion\": null,\n  \"costo\": \"100.00\",\n  \"proveedorServicio\": \"Proveedor SA\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/operaciones/{{operacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Programadas",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/operaciones/programadas"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Ejecutar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/operaciones/{{operacionId}}/ejecutar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por activo",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/operaciones/activo/{{maestroId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Traslados",
+                     "description":  "Base: /api/activos/traslados",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/traslados?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/traslados/{{trasladoId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/traslados",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"ubicacionOrigenId\": 1,\n  \"ubicacionDestinoId\": 2,\n  \"solicitanteId\": 1,\n  \"fechaSolicitud\": \"2026-05-01\",\n  \"fechaEjecucion\": null,\n  \"motivo\": \"Reubicación\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/traslados/{{trasladoId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"ubicacionOrigenId\": 1,\n  \"ubicacionDestinoId\": 2,\n  \"solicitanteId\": 1,\n  \"fechaSolicitud\": \"2026-05-01\",\n  \"fechaEjecucion\": null,\n  \"motivo\": \"Reubicación\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/traslados/{{trasladoId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Aprobar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/traslados/{{trasladoId}}/aprobar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Rechazar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/traslados/{{trasladoId}}/rechazar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Ejecutar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/traslados/{{trasladoId}}/ejecutar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "PATCH Anular",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/traslados/{{trasladoId}}/anular"
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Valuaciones",
+                     "description":  "Base: /api/activos/valuaciones",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/valuaciones?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/valuaciones/{{valuacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/valuaciones",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"fechaValuacion\": \"2026-03-01\",\n  \"valorAnterior\": \"10000.00\",\n  \"valorNuevo\": \"12000.00\",\n  \"metodoValuacion\": \"PERITO\",\n  \"responsableId\": 1,\n  \"observaciones\": \"\",\n  \"fechaAprobacion\": null,\n  \"aprobadorId\": null\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/valuaciones/{{valuacionId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"fechaValuacion\": \"2026-03-01\",\n  \"valorAnterior\": \"10000.00\",\n  \"valorNuevo\": \"12000.00\",\n  \"metodoValuacion\": \"PERITO\",\n  \"responsableId\": 1,\n  \"observaciones\": \"\",\n  \"fechaAprobacion\": null,\n  \"aprobadorId\": null\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/valuaciones/{{valuacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por activo",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/valuaciones/activo/{{maestroId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por periodo (fechas)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/valuaciones/periodo?fechaInicio=2026-01-01\u0026fechaFin=2026-12-31"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Aprobar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/valuaciones/{{valuacionId}}/aprobar"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Ventas (baja)",
+                     "description":  "Base: /api/activos/ventas",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ventas?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ventas/{{ventaId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ventas",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"fechaBaja\": \"2026-04-01\",\n  \"motivo\": \"VENTA\",\n  \"valorVenta\": \"5000.00\",\n  \"comprador\": \"Cliente SA\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ventas/{{ventaId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"fechaBaja\": \"2026-04-01\",\n  \"motivo\": \"VENTA\",\n  \"valorVenta\": \"5000.00\",\n  \"comprador\": \"Cliente SA\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ventas/{{ventaId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Aprobar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ventas/{{ventaId}}/aprobar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Reporte por año",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/ventas/reporte/2026"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Adaptaciones",
+                     "description":  "Base: /api/activos/adaptaciones",
+                     "item":  [
+                                  {
+                                      "name":  "Listar (paginado)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones/{{adaptacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"fecha\": \"2026-02-01\",\n  \"descripcion\": \"Mejora estructural\",\n  \"montoTotal\": \"2000.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones/{{adaptacionId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"fecha\": \"2026-02-01\",\n  \"descripcion\": \"Mejora estructural\",\n  \"montoTotal\": \"2000.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones/{{adaptacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por activo",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones/activo/{{maestroId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por rango fechas",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones/rango-fechas?fechaInicio=2026-01-01\u0026fechaFin=2026-12-31"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Capitalizar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones/{{adaptacionId}}/capitalizar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "PATCH Validar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones/{{adaptacionId}}/validar"
+                                                  },
+                                      "response":  [
+
+                                                   ]
+                                  },
+                                  {
+                                      "name":  "Total capitalizado por activo",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones/activo/{{maestroId}}/total-capitalizado"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Adaptaciones – detalle",
+                     "description":  "Base: /api/activos/adaptaciones-detalles",
+                     "item":  [
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-detalles/{{adaptacionDetId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-detalles",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afAdaptacionId\": 1,\n  \"descripcion\": \"Ítem de obra\",\n  \"monto\": \"500.00\",\n  \"unidadMedidaId\": 1\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-detalles/{{adaptacionDetId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afAdaptacionId\": 1,\n  \"descripcion\": \"Ítem de obra\",\n  \"monto\": \"500.00\",\n  \"unidadMedidaId\": 1\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-detalles/{{adaptacionDetId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por adaptación",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-detalles/adaptacion/{{adaptacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Total por adaptación",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-detalles/adaptacion/{{adaptacionId}}/total"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Adaptaciones – depreciación",
+                     "description":  "Base: /api/activos/adaptaciones-depreciacion",
+                     "item":  [
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-depreciacion/{{adaptacionDepId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-depreciacion",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afAdaptacionId\": 1,\n  \"anio\": 2026,\n  \"mes\": 5,\n  \"depreciacionPeriodo\": \"50.00\",\n  \"depreciacionAcumulada\": \"300.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-depreciacion/{{adaptacionDepId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afAdaptacionId\": 1,\n  \"anio\": 2026,\n  \"mes\": 5,\n  \"depreciacionPeriodo\": \"50.00\",\n  \"depreciacionAcumulada\": \"300.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-depreciacion/{{adaptacionDepId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por adaptación",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-depreciacion/adaptacion/{{adaptacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por periodo",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-depreciacion/periodo/2026/5"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Calcular depreciación",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/adaptaciones-depreciacion/adaptacion/{{adaptacionId}}/calcular?anio=2026\u0026mes=5"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Depreciación contable",
+                     "description":  "Base: /api/activos/depreciacion. Calcular mensual: query afMaestroId; body anio, mes y opcional unidadesProducidasPeriodo (UNIDADES_PRODUCIDAS, prioridad sobre el maestro). Calcular masivo: solo maestros flag activo; omite si ya existe fila activo-período.",
+                     "item":  [
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/depreciacion/{{depreciacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Historial por maestro",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/depreciacion/maestro/{{maestroId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Por periodo global",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/depreciacion/periodo/2026/5"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Calcular mensual",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/depreciacion/calcular-mensual?afMaestroId={{maestroId}}",
+                                                      "description":  "unidadesProducidasPeriodo es opcional; útil para UNIDADES_PRODUCIDAS (si no va aquí, debe estar en el maestro o el cálculo falla con ACT-057). Para LINEAL/ACELERADA puede omitirse o ignorarse.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"anio\": 2026,\n  \"mes\": 5,\n  \"unidadesProducidasPeriodo\": 150\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Calcular masivo",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/depreciacion/calcular-masivo",
+                                                      "description":  "Body solo anio y mes. Unidades UOP se toman del maestro (totales y período); activos inactivos o sin datos UOP se omiten.",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"anio\": 2026,\n  \"mes\": 5\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Reporte periodo",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/depreciacion/reporte/2026/5"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar registro",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/depreciacion/{{depreciacionId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"anio\": 2026,\n  \"mes\": 5,\n  \"depreciacionPeriodo\": \"100.00\",\n  \"depreciacionAcumulada\": \"600.00\",\n  \"valorNeto\": \"9400.00\"\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/depreciacion/{{depreciacionId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Tipos de Operación",
+                     "description":  "Base: /api/activos/tipos-operacion (HU-AF-001)",
+                     "item":  [
+                                  {
+                                      "name":  "Listar",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/tipos-operacion?page=0\u0026size=10"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/tipos-operacion",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"codigo\": \"MANT\",\n  \"descripcion\": \"Mantenimiento preventivo\",\n  \"naturaleza\": \"GASTO\",\n  \"tipoCalculo\": \"FIJO\",\n  \"afectaContabilidad\": true\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/tipos-operacion/{{tipoOperacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/tipos-operacion/{{tipoOperacionId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"codigo\": \"MANT\",\n  \"descripcion\": \"Mantenimiento preventivo (editado)\",\n  \"naturaleza\": \"GASTO\",\n  \"tipoCalculo\": \"FIJO\",\n  \"afectaContabilidad\": true\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/tipos-operacion/{{tipoOperacionId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Activar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/tipos-operacion/{{tipoOperacionId}}/activar"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Desactivar",
+                                      "request":  {
+                                                      "method":  "PATCH",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/tipos-operacion/{{tipoOperacionId}}/desactivar"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Numeración AF",
+                     "description":  "Base: /api/activos/numeracion (TAB-007/008)",
+                     "item":  [
+                                  {
+                                      "name":  "Obtener config MAESTRO",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/numeracion/MAESTRO"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar config MAESTRO",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/numeracion/MAESTRO",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"prefijo\": \"AF\",\n  \"secuenciaActual\": 0,\n  \"longitudNumero\": 6\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Siguiente codigo MAESTRO",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/numeracion/MAESTRO/siguiente-codigo"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Accesorios",
+                     "description":  "Base: /api/activos/accesorios",
+                     "item":  [
+                                  {
+                                      "name":  "Listar por maestro",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/accesorios/maestro/{{maestroId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Crear",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/accesorios",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"descripcion\": \"Monitor adicional\",\n  \"costo\": 350.0000\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Obtener por ID",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/accesorios/{{accesorioId}}"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Actualizar",
+                                      "request":  {
+                                                      "method":  "PUT",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/accesorios/{{accesorioId}}",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"afMaestroId\": 1,\n  \"descripcion\": \"Monitor adicional (editado)\",\n  \"costo\": 420.0000\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Eliminar",
+                                      "request":  {
+                                                      "method":  "DELETE",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/accesorios/{{accesorioId}}"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Reportes AF",
+                     "description":  "Base: /api/activos/reportes (REP-001/002/003). Export REP-001: 12 columnas HU-AF-REP-001 §8 (xlsx/csv/pdf).",
+                     "item":  [
+                                  {
+                                      "name":  "Libro de activos (JSON)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/reportes/libro-activos?fechaCorte=2026-05-16"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Libro de activos — export (xlsx/csv/pdf)",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/reportes/libro-activos/export?formato=xlsx\u0026fechaCorte=2026-05-16"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Depreciacion anual",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/reportes/depreciacion-anual/{{maestroId}}/2026"
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Consolidado",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/reportes/consolidado"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Jobs AF",
+                     "description":  "Base: /api/activos/jobs — invocar desde ms-worker",
+                     "item":  [
+                                  {
+                                      "name":  "Depreciacion masiva",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/jobs/depreciacion-masiva?contabilizar=false",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"anio\": 2026,\n  \"mes\": 5\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Devengo prima masivo",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/jobs/devengo-prima-masivo?anio=2026\u0026mes=5\u0026contabilizar=false"
+                                                  }
+                                  }
+                              ]
+                 },
+                 {
+                     "name":  "Integración AF",
+                     "description":  "Integración ERP de Activos Fijos (AfIntegracionController).",
+                     "item":  [
+                                  {
+                                      "name":  "Maestro desde orden de compra",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/compras/maestro-desde-orden-compra",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"ordenCompraId\": 1,\n  \"ordenCompraLineaId\": 1,\n  \"codigo\": \"AF-OC-001\",\n  \"afSubClaseId\": 1,\n  \"valorAdquisicion\": 15000.0000,\n  \"valorResidual\": 0.0000\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Maestro desde recepcion",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/compras/maestro-desde-recepcion",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"ordenCompraId\": {{ordenCompraId}},\n  \"recepcionId\": {{recepcionId}},\n  \"ordenCompraLineaId\": {{ordenCompraLineaId}},\n  \"codigo\": \"AF-REC-001\",\n  \"afSubClaseId\": 1,\n  \"valorAdquisicion\": 15000.0000,\n  \"valorResidual\": 0.0000\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Maestro desde factura compra",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
+                                                                     }
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/compras/maestro-desde-factura",
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\n  \"ordenCompraId\": 1,\n  \"ordenCompraLineaId\": 1,\n  \"facturaSerie\": \"F001\",\n  \"facturaNumero\": \"00012345\",\n  \"facturaFecha\": \"2026-05-10\",\n  \"codigo\": \"AF-FAC-001\",\n  \"afSubClaseId\": 1,\n  \"afUbicacionId\": 1,\n  \"fechaAdquisicion\": \"2026-05-10\",\n  \"valorAdquisicion\": 15000.0000,\n  \"valorResidual\": 0.0000,\n  \"proveedorId\": 99\n}"
+                                                               }
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Contabilizar depreciacion",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/contabilidad/depreciacion/{{calculoId}}",
+                                                      "description":  "Sin body. Crea asiento AF_DEPRECIACION vía Feign POST /api/contabilidad/asientos. Precondición: cálculo en af_calculo_cntbl y matriz con cuentas."
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Contabilizar devengo prima",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/contabilidad/devengo/{{devengoId}}",
+                                                      "description":  "Sin body. Módulo origen AF_DEVENGO_PRIMA."
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Contabilizar alta activo",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/contabilidad/alta/{{maestroId}}",
+                                                      "description":  "Sin body. Módulo origen AF_ALTA_ACTIVO."
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Contabilizar adaptacion",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/contabilidad/adaptacion/{{adaptacionId}}",
+                                                      "description":  "Sin body. Módulo origen AF_ADAPTACION (adaptación capitalizada)."
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Contabilizar baja activo",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/contabilidad/baja/{{maestroId}}",
+                                                      "description":  "Sin body. Módulo origen AF_BAJA_ACTIVO."
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Contabilizar venta",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/contabilidad/venta/{{ventaId}}",
+                                                      "description":  "Sin body. Módulo origen AF_VENTA."
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Contabilizar valuacion",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/contabilidad/valuacion/{{valuacionId}}",
+                                                      "description":  "Sin body. Módulo origen AF_VALUACION (valuación aprobada)."
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Contabilizar traslado",
+                                      "request":  {
+                                                      "method":  "POST",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/contabilidad/traslado/{{trasladoId}}",
+                                                      "description":  "Sin body. Módulo origen AF_TRASLADO (traslado EJECUTADO; reclasifica valor neto entre CC)."
+                                                  }
+                                  },
+                                  {
+                                      "name":  "Trazabilidad asiento por origen",
+                                      "request":  {
+                                                      "method":  "GET",
+                                                      "header":  [
+
+                                                                 ],
+                                                      "url":  "{{baseUrl}}/api/activos/integracion/contabilidad/trazabilidad?moduloOrigen=AF_DEPRECIACION\u0026documentoOrigenId={{calculoId}}",
+                                                      "description":  "Consulta asiento remoto por moduloOrigen + documentoOrigenId (proxy a ms-contabilidad GET /asientos/buscar)."
+                                                  }
+                                  }
+                              ]
+                 }
+             ]
+}

@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="reporte_registro_ventas"
+              pageWidth="1123" pageHeight="794" columnWidth="1063"
+              leftMargin="30" rightMargin="30" topMargin="15" bottomMargin="15"
+              orientation="Landscape">
+
+    <property name="net.sf.jasperreports.print.create.bookmarks" value="false"/>
+
+    <parameter name="headerSubreport" class="net.sf.jasperreports.engine.JasperReport"/>
+    <parameter name="logoSubreport" class="net.sf.jasperreports.engine.JasperReport"/>
+    <parameter name="logoImage" class="java.io.InputStream"/>
+    <parameter name="logoSize" class="java.lang.String"/>
+    <parameter name="empresaNombre" class="java.lang.String"/>
+    <parameter name="empresaRuc" class="java.lang.String"/>
+    <parameter name="reporteTitulo" class="java.lang.String"/>
+    <parameter name="anio" class="java.lang.Integer"/>
+    <parameter name="mes" class="java.lang.Integer"/>
+    <parameter name="mesNombre" class="java.lang.String"/>
+    <parameter name="subtitulo" class="java.lang.String"/>
+    <parameter name="usuario" class="java.lang.String"/>
+
+    <field name="ano" class="java.lang.Integer"/>
+    <field name="mes" class="java.lang.Integer"/>
+    <field name="nro_asiento" class="java.lang.Integer"/>
+    <field name="fecha_documento" class="java.util.Date"/>
+    <field name="fecha_vencimiento" class="java.util.Date"/>
+    <field name="tipo_doc" class="java.lang.String"/>
+    <field name="desc_tipo_doc" class="java.lang.String"/>
+    <field name="serie" class="java.lang.String"/>
+    <field name="nro_doc" class="java.lang.String"/>
+    <field name="cod_relacion" class="java.lang.Long"/>
+    <field name="cod_moneda" class="java.lang.String"/>
+    <field name="importe_doc" class="java.math.BigDecimal"/>
+    <field name="nom_proveedor" class="java.lang.String"/>
+    <field name="nro_doc_ident" class="java.lang.String"/>
+    <field name="tasa_cambio" class="java.math.BigDecimal"/>
+    <field name="tipo_doc_sunat" class="java.lang.String"/>
+    <field name="vtas_gravadas" class="java.math.BigDecimal"/>
+    <field name="igv_gravadas" class="java.math.BigDecimal"/>
+    <field name="igv_gratuito" class="java.math.BigDecimal"/>
+    <field name="vtas_inafectas" class="java.math.BigDecimal"/>
+    <field name="igv_inafectas" class="java.math.BigDecimal"/>
+    <field name="vtas_exoneradas" class="java.math.BigDecimal"/>
+    <field name="igv_exoneradas" class="java.math.BigDecimal"/>
+    <field name="exportaciones" class="java.math.BigDecimal"/>
+    <field name="ventas_gratuitas" class="java.math.BigDecimal"/>
+    <field name="icbper" class="java.math.BigDecimal"/>
+
+    <variable name="totalVtasGravadas" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{vtas_gravadas}]]></variableExpression>
+    </variable>
+    <variable name="totalIgvGravadas" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{igv_gravadas}]]></variableExpression>
+    </variable>
+    <variable name="totalVtasInafectas" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{vtas_inafectas}]]></variableExpression>
+    </variable>
+    <variable name="totalVtasExoneradas" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{vtas_exoneradas}]]></variableExpression>
+    </variable>
+    <variable name="totalExportaciones" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{exportaciones}]]></variableExpression>
+    </variable>
+    <variable name="totalIgvGratuito" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{igv_gratuito}]]></variableExpression>
+    </variable>
+    <variable name="totalVentasGratuitas" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{ventas_gratuitas}]]></variableExpression>
+    </variable>
+    <variable name="totalIcBper" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{icbper}]]></variableExpression>
+    </variable>
+    <variable name="totalImporteDoc" class="java.math.BigDecimal" calculation="Sum">
+        <variableExpression><![CDATA[$F{importe_doc}]]></variableExpression>
+    </variable>
+
+    <pageHeader>
+        <band height="80" splitType="Stretch">
+            <subreport>
+                <reportElement x="0" y="0" width="1063" height="80"/>
+                <subreportParameter name="logoSubreport">
+                    <subreportParameterExpression><![CDATA[$P{logoSubreport}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="logoImage">
+                    <subreportParameterExpression><![CDATA[$P{logoImage}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="logoSize">
+                    <subreportParameterExpression><![CDATA[$P{logoSize}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="empresaNombre">
+                    <subreportParameterExpression><![CDATA[$P{empresaNombre}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="empresaRuc">
+                    <subreportParameterExpression><![CDATA[$P{empresaRuc}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="reporteTitulo">
+                    <subreportParameterExpression><![CDATA[$P{reporteTitulo}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="anio">
+                    <subreportParameterExpression><![CDATA[$P{anio}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="mes">
+                    <subreportParameterExpression><![CDATA[$P{mes}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="mesNombre">
+                    <subreportParameterExpression><![CDATA[$P{mesNombre}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="subtitulo">
+                    <subreportParameterExpression><![CDATA[$P{subtitulo}]]></subreportParameterExpression>
+                </subreportParameter>
+                <subreportParameter name="usuario">
+                    <subreportParameterExpression><![CDATA[$P{usuario}]]></subreportParameterExpression>
+                </subreportParameter>
+                <dataSourceExpression><![CDATA[new net.sf.jasperreports.engine.JREmptyDataSource()]]></dataSourceExpression>
+                <subreportExpression><![CDATA[$P{headerSubreport}]]></subreportExpression>
+            </subreport>
+            <textField>
+                <reportElement x="983" y="5" width="50" height="10"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Pág. " + $V{PAGE_NUMBER} + " de "]]></textFieldExpression>
+            </textField>
+            <textField evaluationTime="Report">
+                <reportElement x="1033" y="5" width="30" height="10"/>
+                <textElement textAlignment="Left" verticalAlignment="Middle">
+                    <font size="7"/>
+                </textElement>
+                <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageHeader>
+
+    <columnHeader>
+        <band height="30">
+            <staticText>
+                <reportElement x="0" y="0" width="50" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[Nro]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="50" y="0" width="70" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[Fecha]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="120" y="0" width="40" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[TD]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="160" y="0" width="100" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[Serie-Numero]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="260" y="0" width="160" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[Cliente]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="420" y="0" width="70" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[Gravadas]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="490" y="0" width="60" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[IGV]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="550" y="0" width="70" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[Inafectas]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="620" y="0" width="70" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[Exoneradas]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="690" y="0" width="70" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[Exportac.]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="760" y="0" width="50" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[ICBPER]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="810" y="0" width="80" height="30" backcolor="#D9D9D9" mode="Opaque"/>
+                <box><pen lineWidth="0.5"/><topPen lineWidth="0.5"/><leftPen lineWidth="0.5"/><bottomPen lineWidth="0.5"/><rightPen lineWidth="0.5"/></box>
+                <textElement textAlignment="Center" verticalAlignment="Middle"><font size="6" isBold="true"/></textElement>
+                <text><![CDATA[Total]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="13">
+            <textField>
+                <reportElement x="0" y="0" width="50" height="13"/>
+                <textFieldExpression><![CDATA[$V{REPORT_COUNT}]]></textFieldExpression>
+            </textField>
+            <textField pattern="dd/MM/yyyy">
+                <reportElement x="50" y="0" width="70" height="13"/>
+                <textFieldExpression><![CDATA[$F{fecha_documento}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="120" y="0" width="40" height="13"/>
+                <textFieldExpression><![CDATA[$F{tipo_doc}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="160" y="0" width="100" height="13"/>
+                <textFieldExpression><![CDATA[$F{nro_doc}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="260" y="0" width="160" height="13"/>
+                <textFieldExpression><![CDATA[$F{nom_proveedor}]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="420" y="0" width="70" height="13"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="5"/></textElement>
+                <textFieldExpression><![CDATA[$F{vtas_gravadas} != null ? $F{vtas_gravadas}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="490" y="0" width="60" height="13"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="5"/></textElement>
+                <textFieldExpression><![CDATA[$F{igv_gravadas} != null ? $F{igv_gravadas}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="550" y="0" width="70" height="13"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="5"/></textElement>
+                <textFieldExpression><![CDATA[$F{vtas_inafectas} != null ? $F{vtas_inafectas}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="620" y="0" width="70" height="13"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="5"/></textElement>
+                <textFieldExpression><![CDATA[$F{vtas_exoneradas} != null ? $F{vtas_exoneradas}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="690" y="0" width="70" height="13"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="5"/></textElement>
+                <textFieldExpression><![CDATA[$F{exportaciones} != null ? $F{exportaciones}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="760" y="0" width="50" height="13"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="5"/></textElement>
+                <textFieldExpression><![CDATA[$F{icbper} != null ? $F{icbper}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="810" y="0" width="80" height="13"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="5"/></textElement>
+                <textFieldExpression><![CDATA[$F{importe_doc} != null ? $F{importe_doc}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <summary>
+        <band height="20">
+            <staticText>
+                <reportElement x="0" y="0" width="420" height="15"/>
+                <text><![CDATA[TOTALES]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="420" y="0" width="70" height="15"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$V{totalVtasGravadas} != null ? $V{totalVtasGravadas}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="490" y="0" width="60" height="15"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$V{totalIgvGravadas} != null ? $V{totalIgvGravadas}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="550" y="0" width="70" height="15"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$V{totalVtasInafectas} != null ? $V{totalVtasInafectas}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="620" y="0" width="70" height="15"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$V{totalVtasExoneradas} != null ? $V{totalVtasExoneradas}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="690" y="0" width="70" height="15"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$V{totalExportaciones} != null ? $V{totalExportaciones}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="760" y="0" width="50" height="15"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$V{totalIcBper} != null ? $V{totalIcBper}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+            <textField>
+                <reportElement x="810" y="0" width="80" height="15"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle"><font size="6"/></textElement>
+                <textFieldExpression><![CDATA[$V{totalImporteDoc} != null ? $V{totalImporteDoc}.setScale(4, java.math.RoundingMode.DOWN).toString() : "0.0000"]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+
+</jasperReport>

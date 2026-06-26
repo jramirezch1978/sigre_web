@@ -1,0 +1,82 @@
+server:
+  port: 9010
+spring:
+  application:
+    name: ms-ventas
+  sql:
+    init:
+      mode: never
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: ventas
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        boot:
+          allow_jdbc_metadata_access: false
+        # Optimizations for PostgreSQL performance and batch operations
+        jdbc:
+          batch_size: 20
+          order_inserts: true
+          order_updates: true
+        query:
+          plan_cache_max_size: 4096
+  flyway:
+    enabled: false
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USER:restaurant}
+    password: ${RABBIT_PASS:R4bb1t_D3v!}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  health:
+    db:
+      enabled: false
+app:
+  testdata:
+    enabled: ${APP_TESTDATA_ENABLED:true}
+  security-datasource:
+    jdbc-url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_SECURITY_NAME:restaurant_pe_security}?sslmode=${DB_SSL_MODE:require}
+    username: ${DB_USER:restaurant_admin}
+    password: ${DB_PASS:R3st4ur4nt_D3v!}
+  tenant:
+    jdbc-ssl-mode: ${DB_SSL_MODE:require}
+    pool:
+      maximum-pool-size: ${TENANT_POOL_MAX:3}
+      minimum-idle: ${TENANT_POOL_MIN_IDLE:0}
+      idle-timeout-ms: ${TENANT_POOL_IDLE_TIMEOUT:30000}
+      max-lifetime-ms: ${TENANT_POOL_MAX_LIFETIME:120000}
+  jwt:
+    secret: ${JWT_SECRET:dGhpcyBpcyBhIHNlY3JldCBrZXkgZm9yIHJlc3RhdXJhbnQucGUgZXJwIGp3dCB0b2tlbiBzaWduaW5n}
+    access-token-expiration: ${JWT_ACCESS_MS:900000}
+    definitive-token-expiration: ${JWT_DEFINITIVE_MS:900000}
+    refresh-token-expiration: ${JWT_REFRESH_MS:604800000}
+  encryption:
+    key: ${APP_ENCRYPTION_KEY:UmVzdGF1cmFudFBlQWVzMjU2S2V5RGV2MjAyNiEhISE=}
+
+# Configuración para comunicación con otros microservicios
+api:
+  gateway:
+    url: ${API_GATEWAY_URL:http://api-gateway:9080}
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+      ms-almacen:
+        url: ${MS_ALMACEN_URL:http://localhost:9003}
+
+springdoc:
+  api-docs:
+    path: /api/ventas/v3/api-docs
+  swagger-ui:
+    path: /api/ventas/swagger-ui.html
