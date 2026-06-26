@@ -1,9 +1,10 @@
-import { Component, HostListener, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ModalController } from '@ionic/angular';
 import { AuthService, LoginData } from '../../../auth/services/auth.service';
 import { StorageService } from '../../../core/services/storage.service';
+import { MetoxiInitService } from '../../../erp/services/metoxi-init.service';
 import { ModalConfirmationComponent } from '@sigre-common';
 
 export interface AdminMenuItem {
@@ -18,32 +19,32 @@ export interface AdminMenuItem {
   styleUrls: ['./admin-shell.component.scss'],
   standalone: false,
 })
-export class AdminShellComponent implements OnInit {
+export class AdminShellComponent implements OnInit, OnDestroy {
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly storage = inject(StorageService);
   private readonly modalCtrl = inject(ModalController);
+  private readonly metoxi = inject(MetoxiInitService);
 
   rutaActiva = '';
-  menuAbierto = true;
   menuUsuarioAbierto = false;
   nombreUsuario = 'Usuario';
   emailUsuario = '';
   inicialesUsuario = 'U';
 
   readonly menuItems: AdminMenuItem[] = [
-    { label: 'Inicio', icon: 'home-outline', route: '/admin/inicio' },
-    { label: 'Empresas', icon: 'business-outline', route: '/admin/empresas' },
-    { label: 'Usuarios', icon: 'people-outline', route: '/admin/usuarios' },
-    { label: 'Roles', icon: 'key-outline', route: '/admin/roles' },
-    { label: 'Módulos', icon: 'grid-outline', route: '/admin/modulos' },
-    { label: 'Opciones de menú', icon: 'list-outline', route: '/admin/opciones-menu' },
-    { label: 'Acciones', icon: 'flash-outline', route: '/admin/acciones' },
-    { label: 'Roles x Usuario', icon: 'person-add-outline', route: '/admin/roles-usuario' },
-    { label: 'Grupos de usuario', icon: 'people-circle-outline', route: '/admin/grupos-usuario' },
-    { label: 'Sucursales', icon: 'storefront-outline', route: '/admin/sucursales' },
-    { label: 'Usuarios x Sucursal', icon: 'git-network-outline', route: '/admin/usuarios-sucursales' },
+    { label: 'Inicio', icon: 'dashboard', route: '/admin/inicio' },
+    { label: 'Empresas', icon: 'business', route: '/admin/empresas' },
+    { label: 'Usuarios', icon: 'group', route: '/admin/usuarios' },
+    { label: 'Roles', icon: 'vpn_key', route: '/admin/roles' },
+    { label: 'Módulos', icon: 'grid_view', route: '/admin/modulos' },
+    { label: 'Opciones de menú', icon: 'list', route: '/admin/opciones-menu' },
+    { label: 'Acciones', icon: 'bolt', route: '/admin/acciones' },
+    { label: 'Roles x Usuario', icon: 'person_add', route: '/admin/roles-usuario' },
+    { label: 'Grupos de usuario', icon: 'groups', route: '/admin/grupos-usuario' },
+    { label: 'Sucursales', icon: 'storefront', route: '/admin/sucursales' },
+    { label: 'Usuarios x Sucursal', icon: 'account_tree', route: '/admin/usuarios-sucursales' },
   ];
 
   constructor() {
@@ -55,6 +56,11 @@ export class AdminShellComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarDatosUsuario();
+    this.metoxi.activarShellErp();
+  }
+
+  ngOnDestroy(): void {
+    this.metoxi.desactivarShellErp();
   }
 
   @HostListener('document:click')
@@ -71,7 +77,7 @@ export class AdminShellComponent implements OnInit {
   }
 
   toggleMenu(): void {
-    this.menuAbierto = !this.menuAbierto;
+    document.body.classList.toggle('toggled');
   }
 
   toggleMenuUsuario(event: Event): void {

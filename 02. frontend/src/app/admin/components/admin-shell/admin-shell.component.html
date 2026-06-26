@@ -1,107 +1,105 @@
-<div class="container body admin-gentelella">
-  <div class="main_container" [class.menu-collapsed]="!menuAbierto">
-    <div class="col-md-3 left_col" [class.collapsed]="!menuAbierto">
-      <div class="left_col scroll-view" [class.collapsed]="!menuAbierto">
-        <div class="navbar nav_title">
-          <a routerLink="/admin/inicio" class="site_title">
-            <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE" class="site-logo" />
-            @if (menuAbierto) {
-              <span class="logo-text">Admin</span>
-            }
+<!-- Shell Metoxi — SIGRE Admin -->
+<header class="top-header">
+  <nav class="navbar navbar-expand align-items-center gap-4">
+    <div class="btn-toggle">
+      <a href="javascript:;" (click)="toggleMenu()">
+        <i class="material-icons-outlined">menu</i>
+      </a>
+    </div>
+
+    <div class="search-bar flex-grow-1 d-none d-lg-block">
+      <div class="position-relative">
+        <input class="form-control rounded-5 px-5 search-control" type="text" placeholder="Buscar en Admin…" />
+        <span class="material-icons-outlined position-absolute ms-3 translate-middle-y start-0 top-50">search</span>
+      </div>
+    </div>
+
+    <ul class="navbar-nav gap-1 nav-right-links align-items-center ms-auto">
+      <!-- Ir al ERP -->
+      <li class="nav-item">
+        <a class="nav-link" href="javascript:;" (click)="irAlErp()" title="Ir al ERP">
+          <i class="material-icons-outlined">apps</i>
+        </a>
+      </li>
+
+      <!-- Avatar / usuario -->
+      <li class="nav-item dropdown sigre-nav-dropdown" (click)="$event.stopPropagation()">
+        <a class="nav-link dropdown-toggle dropdown-toggle-nocaret"
+           [class.show]="menuUsuarioAbierto"
+           href="javascript:;"
+           (click)="toggleMenuUsuario($event)">
+          <div class="sigre-user-avatar rounded-circle p-1 border d-inline-flex align-items-center justify-content-center fw-bold">
+            {{ inicialesUsuario }}
+          </div>
+        </a>
+        <div class="dropdown-menu dropdown-user dropdown-menu-end shadow"
+             [class.show]="menuUsuarioAbierto">
+          <a class="dropdown-item gap-2 py-2" href="javascript:;">
+            <div class="text-center">
+              <div class="sigre-user-avatar sigre-user-avatar--lg rounded-circle p-1 shadow mb-3 mx-auto fw-bold">
+                {{ inicialesUsuario }}
+              </div>
+              <h5 class="user-name mb-0 fw-bold">{{ nombreUsuario }}</h5>
+              @if (emailUsuario) {
+                <p class="mb-0 text-muted small">{{ emailUsuario }}</p>
+              }
+            </div>
+          </a>
+          <hr class="dropdown-divider" />
+          <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;" (click)="irPerfil()">
+            <i class="material-icons-outlined">person</i>Perfil
+          </a>
+          <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;" (click)="irPreferencias()">
+            <i class="material-icons-outlined">settings</i>Preferencias
+          </a>
+          <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;" (click)="irAlErp()">
+            <i class="material-icons-outlined">arrow_back</i>Ir al ERP
+          </a>
+          <hr class="dropdown-divider" />
+          <a class="dropdown-item d-flex align-items-center gap-2 py-2" href="javascript:;" (click)="cerrarSesion()">
+            <i class="material-icons-outlined">power_settings_new</i>Cerrar sesión
           </a>
         </div>
-        <div class="clearfix"></div>
-        <div class="profile clearfix">
-          <div class="profile_pic">
-            <span class="profile-avatar profile-avatar--initials">{{ inicialesUsuario }}</span>
-          </div>
-          @if (menuAbierto) {
-            <div class="profile_info">
-              <span>Bienvenido,</span>
-              <h4 [title]="nombreUsuario">{{ nombreUsuario }}</h4>
-            </div>
-          }
-        </div>
-        <br />
-        <div id="sidebar-menu" class="main_menu_side main_menu">
-          <div class="menu_section">
-            @if (menuAbierto) { <h3>Consola</h3> }
-            <ul class="nav side-menu">
-              @for (item of menuItems; track item.route) {
-                <li [class.active]="isActive(item.route)">
-                  <a (click)="navegar(item.route)" [title]="item.label">
-                    <ion-icon [name]="item.icon"></ion-icon>
-                    @if (menuAbierto) { <span>{{ item.label }}</span> }
-                  </a>
-                </li>
-              }
-            </ul>
-          </div>
-        </div>
-        <div class="sidebar-footer">
-          <button type="button" class="sidebar-footer__btn" (click)="irAlErp()" title="Ir al ERP">
-            <ion-icon name="arrow-back-outline"></ion-icon>
-            @if (menuAbierto) { <span>Ir al ERP</span> }
-          </button>
-          <button type="button" class="sidebar-footer__btn sidebar-footer__btn--danger" (click)="cerrarSesion()" title="Cerrar sesión">
-            <ion-icon name="log-out-outline"></ion-icon>
-            @if (menuAbierto) { <span>Cerrar sesión</span> }
-          </button>
-        </div>
-      </div>
-    </div>
+      </li>
+    </ul>
+  </nav>
+</header>
 
-    <div class="top_nav">
-      <div class="nav_menu">
-        <div class="nav toggle">
-          <a (click)="toggleMenu()"><ion-icon name="menu-outline"></ion-icon></a>
-        </div>
-        <div class="top_nav__spacer"></div>
-        <div class="admin-user-menu">
-          <button
-            type="button"
-            class="admin-user-menu__trigger"
-            (click)="toggleMenuUsuario($event)"
-            [attr.aria-expanded]="menuUsuarioAbierto"
-            aria-haspopup="true">
-            <span class="admin-user-menu__avatar">{{ inicialesUsuario }}</span>
-            <span class="admin-user-menu__name">{{ nombreUsuario }}</span>
-            <ion-icon
-              name="chevron-down-outline"
-              class="admin-user-menu__chevron"
-              [class.is-open]="menuUsuarioAbierto"></ion-icon>
-          </button>
-          @if (menuUsuarioAbierto) {
-            <div class="admin-user-menu__dropdown" (click)="$event.stopPropagation()">
-              <div class="admin-user-menu__header">
-                <span class="admin-user-menu__avatar admin-user-menu__avatar--lg">{{ inicialesUsuario }}</span>
-                <div class="admin-user-menu__meta">
-                  <strong>{{ nombreUsuario }}</strong>
-                  @if (emailUsuario) {
-                    <small>{{ emailUsuario }}</small>
-                  }
-                </div>
-              </div>
-              <button type="button" class="admin-user-menu__item" (click)="irPerfil()">
-                <ion-icon name="person-outline"></ion-icon>
-                <span>Perfil</span>
-              </button>
-              <button type="button" class="admin-user-menu__item" (click)="irPreferencias()">
-                <ion-icon name="settings-outline"></ion-icon>
-                <span>Preferencias</span>
-              </button>
-              <button type="button" class="admin-user-menu__item admin-user-menu__item--danger" (click)="cerrarSesion()">
-                <ion-icon name="log-out-outline"></ion-icon>
-                <span>Cerrar sesión</span>
-              </button>
-            </div>
-          }
-        </div>
-      </div>
+<aside class="sidebar-wrapper">
+  <div class="sidebar-header sigre-sidebar-header">
+    <div class="logo-icon">
+      <img src="assets/imagenes/auth/logo-sigre.png" class="logo-img sigre-sidebar-logo sigre-sidebar-logo--icon" alt="SIGRE" />
     </div>
-
-    <div class="right_col" role="main">
-      <router-outlet></router-outlet>
+    <div class="logo-name flex-grow-1 sigre-sidebar-brand">
+      <span class="fw-bold fs-5">Admin</span>
+    </div>
+    <div class="sidebar-close d-lg-none" (click)="toggleMenu()">
+      <span class="material-icons-outlined">close</span>
     </div>
   </div>
-</div>
+
+  <div class="sidebar-nav">
+    <ul class="metismenu" id="sidenav">
+      <li class="menu-label">Consola</li>
+      @for (item of menuItems; track item.route) {
+        <li [class.mm-active]="isActive(item.route)">
+          <a href="javascript:;" (click)="navegar(item.route)" [title]="item.label">
+            <div class="parent-icon">
+              <i class="material-icons-outlined">{{ item.icon }}</i>
+            </div>
+            <div class="menu-title">{{ item.label }}</div>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</aside>
+
+<main class="main-wrapper">
+  <div class="main-content">
+    <router-outlet></router-outlet>
+  </div>
+  <footer class="page-footer">
+    <p class="mb-0">SIGRE Admin · Metoxi UI</p>
+  </footer>
+</main>

@@ -26,6 +26,10 @@ for /f "delims=" %%t in ('powershell -NoProfile -Command "Get-Date -Format ddMMy
 
 set "DOCKER_CTX=cronos"
 set "DOCKER_CTX_BUILD=default"
+REM Builder legacy: BuildKit de Docker Desktop no resuelve el registry (registry-1.docker.io)
+REM aunque el daemon sí; el builder legacy usa la red del daemon. Si BuildKit vuelve a
+REM funcionar (p.ej. tras reiniciar Docker Desktop), puede ponerse en 1.
+set "DOCKER_BUILDKIT=0"
 set "IMAGE_REGISTRY=sigre"
 set "IMAGE_TAG=latest"
 set "SSH_USER=jramirez"
