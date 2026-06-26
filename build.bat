@@ -40,6 +40,7 @@ if /i "%~1"=="backend-all" goto :buildBackendAll
 if /i "%~1"=="infra" goto :buildInfra
 if /i "%~1"=="module" goto :buildModule
 if /i "%~1"=="frontend" goto :buildFrontend
+if /i "%~1"=="compile" goto :compileTarget
 if /i "%~1"=="all" goto :buildAll
 if /i "%~1"=="clean" goto :cleanAll
 if /i "%~1"=="test" goto :testAll
@@ -191,6 +192,90 @@ popd
 echo %GREEN%[OK]%RESET% Frontend compilado en 02. frontend\dist
 goto :endScript
 
+REM ============================================================
+REM compile: compilacion rapida de validacion (sin install ni prod)
+REM   build.bat compile                -> backend (mvn compile) + frontend (ng build dev)
+REM   build.bat compile frontend       -> solo frontend (ng build dev)
+REM   build.bat compile backend        -> solo backend completo (mvn compile)
+REM   build.bat compile ^<modulo^>       -> un modulo backend (mvn compile -pl modulo -am)
+REM ============================================================
+:compileTarget
+set "CTARGET=%~2"
+if /i "!CTARGET!"=="frontend" goto :compileFrontendOnly
+if /i "!CTARGET!"=="backend" goto :compileBackendOnly
+if not "!CTARGET!"=="" goto :compileModuleOnly
+call :compileBackendAll || goto :endScript
+call :compileFrontend
+goto :endScript
+
+:compileFrontendOnly
+call :compileFrontend
+goto :endScript
+
+:compileBackendOnly
+call :compileBackendAll
+goto :endScript
+
+:compileModuleOnly
+call :compileModule "%~2"
+goto :endScript
+
+:compileFrontend
+set "BUILD_LOG=!BUILD_LOG_DIR!\compile-frontend-!BUILD_LOG_TS!.log"
+call :checkNode || exit /b 1
+echo %CYAN%[INFO]%RESET% Compilando frontend ^(ng build dev^)...
+echo [build] Log: !BUILD_LOG!
+pushd "!FRONTEND_DIR!"
+if not exist "node_modules" call npm ci >> "!BUILD_LOG!" 2>&1
+call npm run build >> "!BUILD_LOG!" 2>&1
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Fallo compilacion frontend. Ver: !BUILD_LOG!
+    popd
+    exit /b 1
+)
+popd
+echo %GREEN%[OK]%RESET% Frontend compilado.
+exit /b 0
+
+:compileBackendAll
+set "BUILD_LOG=!BUILD_LOG_DIR!\compile-backend-!BUILD_LOG_TS!.log"
+call :checkJava || exit /b 1
+call :checkMaven || exit /b 1
+echo %CYAN%[INFO]%RESET% Compilando backend ^(mvn compile^)...
+echo [build] Log: !BUILD_LOG!
+pushd "!BACKEND_DIR!"
+call mvn compile -DskipTests > "!BUILD_LOG!" 2>&1
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Fallo compilacion backend. Ver: !BUILD_LOG!
+    popd
+    exit /b 1
+)
+popd
+echo %GREEN%[OK]%RESET% Backend compilado.
+exit /b 0
+
+:compileModule
+set "CMOD=%~1"
+set "BUILD_LOG=!BUILD_LOG_DIR!\compile-!CMOD!-!BUILD_LOG_TS!.log"
+call :checkJava || exit /b 1
+call :checkMaven || exit /b 1
+if not exist "!BACKEND_DIR!\!CMOD!" (
+    echo %RED%[ERROR]%RESET% No existe modulo backend: !CMOD!
+    exit /b 1
+)
+echo %CYAN%[INFO]%RESET% Compilando modulo !CMOD! ^(mvn compile -pl !CMOD! -am^)...
+echo [build] Log: !BUILD_LOG!
+pushd "!BACKEND_DIR!"
+call mvn compile -DskipTests -pl !CMOD! -am > "!BUILD_LOG!" 2>&1
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Fallo compilacion !CMOD!. Ver: !BUILD_LOG!
+    popd
+    exit /b 1
+)
+popd
+echo %GREEN%[OK]%RESET% Modulo !CMOD! compilado.
+exit /b 0
+
 :buildAll
 call :buildBackendAll
 call :buildFrontend
@@ -229,6 +314,11 @@ echo   backend-all         Compilar todo el backend Maven
 echo   infra               discovery-server, config-server, api-gateway
 echo   module ^<nombre^>     Un modulo backend
 echo   frontend            ng build:prod
+echo   compile [target]    Compilacion rapida de validacion (sin install/prod):
+echo                         compile           backend + frontend
+echo                         compile frontend  solo frontend (ng build dev)
+echo                         compile backend   solo backend (mvn compile)
+echo                         compile ^<modulo^>  un modulo backend
 echo   all                 backend-all + frontend
 echo   clean / test / package
 echo   menu / help
