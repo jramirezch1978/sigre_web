@@ -67,14 +67,18 @@ export class AppComponent implements OnInit, OnDestroy {
     const erpPublicPrefixes = ['/sigre/inicio', '/sigre/registro', '/sigre/modulo/'];
     const isErpPublicPage = erpPublicPrefixes.some(prefix => path.startsWith(prefix));
 
-    // ERP shell = rutas autenticadas con sidebar + header fijos (solo .main-wrapper debe scrollear)
+    // Shell con sidebar + header fijos (solo .main-wrapper debe scrollear, body bloqueado):
+    //  - ERP autenticado (/sigre, salvo páginas públicas)
+    //  - consola de administración (/admin, salvo el login)
     const isErpShell = path.startsWith('/sigre') && !isErpPublicPage;
+    const isAdminShell = path.startsWith('/admin') && !path.startsWith('/admin/login');
+    const isShell = isErpShell || isAdminShell;
 
-    this.isPublicScrollPage = !isErpShell;
+    this.isPublicScrollPage = !isShell;
 
-    document.body.classList.toggle('public-scroll-page', !isErpShell);
-    document.documentElement.classList.toggle('public-scroll-page', !isErpShell);
-    document.body.classList.toggle('erp-shell-active', isErpShell);
-    document.documentElement.classList.toggle('erp-shell-active', isErpShell);
+    document.body.classList.toggle('public-scroll-page', !isShell);
+    document.documentElement.classList.toggle('public-scroll-page', !isShell);
+    document.body.classList.toggle('erp-shell-active', isShell);
+    document.documentElement.classList.toggle('erp-shell-active', isShell);
   }
 }
