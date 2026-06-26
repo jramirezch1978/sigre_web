@@ -1,0 +1,49 @@
+<div class="admin-page ion-padding admin-page--fluid">
+  <div class="admin-page__head">
+    <div>
+      <h1 class="admin-page__title">Ediciones del ERP</h1>
+      <p class="admin-page__subtitle">Ediciones comerciales de SIGRE y los módulos que incluye cada una.</p>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+  } @else {
+    <div class="ediciones-grid">
+      @for (e of ediciones; track e.id) {
+        <div class="card rounded-4 edicion-card">
+          <div class="edicion-card__head">
+            <div>
+              <h3 class="edicion-card__name">{{ e.nombre }}</h3>
+              <span class="edicion-card__code">{{ e.codigo }}</span>
+            </div>
+            @if (e.activo) {
+              <span class="badge-estado badge-activo">Activa</span>
+            } @else {
+              <span class="badge-estado badge-inactivo">Inactiva</span>
+            }
+          </div>
+
+          @if (e.descripcion) {
+            <p class="edicion-card__desc">{{ e.descripcion }}</p>
+          }
+
+          <div class="edicion-card__modulos">
+            <span class="edicion-card__modulos-title">
+              Módulos incluidos ({{ e.modulos?.length ?? 0 }})
+            </span>
+            <div class="edicion-chips">
+              @for (m of e.modulos; track m.id) {
+                <span class="edicion-chip">{{ m.nombre }}</span>
+              } @empty {
+                <span class="edicion-card__empty">Sin módulos asignados.</span>
+              }
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="admin-center"><p style="color:#64748b">No hay ediciones registradas.</p></div>
+      }
+    </div>
+  }
+</div>

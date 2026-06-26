@@ -6,7 +6,7 @@ import {
   ModuloDto, OpcionMenuDto, AccionDto, RolDto,
   RolUsuarioDto, RolOpcionMenuDto, RolOpcionAccionDto,
   UsuarioAdminDto, AdminDashboardTelemetry, EmpresaAdminDto,
-  EmpresaAdminUpdatePayload, GrupoUsuarioDto, GrupoUsuarioMiembroDto
+  EmpresaAdminUpdatePayload, GrupoUsuarioDto, GrupoUsuarioMiembroDto, EdicionErpDto
 } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
@@ -183,6 +183,15 @@ export class AdminSeguridadApiService extends AbstractAuthenticatedApiService {
     return this.http.put<ApiResponse<RolOpcionAccionDto>>(
       this.buildUrl(`/auth/seguridad/empresas/${empresaId}/roles/${rolId}/opciones-menu/${opcionMenuId}/acciones/${accionId}`),
       body, { headers: this.bearerHeaders() }
+    );
+  }
+
+  // ── Ediciones del ERP (catálogo: edición + módulos incluidos) ──
+
+  listarEdiciones(): Observable<ApiResponse<EdicionErpDto[]>> {
+    return this.http.get<ApiResponse<EdicionErpDto[]>>(
+      this.buildUrl('/auth/seguridad/landing/ediciones'),
+      { headers: this.bearerHeaders() }
     );
   }
 

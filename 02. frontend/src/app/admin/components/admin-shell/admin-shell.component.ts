@@ -39,6 +39,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     { label: 'Usuarios', icon: 'group', route: '/admin/usuarios' },
     { label: 'Roles', icon: 'vpn_key', route: '/admin/roles' },
     { label: 'Módulos', icon: 'grid_view', route: '/admin/modulos' },
+    { label: 'Ediciones', icon: 'layers', route: '/admin/ediciones' },
     { label: 'Opciones de menú', icon: 'list', route: '/admin/opciones-menu' },
     { label: 'Acciones', icon: 'bolt', route: '/admin/acciones' },
     { label: 'Roles x Usuario', icon: 'person_add', route: '/admin/roles-usuario' },

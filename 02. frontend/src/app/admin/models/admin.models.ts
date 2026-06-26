@@ -57,6 +57,16 @@ export interface RolOpcionAccionDto {
   activo?: boolean;
 }
 
+export interface EdicionErpDto {
+  id: number;
+  codigo: string;
+  nombre: string;
+  descripcion?: string;
+  orden?: number;
+  activo?: boolean;
+  modulos?: ModuloDto[];
+}
+
 export interface GrupoUsuarioDto {
   id: number;
   empresaId?: number;
