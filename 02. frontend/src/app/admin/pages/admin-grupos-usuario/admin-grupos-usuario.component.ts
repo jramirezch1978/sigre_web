@@ -25,6 +25,8 @@ export class AdminGruposUsuarioComponent implements OnInit {
   grupos: GrupoUsuarioDto[] = [];
   usuariosEmpresa: UsuarioAdminDto[] = [];
   miembros: GrupoUsuarioMiembroDto[] = [];
+  /** Miembros seleccionados durante la creación, antes de que el grupo exista. */
+  miembrosPendientes: UsuarioAdminDto[] = [];
   loading = true;
   loadingMiembros = false;
   filtro = '';
@@ -70,7 +72,10 @@ export class AdminGruposUsuarioComponent implements OnInit {
   }
 
   get usuariosDisponibles(): UsuarioAdminDto[] {
-    const asignados = new Set(this.miembros.map(m => m.usuarioId));
+    const asignados = new Set<number>(this.miembros.map(m => m.usuarioId));
+    for (const p of this.miembrosPendientes) {
+      asignados.add(p.id);
+    }
     return this.usuariosEmpresa.filter(u => !asignados.has(u.id));
   }
 
@@ -78,6 +83,7 @@ export class AdminGruposUsuarioComponent implements OnInit {
     this.editandoId = null;
     this.form.reset({ codigo: '', descripcion: '', activo: true });
     this.miembros = [];
+    this.miembrosPendientes = [];
     this.usuarioIdAsignar = null;
     this.mostrandoForm = true;
   }
@@ -85,6 +91,7 @@ export class AdminGruposUsuarioComponent implements OnInit {
   abrirEditar(g: GrupoUsuarioDto): void {
     this.editandoId = g.id;
     this.form.patchValue(g);
+    this.miembrosPendientes = [];
     this.mostrandoForm = true;
     this.cargarMiembros();
   }
@@ -93,25 +100,55 @@ export class AdminGruposUsuarioComponent implements OnInit {
     this.mostrandoForm = false;
     this.editandoId = null;
     this.miembros = [];
+    this.miembrosPendientes = [];
     this.usuarioIdAsignar = null;
   }
 
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     const body = this.form.getRawValue();
-    const obs = this.editandoId != null
-      ? this.api.actualizarGrupoUsuario(this.empresaId, this.editandoId, body)
-      : this.api.crearGrupoUsuario(this.empresaId, body);
-    obs.subscribe({
+
+    // Edición: solo actualiza el grupo (los miembros se gestionan en vivo).
+    if (this.editandoId != null) {
+      this.api.actualizarGrupoUsuario(this.empresaId, this.editandoId, body).subscribe({
+        next: () => { this.cargarDatosIniciales(); this.showSuccess('Grupo actualizado'); },
+        error: async (err: any) => { await this.showError(err?.error?.message ?? 'Error al guardar'); },
+      });
+      return;
+    }
+
+    // Creación: crea el grupo y, a la vez, inserta los miembros seleccionados.
+    this.api.crearGrupoUsuario(this.empresaId, body).subscribe({
       next: (resp) => {
         const guardado = resp.data;
-        if (this.editandoId == null && guardado) {
-          this.editandoId = guardado.id;
-          this.form.patchValue(guardado);
+        if (!guardado) { this.cargarDatosIniciales(); return; }
+        this.editandoId = guardado.id;
+        this.form.patchValue(guardado);
+
+        const pendientes = [...this.miembrosPendientes];
+        this.miembrosPendientes = [];
+
+        if (pendientes.length === 0) {
           this.cargarMiembros();
+          this.cargarDatosIniciales();
+          this.showSuccess('Grupo creado exitosamente');
+          return;
         }
-        this.cargarDatosIniciales();
-        this.showSuccess(this.editandoId != null ? 'Grupo actualizado' : 'Grupo creado exitosamente');
+
+        const asignaciones = pendientes.map(u =>
+          this.api.asignarMiembroGrupo(this.empresaId, guardado.id, { usuarioId: u.id, activo: true }));
+        forkJoin(asignaciones).subscribe({
+          next: () => {
+            this.cargarMiembros();
+            this.cargarDatosIniciales();
+            this.showSuccess(`Grupo creado con ${pendientes.length} miembro(s)`);
+          },
+          error: async (err: any) => {
+            this.cargarMiembros();
+            this.cargarDatosIniciales();
+            await this.showError(err?.error?.message ?? 'Grupo creado, pero falló al asignar algún miembro');
+          },
+        });
       },
       error: async (err: any) => { await this.showError(err?.error?.message ?? 'Error al guardar'); },
     });
@@ -127,7 +164,19 @@ export class AdminGruposUsuarioComponent implements OnInit {
   }
 
   asignarMiembro(): void {
-    if (this.editandoId == null || !this.usuarioIdAsignar) return;
+    if (!this.usuarioIdAsignar) return;
+
+    // Modo creación: el grupo aún no existe → guardar en pendientes (se persisten al Guardar).
+    if (this.editandoId == null) {
+      const u = this.usuariosEmpresa.find(x => x.id === this.usuarioIdAsignar);
+      if (u && !this.miembrosPendientes.some(p => p.id === u.id)) {
+        this.miembrosPendientes = [...this.miembrosPendientes, u];
+      }
+      this.usuarioIdAsignar = null;
+      return;
+    }
+
+    // Modo edición: asigna directo contra el backend.
     this.api.asignarMiembroGrupo(this.empresaId, this.editandoId, { usuarioId: this.usuarioIdAsignar, activo: true }).subscribe({
       next: () => { this.usuarioIdAsignar = null; this.cargarMiembros(); },
       error: async (err: any) => { await this.showError(err?.error?.message ?? 'Error al asignar miembro'); },
@@ -140,6 +189,10 @@ export class AdminGruposUsuarioComponent implements OnInit {
       next: () => this.cargarMiembros(),
       error: async (err: any) => { await this.showError(err?.error?.message ?? 'Error al quitar miembro'); },
     });
+  }
+
+  quitarMiembroPendiente(usuarioId: number): void {
+    this.miembrosPendientes = this.miembrosPendientes.filter(p => p.id !== usuarioId);
   }
 
   private async showError(message: string): Promise<void> {

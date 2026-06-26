@@ -92,26 +92,31 @@
         </div>
       </form>
 
-      @if (editandoId != null) {
-        <div class="rol-detalle-section">
-          <h2 class="rol-detalle-section__title">Miembros del grupo</h2>
-          <p class="rol-detalle-section__subtitle">Usuarios de la empresa que pertenecen a este grupo.</p>
+      <div class="rol-detalle-section">
+        <h2 class="rol-detalle-section__title">Miembros del grupo</h2>
+        <p class="rol-detalle-section__subtitle">
+          @if (editandoId != null) {
+            Usuarios de la empresa que pertenecen a este grupo.
+          } @else {
+            Agregue los usuarios del grupo; se crearán junto con el grupo al guardar.
+          }
+        </p>
 
-          <div class="form-row" style="align-items:flex-end;margin-bottom:1rem">
-            <ion-item style="flex:1">
-              <ion-select [(ngModel)]="usuarioIdAsignar" placeholder="Seleccione usuario" label="Agregar miembro" labelPlacement="stacked">
-                @for (u of usuariosDisponibles; track u.id) {
-                  <ion-select-option [value]="u.id">{{ u.nombreCompleto }} ({{ u.username }})</ion-select-option>
-                }
-              </ion-select>
-            </ion-item>
-            <ion-button [disabled]="!usuarioIdAsignar" (click)="asignarMiembro()" color="primary" size="default">Asignar</ion-button>
-          </div>
+        <div class="form-row" style="align-items:flex-end;margin-bottom:1rem">
+          <ion-item style="flex:1">
+            <ion-select [(ngModel)]="usuarioIdAsignar" placeholder="Seleccione usuario" label="Agregar miembro" labelPlacement="stacked">
+              @for (u of usuariosDisponibles; track u.id) {
+                <ion-select-option [value]="u.id">{{ u.nombreCompleto }} ({{ u.username }})</ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+          <ion-button [disabled]="!usuarioIdAsignar" (click)="asignarMiembro()" color="primary" size="default">Agregar</ion-button>
+        </div>
 
+        @if (editandoId != null) {
           @if (loadingMiembros) {
             <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
           }
-
           @if (!loadingMiembros) {
             <ion-list>
               @for (m of miembros; track m.id) {
@@ -129,8 +134,24 @@
               }
             </ion-list>
           }
-        </div>
-      }
+        } @else {
+          <ion-list>
+            @for (u of miembrosPendientes; track u.id) {
+              <ion-item>
+                <ion-label>
+                  <strong>{{ u.nombreCompleto }}</strong> — {{ u.username }}
+                  @if (u.email) { <span style="color:#6b7280"> · {{ u.email }}</span> }
+                </ion-label>
+                <ion-button slot="end" fill="clear" color="danger" size="small" (click)="quitarMiembroPendiente(u.id)">
+                  <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                </ion-button>
+              </ion-item>
+            } @empty {
+              <ion-item><ion-label color="medium">Aún no agregó miembros.</ion-label></ion-item>
+            }
+          </ion-list>
+        }
+      </div>
     </ion-content>
   </ng-template>
 </ion-modal>

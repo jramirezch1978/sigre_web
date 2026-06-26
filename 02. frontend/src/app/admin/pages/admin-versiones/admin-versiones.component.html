@@ -1,0 +1,39 @@
+<div class="admin-page ion-padding admin-page--fluid">
+  <div class="admin-page__head">
+    <div>
+      <h1 class="admin-page__title">Versiones del sistema</h1>
+      <p class="admin-page__subtitle">Versión y fecha de compilación del sistema SIGRE.</p>
+    </div>
+  </div>
+
+  @if (cargando) {
+    <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+  } @else {
+    <div class="versiones-hero card rounded-4">
+      <div class="versiones-hero__badge">
+        <i class="material-icons-outlined">verified</i>
+      </div>
+      <div class="versiones-hero__body">
+        <span class="versiones-hero__label">Versión del sistema</span>
+        <span class="versiones-hero__version">{{ info?.version ?? '—' }}</span>
+        <span class="versiones-hero__build">Compilado el {{ fechaBuild }}</span>
+      </div>
+    </div>
+
+    <h2 class="section-title">Aplicaciones</h2>
+    <div class="versiones-grid">
+      @for (c of componentes; track c.nombre) {
+        <div class="card rounded-4 versiones-card">
+          <div class="versiones-card__icon">
+            <i class="material-icons-outlined">{{ c.icono }}</i>
+          </div>
+          <div class="versiones-card__info">
+            <h3 class="versiones-card__name">{{ c.nombre }}</h3>
+            <p class="versiones-card__detail">{{ c.detalle }}</p>
+            <span class="badge-estado badge-activo">v{{ info?.version ?? '—' }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

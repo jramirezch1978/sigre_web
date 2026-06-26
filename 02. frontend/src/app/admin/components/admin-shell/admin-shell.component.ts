@@ -45,6 +45,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     { label: 'Grupos de usuario', icon: 'groups', route: '/admin/grupos-usuario' },
     { label: 'Sucursales', icon: 'storefront', route: '/admin/sucursales' },
     { label: 'Usuarios x Sucursal', icon: 'account_tree', route: '/admin/usuarios-sucursales' },
+    { label: 'Versiones', icon: 'info', route: '/admin/versiones' },
   ];
 
   constructor() {
@@ -57,10 +58,13 @@ export class AdminShellComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.cargarDatosUsuario();
     this.metoxi.activarShellErp();
+    // Marca la zona admin para estilos globales (p.ej. modales Metoxi en styles.scss)
+    document.body.classList.add('sigre-admin-zone');
   }
 
   ngOnDestroy(): void {
     this.metoxi.desactivarShellErp();
+    document.body.classList.remove('sigre-admin-zone');
   }
 
   @HostListener('document:click')
