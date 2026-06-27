@@ -7,20 +7,13 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
 import { ErpLayoutService } from '../../services/erp-layout.service';
 import { MetoxiInitService } from '../../services/metoxi-init.service';
+import { ErpNotificacionService, NotificacionItem } from '../../services/erp-notificacion.service';
 import { fusionarModulosConCatalogo } from '../../shared/erp-modulos-catalog.config';
 import { iconoModulo } from '../../shared/modulos-iconos';
 
 interface CeldaAppsLauncher {
   codigo: string;
   modulo: MenuModulo | null;
-}
-
-interface NotificacionDemo {
-  titulo: string;
-  descripcion: string;
-  tiempo: string;
-  iniciales: string;
-  badgeClass: string;
 }
 
 @Component({
@@ -38,6 +31,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   private readonly menuService = inject(ErpMenuService);
   private readonly layout = inject(ErpLayoutService);
   private readonly metoxiInit = inject(MetoxiInitService);
+  private readonly notificacionService = inject(ErpNotificacionService);
 
   nombreUsuario = '';
   empresaActual = '';
@@ -51,29 +45,8 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   dropdownActivo: 'apps' | 'notificaciones' | 'usuario' | null = null;
   seccionExpandidaId: number | null = null;
 
-  readonly notificacionesDemo: NotificacionDemo[] = [
-    {
-      titulo: 'Stock bajo',
-      descripcion: 'Hay artículos por debajo del mínimo en almacén.',
-      tiempo: 'Hoy',
-      iniciales: 'ST',
-      badgeClass: 'bg-warning text-warning bg-opacity-10',
-    },
-    {
-      titulo: 'OC pendiente',
-      descripcion: 'Una orden de compra espera aprobación.',
-      tiempo: 'Ayer',
-      iniciales: 'OC',
-      badgeClass: 'bg-primary text-primary bg-opacity-10',
-    },
-    {
-      titulo: 'Planilla',
-      descripcion: 'Periodo de planilla abierto para revisión.',
-      tiempo: '2d',
-      iniciales: 'RH',
-      badgeClass: 'bg-success text-success bg-opacity-10',
-    },
-  ];
+  notificaciones: NotificacionItem[] = [];
+  notificacionesNoLeidas = 0;
 
   ngOnInit(): void {
     this.metoxiInit.activarShellErp();
@@ -97,6 +70,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     }
 
     this.cargarMenu();
+    this.cargarNotificaciones();
     this.layout.moduloActivo$.subscribe(modulo => {
       this.moduloActivo = modulo;
     });
@@ -145,7 +119,48 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   }
 
   toggleDropdown(tipo: 'apps' | 'notificaciones' | 'usuario'): void {
-    this.dropdownActivo = this.dropdownActivo === tipo ? null : tipo;
+    const abriendo = this.dropdownActivo !== tipo;
+    this.dropdownActivo = abriendo ? tipo : null;
+    // Al abrir el panel de notificaciones, marcar como leídas (el badge cuenta no leídas).
+    if (abriendo && tipo === 'notificaciones' && this.notificacionesNoLeidas > 0) {
+      this.notificacionService.marcarTodasLeidas().subscribe({
+        next: () => {
+          this.notificacionesNoLeidas = 0;
+          this.notificaciones = this.notificaciones.map(n => ({ ...n, leido: true }));
+        },
+        error: () => { /* el listado igual se muestra */ },
+      });
+    }
+  }
+
+  cargarNotificaciones(): void {
+    this.notificacionService.getResumen().subscribe({
+      next: (r) => {
+        this.notificaciones = r.items;
+        this.notificacionesNoLeidas = r.noLeidas;
+      },
+      error: () => { /* silencioso: el dashboard no debe romperse por notificaciones */ },
+    });
+  }
+
+  /** Icono Material según el tipo de notificación (I/S/W/E). */
+  iconoNotificacion(tipo: string): string {
+    switch (tipo) {
+      case 'S': return 'check_circle';
+      case 'W': return 'warning';
+      case 'E': return 'error';
+      default: return 'info';
+    }
+  }
+
+  /** Clase de color del icono según el tipo. */
+  claseNotificacion(tipo: string): string {
+    switch (tipo) {
+      case 'S': return 'bg-success text-success bg-opacity-10';
+      case 'W': return 'bg-warning text-warning bg-opacity-10';
+      case 'E': return 'bg-danger text-danger bg-opacity-10';
+      default: return 'bg-primary text-primary bg-opacity-10';
+    }
   }
 
   cargarMenu(): void {
