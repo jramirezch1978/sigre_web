@@ -1,0 +1,28 @@
+server:
+  port: 9050
+
+spring:
+  application:
+    name: worker-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/${DB_NAME:sigre_security}?sslmode=${DB_SSL_MODE:disable}
+    username: ${DB_USER:postgres}
+    password: "${DB_PASS:jarch32b}"
+
+app:
+  admin-datasource:
+    jdbc-url: jdbc:postgresql://${DB_HOST:postgres}:${DB_PORT:5432}/postgres?sslmode=${DB_SSL_MODE:disable}
+    username: ${DB_USER:postgres}
+    password: "${DB_PASS:jarch32b}"
+
+worker:
+  licencias:
+    # Vencimiento: cada hora al minuto 10. Eliminación de BD: cada hora al minuto 20.
+    cron-vencimiento: "${WORKER_CRON_VENCIMIENTO:0 10 * * * *}"
+    cron-eliminacion: "${WORKER_CRON_ELIMINACION:0 20 * * * *}"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus

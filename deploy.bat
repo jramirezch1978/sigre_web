@@ -37,7 +37,7 @@ set "SSH_HOST=crisaor.serveftp.com"
 set "REMOTE_STACK=/home/jramirez/stack"
 
 set "INFRA_SERVICES=discovery-server config-server api-gateway"
-set "CORE_SERVICES=seguridad-service core-service asistencia-service"
+set "CORE_SERVICES=seguridad-service core-service asistencia-service worker-service"
 set "COMMERCE_SERVICES=inventory-service orders-service products-service sync-service"
 set "DOMAIN_SERVICES=almacen-service compras-service contabilidad-service finanzas-service rrhh-service activo-fijo-service produccion-service auditoria-service comercializacion-service campo-service comedor-service flota-service mantenimiento-service operaciones-service presupuesto-service aprovision-service sig-service"
 set "ASISTENCIA_SERVICES=discovery-server api-gateway seguridad-service asistencia-service"
@@ -47,7 +47,7 @@ set "ERP_SERVICES=discovery-server api-gateway seguridad-service core-service co
 set "SECURITY_SERVICES=discovery-server seguridad-service api-gateway"
 set "BACKEND_SERVICES=%ASISTENCIA_SERVICES%"
 set "FRONTEND_SERVICE=sigre-frontend"
-set "COMPOSE_APP_SERVICES=discovery-server api-gateway seguridad-service core-service asistencia-service almacen-service compras-service contabilidad-service finanzas-service rrhh-service produccion-service comercializacion-service sigre-frontend"
+set "COMPOSE_APP_SERVICES=discovery-server api-gateway seguridad-service core-service asistencia-service worker-service almacen-service compras-service contabilidad-service finanzas-service rrhh-service produccion-service comercializacion-service sigre-frontend"
 set "ALL_APP_SERVICES=%INFRA_SERVICES% %CORE_SERVICES% %COMMERCE_SERVICES% %DOMAIN_SERVICES% %FRONTEND_SERVICE%"
 
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"

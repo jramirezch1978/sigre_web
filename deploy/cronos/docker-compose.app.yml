@@ -142,6 +142,36 @@ services:
         max-file: "3"
         compress: "true"
 
+  worker-service:
+    container_name: worker-service
+    image: ${IMAGE_REGISTRY}/worker-service:${IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      TZ: America/Lima
+      SERVER_PORT: "9050"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: sigre_security
+      DB_USER: postgres
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_SSL_MODE: disable
+      JAVA_OPTS: "-Xms128m -Xmx256m -Duser.timezone=America/Lima"
+    mem_limit: 320m
+    networks:
+      - stack_default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9050/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+        compress: "true"
+
   core-service:
     container_name: core-service
     image: ${IMAGE_REGISTRY}/core-service:${IMAGE_TAG}
