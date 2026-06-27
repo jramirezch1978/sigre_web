@@ -94,7 +94,7 @@ CREATE TABLE auth.usuario (
     flag_demo VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_demo IN ('0', '1')),
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
     flag_admin_sistema VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_admin_sistema IN ('0', '1')),
-    flag_ventas VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_ventas IN ('0', '1')),  -- sales/licensing: administra licencias y amplia demos
+    tipo_sales VARCHAR(10) CHECK (tipo_sales IN ('LICENSING', 'SALES')),  -- perfil licencias: LICENSING (todo) / SALES (solo renovar); NULL = sin perfil
     fec_creacion TIMESTAMPTZ DEFAULT NOW(),
     fec_modificacion TIMESTAMPTZ,
     created_by BIGINT,
@@ -194,6 +194,20 @@ CREATE TABLE auth.licencia_usuario_exceso (
     UNIQUE (licencia_id, usuario_id, periodo)
 );
 CREATE INDEX IX_LIC_USR_EXCESO_PERIODO ON auth.licencia_usuario_exceso (licencia_id, periodo);
+
+-- Histórico de pagos de licencia: cada renovación exige fecha de pago + voucher del cliente,
+-- y registra qué usuario (perfil ventas/licensing) la renovó.
+CREATE TABLE auth.licencia_pago (
+    id BIGSERIAL PRIMARY KEY,
+    licencia_id BIGINT NOT NULL REFERENCES auth.licencia(id),
+    fecha_pago DATE NOT NULL,
+    voucher VARCHAR(80) NOT NULL,
+    monto NUMERIC(10, 2) NOT NULL DEFAULT 0,
+    periodo CHAR(7) NOT NULL,                        -- 'YYYY-MM' del mes renovado
+    usuario_renovo_id BIGINT REFERENCES auth.usuario(id),
+    fec_creacion TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IX_LICENCIA_PAGO_LIC ON auth.licencia_pago (licencia_id, fecha_pago DESC);
 
 CREATE TABLE auth.opcion_menu (
     id BIGSERIAL PRIMARY KEY,

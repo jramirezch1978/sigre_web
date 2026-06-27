@@ -90,18 +90,27 @@ public class SeguridadService {
         }
     }
 
-    /** True si el usuario tiene el flag de ventas/licensing (administra licencias y amplía demos). */
-    public boolean isVentas(long usuarioId) {
-        Integer n = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM auth.usuario WHERE id = ? AND flag_estado = '1' AND flag_ventas = '1'",
-                Integer.class, usuarioId);
-        return n != null && n > 0;
+    /** Perfil de licencias del usuario: 'LICENSING', 'SALES' o null. */
+    public String tipoSales(long usuarioId) {
+        return jdbcTemplate.query(
+                "SELECT tipo_sales FROM auth.usuario WHERE id = ? AND flag_estado = '1'",
+                rs -> rs.next() ? rs.getString(1) : null, usuarioId);
     }
 
-    public void requireVentas(long usuarioId) {
-        if (!isVentas(usuarioId)) {
-            throw new BusinessException("Se requiere el perfil de ventas/licensing para administrar licencias.",
-                    HttpStatus.FORBIDDEN, "VENTAS_REQUERIDO");
+    /** LICENSING: puede administrar licencias (crear/modificar/eliminar/desactivar/renovar). */
+    public void requireLicensing(long usuarioId) {
+        if (!"LICENSING".equals(tipoSales(usuarioId))) {
+            throw new BusinessException("Se requiere el perfil LICENSING para administrar licencias.",
+                    HttpStatus.FORBIDDEN, "LICENSING_REQUERIDO");
+        }
+    }
+
+    /** Puede renovar licencias: LICENSING o SALES. */
+    public void requireRenovador(long usuarioId) {
+        String t = tipoSales(usuarioId);
+        if (!"LICENSING".equals(t) && !"SALES".equals(t)) {
+            throw new BusinessException("Se requiere el perfil LICENSING o SALES para renovar licencias.",
+                    HttpStatus.FORBIDDEN, "RENOVADOR_REQUERIDO");
         }
     }
 

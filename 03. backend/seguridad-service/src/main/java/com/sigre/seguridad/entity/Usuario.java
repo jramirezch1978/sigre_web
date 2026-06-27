@@ -77,9 +77,9 @@ public class Usuario {
     @Column(name = "flag_admin_sistema", nullable = false, length = 1)
     private String flagAdminSistema = "0";
 
-    /** Perfil ventas/licensing (administra licencias, amplía demos): {@code '1'} activo. */
-    @Column(name = "flag_ventas", nullable = false, length = 1)
-    private String flagVentas = "0";
+    /** Perfil de licencias: {@code 'LICENSING'} (administra todo) o {@code 'SALES'} (solo renueva). */
+    @Column(name = "tipo_sales", length = 10)
+    private String tipoSales;
 
     @PrePersist
     protected void onCreate() {

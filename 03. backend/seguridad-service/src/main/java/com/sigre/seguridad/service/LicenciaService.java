@@ -262,7 +262,13 @@ public class LicenciaService {
      * si persiste el exceso sobre el límite, registra el cobro para el nuevo periodo.
      */
     @Transactional
-    public CostoMensual renovarLicencia(long empresaId) {
+    public CostoMensual renovarLicencia(long empresaId, java.time.LocalDate fechaPago, String voucher, long usuarioRenovoId) {
+        if (fechaPago == null) {
+            throw new BusinessException("La fecha de pago es obligatoria para renovar.", HttpStatus.BAD_REQUEST);
+        }
+        if (voucher == null || voucher.isBlank()) {
+            throw new BusinessException("El voucher de pago es obligatorio para renovar.", HttpStatus.BAD_REQUEST);
+        }
         LicenciaInfo lic = obtenerUltimaLicencia(empresaId);
         if (lic == null) {
             throw new BusinessException("La empresa no tiene licencia.", HttpStatus.NOT_FOUND);
@@ -293,9 +299,16 @@ public class LicenciaService {
         for (int i = max; i < activos.size(); i++) {
             registrarExcesoUsuario(empresaId, activos.get(i));
         }
-        log.info("Licencia {} renovada hasta {} (empresa {}); activos {}, límite {}",
-                lic.id(), nuevoVenc, empresaId, activos.size(), max);
-        return calcularCostoMensual(empresaId);
+
+        CostoMensual costo = calcularCostoMensual(empresaId);
+        // Histórico del pago de esta renovación (quién, cuándo, voucher, monto).
+        jdbcTemplate.update("""
+                INSERT INTO auth.licencia_pago (licencia_id, fecha_pago, voucher, monto, periodo, usuario_renovo_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """, lic.id(), fechaPago, voucher.trim(), costo.costoTotal(), YearMonth.now().toString(), usuarioRenovoId);
+        log.info("Licencia {} renovada hasta {} (empresa {}) por usuario {}; activos {}, límite {}, voucher {}",
+                lic.id(), nuevoVenc, empresaId, usuarioRenovoId, activos.size(), max, voucher);
+        return costo;
     }
 
     /** Resumen de la licencia activa de la empresa (para mostrar en el ERP/admin). */

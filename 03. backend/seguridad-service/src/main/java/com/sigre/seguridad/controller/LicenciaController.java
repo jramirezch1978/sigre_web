@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -60,34 +61,43 @@ public class LicenciaController {
     @GetMapping("/admin/{empresaId}")
     public ApiResponse<Map<String, Object>> adminInfo(@RequestHeader("Authorization") String auth,
                                                       @PathVariable long empresaId) {
-        requireVentas(auth);
+        // LICENSING y SALES pueden consultar (SALES necesita verla para renovar).
+        requireRenovador(auth);
         Map<String, Object> r = new LinkedHashMap<>();
         r.put("licencia", licenciaService.obtenerLicenciaActiva(empresaId));
         r.put("costo", licenciaService.calcularCostoMensual(empresaId));
         return ApiResponse.ok(r, "Licencia de la empresa");
     }
 
-    /** Amplía el vencimiento de una licencia demo (tope: un mes desde el inicio). */
+    /** Amplía el vencimiento de una licencia demo (tope: un mes desde el inicio). Solo LICENSING. */
     @PostMapping("/admin/{empresaId}/ampliar-demo")
     public ApiResponse<OffsetDateTime> ampliarDemo(@RequestHeader("Authorization") String auth,
                                                    @PathVariable long empresaId,
                                                    @RequestParam OffsetDateTime nuevaFecha) {
-        requireVentas(auth);
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        seguridadService.requireLicensing(uid);
         return ApiResponse.ok(licenciaService.ampliarVencimientoDemo(empresaId, nuevaFecha),
                 "Vencimiento de la demo ampliado");
     }
 
-    /** Renueva una licencia de pago un mes más y recuenta el exceso de usuarios. */
+    /**
+     * Renueva una licencia de pago un mes más (recuenta exceso). Requiere fecha de pago y voucher
+     * del cliente; registra quién renovó. LICENSING o SALES.
+     */
     @PostMapping("/admin/{empresaId}/renovar")
     public ApiResponse<LicenciaService.CostoMensual> renovar(@RequestHeader("Authorization") String auth,
-                                                             @PathVariable long empresaId) {
-        requireVentas(auth);
-        return ApiResponse.ok(licenciaService.renovarLicencia(empresaId), "Licencia renovada");
+                                                             @PathVariable long empresaId,
+                                                             @RequestParam LocalDate fechaPago,
+                                                             @RequestParam String voucher) {
+        long uid = requireRenovador(auth);
+        return ApiResponse.ok(licenciaService.renovarLicencia(empresaId, fechaPago, voucher, uid),
+                "Licencia renovada");
     }
 
-    private void requireVentas(String auth) {
+    private long requireRenovador(String auth) {
         long uid = contextHelper.requireUserIdDefinitivo(auth);
-        seguridadService.requireVentas(uid);
+        seguridadService.requireRenovador(uid);
+        return uid;
     }
 
     private void validateProvisionSecret(HttpServletRequest request) {

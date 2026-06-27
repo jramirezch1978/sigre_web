@@ -157,8 +157,9 @@ ON CONFLICT (id) DO UPDATE SET
 
 SELECT setval(pg_get_serial_sequence('auth.usuario', 'id'), (SELECT COALESCE(MAX(id), 1) FROM auth.usuario), TRUE);
 
--- Perfil ventas/licensing: únicos que pueden administrar licencias (ampliar demos, renovar, etc.).
-UPDATE auth.usuario SET flag_ventas = '1' WHERE username IN ('admin', 'work', 'jramirez');
+-- Perfil de licencias: LICENSING administra todo (crear/modificar/eliminar/renovar);
+-- SALES solo renueva. Los admins quedan como LICENSING.
+UPDATE auth.usuario SET tipo_sales = 'LICENSING' WHERE username IN ('admin', 'work', 'jramirez');
 
 COMMIT;
 

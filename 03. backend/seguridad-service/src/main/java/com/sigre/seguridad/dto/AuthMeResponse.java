@@ -44,8 +44,8 @@ public class AuthMeResponse {
     /** Derivado de {@code auth.usuario.flag_admin_sistema}. */
     private Boolean adminSistema;
 
-    /** Derivado de {@code auth.usuario.flag_ventas} (administración de licencias). */
-    private Boolean ventas;
+    /** Derivado de {@code auth.usuario.tipo_sales}: 'LICENSING', 'SALES' o null. */
+    private String tipoSales;
 
     @Getter
     @Setter

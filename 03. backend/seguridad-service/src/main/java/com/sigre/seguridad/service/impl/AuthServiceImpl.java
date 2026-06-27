@@ -145,7 +145,7 @@ public class AuthServiceImpl implements AuthService {
                 .apellidos(usuario.getApellidos())
                 .nombreCompleto(usuario.getNombreCompleto())
                 .adminSistema(isFlagAdminSistema(usuario))
-                .ventas(isFlagVentas(usuario))
+                .tipoSales(tipoSalesDe(usuario))
                 .build();
     }
 
@@ -217,8 +217,8 @@ public class AuthServiceImpl implements AuthService {
         return usuario.getFlagAdminSistema() != null && "1".equals(usuario.getFlagAdminSistema());
     }
 
-    private static boolean isFlagVentas(Usuario usuario) {
-        return usuario.getFlagVentas() != null && "1".equals(usuario.getFlagVentas());
+    private static String tipoSalesDe(Usuario usuario) {
+        return usuario.getTipoSales();
     }
 
     private static void validarCompatibilidadDemo(Usuario usuario, EmpresaMaster empresa) {
@@ -458,7 +458,7 @@ public class AuthServiceImpl implements AuthService {
         }
         usuarioRepository.findById(userId).ifPresent(u -> {
             response.setAdminSistema(isFlagAdminSistema(u));
-            response.setVentas(isFlagVentas(u));
+            response.setTipoSales(tipoSalesDe(u));
         });
     }
 
@@ -580,7 +580,7 @@ public class AuthServiceImpl implements AuthService {
                 .sucursalId(request.getSucursalId())
                 .sucursalNombre(sucursalNombre)
                 .adminSistema(isFlagAdminSistema(usuario))
-                .ventas(isFlagVentas(usuario));
+                .tipoSales(tipoSalesDe(usuario));
         if (refreshToken != null && !refreshToken.isBlank()) {
             b.refreshToken(refreshToken);
         }
