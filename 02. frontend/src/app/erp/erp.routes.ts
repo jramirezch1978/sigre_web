@@ -39,6 +39,12 @@ export const erpRoutes: Routes = [
         loadChildren: () =>
           import('./modules/almacen/almacen.routes').then(m => m.almacenRoutes),
       },
+      {
+        path: 'seguridad-usuarios',
+        loadComponent: () =>
+          import('./pages/erp-seguridad-usuarios/erp-seguridad-usuarios.component')
+            .then(m => m.ErpSeguridadUsuariosComponent),
+      },
     ],
   },
 ];

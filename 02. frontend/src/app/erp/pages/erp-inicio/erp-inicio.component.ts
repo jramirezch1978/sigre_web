@@ -193,6 +193,11 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     void this.router.navigate(['/sigre/dashboard']);
   }
 
+  irASeguridadUsuarios(): void {
+    this.dropdownActivo = null;
+    void this.router.navigate(['/sigre/seguridad-usuarios']);
+  }
+
   navegarOpcion(event: Event, ruta: string | null, codigo?: string): void {
     event.preventDefault();
     event.stopPropagation();

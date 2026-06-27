@@ -1,0 +1,102 @@
+<div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+  <div class="breadcrumb-title pe-3">Seguridad</div>
+  <div class="ps-3">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0 p-0">
+        <li class="breadcrumb-item active" aria-current="page">Usuarios de mi empresa</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+@if (cargando) {
+  <div class="d-flex justify-content-center py-5">
+    <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div>
+  </div>
+} @else if (info && !info.esDemo) {
+  <div class="alert alert-info rounded-4">
+    Esta sección de autogestión de usuarios está disponible solo para empresas con <strong>licencia demo</strong>.
+  </div>
+} @else if (info) {
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="card rounded-4">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="mb-0 fw-bold">Usuarios de la empresa</h5>
+            <span class="badge bg-primary rounded-pill">{{ info.usados }} / {{ info.maxUsuarios }}</span>
+          </div>
+          <div class="table-responsive">
+            <table class="table align-middle mb-0">
+              <thead>
+                <tr><th>Usuario</th><th>Nombre</th><th>Email</th><th>Estado</th></tr>
+              </thead>
+              <tbody>
+                @for (u of info.usuarios; track u.id) {
+                  <tr>
+                    <td class="fw-medium">{{ u.username }}</td>
+                    <td>{{ u.nombre_completo }}</td>
+                    <td class="text-muted">{{ u.email }}</td>
+                    <td>
+                      @if (u.flag_estado === '1') {
+                        <span class="badge bg-success bg-opacity-10 text-success">Activo</span>
+                      } @else {
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary">Inactivo</span>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="4" class="text-center text-muted py-3">Sin usuarios.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card rounded-4">
+        <div class="card-body">
+          <h5 class="mb-1 fw-bold">Agregar usuario</h5>
+          <p class="text-muted small mb-3">Demo: hasta {{ info.maxUsuarios }} usuarios por empresa.</p>
+
+          @if (error) { <div class="alert alert-danger py-2">{{ error }}</div> }
+          @if (exito) { <div class="alert alert-success py-2">{{ exito }}</div> }
+
+          @if (!puedeAgregar) {
+            <div class="alert alert-warning py-2 mb-0">Alcanzaste el máximo de {{ info.maxUsuarios }} usuarios.</div>
+          } @else {
+            <form (ngSubmit)="agregar()">
+              <div class="mb-2">
+                <label class="form-label">Usuario *</label>
+                <input class="form-control" [(ngModel)]="nuevo.username" name="username" autocomplete="off" />
+              </div>
+              <div class="row g-2">
+                <div class="col-6 mb-2">
+                  <label class="form-label">Nombres *</label>
+                  <input class="form-control" [(ngModel)]="nuevo.nombres" name="nombres" />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Apellidos</label>
+                  <input class="form-control" [(ngModel)]="nuevo.apellidos" name="apellidos" />
+                </div>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Email</label>
+                <input class="form-control" type="email" [(ngModel)]="nuevo.email" name="email" autocomplete="off" />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Contraseña *</label>
+                <input class="form-control" type="password" [(ngModel)]="nuevo.password" name="password" autocomplete="new-password" />
+              </div>
+              <button type="submit" class="btn btn-primary w-100" [disabled]="guardando">
+                {{ guardando ? 'Agregando…' : 'Agregar usuario' }}
+              </button>
+            </form>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

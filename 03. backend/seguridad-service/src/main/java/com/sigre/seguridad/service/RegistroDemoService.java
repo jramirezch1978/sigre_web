@@ -17,6 +17,7 @@ import com.sigre.common.exception.BusinessException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -127,6 +128,72 @@ public class RegistroDemoService {
         log.info("Empresa demo registrada: {} (RUC: {}) con {} usuarios, licencia {} (vence {})",
                 codigoEmpresa, emp.getRuc(), userIds.size(), licencia.codigo(), licencia.vencimiento());
         return new RegistroDemoResult(empresaId, dbName, licencia);
+    }
+
+    /** True si el usuario es demo (solo ellos pueden autogestionar usuarios de su empresa). */
+    public boolean esUsuarioDemo(long usuarioId) {
+        Integer n = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auth.usuario WHERE id = ? AND flag_demo = '1'", Integer.class, usuarioId);
+        return n != null && n > 0;
+    }
+
+    /** Usuarios (activos e inactivos) de una empresa, para la autogestión demo. */
+    public List<Map<String, Object>> listarUsuariosEmpresaDemo(long empresaId) {
+        return jdbcTemplate.queryForList("""
+                SELECT u.id, u.username, u.email, u.nombre_completo, u.flag_estado
+                FROM auth.usuario u
+                JOIN auth.usuario_empresa ue ON ue.usuario_id = u.id
+                WHERE ue.empresa_id = ?
+                ORDER BY u.nombre_completo
+                """, empresaId);
+    }
+
+    /**
+     * Agrega un usuario a una empresa demo. Reglas: el actor debe ser usuario demo,
+     * la empresa debe ser demo y no superar {@value #MAX_USUARIOS_DEMO} usuarios.
+     */
+    @Transactional
+    public void agregarUsuarioAEmpresaDemo(long actorId, long empresaId, UsuarioDemo nuevo) {
+        if (!esUsuarioDemo(actorId)) {
+            throw new BusinessException("Solo los usuarios demo pueden agregar usuarios.",
+                    HttpStatus.FORBIDDEN);
+        }
+        Integer empDemo = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM master.empresa WHERE id = ? AND flag_demo = '1'", Integer.class, empresaId);
+        if (empDemo == null || empDemo == 0) {
+            throw new BusinessException("La empresa no es demo.", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        Integer total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auth.usuario_empresa WHERE empresa_id = ? AND flag_estado = '1'",
+                Integer.class, empresaId);
+        if (total != null && total >= MAX_USUARIOS_DEMO) {
+            throw new BusinessException("Una empresa demo no puede tener más de " + MAX_USUARIOS_DEMO + " usuarios.",
+                    HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        if (nuevo.getUsername() == null || nuevo.getUsername().isBlank()) {
+            throw new BusinessException("El nombre de usuario es requerido.", HttpStatus.BAD_REQUEST);
+        }
+        if (usuarioRepository.findByUsernameAndActivoTrue(nuevo.getUsername()).isPresent()) {
+            throw new BusinessException("El usuario '" + nuevo.getUsername() + "' ya está en uso.", HttpStatus.CONFLICT);
+        }
+        if (nuevo.getEmail() != null && !nuevo.getEmail().isBlank()
+                && usuarioRepository.findByEmailAndActivoTrue(nuevo.getEmail()).isPresent()) {
+            throw new BusinessException("El email '" + nuevo.getEmail() + "' ya está registrado.", HttpStatus.CONFLICT);
+        }
+
+        Long uid = crearUsuarioDemo(nuevo);
+        jdbcTemplate.update(
+                "INSERT INTO auth.usuario_empresa (usuario_id, empresa_id, flag_estado) VALUES (?, ?, '1')",
+                uid, empresaId);
+        List<Long> roles = jdbcTemplate.queryForList(
+                "SELECT id FROM auth.rol WHERE empresa_id = ? AND codigo = 'ADMIN' AND flag_estado = '1'",
+                Long.class, empresaId);
+        if (!roles.isEmpty()) {
+            jdbcTemplate.update(
+                    "INSERT INTO auth.rol_usuario (usuario_id, rol_id, flag_estado) VALUES (?, ?, '1')",
+                    uid, roles.get(0));
+        }
+        log.info("Usuario demo '{}' agregado a empresa {} por usuario {}", nuevo.getUsername(), empresaId, actorId);
     }
 
     private Long resolverDistritoId(EmpresaDemo emp) {
