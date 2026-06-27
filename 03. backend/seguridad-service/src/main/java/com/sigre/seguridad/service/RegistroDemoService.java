@@ -37,8 +37,11 @@ public class RegistroDemoService {
     private final SeguridadService seguridadService;
     private final LicenciaService licenciaService;
 
+    /** Resultado del alta demo: empresa creada, su BD destino y la licencia generada. */
+    public record RegistroDemoResult(long empresaId, String dbName, LicenciaService.LicenciaDemo licencia) {}
+
     @Transactional
-    public LicenciaService.LicenciaDemo registrarDemo(RegistroDemoRequest request) {
+    public RegistroDemoResult registrarDemo(RegistroDemoRequest request) {
         EmpresaDemo emp = request.getEmpresa();
         UsuarioDemo admin = request.getAdminUser();
         List<UsuarioDemo> adicionales = request.getUsuariosAdicionales() != null
@@ -123,7 +126,7 @@ public class RegistroDemoService {
 
         log.info("Empresa demo registrada: {} (RUC: {}) con {} usuarios, licencia {} (vence {})",
                 codigoEmpresa, emp.getRuc(), userIds.size(), licencia.codigo(), licencia.vencimiento());
-        return licencia;
+        return new RegistroDemoResult(empresaId, dbName, licencia);
     }
 
     private Long resolverDistritoId(EmpresaDemo emp) {

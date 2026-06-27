@@ -173,6 +173,31 @@ public class TenantProvisioningService {
     }
 
     /**
+     * Provisiona físicamente la BD de una empresa demo YA registrada: clona el template
+     * y deja credenciales reales (rol + grants) para que el ERP pueda conectarse.
+     * NO es transaccional a propósito: CREATE DATABASE no puede ir dentro de una transacción,
+     * por eso se llama después de confirmar el registro demo.
+     */
+    public void provisionarBaseDatosDemo(long empresaId) {
+        EmpresaMaster emp = empresaMasterRepository.findById(empresaId)
+                .orElseThrow(() -> new BusinessException("Empresa demo no encontrada: " + empresaId,
+                        HttpStatus.NOT_FOUND, "EMPRESA_NO_ENCONTRADA"));
+        String dbName = emp.getDbName();
+        if (Boolean.TRUE.equals(databaseExists(dbName))) {
+            log.info("BD demo {} ya existe; no se reaprovisiona", dbName);
+            return;
+        }
+        TenantDbCredentials creds = new TenantDbCredentials(
+                dbName, java.util.UUID.randomUUID().toString().replace("-", ""));
+        createDatabaseFromTemplate(dbName, provisioningDbUsername);
+        securityJdbcTemplate.update(
+                "UPDATE master.empresa SET db_user = ?, db_password_encrypted = ? WHERE id = ?",
+                creds.user(), aesEncryptor.encrypt(creds.password()), empresaId);
+        ensureTenantRoleAndPrivileges(emp, creds);
+        log.info("BD demo {} provisionada (empresa {}, rol {})", dbName, empresaId, creds.user());
+    }
+
+    /**
      * Elimina empresa: borra registro en {@code master.empresa} y la BD física.
      * Proceso atómico: si no se puede eliminar la BD, se revierte el borrado del registro.
      * Acepta búsqueda por {@code codigo}, {@code ruc} o {@code dbName} (al menos uno requerido).
