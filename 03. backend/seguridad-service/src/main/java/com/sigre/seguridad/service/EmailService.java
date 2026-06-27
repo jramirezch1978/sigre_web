@@ -20,6 +20,10 @@ public class EmailService {
 
     private static final String FROM = "no-reply@npssac.com.pe";
 
+    /** Copia (CC) fija de todos los correos. Configurable en YAML (app.notificacion.email.cc). */
+    @org.springframework.beans.factory.annotation.Value("${app.notificacion.email.cc:}")
+    private String copiaFija;
+
     @Async
     public void enviarCodigoRecuperacion(String destinatario, String codigo) {
         String subject = "SIGRE - Código de recuperación de contraseña";
@@ -245,6 +249,17 @@ public class EmailService {
         return value != null ? value : "";
     }
 
+    /** Direcciones de copia fija (separadas por coma o ;) configuradas en YAML. */
+    private String[] copiaFijaArray() {
+        if (copiaFija == null || copiaFija.isBlank()) {
+            return new String[0];
+        }
+        return java.util.Arrays.stream(copiaFija.split("[,;]"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toArray(String[]::new);
+    }
+
     @Async
     public void enviarAlertaBloqueo(String destinatarioUsuario, String destinatarioAdmin,
                                     String username, String ip, String userAgent,
@@ -284,6 +299,10 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setFrom(FROM);
             helper.setTo(to);
+            String[] cc = copiaFijaArray();
+            if (cc.length > 0) {
+                helper.setCc(cc);
+            }
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
             mailSender.send(message);
