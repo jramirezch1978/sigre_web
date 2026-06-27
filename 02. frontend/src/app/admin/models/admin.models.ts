@@ -95,6 +95,8 @@ export interface UsuarioAdminDto {
   activo?: boolean;
   bloqueado?: boolean;
   flagAdminSistema?: boolean;
+  /** Perfil de licencias: 'LICENSING', 'SALES' o '' / undefined para ninguno. */
+  tipoSales?: string;
   fecCreacion?: string;
 }
 

@@ -280,14 +280,14 @@ export class AdminSeguridadApiService extends AbstractAuthenticatedApiService {
     );
   }
 
-  crearUsuario(body: { email: string; username: string; password: string; nombres: string; apellidos: string; flagAdminSistema?: boolean }): Observable<ApiResponse<UsuarioAdminDto>> {
+  crearUsuario(body: { email: string; username: string; password: string; nombres: string; apellidos: string; flagAdminSistema?: boolean; tipoSales?: string }): Observable<ApiResponse<UsuarioAdminDto>> {
     return this.http.post<ApiResponse<UsuarioAdminDto>>(
       this.buildUrl('/auth/seguridad/usuarios'),
       body, { headers: this.bearerHeaders() }
     );
   }
 
-  actualizarUsuario(id: number, body: { email?: string; username?: string; nombres?: string; apellidos?: string; activo?: boolean; bloqueado?: boolean; flagAdminSistema?: boolean }): Observable<ApiResponse<UsuarioAdminDto>> {
+  actualizarUsuario(id: number, body: { email?: string; username?: string; nombres?: string; apellidos?: string; activo?: boolean; bloqueado?: boolean; flagAdminSistema?: boolean; tipoSales?: string }): Observable<ApiResponse<UsuarioAdminDto>> {
     return this.http.put<ApiResponse<UsuarioAdminDto>>(
       this.buildUrl(`/auth/seguridad/usuarios/${id}`),
       body, { headers: this.bearerHeaders() }

@@ -33,6 +33,7 @@ export class AdminUsuariosComponent implements OnInit {
       nombres: ['', [Validators.required, Validators.maxLength(100)]],
       apellidos: ['', [Validators.required, Validators.maxLength(100)]],
       flagAdminSistema: [false],
+      tipoSales: [''],
     });
     this.formEditar = this.fb.group({
       email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
@@ -42,6 +43,7 @@ export class AdminUsuariosComponent implements OnInit {
       activo: [true],
       bloqueado: [false],
       flagAdminSistema: [false],
+      tipoSales: [''],
     });
     this.cargar();
   }
@@ -69,7 +71,7 @@ export class AdminUsuariosComponent implements OnInit {
 
   abrirCrear(): void {
     this.editandoId = null;
-    this.formCrear.reset({ email: '', username: '', password: '', nombres: '', apellidos: '', flagAdminSistema: false });
+    this.formCrear.reset({ email: '', username: '', password: '', nombres: '', apellidos: '', flagAdminSistema: false, tipoSales: '' });
     this.mostrandoForm = true;
   }
 
@@ -80,6 +82,7 @@ export class AdminUsuariosComponent implements OnInit {
       nombres: u.nombres, apellidos: u.apellidos,
       activo: u.activo ?? true, bloqueado: u.bloqueado ?? false,
       flagAdminSistema: u.flagAdminSistema ?? false,
+      tipoSales: u.tipoSales ?? '',
     });
     this.mostrandoForm = true;
   }

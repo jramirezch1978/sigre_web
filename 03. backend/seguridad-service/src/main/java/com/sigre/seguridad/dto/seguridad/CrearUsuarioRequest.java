@@ -26,4 +26,8 @@ public class CrearUsuarioRequest {
     private String apellidos;
 
     private Boolean flagAdminSistema = false;
+
+    /** Perfil de licencias: 'LICENSING', 'SALES' o vacío/null para ninguno. */
+    @Size(max = 10)
+    private String tipoSales;
 }

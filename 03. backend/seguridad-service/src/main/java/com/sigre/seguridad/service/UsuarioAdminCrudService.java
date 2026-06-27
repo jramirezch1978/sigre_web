@@ -32,7 +32,7 @@ public class UsuarioAdminCrudService {
         return jdbcTemplate.query(
                 """
                 SELECT id, email, username, nombres, apellidos, nombre_completo,
-                       flag_estado, bloqueado, flag_admin_sistema, fec_creacion
+                       flag_estado, bloqueado, flag_admin_sistema, tipo_sales, fec_creacion
                 FROM auth.usuario
                 WHERE flag_estado = '1'
                 ORDER BY fec_creacion DESC NULLS LAST, nombre_completo
@@ -47,6 +47,7 @@ public class UsuarioAdminCrudService {
                         .activo("1".equals(rs.getString("flag_estado")))
                         .bloqueado(rs.getBoolean("bloqueado"))
                         .flagAdminSistema("1".equals(rs.getString("flag_admin_sistema")))
+                        .tipoSales(rs.getString("tipo_sales"))
                         .fecCreacion(rs.getObject("fec_creacion", OffsetDateTime.class))
                         .build());
     }
@@ -55,7 +56,7 @@ public class UsuarioAdminCrudService {
         List<UsuarioAdminDto> list = jdbcTemplate.query(
                 """
                 SELECT id, email, username, nombres, apellidos, nombre_completo,
-                       flag_estado, bloqueado, flag_admin_sistema, fec_creacion
+                       flag_estado, bloqueado, flag_admin_sistema, tipo_sales, fec_creacion
                 FROM auth.usuario WHERE id = ?
                 """,
                 (rs, i) -> UsuarioAdminDto.builder()
@@ -68,6 +69,7 @@ public class UsuarioAdminCrudService {
                         .activo("1".equals(rs.getString("flag_estado")))
                         .bloqueado(rs.getBoolean("bloqueado"))
                         .flagAdminSistema("1".equals(rs.getString("flag_admin_sistema")))
+                        .tipoSales(rs.getString("tipo_sales"))
                         .fecCreacion(rs.getObject("fec_creacion", OffsetDateTime.class))
                         .build(),
                 id);
@@ -95,6 +97,7 @@ public class UsuarioAdminCrudService {
         entity.setDosFactorHabilitado(false);
         entity.setIntentosFallidos(0);
         entity.setFlagAdminSistema(req.getFlagAdminSistema() != null && req.getFlagAdminSistema() ? "1" : "0");
+        entity.setTipoSales(normalizarTipoSales(req.getTipoSales()));
 
         entity = usuarioRepository.save(entity);
         return obtenerUsuario(entity.getId());
@@ -132,16 +135,28 @@ public class UsuarioAdminCrudService {
         if (req.getFlagAdminSistema() != null) {
             entity.setFlagAdminSistema(req.getFlagAdminSistema() ? "1" : "0");
         }
+        if (req.getTipoSales() != null) {
+            entity.setTipoSales(normalizarTipoSales(req.getTipoSales()));
+        }
 
         usuarioRepository.save(entity);
         return obtenerUsuario(id);
+    }
+
+    /** Solo se aceptan 'LICENSING' o 'SALES'; cualquier otro valor (o vacío) queda en null. */
+    private static String normalizarTipoSales(String valor) {
+        if (valor == null) {
+            return null;
+        }
+        String v = valor.trim().toUpperCase();
+        return ("LICENSING".equals(v) || "SALES".equals(v)) ? v : null;
     }
 
     public List<UsuarioAdminDto> listarUsuariosDeEmpresa(long empresaId) {
         return jdbcTemplate.query(
                 """
                 SELECT u.id, u.email, u.username, u.nombres, u.apellidos, u.nombre_completo,
-                       u.flag_estado, u.bloqueado, u.flag_admin_sistema, u.fec_creacion
+                       u.flag_estado, u.bloqueado, u.flag_admin_sistema, u.tipo_sales, u.fec_creacion
                 FROM auth.usuario u
                 JOIN auth.usuario_empresa ue ON ue.usuario_id = u.id
                 WHERE ue.empresa_id = ? AND ue.flag_estado = '1' AND u.flag_estado = '1'
@@ -157,6 +172,7 @@ public class UsuarioAdminCrudService {
                         .activo("1".equals(rs.getString("flag_estado")))
                         .bloqueado(rs.getBoolean("bloqueado"))
                         .flagAdminSistema("1".equals(rs.getString("flag_admin_sistema")))
+                        .tipoSales(rs.getString("tipo_sales"))
                         .fecCreacion(rs.getObject("fec_creacion", OffsetDateTime.class))
                         .build(),
                 empresaId);

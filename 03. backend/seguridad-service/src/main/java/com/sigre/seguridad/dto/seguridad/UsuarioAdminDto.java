@@ -23,5 +23,7 @@ public class UsuarioAdminDto {
     private Boolean activo;
     private Boolean bloqueado;
     private Boolean flagAdminSistema;
+    /** Perfil de licencias: 'LICENSING', 'SALES' o null. */
+    private String tipoSales;
     private OffsetDateTime fecCreacion;
 }

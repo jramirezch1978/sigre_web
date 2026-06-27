@@ -26,4 +26,8 @@ public class ActualizarUsuarioRequest {
     private Boolean bloqueado;
 
     private Boolean flagAdminSistema;
+
+    /** Perfil de licencias: 'LICENSING', 'SALES' o vacío para quitarlo. */
+    @Size(max = 10)
+    private String tipoSales;
 }
