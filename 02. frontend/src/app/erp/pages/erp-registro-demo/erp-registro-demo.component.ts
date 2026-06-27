@@ -29,6 +29,7 @@ interface RegistroDemoRequest {
     dniRepresentanteLegal: string;
     correoContacto: string;
     telefonoContacto: string;
+    correoResponsableLicencia: string;
   };
   adminUser: {
     username: string;
@@ -83,6 +84,7 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
     dniRepresentanteLegal: '',
     correoContacto: '',
     telefonoContacto: '',
+    correoResponsableLicencia: '',
     estadoSunat: '',
     condicionSunat: '',
   };
@@ -324,6 +326,7 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
         dniRepresentanteLegal: this.empresa.dniRepresentanteLegal,
         correoContacto: this.empresa.correoContacto,
         telefonoContacto: this.empresa.telefonoContacto,
+        correoResponsableLicencia: this.empresa.correoResponsableLicencia,
       },
       adminUser: { ...this.adminUser },
       usuariosAdicionales: this.usuariosAdicionales.filter(u => u.username.trim()),

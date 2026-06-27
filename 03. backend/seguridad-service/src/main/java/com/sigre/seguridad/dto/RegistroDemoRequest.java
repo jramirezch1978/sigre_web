@@ -58,6 +58,10 @@ public class RegistroDemoRequest {
 
         @Size(max = 30)
         private String telefonoContacto;
+
+        /** Correo del responsable de la licencia (avisos de renovación). Si va vacío se usa el de contacto. */
+        @Size(max = 150)
+        private String correoResponsableLicencia;
     }
 
     @Getter

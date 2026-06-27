@@ -163,6 +163,8 @@ CREATE TABLE auth.licencia (
     edicion_codigo VARCHAR(40) REFERENCES auth.edicion_erp(codigo),
     tipo VARCHAR(1) NOT NULL DEFAULT 'D' CHECK (tipo IN ('D', 'P')),  -- D=demo, P=pago
     max_usuarios INTEGER,
+    correo_responsable VARCHAR(150),   -- responsable de la licencia (avisos de renovación)
+    fecha_aviso_renovacion TIMESTAMPTZ,  -- último aviso de renovación enviado (evita reenvíos en el mismo ciclo)
     fecha_inicio TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     fecha_vencimiento TIMESTAMPTZ NOT NULL,            -- demo: inicio + 15 dias
     fecha_eliminacion_bd TIMESTAMPTZ,                  -- demo: inicio + 20 dias (la procesa worker-service)

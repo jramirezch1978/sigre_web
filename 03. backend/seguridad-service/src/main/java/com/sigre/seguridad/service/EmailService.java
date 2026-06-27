@@ -86,6 +86,41 @@ public class EmailService {
         enviarHtml(destinatario, subject, body);
     }
 
+    /** Aviso al responsable de la licencia: la licencia está por vencer y el costo de renovación. */
+    @Async
+    public void enviarRecordatorioRenovacion(String destinatario, String razonSocial, String codigoLicencia,
+                                             String edicion, String vencimiento, int usuariosActivos,
+                                             java.math.BigDecimal costoTotal) {
+        if (destinatario == null || destinatario.isBlank()) {
+            log.warn("No se envió aviso de renovación: licencia {} sin correo de responsable", codigoLicencia);
+            return;
+        }
+        String subject = "SIGRE ERP - Su licencia está por vencer";
+        String body = """
+                <html><body style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;color:#2a3f54;">
+                  <div style="background:#2a3f54;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;">
+                    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a7b1c2;">SIGRE ERP</div>
+                    <h1 style="margin:6px 0 0;font-size:22px;">Su licencia está por vencer</h1>
+                  </div>
+                  <div style="padding:28px;background:#f5f7fa;border-radius:0 0 8px 8px;">
+                    <p>Estimado responsable de <strong>%s</strong>,</p>
+                    <p>Le recordamos que su licencia <strong>%s</strong> vence el <strong>%s</strong>.
+                       Para mantener el servicio sin interrupciones, realice la renovación mensual antes de esa fecha.</p>
+                    <table style="width:100%%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:8px;overflow:hidden;">
+                      <tr><td style="padding:10px 14px;color:#64748b;">Licencia</td><td style="padding:10px 14px;text-align:right;font-weight:600;font-family:'Courier New',monospace;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">Edición</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">Usuarios activos</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%d</td></tr>
+                      <tr><td style="padding:12px 14px;color:#0d6efd;font-weight:700;border-top:2px solid #e4e9f0;">Costo de renovación (mensual)</td><td style="padding:12px 14px;text-align:right;font-weight:800;font-size:18px;color:#0d6efd;border-top:2px solid #e4e9f0;">USD %s</td></tr>
+                    </table>
+                    <p style="color:#888;font-size:12px;margin-top:20px;">El costo se calcula según la tarifa de su edición y la cantidad de usuarios activos que han iniciado sesión. No incluye impuestos.</p>
+                  </div>
+                </body></html>
+                """.formatted(safe(razonSocial), safe(edicion), safe(vencimiento),
+                safe(codigoLicencia), safe(edicion), usuariosActivos,
+                costoTotal != null ? costoTotal.toPlainString() : "0.00");
+        enviarHtml(destinatario, subject, body);
+    }
+
     private String buildRegistroEmpresaHtml(EmpresaRegistroEmailDto d) {
         return """
                 <!DOCTYPE html>

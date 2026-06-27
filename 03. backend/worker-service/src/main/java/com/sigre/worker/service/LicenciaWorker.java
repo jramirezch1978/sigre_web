@@ -2,9 +2,11 @@ package com.sigre.worker.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
@@ -26,12 +28,20 @@ public class LicenciaWorker {
 
     private final JdbcTemplate security;
     private final JdbcTemplate admin;
+    private final RestClient restClient = RestClient.create();
+
+    @Value("${worker.seguridad.base-url:http://seguridad-service:9001}")
+    private String seguridadBaseUrl;
+    @Value("${worker.seguridad.provision-secret:}")
+    private String provisionSecret;
 
     // Observabilidad (solo lectura, expuesta por WorkerEstadoController).
     private volatile java.time.OffsetDateTime ultimaCorridaVencimiento;
     private volatile java.time.OffsetDateTime ultimaCorridaEliminacion;
+    private volatile java.time.OffsetDateTime ultimaCorridaRenovacion;
     private volatile int ultimoVencidas;
     private volatile int ultimoBdEliminadas;
+    private volatile int ultimoAvisosRenovacion;
 
     public LicenciaWorker(JdbcTemplate securityJdbcTemplate,
                           @Qualifier("adminJdbcTemplate") JdbcTemplate adminJdbcTemplate) {
@@ -41,8 +51,10 @@ public class LicenciaWorker {
 
     public java.time.OffsetDateTime getUltimaCorridaVencimiento() { return ultimaCorridaVencimiento; }
     public java.time.OffsetDateTime getUltimaCorridaEliminacion() { return ultimaCorridaEliminacion; }
+    public java.time.OffsetDateTime getUltimaCorridaRenovacion() { return ultimaCorridaRenovacion; }
     public int getUltimoVencidas() { return ultimoVencidas; }
     public int getUltimoBdEliminadas() { return ultimoBdEliminadas; }
+    public int getUltimoAvisosRenovacion() { return ultimoAvisosRenovacion; }
 
     /** Vencimiento de licencias: desactiva empresa + usuarios demo cuando expira la vigencia. */
     @Scheduled(cron = "${worker.licencias.cron-vencimiento:0 10 * * * *}")
@@ -106,6 +118,29 @@ public class LicenciaWorker {
             } catch (Exception e) {
                 log.error("[worker] Error eliminando BD '{}' (licencia {}): {}", dbName, licId, e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Aviso de renovación: dispara a diario el cálculo + correo en seguridad-service (que es
+     * el dueño del motor de cálculo y del envío de correos). El worker solo agenda y delega.
+     */
+    @Scheduled(cron = "${worker.licencias.cron-renovacion:0 30 8 * * *}")
+    public void avisarRenovaciones() {
+        this.ultimaCorridaRenovacion = java.time.OffsetDateTime.now();
+        try {
+            Map<?, ?> resp = restClient.post()
+                    .uri(seguridadBaseUrl + "/api/auth/seguridad/licencias/procesar-renovaciones")
+                    .header("X-Provision-Secret", provisionSecret)
+                    .retrieve()
+                    .body(Map.class);
+            Object data = resp != null ? resp.get("data") : null;
+            if (data instanceof Map<?, ?> d && d.get("avisosEnviados") instanceof Number n) {
+                this.ultimoAvisosRenovacion = n.intValue();
+            }
+            log.info("[worker] Avisos de renovación procesados por seguridad-service: {}", this.ultimoAvisosRenovacion);
+        } catch (Exception e) {
+            log.error("[worker] Error disparando avisos de renovación: {}", e.getMessage());
         }
     }
 

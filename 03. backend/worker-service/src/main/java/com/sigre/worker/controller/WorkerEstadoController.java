@@ -33,8 +33,10 @@ public class WorkerEstadoController {
         Map<String, Object> r = new LinkedHashMap<>();
         r.put("ultimaCorridaVencimiento", worker.getUltimaCorridaVencimiento());
         r.put("ultimaCorridaEliminacion", worker.getUltimaCorridaEliminacion());
+        r.put("ultimaCorridaRenovacion", worker.getUltimaCorridaRenovacion());
         r.put("ultimoVencidas", worker.getUltimoVencidas());
         r.put("ultimoBdEliminadas", worker.getUltimoBdEliminadas());
+        r.put("ultimoAvisosRenovacion", worker.getUltimoAvisosRenovacion());
         r.put("activas", contar("estado = 'A'"));
         r.put("vencidas", contar("estado = 'V'"));
         r.put("bdEliminadas", contar("estado = 'E'"));

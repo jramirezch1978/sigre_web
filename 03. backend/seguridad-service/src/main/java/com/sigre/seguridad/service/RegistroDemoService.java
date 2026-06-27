@@ -122,8 +122,13 @@ public class RegistroDemoService {
         asignarMenuCompleto(rolId);
 
         // Licencia demo (edición Enterprise, 15 días). Su código + vencimiento se
-        // devuelven para mostrarlos/enviarlos por correo.
-        LicenciaService.LicenciaDemo licencia = licenciaService.crearLicenciaDemo(empresaId);
+        // devuelven para mostrarlos/enviarlos por correo. El responsable de la licencia
+        // (avisos de renovación) usa el correo indicado o, en su defecto, el de contacto.
+        String correoResponsable = emp.getCorreoResponsableLicencia() != null
+                && !emp.getCorreoResponsableLicencia().isBlank()
+                ? emp.getCorreoResponsableLicencia()
+                : emp.getCorreoContacto();
+        LicenciaService.LicenciaDemo licencia = licenciaService.crearLicenciaDemo(empresaId, correoResponsable);
 
         log.info("Empresa demo registrada: {} (RUC: {}) con {} usuarios, licencia {} (vence {})",
                 codigoEmpresa, emp.getRuc(), userIds.size(), licencia.codigo(), licencia.vencimiento());

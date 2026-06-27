@@ -168,6 +168,9 @@ export class AuthInterceptor implements HttpInterceptor {
     }
     this.sessionModalShown = true;
 
+    // Cierra cualquier modal/popup/select abierto antes de avisar y redirigir al login.
+    await this.cerrarOverlaysAbiertos();
+
     const message = error?.error?.message ?? 'Su sesión ha expirado. Inicie sesión nuevamente.';
     const modalService = this.injector.get(SigreModalService);
     await modalService.error(message, 'Sesión expirada');
@@ -176,5 +179,17 @@ export class AuthInterceptor implements HttpInterceptor {
     this.sessionModalShown = false;
     const loginUrl = this.router.url.startsWith('/admin') ? '/admin/login' : '/auth/signin';
     await this.router.navigateByUrl(loginUrl);
+  }
+
+  /** Descarta todos los overlays de Ionic abiertos (modales, popups, selects, etc.). */
+  private async cerrarOverlaysAbiertos(): Promise<void> {
+    const selectores = ['ion-modal', 'ion-popover', 'ion-action-sheet', 'ion-alert', 'ion-loading', 'ion-picker'];
+    for (const sel of selectores) {
+      document.querySelectorAll(sel).forEach((el: unknown) => {
+        const overlay = el as { dismiss?: () => Promise<unknown> };
+        try { void overlay.dismiss?.(); } catch { /* noop */ }
+      });
+    }
+    await new Promise(resolve => setTimeout(resolve, 60));
   }
 }

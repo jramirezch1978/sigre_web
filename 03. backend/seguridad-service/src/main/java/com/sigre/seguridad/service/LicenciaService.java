@@ -3,16 +3,27 @@ package com.sigre.seguridad.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.SecureRandom;
 import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Gestión de licencias del ERP (auth.licencia). La demo usa edición Enterprise
- * (todos los módulos), 15 días de vigencia y 20 días para eliminar la BD.
+ * Gestión de licencias del ERP (auth.licencia) y motor de cálculo de costo mensual.
+ *
+ * <p>Regla de precio (la misma que muestra la landing del frontend):
+ * cada usuario cuesta {@code precio}/mes (por usuario y por empresa); el plan incluye
+ * hasta {@code max_usuarios} a tarifa base y cada usuario adicional sobre ese límite
+ * cuesta {@code precio + RECARGO_USUARIO_EXTRA}. El "tamaño" facturable es la cantidad
+ * de usuarios <b>activos que han iniciado sesión</b> en la empresa.</p>
  */
 @Slf4j
 @Service
@@ -24,13 +35,31 @@ public class LicenciaService {
     public static final String EDICION_DEMO = "ENTERPRISE";
     public static final int DEMO_MAX_USUARIOS = 5;
 
+    /** Recargo mensual por usuario que excede el límite incluido (debe coincidir con la landing). */
+    public static final BigDecimal RECARGO_USUARIO_EXTRA = new BigDecimal("2");
+    /** Días antes del vencimiento en que se envía el aviso de renovación. */
+    public static final int DIAS_AVISO_RENOVACION = 7;
+
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final char[] HEX = "0123456789ABCDEF".toCharArray();
+    private static final DateTimeFormatter FMT_FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final JdbcTemplate jdbcTemplate;
+    private final EmailService emailService;
 
     /** Datos de la licencia recién creada (para correo/respuesta). */
     public record LicenciaDemo(String codigo, OffsetDateTime vencimiento, int diasVigencia) {}
+
+    /** Desglose del costo mensual calculado por el motor. */
+    public record CostoMensual(
+            String edicionCodigo,
+            BigDecimal precioBase,
+            int maxIncluidos,
+            int usuariosActivos,
+            int usuariosIncluidos,
+            int usuariosExtra,
+            BigDecimal recargoPorUsuario,
+            BigDecimal costoTotal) {}
 
     /** Código de 16 hex en grupos de 4: XXXX-XXXX-XXXX-XXXX (estilo Windows). */
     public String generarCodigo() {
@@ -48,7 +77,7 @@ public class LicenciaService {
 
     /** Crea la licencia demo (Enterprise) para la empresa. Reintenta ante colisión de código. */
     @Transactional
-    public LicenciaDemo crearLicenciaDemo(long empresaId) {
+    public LicenciaDemo crearLicenciaDemo(long empresaId, String correoResponsable) {
         OffsetDateTime inicio = OffsetDateTime.now();
         OffsetDateTime vencimiento = inicio.plusDays(DEMO_DIAS_VIGENCIA);
         OffsetDateTime eliminacionBd = inicio.plusDays(DEMO_DIAS_ELIMINACION_BD);
@@ -58,11 +87,12 @@ public class LicenciaService {
             try {
                 jdbcTemplate.update("""
                         INSERT INTO auth.licencia (empresa_id, codigo_licencia, edicion_codigo, tipo,
-                            max_usuarios, fecha_inicio, fecha_vencimiento, fecha_eliminacion_bd, estado, flag_estado)
-                        VALUES (?, ?, ?, 'D', ?, ?, ?, ?, 'A', '1')
+                            max_usuarios, correo_responsable, fecha_inicio, fecha_vencimiento,
+                            fecha_eliminacion_bd, estado, flag_estado)
+                        VALUES (?, ?, ?, 'D', ?, ?, ?, ?, ?, 'A', '1')
                         """,
                         empresaId, codigo, EDICION_DEMO, DEMO_MAX_USUARIOS,
-                        inicio, vencimiento, eliminacionBd);
+                        emptyToNull(correoResponsable), inicio, vencimiento, eliminacionBd);
                 log.info("Licencia demo {} creada para empresa {} (vence {})", codigo, empresaId, vencimiento);
                 return new LicenciaDemo(codigo, vencimiento, DEMO_DIAS_VIGENCIA);
             } catch (DuplicateKeyException e) {
@@ -70,5 +100,136 @@ public class LicenciaService {
             }
         }
         throw new IllegalStateException("No se pudo generar un código de licencia único tras varios intentos.");
+    }
+
+    /**
+     * Motor de cálculo: costo mensual de la licencia ACTIVA de una empresa, según la edición
+     * (plan de suscripción) y la cantidad de usuarios activos que han iniciado sesión.
+     */
+    public CostoMensual calcularCostoMensual(long empresaId) {
+        String edicion = obtenerEdicionLicenciaActiva(empresaId);
+        return calcularCostoPorEdicion(edicion, contarUsuariosActivosConAcceso(empresaId));
+    }
+
+    /** Cálculo puro a partir de la edición y la cantidad de usuarios facturables. */
+    public CostoMensual calcularCostoPorEdicion(String edicionCodigo, int usuariosActivos) {
+        Map<String, Object> plan = obtenerPlanPorEdicion(edicionCodigo);
+        BigDecimal precio = plan != null && plan.get("precio") != null
+                ? new BigDecimal(plan.get("precio").toString())
+                : BigDecimal.ZERO;
+        int maxIncluidos = plan != null && plan.get("max_usuarios") != null
+                ? ((Number) plan.get("max_usuarios")).intValue()
+                : usuariosActivos;
+
+        int incluidos = Math.min(usuariosActivos, Math.max(maxIncluidos, 0));
+        int extra = Math.max(0, usuariosActivos - Math.max(maxIncluidos, 0));
+
+        BigDecimal costoIncluidos = precio.multiply(BigDecimal.valueOf(incluidos));
+        BigDecimal costoExtra = precio.add(RECARGO_USUARIO_EXTRA).multiply(BigDecimal.valueOf(extra));
+        BigDecimal total = costoIncluidos.add(costoExtra).setScale(2, RoundingMode.HALF_UP);
+
+        return new CostoMensual(edicionCodigo, precio.setScale(2, RoundingMode.HALF_UP),
+                maxIncluidos, usuariosActivos, incluidos, extra, RECARGO_USUARIO_EXTRA, total);
+    }
+
+    /**
+     * Busca licencias de pago que vencen dentro de {@link #DIAS_AVISO_RENOVACION} días y aún no
+     * se han avisado en este ciclo; calcula el costo de renovación y notifica al responsable.
+     * Lo invoca worker-service de forma agendada (un disparo diario basta).
+     *
+     * @return cantidad de avisos enviados.
+     */
+    @Transactional
+    public int procesarRenovacionesPorVencer(int diasAviso) {
+        List<Map<String, Object>> porVencer = jdbcTemplate.queryForList("""
+                SELECT l.id, l.empresa_id, l.edicion_codigo, l.codigo_licencia, l.fecha_vencimiento,
+                       COALESCE(NULLIF(l.correo_responsable, ''), e.correo_contacto) AS correo,
+                       e.razon_social
+                FROM auth.licencia l
+                JOIN master.empresa e ON e.id = l.empresa_id
+                WHERE l.estado = 'A' AND l.tipo = 'P'
+                  AND l.fecha_vencimiento > NOW()
+                  AND l.fecha_vencimiento <= NOW() + (? * INTERVAL '1 day')
+                  AND (l.fecha_aviso_renovacion IS NULL
+                       OR l.fecha_aviso_renovacion < l.fecha_vencimiento - (? * INTERVAL '1 day'))
+                """, diasAviso, diasAviso);
+
+        int enviados = 0;
+        for (Map<String, Object> lic : porVencer) {
+            long licenciaId = ((Number) lic.get("id")).longValue();
+            long empresaId = ((Number) lic.get("empresa_id")).longValue();
+            String correo = (String) lic.get("correo");
+            String razonSocial = (String) lic.get("razon_social");
+            String edicion = (String) lic.get("edicion_codigo");
+            String codigo = (String) lic.get("codigo_licencia");
+            OffsetDateTime vencimiento = ((java.sql.Timestamp) lic.get("fecha_vencimiento"))
+                    .toInstant().atOffset(OffsetDateTime.now().getOffset());
+
+            if (correo == null || correo.isBlank()) {
+                log.warn("Licencia {} por vencer sin correo de responsable/contacto; se omite aviso", codigo);
+                continue;
+            }
+
+            CostoMensual costo = calcularCostoPorEdicion(edicion, contarUsuariosActivosConAcceso(empresaId));
+            emailService.enviarRecordatorioRenovacion(correo, razonSocial, codigo, edicion,
+                    vencimiento.format(FMT_FECHA), costo.usuariosActivos(), costo.costoTotal());
+            jdbcTemplate.update("UPDATE auth.licencia SET fecha_aviso_renovacion = NOW() WHERE id = ?", licenciaId);
+            enviados++;
+            log.info("Aviso de renovación enviado: licencia {} (empresa {}) → {} | costo {} USD",
+                    codigo, empresaId, correo, costo.costoTotal());
+        }
+        if (enviados > 0) {
+            log.info("Renovaciones procesadas: {} aviso(s) enviado(s)", enviados);
+        }
+        return enviados;
+    }
+
+    /** Edición de la licencia activa de la empresa (o la demo por defecto si no hay). */
+    private String obtenerEdicionLicenciaActiva(long empresaId) {
+        try {
+            return jdbcTemplate.queryForObject("""
+                    SELECT edicion_codigo FROM auth.licencia
+                    WHERE empresa_id = ? AND estado = 'A'
+                    ORDER BY fecha_inicio DESC LIMIT 1
+                    """, String.class, empresaId);
+        } catch (EmptyResultDataAccessException e) {
+            return EDICION_DEMO;
+        }
+    }
+
+    /** Plan de suscripción de pago asociado a una edición (el de mayor precio, ignorando el demo). */
+    private Map<String, Object> obtenerPlanPorEdicion(String edicionCodigo) {
+        if (edicionCodigo == null) {
+            return null;
+        }
+        List<Map<String, Object>> planes = jdbcTemplate.queryForList("""
+                SELECT precio, max_usuarios FROM auth.plan_suscripcion
+                WHERE edicion_codigo = ? AND flag_estado = '1'
+                ORDER BY precio DESC LIMIT 1
+                """, edicionCodigo);
+        return planes.isEmpty() ? null : planes.get(0);
+    }
+
+    /** Usuarios activos de la empresa que han iniciado sesión correctamente al menos una vez. */
+    private int contarUsuariosActivosConAcceso(long empresaId) {
+        Integer n = jdbcTemplate.queryForObject("""
+                SELECT COUNT(DISTINCT ue.usuario_id)
+                FROM auth.usuario_empresa ue
+                JOIN auth.usuario u ON u.id = ue.usuario_id
+                WHERE ue.empresa_id = ?
+                  AND ue.flag_estado = '1'
+                  AND u.flag_estado = '1'
+                  AND EXISTS (
+                      SELECT 1 FROM auth.log_acceso la
+                      WHERE la.usuario_id = ue.usuario_id
+                        AND la.empresa_id = ue.empresa_id
+                        AND la.exito = TRUE
+                  )
+                """, Integer.class, empresaId);
+        return n != null ? n : 0;
+    }
+
+    private static String emptyToNull(String v) {
+        return (v == null || v.isBlank()) ? null : v;
     }
 }
