@@ -122,6 +122,7 @@ CREATE TABLE auth.edicion_erp (
     nombre VARCHAR(120) NOT NULL,
     descripcion VARCHAR(500),
     orden INTEGER NOT NULL DEFAULT 0,
+    logo BYTEA,                 -- ícono/logo de la edición (PNG), cargado en seed/04
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1'))
 );
 

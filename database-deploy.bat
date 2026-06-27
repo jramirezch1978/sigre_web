@@ -344,6 +344,7 @@ call :run_sql "security/99-auditoria-security-post.sql" || exit /b 1
 call :run_sql "seed/01-carga-inicial-security.sql" || exit /b 1
 call :run_sql "seed/02-edicion-erp-contenido-modulos-security.sql" || exit /b 1
 call :run_sql "seed/03-opciones-menu-completas-security.sql" || exit /b 1
+call :run_sql "seed/04-edicion-erp-logos-security.sql" || exit /b 1
 set "PGDATABASE=!SAVED_PGDATABASE!"
 echo.
 echo ^>^> create-security: DDL de seguridad ejecutado en !PGSECURITY!
