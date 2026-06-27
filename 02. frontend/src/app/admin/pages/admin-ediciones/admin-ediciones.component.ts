@@ -43,6 +43,19 @@ export class AdminEdicionesComponent implements OnInit {
     });
   }
 
+  /** Logo PNG generado por edición (basado en el logo SIGRE + color + nombre). */
+  private readonly archivos: Record<string, string> = {
+    MYPE: 'mype',
+    SMALL_BUSINESS: 'small-business',
+    PROFESSIONAL: 'professional',
+    ENTERPRISE: 'enterprise',
+  };
+
+  iconoEdicion(codigo: string): string {
+    const slug = this.archivos[codigo];
+    return slug ? `assets/imagenes/ediciones/${slug}.png` : this.logoSigre;
+  }
+
   tema(codigo: string): TemaEdicion {
     return this.temas[codigo] ?? { c1: '#94a3b8', c2: '#475569', estrellas: 0, etiqueta: '' };
   }
