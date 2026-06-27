@@ -14,3 +14,4 @@ export type { SigreValidatedFieldVariant } from './forms/sigre-validated-field.c
 export { SigreValidationBadgeComponent } from './forms/sigre-validation-badge.component';
 export { estadoValidacionCampo } from './forms/sigre-field-validation.util';
 export type { SigreFieldValidationState } from './forms/sigre-field-validation.util';
+export { SigreValidIconDirective } from './forms/sigre-valid-icon.directive';

@@ -11,6 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { SigreValidIconDirective } from '@sigre-common';
+
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminUiModule } from '../ui/admin-ui.module';
 
@@ -62,6 +64,7 @@ import { AdminCuentaComponent } from './pages/admin-cuenta/admin-cuenta.componen
     ReactiveFormsModule,
     AdminRoutingModule,
     AdminUiModule,
+    SigreValidIconDirective,
     BaseChartDirective,
     MatButtonModule,
     MatFormFieldModule,
