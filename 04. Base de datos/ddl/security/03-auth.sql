@@ -54,6 +54,7 @@ DROP TABLE IF EXISTS auth.notificacion CASCADE;
 DROP TABLE IF EXISTS auth.grupo_usuario_det CASCADE;
 DROP TABLE IF EXISTS auth.grupo_usuario CASCADE;
 DROP TABLE IF EXISTS auth.log_acceso CASCADE;
+DROP TABLE IF EXISTS auth.licencia CASCADE;
 DROP TABLE IF EXISTS auth.plan_suscripcion CASCADE;
 DROP TABLE IF EXISTS auth.edicion_modulo CASCADE;
 DROP TABLE IF EXISTS auth.edicion_erp CASCADE;
@@ -153,6 +154,27 @@ CREATE TABLE auth.plan_suscripcion (
 );
 
 CREATE INDEX IX_PLAN_SUSCRIPCION_ORDEN ON auth.plan_suscripcion (orden);
+
+-- Licencias del ERP (demo y de pago). codigo_licencia: 16 hex estilo Windows (XXXX-XXXX-XXXX-XXXX).
+CREATE TABLE auth.licencia (
+    id BIGSERIAL PRIMARY KEY,
+    empresa_id BIGINT NOT NULL REFERENCES master.empresa(id),
+    codigo_licencia VARCHAR(19) NOT NULL UNIQUE,
+    edicion_codigo VARCHAR(40) REFERENCES auth.edicion_erp(codigo),
+    tipo VARCHAR(1) NOT NULL DEFAULT 'D' CHECK (tipo IN ('D', 'P')),  -- D=demo, P=pago
+    max_usuarios INTEGER,
+    fecha_inicio TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    fecha_vencimiento TIMESTAMPTZ NOT NULL,            -- demo: inicio + 15 dias
+    fecha_eliminacion_bd TIMESTAMPTZ,                  -- demo: inicio + 20 dias (la procesa worker-service)
+    fecha_baja TIMESTAMPTZ,                            -- cuando se desactiva (vencida)
+    bd_eliminada BOOLEAN NOT NULL DEFAULT FALSE,
+    estado VARCHAR(1) NOT NULL DEFAULT 'A' CHECK (estado IN ('A', 'V', 'E')),  -- A=activa, V=vencida, E=BD eliminada
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1'))
+);
+
+CREATE INDEX IX_LICENCIA_EMPRESA ON auth.licencia (empresa_id);
+CREATE INDEX IX_LICENCIA_VENCIMIENTO ON auth.licencia (estado, fecha_vencimiento);
+CREATE INDEX IX_LICENCIA_ELIM_BD ON auth.licencia (bd_eliminada, fecha_eliminacion_bd);
 
 CREATE TABLE auth.opcion_menu (
     id BIGSERIAL PRIMARY KEY,

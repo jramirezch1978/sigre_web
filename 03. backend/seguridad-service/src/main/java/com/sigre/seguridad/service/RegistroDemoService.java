@@ -35,9 +35,10 @@ public class RegistroDemoService {
     private final EmpresaMasterRepository empresaRepository;
     private final UsuarioRepository usuarioRepository;
     private final SeguridadService seguridadService;
+    private final LicenciaService licenciaService;
 
     @Transactional
-    public void registrarDemo(RegistroDemoRequest request) {
+    public LicenciaService.LicenciaDemo registrarDemo(RegistroDemoRequest request) {
         EmpresaDemo emp = request.getEmpresa();
         UsuarioDemo admin = request.getAdminUser();
         List<UsuarioDemo> adicionales = request.getUsuariosAdicionales() != null
@@ -116,8 +117,13 @@ public class RegistroDemoService {
 
         asignarMenuCompleto(rolId);
 
-        log.info("Empresa demo registrada: {} (RUC: {}) con {} usuarios",
-                codigoEmpresa, emp.getRuc(), userIds.size());
+        // Licencia demo (edición Enterprise, 15 días). Su código + vencimiento se
+        // devuelven para mostrarlos/enviarlos por correo.
+        LicenciaService.LicenciaDemo licencia = licenciaService.crearLicenciaDemo(empresaId);
+
+        log.info("Empresa demo registrada: {} (RUC: {}) con {} usuarios, licencia {} (vence {})",
+                codigoEmpresa, emp.getRuc(), userIds.size(), licencia.codigo(), licencia.vencimiento());
+        return licencia;
     }
 
     private Long resolverDistritoId(EmpresaDemo emp) {
