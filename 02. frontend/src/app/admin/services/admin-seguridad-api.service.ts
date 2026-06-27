@@ -204,7 +204,7 @@ export class AdminSeguridadApiService extends AbstractAuthenticatedApiService {
     );
   }
 
-  crearGrupoUsuario(empresaId: number, body: { codigo: string; descripcion: string; activo?: boolean }): Observable<ApiResponse<GrupoUsuarioDto>> {
+  crearGrupoUsuario(empresaId: number, body: { codigo: string; descripcion: string; activo?: boolean; miembrosIds: number[] }): Observable<ApiResponse<GrupoUsuarioDto>> {
     return this.http.post<ApiResponse<GrupoUsuarioDto>>(
       this.buildUrl(`/auth/seguridad/empresas/${empresaId}/grupos-usuario`),
       body, { headers: this.bearerHeaders() }

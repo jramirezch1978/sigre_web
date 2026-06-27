@@ -789,8 +789,20 @@ public class SeguridadService {
         return list.get(0);
     }
 
+    /**
+     * Crea el grupo y sus miembros en una sola transacción (atómico). Exige al menos
+     * un miembro: no se permiten grupos huérfanos (cabecera sin detalle). Si algún
+     * miembro es inválido, se revierte todo (no queda grupo a medias).
+     */
     @Transactional
     public GrupoUsuarioDto crearGrupoUsuario(long empresaId, GrupoUsuarioRequest req) {
+        List<Long> miembros = (req.getMiembrosIds() == null) ? List.of()
+                : req.getMiembrosIds().stream().filter(java.util.Objects::nonNull).distinct().toList();
+        if (miembros.isEmpty()) {
+            throw new BusinessException("Debe agregar al menos un miembro al grupo.",
+                    HttpStatus.UNPROCESSABLE_ENTITY, "GRUPO_SIN_MIEMBROS");
+        }
+
         GeneratedKeyHolder kh = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(
@@ -806,7 +818,26 @@ public class SeguridadService {
             return ps;
         }, kh);
         Number key = kh.getKey();
-        return obtenerGrupoUsuario(empresaId, key != null ? key.longValue() : null);
+        long grupoId = (key != null) ? key.longValue() : 0L;
+
+        for (Long usuarioId : miembros) {
+            Integer ue = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM auth.usuario_empresa WHERE usuario_id = ? AND empresa_id = ? AND flag_estado = '1'",
+                    Integer.class, usuarioId, empresaId);
+            if (ue == null || ue == 0) {
+                throw new BusinessException("El usuario " + usuarioId + " no pertenece a la empresa.",
+                        HttpStatus.UNPROCESSABLE_ENTITY, "USUARIO_SIN_EMPRESA");
+            }
+            jdbcTemplate.update(
+                    """
+                    INSERT INTO auth.grupo_usuario_det (grupo_usuario_id, usuario_id, flag_estado)
+                    VALUES (?,?, '1')
+                    ON CONFLICT (grupo_usuario_id, usuario_id) DO UPDATE SET flag_estado = EXCLUDED.flag_estado
+                    """,
+                    grupoId, usuarioId);
+        }
+
+        return obtenerGrupoUsuario(empresaId, grupoId);
     }
 
     @Transactional

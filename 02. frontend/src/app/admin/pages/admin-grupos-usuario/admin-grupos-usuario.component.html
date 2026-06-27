@@ -104,13 +104,13 @@
 
         <div class="form-row" style="align-items:flex-end;margin-bottom:1rem">
           <ion-item style="flex:1">
-            <ion-select [(ngModel)]="usuarioIdAsignar" placeholder="Seleccione usuario" label="Agregar miembro" labelPlacement="stacked">
+            <ion-select [(ngModel)]="usuariosIdsAsignar" [multiple]="true" placeholder="Seleccione uno o varios usuarios" label="Agregar miembros" labelPlacement="stacked">
               @for (u of usuariosDisponibles; track u.id) {
                 <ion-select-option [value]="u.id">{{ u.nombreCompleto }} ({{ u.username }})</ion-select-option>
               }
             </ion-select>
           </ion-item>
-          <ion-button [disabled]="!usuarioIdAsignar" (click)="asignarMiembro()" color="primary" size="default">Agregar</ion-button>
+          <ion-button [disabled]="!usuariosIdsAsignar.length" (click)="asignarMiembro()" color="primary" size="default">Agregar</ion-button>
         </div>
 
         @if (editandoId != null) {

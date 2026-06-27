@@ -32,7 +32,8 @@ export class AdminGruposUsuarioComponent implements OnInit {
   filtro = '';
   mostrandoForm = false;
   editandoId: number | null = null;
-  usuarioIdAsignar: number | null = null;
+  /** Selección múltiple del combo "Agregar miembro". */
+  usuariosIdsAsignar: number[] = [];
   form!: FormGroup;
 
   get empresaId(): number {
@@ -84,7 +85,7 @@ export class AdminGruposUsuarioComponent implements OnInit {
     this.form.reset({ codigo: '', descripcion: '', activo: true });
     this.miembros = [];
     this.miembrosPendientes = [];
-    this.usuarioIdAsignar = null;
+    this.usuariosIdsAsignar = [];
     this.mostrandoForm = true;
   }
 
@@ -92,6 +93,7 @@ export class AdminGruposUsuarioComponent implements OnInit {
     this.editandoId = g.id;
     this.form.patchValue(g);
     this.miembrosPendientes = [];
+    this.usuariosIdsAsignar = [];
     this.mostrandoForm = true;
     this.cargarMiembros();
   }
@@ -101,14 +103,14 @@ export class AdminGruposUsuarioComponent implements OnInit {
     this.editandoId = null;
     this.miembros = [];
     this.miembrosPendientes = [];
-    this.usuarioIdAsignar = null;
+    this.usuariosIdsAsignar = [];
   }
 
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     const body = this.form.getRawValue();
 
-    // Edición: solo actualiza el grupo (los miembros se gestionan en vivo).
+    // Edición: solo actualiza la cabecera (los miembros se gestionan en vivo).
     if (this.editandoId != null) {
       this.api.actualizarGrupoUsuario(this.empresaId, this.editandoId, body).subscribe({
         next: () => { this.cargarDatosIniciales(); this.showSuccess('Grupo actualizado'); },
@@ -117,38 +119,18 @@ export class AdminGruposUsuarioComponent implements OnInit {
       return;
     }
 
-    // Creación: crea el grupo y, a la vez, inserta los miembros seleccionados.
-    this.api.crearGrupoUsuario(this.empresaId, body).subscribe({
-      next: (resp) => {
-        const guardado = resp.data;
-        if (!guardado) { this.cargarDatosIniciales(); return; }
-        this.editandoId = guardado.id;
-        this.form.patchValue(guardado);
-
-        const pendientes = [...this.miembrosPendientes];
-        this.miembrosPendientes = [];
-
-        if (pendientes.length === 0) {
-          this.cargarMiembros();
-          this.cargarDatosIniciales();
-          this.showSuccess('Grupo creado exitosamente');
-          return;
-        }
-
-        const asignaciones = pendientes.map(u =>
-          this.api.asignarMiembroGrupo(this.empresaId, guardado.id, { usuarioId: u.id, activo: true }));
-        forkJoin(asignaciones).subscribe({
-          next: () => {
-            this.cargarMiembros();
-            this.cargarDatosIniciales();
-            this.showSuccess(`Grupo creado con ${pendientes.length} miembro(s)`);
-          },
-          error: async (err: any) => {
-            this.cargarMiembros();
-            this.cargarDatosIniciales();
-            await this.showError(err?.error?.message ?? 'Grupo creado, pero falló al asignar algún miembro');
-          },
-        });
+    // Creación: cabecera + detalle en una sola operación atómica (no se permiten grupos vacíos).
+    if (this.miembrosPendientes.length === 0) {
+      void this.showError('Debe agregar al menos un miembro al grupo antes de guardar.');
+      return;
+    }
+    const total = this.miembrosPendientes.length;
+    const payload = { ...body, miembrosIds: this.miembrosPendientes.map(u => u.id) };
+    this.api.crearGrupoUsuario(this.empresaId, payload).subscribe({
+      next: () => {
+        this.cargarDatosIniciales();
+        this.cancelar();
+        this.showSuccess(`Grupo creado con ${total} miembro(s)`);
       },
       error: async (err: any) => { await this.showError(err?.error?.message ?? 'Error al guardar'); },
     });
@@ -164,27 +146,36 @@ export class AdminGruposUsuarioComponent implements OnInit {
   }
 
   asignarMiembro(): void {
-    if (!this.usuarioIdAsignar) return;
+    const ids = this.usuariosIdsAsignar ?? [];
+    if (ids.length === 0) return;
 
     // Modo creación: el grupo aún no existe → guardar en pendientes (se persisten al Guardar).
     if (this.editandoId == null) {
-      const u = this.usuariosEmpresa.find(x => x.id === this.usuarioIdAsignar);
-      if (u && !this.miembrosPendientes.some(p => p.id === u.id)) {
-        this.miembrosPendientes = [...this.miembrosPendientes, u];
+      for (const id of ids) {
+        const u = this.usuariosEmpresa.find(x => x.id === id);
+        if (u && !this.miembrosPendientes.some(p => p.id === u.id)) {
+          this.miembrosPendientes = [...this.miembrosPendientes, u];
+        }
       }
-      this.usuarioIdAsignar = null;
+      this.usuariosIdsAsignar = [];
       return;
     }
 
-    // Modo edición: asigna directo contra el backend.
-    this.api.asignarMiembroGrupo(this.empresaId, this.editandoId, { usuarioId: this.usuarioIdAsignar, activo: true }).subscribe({
-      next: () => { this.usuarioIdAsignar = null; this.cargarMiembros(); },
-      error: async (err: any) => { await this.showError(err?.error?.message ?? 'Error al asignar miembro'); },
+    // Modo edición: asigna todos los seleccionados contra el backend.
+    const grupoId = this.editandoId;
+    const calls = ids.map(id => this.api.asignarMiembroGrupo(this.empresaId, grupoId, { usuarioId: id, activo: true }));
+    forkJoin(calls).subscribe({
+      next: () => { this.usuariosIdsAsignar = []; this.cargarMiembros(); },
+      error: async (err: any) => { this.cargarMiembros(); await this.showError(err?.error?.message ?? 'Error al asignar miembros'); },
     });
   }
 
   quitarMiembro(usuarioId: number): void {
     if (this.editandoId == null) return;
+    if (this.miembros.length <= 1) {
+      void this.showError('Un grupo debe tener al menos un miembro. Agregue otro antes de quitar este.');
+      return;
+    }
     this.api.quitarMiembroGrupo(this.empresaId, this.editandoId, usuarioId).subscribe({
       next: () => this.cargarMiembros(),
       error: async (err: any) => { await this.showError(err?.error?.message ?? 'Error al quitar miembro'); },
