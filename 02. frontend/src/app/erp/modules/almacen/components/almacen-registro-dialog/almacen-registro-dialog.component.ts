@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, of, Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { TablaCrudCampo, TablaCrudConfig } from '../../config/almacen-tabla-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
@@ -182,13 +183,19 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       return;
     }
 
+    // Cada lista se carga de forma independiente: si una falla (servicio caído, endpoint nuevo
+    // sin desplegar, etc.) NO debe bloquear el resto del formulario. Se reporta solo cuáles fallaron.
+    const fallidas: string[] = [];
+    const resiliente = <T>(etiqueta: string, fuente: Observable<T[]>): Observable<T[]> =>
+      fuente.pipe(catchError(() => { fallidas.push(etiqueta); return of([] as T[]); }));
+
     forkJoin({
-      tipos: necesitaTipos ? this.almacenApi.listarTiposAlmacen() : of([]),
-      sucursales: necesitaSucursales ? this.coreApi.listarMisSucursales() : of([]),
-      almacenes: necesitaAlmacenes ? this.almacenApi.listarAlmacenes() : of([]),
-      tiposMov: necesitaTiposMov ? this.almacenApi.listarTiposMovimiento() : of([]),
-      centrosCosto: necesitaCentrosCosto ? this.coreApi.listarCentrosCosto() : of([]),
-      proveedores: necesitaProveedores ? this.coreApi.listarProveedores() : of([]),
+      tipos: necesitaTipos ? resiliente('tipos de almacén', this.almacenApi.listarTiposAlmacen()) : of([]),
+      sucursales: necesitaSucursales ? resiliente('sucursales', this.coreApi.listarMisSucursales()) : of([]),
+      almacenes: necesitaAlmacenes ? resiliente('almacenes', this.almacenApi.listarAlmacenes()) : of([]),
+      tiposMov: necesitaTiposMov ? resiliente('tipos de movimiento', this.almacenApi.listarTiposMovimiento()) : of([]),
+      centrosCosto: necesitaCentrosCosto ? resiliente('centros de costo', this.coreApi.listarCentrosCosto()) : of([]),
+      proveedores: necesitaProveedores ? resiliente('proveedores', this.coreApi.listarProveedores()) : of([]),
     }).subscribe({
       next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores }) => {
         if (necesitaTipos) {
@@ -221,6 +228,10 @@ export class AlmacenRegistroDialogComponent implements OnInit {
         if (necesitaProveedores) {
           this.opciones['proveedores'] = proveedores;
         }
+        // El formulario queda usable; solo se avisa de las listas que no cargaron.
+        this.error = fallidas.length
+          ? `No se pudieron cargar algunas listas (${fallidas.join(', ')}); esos campos quedarán vacíos. Puede continuar.`
+          : '';
         this.cargandoOpciones = false;
       },
       error: () => {
