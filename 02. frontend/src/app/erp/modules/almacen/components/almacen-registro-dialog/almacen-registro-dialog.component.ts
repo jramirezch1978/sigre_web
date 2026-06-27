@@ -10,6 +10,7 @@ import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService, SelectOptionDto } from '../../services/core-api.service';
 import {
   extraerMensajeErrorApi,
+  SigreModalService,
   SigreMetoxiModalActionsComponent,
   SigreMetoxiModalShellComponent,
 } from '@sigre-common';
@@ -42,6 +43,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   private readonly almacenApi = inject(AlmacenApiService);
   private readonly coreApi = inject(CoreApiService);
   private readonly crudService = inject(AlmacenCrudService);
+  private readonly modal = inject(SigreModalService);
   readonly data = inject<AlmacenRegistroDialogData>(MAT_DIALOG_DATA);
 
   form!: FormGroup;
@@ -89,7 +91,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       next: () => this.dialogRef.close(true),
       error: err => {
         this.guardando = false;
-        this.error = extraerMensajeErrorApi(err, 'No se pudo guardar el registro');
+        void this.modal.error(extraerMensajeErrorApi(err, 'No se pudo guardar el registro'), 'Error');
       },
     });
   }
@@ -228,15 +230,17 @@ export class AlmacenRegistroDialogComponent implements OnInit {
         if (necesitaProveedores) {
           this.opciones['proveedores'] = proveedores;
         }
-        // El formulario queda usable; solo se avisa de las listas que no cargaron.
-        this.error = fallidas.length
-          ? `No se pudieron cargar algunas listas (${fallidas.join(', ')}); esos campos quedarán vacíos. Puede continuar.`
-          : '';
         this.cargandoOpciones = false;
+        // El formulario queda usable; solo se avisa (modal WARNING) de las listas que no cargaron.
+        if (fallidas.length) {
+          void this.modal.warning(
+            `No se pudieron cargar algunas listas (${fallidas.join(', ')}). Esos campos quedarán vacíos; puede continuar.`,
+            'Advertencia');
+        }
       },
       error: () => {
         this.cargandoOpciones = false;
-        this.error = 'No se pudieron cargar las listas del formulario';
+        void this.modal.error('No se pudieron cargar las listas del formulario.', 'Error');
       },
     });
   }

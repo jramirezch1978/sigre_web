@@ -4,7 +4,7 @@ import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, filter, take, switchMap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { StorageService } from '../../core/services/storage.service';
-import { SigreModalService } from '@sigre-common';
+import { SigreModalService, SigreOverlayService } from '@sigre-common';
 import { AuthService } from '../services/auth.service';
 
 @Injectable()
@@ -168,8 +168,9 @@ export class AuthInterceptor implements HttpInterceptor {
     }
     this.sessionModalShown = true;
 
-    // Cierra cualquier modal/popup/select abierto antes de avisar y redirigir al login.
-    await this.cerrarOverlaysAbiertos();
+    // Cierra cualquier modal/popup abierto (MatDialog del ERP + overlays Ionic de admin)
+    // antes de avisar y redirigir al login, para que no quede nada encima.
+    await this.injector.get(SigreOverlayService).cerrarTodos();
 
     const message = error?.error?.message ?? 'Su sesión ha expirado. Inicie sesión nuevamente.';
     const modalService = this.injector.get(SigreModalService);
@@ -179,17 +180,5 @@ export class AuthInterceptor implements HttpInterceptor {
     this.sessionModalShown = false;
     const loginUrl = this.router.url.startsWith('/admin') ? '/admin/login' : '/auth/signin';
     await this.router.navigateByUrl(loginUrl);
-  }
-
-  /** Descarta todos los overlays de Ionic abiertos (modales, popups, selects, etc.). */
-  private async cerrarOverlaysAbiertos(): Promise<void> {
-    const selectores = ['ion-modal', 'ion-popover', 'ion-action-sheet', 'ion-alert', 'ion-loading', 'ion-picker'];
-    for (const sel of selectores) {
-      document.querySelectorAll(sel).forEach((el: unknown) => {
-        const overlay = el as { dismiss?: () => Promise<unknown> };
-        try { void overlay.dismiss?.(); } catch { /* noop */ }
-      });
-    }
-    await new Promise(resolve => setTimeout(resolve, 60));
   }
 }

@@ -9,6 +9,7 @@ import { CryptoService } from '../../core/services/crypto.service';
 import { SanitizerService } from '../../core/services/sanitizer.service';
 import { UtilityService } from '../../services/utility.service';
 import { PostAuthIntentService } from '../../admin/services/post-auth-intent.service';
+import { SigreOverlayService } from '@sigre-common';
 
 export interface LoginApiResponse {
   success: boolean;
@@ -69,6 +70,7 @@ export class AuthService {
   private readonly utilityService = inject(UtilityService);
   private readonly sessionIdle = inject(SessionIdleService);
   private readonly postAuthIntent = inject(PostAuthIntentService);
+  private readonly overlay = inject(SigreOverlayService);
 
   private readonly apiBase = inject(ApiBaseService);
 
@@ -313,6 +315,9 @@ export class AuthService {
   }
 
   async signOut(options?: { returnUrl?: string; redirectTo?: string }): Promise<void> {
+    // Cierra cualquier modal/popup abierto (MatDialog del ERP, overlays Ionic de admin)
+    // para que no quede ninguna ventana encima del login al cerrar sesión.
+    await this.overlay.cerrarTodos();
     await this.invalidateSession();
 
     const redirectTo = options?.redirectTo?.trim();
