@@ -27,17 +27,30 @@ public class LicenciaWorker {
     private final JdbcTemplate security;
     private final JdbcTemplate admin;
 
+    // Observabilidad (solo lectura, expuesta por WorkerEstadoController).
+    private volatile java.time.OffsetDateTime ultimaCorridaVencimiento;
+    private volatile java.time.OffsetDateTime ultimaCorridaEliminacion;
+    private volatile int ultimoVencidas;
+    private volatile int ultimoBdEliminadas;
+
     public LicenciaWorker(JdbcTemplate securityJdbcTemplate,
                           @Qualifier("adminJdbcTemplate") JdbcTemplate adminJdbcTemplate) {
         this.security = securityJdbcTemplate;
         this.admin = adminJdbcTemplate;
     }
 
+    public java.time.OffsetDateTime getUltimaCorridaVencimiento() { return ultimaCorridaVencimiento; }
+    public java.time.OffsetDateTime getUltimaCorridaEliminacion() { return ultimaCorridaEliminacion; }
+    public int getUltimoVencidas() { return ultimoVencidas; }
+    public int getUltimoBdEliminadas() { return ultimoBdEliminadas; }
+
     /** Vencimiento de licencias: desactiva empresa + usuarios demo cuando expira la vigencia. */
     @Scheduled(cron = "${worker.licencias.cron-vencimiento:0 10 * * * *}")
     public void vencerLicencias() {
+        this.ultimaCorridaVencimiento = java.time.OffsetDateTime.now();
         List<Map<String, Object>> vencidas = security.queryForList(
                 "SELECT id, empresa_id FROM auth.licencia WHERE estado = 'A' AND fecha_vencimiento <= now()");
+        this.ultimoVencidas = vencidas.size();
         if (vencidas.isEmpty()) {
             return;
         }
@@ -64,12 +77,14 @@ public class LicenciaWorker {
     /** Eliminación de la BD del tenant pasados los días configurados. */
     @Scheduled(cron = "${worker.licencias.cron-eliminacion:0 20 * * * *}")
     public void eliminarBasesDeDatos() {
+        this.ultimaCorridaEliminacion = java.time.OffsetDateTime.now();
         List<Map<String, Object>> aEliminar = security.queryForList("""
                 SELECT l.id AS lic_id, e.id AS emp_id, e.db_name AS db_name
                 FROM auth.licencia l
                 JOIN master.empresa e ON e.id = l.empresa_id
                 WHERE l.bd_eliminada = false AND l.fecha_eliminacion_bd <= now()
                 """);
+        this.ultimoBdEliminadas = aEliminar.size();
         if (aEliminar.isEmpty()) {
             return;
         }
