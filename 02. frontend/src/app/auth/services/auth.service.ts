@@ -31,6 +31,8 @@ export interface LoginData {
   nombreCompleto: string;
   /** Coincide con auth.usuario.flag_admin_sistema = '1'. */
   adminSistema?: boolean;
+  /** Perfil de licencias: 'LICENSING' (administra) o 'SALES' (solo renueva). */
+  tipoSales?: string;
   empresaId?: number;
   empresaCodigo?: string;
   empresaNombre?: string;

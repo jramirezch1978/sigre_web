@@ -32,8 +32,9 @@ export class AdminShellComponent implements OnInit, OnDestroy {
   nombreUsuario = 'Usuario';
   emailUsuario = '';
   inicialesUsuario = 'U';
+  tipoSales: string | null = null;
 
-  readonly menuItems: AdminMenuItem[] = [
+  private readonly baseMenuItems: AdminMenuItem[] = [
     { label: 'Inicio', icon: 'dashboard', route: '/admin/inicio' },
     { label: 'Empresas', icon: 'business', route: '/admin/empresas' },
     { label: 'Usuarios', icon: 'group', route: '/admin/usuarios' },
@@ -48,6 +49,14 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     { label: 'Usuarios x Sucursal', icon: 'account_tree', route: '/admin/usuarios-sucursales' },
     { label: 'Versiones', icon: 'info', route: '/admin/versiones' },
   ];
+
+  /** El menú agrega "Licencias" solo si el usuario tiene perfil LICENSING o SALES. */
+  get menuItems(): AdminMenuItem[] {
+    if (this.tipoSales === 'LICENSING' || this.tipoSales === 'SALES') {
+      return [...this.baseMenuItems, { label: 'Licencias', icon: 'workspace_premium', route: '/admin/licencias' }];
+    }
+    return this.baseMenuItems;
+  }
 
   constructor() {
     this.rutaActiva = this.router.url;
@@ -131,6 +140,7 @@ export class AdminShellComponent implements OnInit, OnDestroy {
     this.nombreUsuario = this.resolverNombreUsuario(user);
     this.emailUsuario = user?.email?.trim() ?? '';
     this.inicialesUsuario = this.calcularIniciales(this.nombreUsuario);
+    this.tipoSales = user?.tipoSales ?? null;
   }
 
   private resolverNombreUsuario(user: LoginData | null): string {

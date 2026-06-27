@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,6 +57,13 @@ public class LicenciaController {
     }
 
     // ── Administración de licencias (solo perfil ventas/licensing) ──────────────
+
+    /** Listado de licencias para la consola admin (LICENSING o SALES). */
+    @GetMapping("/admin")
+    public ApiResponse<List<Map<String, Object>>> adminListar(@RequestHeader("Authorization") String auth) {
+        requireRenovador(auth);
+        return ApiResponse.ok(licenciaService.listarLicencias(), "Licencias");
+    }
 
     /** Resumen de la licencia + costo mensual de una empresa (consola admin de licencias). */
     @GetMapping("/admin/{empresaId}")

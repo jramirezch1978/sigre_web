@@ -13,6 +13,7 @@ import { AdminRolesUsuarioComponent } from './pages/admin-roles-usuario/admin-ro
 import { AdminGruposUsuarioComponent } from './pages/admin-grupos-usuario/admin-grupos-usuario.component';
 import { AdminVersionesComponent } from './pages/admin-versiones/admin-versiones.component';
 import { AdminEdicionesComponent } from './pages/admin-ediciones/admin-ediciones.component';
+import { AdminLicenciasComponent } from './pages/admin-licencias/admin-licencias.component';
 import { AdminSucursalesComponent } from './pages/admin-sucursales/admin-sucursales.component';
 import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursales/admin-usuario-sucursales.component';
 import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
@@ -46,6 +47,7 @@ const routes: Routes = [
       { path: 'roles-usuario', component: AdminRolesUsuarioComponent, canActivate: [adminOperativeSessionGuard] },
       { path: 'grupos-usuario', component: AdminGruposUsuarioComponent, canActivate: [adminOperativeSessionGuard] },
       { path: 'ediciones', component: AdminEdicionesComponent, canActivate: [adminOperativeSessionGuard] },
+      { path: 'licencias', component: AdminLicenciasComponent, canActivate: [adminOperativeSessionGuard] },
       { path: 'versiones', component: AdminVersionesComponent, canActivate: [adminOperativeSessionGuard] },
       { path: 'sucursales', component: AdminSucursalesComponent, canActivate: [adminZoneGuard] },
       { path: 'usuarios-sucursales', component: AdminUsuarioSucursalesComponent, canActivate: [adminZoneGuard] },

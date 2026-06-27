@@ -29,6 +29,7 @@ import { AdminRolesUsuarioComponent } from './pages/admin-roles-usuario/admin-ro
 import { AdminGruposUsuarioComponent } from './pages/admin-grupos-usuario/admin-grupos-usuario.component';
 import { AdminVersionesComponent } from './pages/admin-versiones/admin-versiones.component';
 import { AdminEdicionesComponent } from './pages/admin-ediciones/admin-ediciones.component';
+import { AdminLicenciasComponent } from './pages/admin-licencias/admin-licencias.component';
 import { AdminSucursalesComponent } from './pages/admin-sucursales/admin-sucursales.component';
 import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursales/admin-usuario-sucursales.component';
 import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
@@ -52,6 +53,7 @@ import { AdminCuentaComponent } from './pages/admin-cuenta/admin-cuenta.componen
     AdminGruposUsuarioComponent,
     AdminVersionesComponent,
     AdminEdicionesComponent,
+    AdminLicenciasComponent,
     AdminSucursalesComponent,
     AdminUsuarioSucursalesComponent,
     AdminCuentaComponent,
