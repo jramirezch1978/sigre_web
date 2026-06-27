@@ -52,6 +52,40 @@ public class EmailService {
         enviarHtml(datos.getCorreoContacto(), subject, buildRegistroEmpresaHtml(datos));
     }
 
+    /** Correo con el número de licencia demo y su vigencia. */
+    @Async
+    public void enviarLicenciaDemo(String destinatario, String razonSocial, String codigoLicencia,
+                                   String vencimiento, int dias) {
+        if (destinatario == null || destinatario.isBlank()) {
+            log.warn("No se envió correo de licencia demo: empresa sin correo de contacto");
+            return;
+        }
+        String subject = "SIGRE ERP - Licencia Demo activada";
+        String body = """
+                <html><body style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;color:#2a3f54;">
+                  <div style="background:#2a3f54;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;">
+                    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a7b1c2;">SIGRE ERP</div>
+                    <h1 style="margin:6px 0 0;font-size:22px;">Licencia Demo activada</h1>
+                  </div>
+                  <div style="padding:28px;background:#f5f7fa;border-radius:0 0 8px 8px;">
+                    <p>Estimado cliente de <strong>%s</strong>,</p>
+                    <p>Su licencia <strong>Demo</strong> (edición Enterprise — todos los módulos) ha sido activada. Este es su número de licencia:</p>
+                    <div style="text-align:center;margin:24px 0;">
+                      <span style="font-family:'Courier New',monospace;font-size:26px;font-weight:bold;letter-spacing:4px;background:#fff;padding:16px 28px;border-radius:8px;border:2px solid #0d6efd;color:#0d6efd;display:inline-block;">%s</span>
+                    </div>
+                    <table style="width:100%%;border-collapse:collapse;font-size:14px;">
+                      <tr><td style="padding:8px 0;color:#64748b;">Edición</td><td style="padding:8px 0;text-align:right;font-weight:600;">Enterprise (Demo)</td></tr>
+                      <tr><td style="padding:8px 0;color:#64748b;">Duración</td><td style="padding:8px 0;text-align:right;font-weight:600;">%d días</td></tr>
+                      <tr><td style="padding:8px 0;color:#64748b;">Vence</td><td style="padding:8px 0;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:8px 0;color:#64748b;">Usuarios máximos</td><td style="padding:8px 0;text-align:right;font-weight:600;">5</td></tr>
+                    </table>
+                    <p style="color:#888;font-size:12px;margin-top:20px;">Al finalizar el período demo el acceso se desactivará automáticamente. Conserve este número de licencia.</p>
+                  </div>
+                </body></html>
+                """.formatted(safe(razonSocial), safe(codigoLicencia), dias, safe(vencimiento));
+        enviarHtml(destinatario, subject, body);
+    }
+
     private String buildRegistroEmpresaHtml(EmpresaRegistroEmailDto d) {
         return """
                 <!DOCTYPE html>
