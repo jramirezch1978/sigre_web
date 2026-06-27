@@ -90,6 +90,21 @@ public class SeguridadService {
         }
     }
 
+    /** True si el usuario tiene el flag de ventas/licensing (administra licencias y amplía demos). */
+    public boolean isVentas(long usuarioId) {
+        Integer n = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auth.usuario WHERE id = ? AND flag_estado = '1' AND flag_ventas = '1'",
+                Integer.class, usuarioId);
+        return n != null && n > 0;
+    }
+
+    public void requireVentas(long usuarioId) {
+        if (!isVentas(usuarioId)) {
+            throw new BusinessException("Se requiere el perfil de ventas/licensing para administrar licencias.",
+                    HttpStatus.FORBIDDEN, "VENTAS_REQUERIDO");
+        }
+    }
+
     @Transactional(readOnly = true)
     public List<EmpresaAdminDto> listarEmpresasAdmin() {
         return jdbcTemplate.query(

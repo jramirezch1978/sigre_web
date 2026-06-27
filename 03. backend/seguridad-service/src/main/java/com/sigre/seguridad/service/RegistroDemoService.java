@@ -68,6 +68,17 @@ public class RegistroDemoService {
             throw new BusinessException("El email '" + admin.getEmail() + "' ya está registrado.", HttpStatus.CONFLICT);
         }
 
+        // Anti-abuso demo: no permitir un nuevo demo con un documento de identidad ya usado en otro demo.
+        if (admin.getNumeroDocumento() != null && !admin.getNumeroDocumento().isBlank()) {
+            Integer dup = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM auth.usuario WHERE flag_demo = '1' AND numero_documento = ?",
+                    Integer.class, admin.getNumeroDocumento().trim());
+            if (dup != null && dup > 0) {
+                throw new BusinessException("Ya existe un registro demo con el documento " + admin.getNumeroDocumento()
+                        + ". Cada persona puede tener una sola demo.", HttpStatus.CONFLICT);
+            }
+        }
+
         Long empresaCodigo = empresaRepository.nextEmpresaCodigo();
         String codigoEmpresa = String.format("DEMO%04d", empresaCodigo);
         String dbName = DEMO_DB_PREFIX + empresaCodigo;
@@ -90,12 +101,12 @@ public class RegistroDemoService {
 
         List<Long> userIds = new ArrayList<>();
 
-        Long adminId = crearUsuarioDemo(admin);
+        Long adminId = crearUsuario(admin, true);
         userIds.add(adminId);
 
         for (UsuarioDemo u : adicionales) {
             if (u.getUsername() == null || u.getUsername().isBlank()) continue;
-            Long uid = crearUsuarioDemo(u);
+            Long uid = crearUsuario(u, true);
             userIds.add(uid);
         }
 
@@ -154,39 +165,57 @@ public class RegistroDemoService {
     }
 
     /**
-     * Agrega un usuario a una empresa demo. Reglas: el actor debe ser usuario demo,
-     * la empresa debe ser demo y no superar {@value #MAX_USUARIOS_DEMO} usuarios.
+     * Agrega un usuario a la empresa del actor (demo o de pago) desde el módulo de seguridad del ERP.
+     * Reglas:
+     *  - El actor debe pertenecer a la empresa.
+     *  - Demo: límite DURO de {@value #MAX_USUARIOS_DEMO} usuarios; el nuevo usuario también es demo;
+     *    dedup por documento o correo.
+     *  - Pago: si el alta excede el límite incluido de la edición, requiere {@code confirmarExceso};
+     *    al confirmar se registra el cobro del usuario en exceso para el mes actual. Dedup por correo.
+     *  - El username siempre es único.
      */
     @Transactional
-    public void agregarUsuarioAEmpresaDemo(long actorId, long empresaId, UsuarioDemo nuevo) {
-        if (!esUsuarioDemo(actorId)) {
-            throw new BusinessException("Solo los usuarios demo pueden agregar usuarios.",
-                    HttpStatus.FORBIDDEN);
-        }
-        Integer empDemo = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM master.empresa WHERE id = ? AND flag_demo = '1'", Integer.class, empresaId);
-        if (empDemo == null || empDemo == 0) {
-            throw new BusinessException("La empresa no es demo.", HttpStatus.UNPROCESSABLE_ENTITY);
-        }
-        Integer total = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM auth.usuario_empresa WHERE empresa_id = ? AND flag_estado = '1'",
-                Integer.class, empresaId);
-        if (total != null && total >= MAX_USUARIOS_DEMO) {
-            throw new BusinessException("Una empresa demo no puede tener más de " + MAX_USUARIOS_DEMO + " usuarios.",
-                    HttpStatus.UNPROCESSABLE_ENTITY);
-        }
+    public void agregarUsuarioEmpresa(long actorId, long empresaId, UsuarioDemo nuevo, boolean confirmarExceso) {
+        requireActorEnEmpresa(actorId, empresaId);
+
         if (nuevo.getUsername() == null || nuevo.getUsername().isBlank()) {
             throw new BusinessException("El nombre de usuario es requerido.", HttpStatus.BAD_REQUEST);
         }
         if (usuarioRepository.findByUsernameAndActivoTrue(nuevo.getUsername()).isPresent()) {
             throw new BusinessException("El usuario '" + nuevo.getUsername() + "' ya está en uso.", HttpStatus.CONFLICT);
         }
+
+        LicenciaService.AltaUsuarioEval eval = licenciaService.evaluarAltaUsuario(empresaId);
+
+        if (eval.esDemo()) {
+            if (eval.excede()) {
+                throw new BusinessException("Una empresa demo no puede tener más de " + eval.maxUsuarios() + " usuarios.",
+                        HttpStatus.UNPROCESSABLE_ENTITY);
+            }
+            // Anti-abuso demo: no repetir documento entre cuentas demo.
+            if (nuevo.getNumeroDocumento() != null && !nuevo.getNumeroDocumento().isBlank()) {
+                Integer dup = jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM auth.usuario WHERE flag_demo = '1' AND numero_documento = ?",
+                        Integer.class, nuevo.getNumeroDocumento().trim());
+                if (dup != null && dup > 0) {
+                    throw new BusinessException("Ya existe un usuario demo con el documento " + nuevo.getNumeroDocumento() + ".",
+                            HttpStatus.CONFLICT);
+                }
+            }
+        } else if (eval.excede() && !confirmarExceso) {
+            // El frontend captura este código para mostrar el modal de advertencia y reenviar confirmando.
+            throw new BusinessException("Agregar este usuario supera el límite de " + eval.maxUsuarios()
+                    + " usuarios incluidos en su licencia y tendrá un costo adicional de USD "
+                    + eval.costoUsuarioAdicional().toPlainString() + " este mes. ¿Desea continuar?",
+                    HttpStatus.CONFLICT, "EXCESO_REQUIERE_CONFIRMACION");
+        }
+
         if (nuevo.getEmail() != null && !nuevo.getEmail().isBlank()
                 && usuarioRepository.findByEmailAndActivoTrue(nuevo.getEmail()).isPresent()) {
             throw new BusinessException("El email '" + nuevo.getEmail() + "' ya está registrado.", HttpStatus.CONFLICT);
         }
 
-        Long uid = crearUsuarioDemo(nuevo);
+        Long uid = crearUsuario(nuevo, eval.esDemo());
         jdbcTemplate.update(
                 "INSERT INTO auth.usuario_empresa (usuario_id, empresa_id, flag_estado) VALUES (?, ?, '1')",
                 uid, empresaId);
@@ -198,7 +227,22 @@ public class RegistroDemoService {
                     "INSERT INTO auth.rol_usuario (usuario_id, rol_id, flag_estado) VALUES (?, ?, '1')",
                     uid, roles.get(0));
         }
-        log.info("Usuario demo '{}' agregado a empresa {} por usuario {}", nuevo.getUsername(), empresaId, actorId);
+
+        if (!eval.esDemo() && eval.excede() && confirmarExceso) {
+            licenciaService.registrarExcesoUsuario(empresaId, uid);
+        }
+        log.info("Usuario '{}' agregado a empresa {} por usuario {} (demo={}, exceso={})",
+                nuevo.getUsername(), empresaId, actorId, eval.esDemo(), eval.excede());
+    }
+
+    /** El actor debe pertenecer (activo) a la empresa sobre la que opera. */
+    private void requireActorEnEmpresa(long actorId, long empresaId) {
+        Integer n = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM auth.usuario_empresa WHERE usuario_id = ? AND empresa_id = ? AND flag_estado = '1'",
+                Integer.class, actorId, empresaId);
+        if (n == null || n == 0) {
+            throw new BusinessException("No tiene acceso a esta empresa.", HttpStatus.FORBIDDEN);
+        }
     }
 
     private Long resolverDistritoId(EmpresaDemo emp) {
@@ -217,18 +261,23 @@ public class RegistroDemoService {
         }
     }
 
-    private Long crearUsuarioDemo(UsuarioDemo u) {
+    private Long crearUsuario(UsuarioDemo u, boolean esDemo) {
         String nombreCompleto = u.getNombres() + (u.getApellidos() != null ? " " + u.getApellidos() : "");
         String passHash = passwordEncoder.encode(u.getPassword());
 
         return jdbcTemplate.queryForObject("""
                 INSERT INTO auth.usuario (username, email, password, nombres, apellidos,
-                    nombre_completo, flag_demo, flag_estado)
-                VALUES (?, ?, ?, ?, ?, ?, '1', '1')
+                    nombre_completo, numero_documento, flag_demo, flag_estado)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, '1')
                 RETURNING id
                 """, Long.class,
                 u.getUsername(), u.getEmail(), passHash,
-                u.getNombres(), u.getApellidos() != null ? u.getApellidos() : "", nombreCompleto);
+                u.getNombres(), u.getApellidos() != null ? u.getApellidos() : "", nombreCompleto,
+                emptyToNull(u.getNumeroDocumento()), esDemo ? "1" : "0");
+    }
+
+    private static String emptyToNull(String v) {
+        return (v == null || v.isBlank()) ? null : v.trim();
     }
 
     private void asignarMenuCompleto(Long rolId) {

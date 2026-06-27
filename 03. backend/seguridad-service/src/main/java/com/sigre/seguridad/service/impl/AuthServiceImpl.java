@@ -145,6 +145,7 @@ public class AuthServiceImpl implements AuthService {
                 .apellidos(usuario.getApellidos())
                 .nombreCompleto(usuario.getNombreCompleto())
                 .adminSistema(isFlagAdminSistema(usuario))
+                .ventas(isFlagVentas(usuario))
                 .build();
     }
 
@@ -214,6 +215,10 @@ public class AuthServiceImpl implements AuthService {
 
     private static boolean isFlagAdminSistema(Usuario usuario) {
         return usuario.getFlagAdminSistema() != null && "1".equals(usuario.getFlagAdminSistema());
+    }
+
+    private static boolean isFlagVentas(Usuario usuario) {
+        return usuario.getFlagVentas() != null && "1".equals(usuario.getFlagVentas());
     }
 
     private static void validarCompatibilidadDemo(Usuario usuario, EmpresaMaster empresa) {
@@ -451,7 +456,10 @@ public class AuthServiceImpl implements AuthService {
         if (userId == null) {
             return;
         }
-        usuarioRepository.findById(userId).ifPresent(u -> response.setAdminSistema(isFlagAdminSistema(u)));
+        usuarioRepository.findById(userId).ifPresent(u -> {
+            response.setAdminSistema(isFlagAdminSistema(u));
+            response.setVentas(isFlagVentas(u));
+        });
     }
 
     private static Long claimToLong(Object raw) {
@@ -571,7 +579,8 @@ public class AuthServiceImpl implements AuthService {
                 .empresaRuc(empresa.getRuc())
                 .sucursalId(request.getSucursalId())
                 .sucursalNombre(sucursalNombre)
-                .adminSistema(isFlagAdminSistema(usuario));
+                .adminSistema(isFlagAdminSistema(usuario))
+                .ventas(isFlagVentas(usuario));
         if (refreshToken != null && !refreshToken.isBlank()) {
             b.refreshToken(refreshToken);
         }

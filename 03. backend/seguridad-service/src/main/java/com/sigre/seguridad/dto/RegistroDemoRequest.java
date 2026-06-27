@@ -84,5 +84,9 @@ public class RegistroDemoRequest {
 
         @Size(max = 120)
         private String apellidos;
+
+        /** DNI/CE. En el registro demo evita altas repetidas con el mismo documento. */
+        @Size(max = 20)
+        private String numeroDocumento;
     }
 }

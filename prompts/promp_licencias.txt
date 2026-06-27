@@ -1,0 +1,34 @@
+Versiones del SIGRE
+-------------------
+MYPE
+Small business
+profesional
+Enteprise
+
+La licencia esta asociada a una empresa y a una edicion del software, es la versión o edición adquirida que limita la cantidad de usuarios, en caso sea demo, solo se podrían registrar maximo 5 usuarios nada mas, en las otras versiones, no se limita el usuario, sino la tarifa, cada version del sigre tiene una cantidad de usuarios a un costo estandar (revisar la logica en frontend y colocarla en este prompt indicando la formula del calculo). cuando se registren mas usuarios, se cobra un monto por cada usuario adicional.
+
+FORMULA DE CALCULO (tomada del frontend erp-landing.component.ts -> recargoUsuarioExtra = 2, y de auth.plan_suscripcion):
+  - Cada edicion tiene una tarifa "precio" (USD por usuario y por empresa, al mes) y un numero de
+    usuarios incluidos a esa tarifa base = "max_usuarios":
+      MYPE = 8 USD hasta 5 | SMALL_BUSINESS = 12 USD hasta 10 | PROFESSIONAL = 16 USD hasta 20 | ENTERPRISE = 20 USD hasta 40 | DEMO = 0 USD, max 5 (limite duro).
+  - RECARGO_USUARIO_EXTRA = 2 USD: cada usuario ACTIVO por encima de "max_usuarios" cuesta (precio + 2).
+  - Sea A = cantidad de usuarios ACTIVOS que han iniciado sesion (auth.log_acceso.exito = true):
+      incluidos    = min(A, max_usuarios)
+      exceso       = max(0, A - max_usuarios)
+      costoMensual = incluidos * precio + exceso * (precio + RECARGO_USUARIO_EXTRA)
+  - El cobro del exceso se registra el MES en que el usuario excedente se activo (tabla
+    auth.licencia_usuario_exceso); no se recobra los meses siguientes salvo que vuelva a haber exceso
+    tras la renovacion mensual (al renovar se recuentan los usuarios activos).
+  - DEMO: precio 0 y limite DURO de 5 usuarios (no hay exceso ni cobro; simplemente no deja crear el 6to).
+
+en caso de la licencia demo, tiene una duración de 15 días y no es ampliable (pero si debe tener una fecha de vencimiento, para en caso sea necesario, y solo con el usuario de tipo sales, puede ampliar dicha fec de vencimiento, pero sin pasarse del mes, todas las licencias tienen una duración mensual, renovable, excepto la licencia demo.
+
+para evitar que un usuario demo (y solo para los demo) esten creando demos a cada momento, se debe validar que no se repita el registro usando el documento de identidad (validar si la tabla usuario tiene un campo de documento de identidad) o el correo, cualquiera de los dos, cuando el usuario deja de ser demo, entonces solo se vaidará por su correo (asi se envitan que se registren varios usuarios con el mismo correo), ademas del username (por ejemplo jramirez, jhonny.ramirez, etc), el username y es uncampo unique key, hay que mantenerlo
+
+el usuario demo puede regitrar mas usuarios, ya dentro del ERP en el modulo de seguridad, estos usuarios que registre como usaurio demo son tambien usuarios demos, no hay problema de la duración porque eso esta amarrado por la licencia, cuando la licencia expire, ya no debería poder permitir loguearse, un usuario demo no puede acceder a la consola administrativa bajo ninguna circunstancia
+
+un usuario normal (no demo), debería poder tambien añadir mas usuarios tambien desde el modulo de seguridad, pero el erp debe advertir cuando se exceda de la cantidad de usuarios (que deben ser siempre los usuarios activos) segunla licencia, y que el usuario adicional tendría un costo adicional.
+
+Para evitar que el cliente este jugando sucio, y cree un usuario (en exceso) para un día y desactivarlo al dia siguiente, se debe tener el control necesario para cobrar solo ese mes que se activo el usuario el adicional, ya el siguiente mes no se pagaría a menos que el cliente ative el usuario por exceso nuevamente, pero si en otro caso, si el limite es 5 usuarios, y desactiva 1 para crear uno nuevo, no hay problema, no hay exceso porque el usuario desactivo un usuario primero para crear uno nuevo, el problema es cuando crea un usuario nuevo y se crean 6 usuarios, y luego desactiva 1, entonces ahi esta el exceso, porque tuvo, aunque sea por unos momentos, un usuario adicional, por ello antes de crear un usuario adicionl, debe salir una ventana de advertencia, en modal popup, un mensaje bien claro, y si el usuario acepta, entonces ya se regostra el pago por excel en la tabla licencia, el cual cuando venza la licencia en el mes se tendría que renovar (una opcion para renovarlo en admin) y una vez renovado se volvería ac ontrar los usuarios activos para ver si aun sigue con el exceso de usuarios o tiene el limite normal.
+
+la administracion de las licencias,d ebería estar en el mismo modulo de administración, pero la unica persona o usuario que puede acceder y manipularlo (osea añadir, modificar, eliminar o desacivar) debe tener el campo de icencsing o sales activo ok, procede con ese cambio tambien.

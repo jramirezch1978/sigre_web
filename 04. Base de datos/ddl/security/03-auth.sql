@@ -85,6 +85,7 @@ CREATE TABLE auth.usuario (
     nombres VARCHAR(120) NOT NULL,
     apellidos VARCHAR(120),
     nombre_completo VARCHAR(200) NOT NULL,
+    numero_documento VARCHAR(20),      -- DNI/CE; usado para evitar registros demo repetidos
     dos_factor_habilitado BOOLEAN NOT NULL DEFAULT FALSE,
     bloqueado BOOLEAN NOT NULL DEFAULT FALSE,
     intentos_fallidos INTEGER NOT NULL DEFAULT 0,
@@ -93,6 +94,7 @@ CREATE TABLE auth.usuario (
     flag_demo VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_demo IN ('0', '1')),
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
     flag_admin_sistema VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_admin_sistema IN ('0', '1')),
+    flag_ventas VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_ventas IN ('0', '1')),  -- sales/licensing: administra licencias y amplia demos
     fec_creacion TIMESTAMPTZ DEFAULT NOW(),
     fec_modificacion TIMESTAMPTZ,
     created_by BIGINT,
@@ -177,6 +179,21 @@ CREATE TABLE auth.licencia (
 CREATE INDEX IX_LICENCIA_EMPRESA ON auth.licencia (empresa_id);
 CREATE INDEX IX_LICENCIA_VENCIMIENTO ON auth.licencia (estado, fecha_vencimiento);
 CREATE INDEX IX_LICENCIA_ELIM_BD ON auth.licencia (bd_eliminada, fecha_eliminacion_bd);
+
+-- Control de usuarios EN EXCESO sobre el limite de la edicion. Se registra una fila el mes en
+-- que un usuario excedente se activa; el costo del exceso se cobra solo en ese periodo. Al renovar
+-- la licencia se recuentan los activos y, si persiste el exceso, se generan nuevas filas del periodo.
+CREATE TABLE auth.licencia_usuario_exceso (
+    id BIGSERIAL PRIMARY KEY,
+    licencia_id BIGINT NOT NULL REFERENCES auth.licencia(id),
+    usuario_id BIGINT NOT NULL REFERENCES auth.usuario(id),
+    periodo CHAR(7) NOT NULL,                       -- 'YYYY-MM' del mes facturado
+    monto NUMERIC(10, 2) NOT NULL DEFAULT 0,        -- recargo cobrado por este usuario en el periodo
+    fecha_activacion TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
+    UNIQUE (licencia_id, usuario_id, periodo)
+);
+CREATE INDEX IX_LIC_USR_EXCESO_PERIODO ON auth.licencia_usuario_exceso (licencia_id, periodo);
 
 CREATE TABLE auth.opcion_menu (
     id BIGSERIAL PRIMARY KEY,
@@ -350,6 +367,7 @@ CREATE TABLE auth.token_uso_log (
 -- ============================================================
 
 CREATE INDEX IX_USUARIO_EMPRESA_01 ON auth.usuario_empresa (empresa_id, flag_estado);
+CREATE INDEX IX_USUARIO_DOCUMENTO ON auth.usuario (numero_documento) WHERE numero_documento IS NOT NULL;
 CREATE INDEX IX_CODIGO_RECUPERACION_01 ON auth.codigo_recuperacion (usuario_id, usado, expira_en DESC);
 CREATE INDEX IX_ROL_01 ON auth.rol (empresa_id, flag_estado);
 CREATE INDEX IX_ROL_USUARIO_01 ON auth.rol_usuario (usuario_id, flag_estado);

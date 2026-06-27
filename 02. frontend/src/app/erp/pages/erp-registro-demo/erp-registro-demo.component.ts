@@ -15,6 +15,7 @@ interface UsuarioDemo {
   password: string;
   nombres: string;
   apellidos: string;
+  numeroDocumento?: string;
 }
 
 interface RegistroDemoRequest {
@@ -37,6 +38,7 @@ interface RegistroDemoRequest {
     password: string;
     nombres: string;
     apellidos: string;
+    numeroDocumento?: string;
   };
   usuariosAdicionales: UsuarioDemo[];
 }
@@ -95,6 +97,7 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
     password: '',
     nombres: '',
     apellidos: '',
+    numeroDocumento: '',
   };
 
   confirmPassword = '';
@@ -305,6 +308,10 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
     }
     if (!this.adminUser.nombres.trim()) {
       this.error = 'El nombre es obligatorio.';
+      return false;
+    }
+    if (!this.adminUser.numeroDocumento || !this.adminUser.numeroDocumento.trim()) {
+      this.error = 'El documento de identidad es obligatorio para el registro demo.';
       return false;
     }
     return true;

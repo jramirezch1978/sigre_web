@@ -13,10 +13,6 @@
   <div class="d-flex justify-content-center py-5">
     <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div>
   </div>
-} @else if (info && !info.esDemo) {
-  <div class="alert alert-info rounded-4">
-    Esta sección de autogestión de usuarios está disponible solo para empresas con <strong>licencia demo</strong>.
-  </div>
 } @else if (info) {
   <div class="row g-3">
     <div class="col-12 col-lg-7">
@@ -59,14 +55,28 @@
       <div class="card rounded-4">
         <div class="card-body">
           <h5 class="mb-1 fw-bold">Agregar usuario</h5>
-          <p class="text-muted small mb-3">Demo: hasta {{ info.maxUsuarios }} usuarios por empresa.</p>
+          @if (info.esDemo) {
+            <p class="text-muted small mb-3">Demo: hasta {{ info.maxUsuarios }} usuarios por empresa.</p>
+          } @else {
+            <p class="text-muted small mb-3">
+              Incluidos {{ info.maxUsuarios }} usuarios. Cada usuario activo adicional cuesta
+              <strong>USD {{ info.costoUsuarioAdicional }}</strong> al mes.
+            </p>
+          }
 
           @if (error) { <div class="alert alert-danger py-2">{{ error }}</div> }
           @if (exito) { <div class="alert alert-success py-2">{{ exito }}</div> }
 
           @if (!puedeAgregar) {
-            <div class="alert alert-warning py-2 mb-0">Alcanzaste el máximo de {{ info.maxUsuarios }} usuarios.</div>
+            <div class="alert alert-warning py-2 mb-0">Alcanzaste el máximo de {{ info.maxUsuarios }} usuarios de tu plan demo.</div>
           } @else {
+            @if (proximoConCosto) {
+              <div class="alert alert-warning py-2">
+                <i class="material-icons-outlined align-middle me-1" style="font-size:18px;">warning_amber</i>
+                Ya tienes {{ info.usuariosActivos }} usuarios activos (límite {{ info.maxUsuarios }}). Este usuario será
+                <strong>adicional</strong> y se cobrará <strong>USD {{ info.costoUsuarioAdicional }}</strong> este mes.
+              </div>
+            }
             <form (ngSubmit)="agregar()">
               <div class="mb-2">
                 <label class="form-label">Usuario *</label>
@@ -82,16 +92,22 @@
                   <input class="form-control" [(ngModel)]="nuevo.apellidos" name="apellidos" />
                 </div>
               </div>
-              <div class="mb-2">
-                <label class="form-label">Email</label>
-                <input class="form-control" type="email" [(ngModel)]="nuevo.email" name="email" autocomplete="off" />
+              <div class="row g-2">
+                <div class="col-6 mb-2">
+                  <label class="form-label">Email</label>
+                  <input class="form-control" type="email" [(ngModel)]="nuevo.email" name="email" autocomplete="off" />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Documento {{ info.esDemo ? '*' : '' }}</label>
+                  <input class="form-control" [(ngModel)]="nuevo.numeroDocumento" name="numeroDocumento" autocomplete="off" placeholder="DNI / CE" />
+                </div>
               </div>
               <div class="mb-3">
                 <label class="form-label">Contraseña *</label>
                 <input class="form-control" type="password" [(ngModel)]="nuevo.password" name="password" autocomplete="new-password" />
               </div>
               <button type="submit" class="btn btn-primary w-100" [disabled]="guardando">
-                {{ guardando ? 'Agregando…' : 'Agregar usuario' }}
+                {{ guardando ? 'Agregando…' : (proximoConCosto ? 'Agregar usuario adicional' : 'Agregar usuario') }}
               </button>
             </form>
           }

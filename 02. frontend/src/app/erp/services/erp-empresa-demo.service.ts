@@ -16,6 +16,9 @@ export interface EmpresaDemoInfo {
   esDemo: boolean;
   maxUsuarios: number;
   usados: number;
+  usuariosActivos: number;
+  proximoExcede: boolean;
+  costoUsuarioAdicional: number;
   usuarios: UsuarioEmpresaDemo[];
 }
 
@@ -25,6 +28,7 @@ export interface NuevoUsuarioDemo {
   password: string;
   nombres: string;
   apellidos: string;
+  numeroDocumento?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -32,14 +36,22 @@ export class ErpEmpresaDemoService {
   private readonly http = inject(HttpClient);
   private readonly apiBase = inject(ApiBaseService);
 
-  getInfo(): Observable<EmpresaDemoInfo> {
-    return this.http
-      .get<ApiResponse<EmpresaDemoInfo>>(`${this.apiBase.getApiBaseUrl()}/auth/seguridad/empresa-demo/info`)
-      .pipe(map(r => r.data ?? { esDemo: false, maxUsuarios: 5, usados: 0, usuarios: [] }));
+  private get base(): string {
+    return `${this.apiBase.getApiBaseUrl()}/auth/seguridad/empresa-demo`;
   }
 
-  agregarUsuario(nuevo: NuevoUsuarioDemo): Observable<ApiResponse<void>> {
+  getInfo(): Observable<EmpresaDemoInfo> {
+    return this.http
+      .get<ApiResponse<EmpresaDemoInfo>>(`${this.base}/info`)
+      .pipe(map(r => r.data ?? {
+        esDemo: false, maxUsuarios: 5, usados: 0, usuariosActivos: 0,
+        proximoExcede: false, costoUsuarioAdicional: 0, usuarios: [],
+      }));
+  }
+
+  /** Agrega un usuario. Si excede el límite de la licencia, pasar confirmarExceso=true. */
+  agregarUsuario(nuevo: NuevoUsuarioDemo, confirmarExceso = false): Observable<ApiResponse<void>> {
     return this.http.post<ApiResponse<void>>(
-      `${this.apiBase.getApiBaseUrl()}/auth/seguridad/empresa-demo/usuarios`, nuevo);
+      `${this.base}/usuarios?confirmarExceso=${confirmarExceso}`, nuevo);
   }
 }

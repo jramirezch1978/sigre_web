@@ -3,6 +3,7 @@ package com.sigre.seguridad.controller;
 import com.sigre.common.dto.ApiResponse;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.seguridad.service.LicenciaService;
+import com.sigre.seguridad.service.SeguridadService;
 import com.sigre.seguridad.support.SeguridadContextHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -24,6 +26,7 @@ public class LicenciaController {
 
     private final LicenciaService licenciaService;
     private final SeguridadContextHelper contextHelper;
+    private final SeguridadService seguridadService;
 
     @Value("${app.provisioning.secret:}")
     private String provisionSecret;
@@ -49,6 +52,42 @@ public class LicenciaController {
         r.put("diasAviso", dias);
         r.put("avisosEnviados", enviados);
         return ApiResponse.ok(r, "Renovaciones procesadas");
+    }
+
+    // ── Administración de licencias (solo perfil ventas/licensing) ──────────────
+
+    /** Resumen de la licencia + costo mensual de una empresa (consola admin de licencias). */
+    @GetMapping("/admin/{empresaId}")
+    public ApiResponse<Map<String, Object>> adminInfo(@RequestHeader("Authorization") String auth,
+                                                      @PathVariable long empresaId) {
+        requireVentas(auth);
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("licencia", licenciaService.obtenerLicenciaActiva(empresaId));
+        r.put("costo", licenciaService.calcularCostoMensual(empresaId));
+        return ApiResponse.ok(r, "Licencia de la empresa");
+    }
+
+    /** Amplía el vencimiento de una licencia demo (tope: un mes desde el inicio). */
+    @PostMapping("/admin/{empresaId}/ampliar-demo")
+    public ApiResponse<OffsetDateTime> ampliarDemo(@RequestHeader("Authorization") String auth,
+                                                   @PathVariable long empresaId,
+                                                   @RequestParam OffsetDateTime nuevaFecha) {
+        requireVentas(auth);
+        return ApiResponse.ok(licenciaService.ampliarVencimientoDemo(empresaId, nuevaFecha),
+                "Vencimiento de la demo ampliado");
+    }
+
+    /** Renueva una licencia de pago un mes más y recuenta el exceso de usuarios. */
+    @PostMapping("/admin/{empresaId}/renovar")
+    public ApiResponse<LicenciaService.CostoMensual> renovar(@RequestHeader("Authorization") String auth,
+                                                             @PathVariable long empresaId) {
+        requireVentas(auth);
+        return ApiResponse.ok(licenciaService.renovarLicencia(empresaId), "Licencia renovada");
+    }
+
+    private void requireVentas(String auth) {
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        seguridadService.requireVentas(uid);
     }
 
     private void validateProvisionSecret(HttpServletRequest request) {

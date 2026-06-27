@@ -37,4 +37,7 @@ public class LoginResponse {
 
     /** {@code true} si {@code auth.usuario.flag_admin_sistema = '1'} (menú administración de empresas). */
     private Boolean adminSistema;
+
+    /** {@code true} si {@code auth.usuario.flag_ventas = '1'} (administración de licencias). */
+    private Boolean ventas;
 }
