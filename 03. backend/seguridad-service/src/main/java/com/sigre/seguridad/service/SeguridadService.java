@@ -1,16 +1,14 @@
 package com.sigre.seguridad.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.sigre.seguridad.dto.seguridad.*;
 import com.sigre.common.exception.BusinessException;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -268,18 +266,10 @@ public class SeguridadService {
 
     @Transactional
     public ModuloDto crearModulo(ModuloRequest req) {
-        GeneratedKeyHolder kh = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO auth.modulo (codigo, nombre, flag_estado) VALUES (?,?,?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, req.getCodigo());
-            ps.setString(2, req.getNombre());
-            ps.setString(3, toFlag(req.getActivo()));
-            return ps;
-        }, kh);
-        Number key = kh.getKey();
-        return obtenerModulo(key != null ? key.longValue() : null);
+        Long id = jdbcTemplate.queryForObject(
+                "INSERT INTO auth.modulo (codigo, nombre, flag_estado) VALUES (?,?,?) RETURNING id",
+                Long.class, req.getCodigo(), req.getNombre(), toFlag(req.getActivo()));
+        return obtenerModulo(id);
     }
 
     public ModuloDto obtenerModulo(Long id) {
@@ -345,30 +335,16 @@ public class SeguridadService {
 
     @Transactional
     public OpcionMenuDto crearOpcionMenu(OpcionMenuRequest req) {
-        GeneratedKeyHolder kh = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
-                    """
-                    INSERT INTO auth.opcion_menu
-                    (modulo_id, codigo, nombre, ruta_frontend, opcion_padre_id, orden, flag_estado)
-                    VALUES (?,?,?,?,?,?,?)
-                    """,
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setLong(1, req.getModuloId());
-            ps.setString(2, req.getCodigo());
-            ps.setString(3, req.getNombre());
-            ps.setString(4, req.getRutaFrontend());
-            if (req.getOpcionPadreId() != null) {
-                ps.setLong(5, req.getOpcionPadreId());
-            } else {
-                ps.setObject(5, null);
-            }
-            ps.setInt(6, req.getOrden() != null ? req.getOrden() : 0);
-            ps.setString(7, toFlag(req.getActivo()));
-            return ps;
-        }, kh);
-        Number key = kh.getKey();
-        return obtenerOpcionMenu(key != null ? key.longValue() : null);
+        Long id = jdbcTemplate.queryForObject(
+                """
+                INSERT INTO auth.opcion_menu
+                (modulo_id, codigo, nombre, ruta_frontend, opcion_padre_id, orden, flag_estado)
+                VALUES (?,?,?,?,?,?,?) RETURNING id
+                """,
+                Long.class,
+                req.getModuloId(), req.getCodigo(), req.getNombre(), req.getRutaFrontend(),
+                req.getOpcionPadreId(), req.getOrden() != null ? req.getOrden() : 0, toFlag(req.getActivo()));
+        return obtenerOpcionMenu(id);
     }
 
     public OpcionMenuDto obtenerOpcionMenu(Long id) {
@@ -414,18 +390,10 @@ public class SeguridadService {
 
     @Transactional
     public AccionDto crearAccion(AccionRequest req) {
-        GeneratedKeyHolder kh = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO auth.accion (codigo, nombre, flag_estado) VALUES (?,?,?)",
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, req.getCodigo());
-            ps.setString(2, req.getNombre());
-            ps.setString(3, toFlag(req.getActivo()));
-            return ps;
-        }, kh);
-        Number key = kh.getKey();
-        return obtenerAccion(key != null ? key.longValue() : null);
+        Long id = jdbcTemplate.queryForObject(
+                "INSERT INTO auth.accion (codigo, nombre, flag_estado) VALUES (?,?,?) RETURNING id",
+                Long.class, req.getCodigo(), req.getNombre(), toFlag(req.getActivo()));
+        return obtenerAccion(id);
     }
 
     public AccionDto obtenerAccion(Long id) {
@@ -480,23 +448,15 @@ public class SeguridadService {
 
     @Transactional
     public RolDto crearRol(long empresaId, RolRequest req) {
-        GeneratedKeyHolder kh = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
-                    """
-                    INSERT INTO auth.rol (empresa_id, codigo, nombre, es_admin, flag_estado)
-                    VALUES (?,?,?,?,?)
-                    """,
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setLong(1, empresaId);
-            ps.setString(2, req.getCodigo());
-            ps.setString(3, req.getNombre());
-            ps.setBoolean(4, Boolean.TRUE.equals(req.getEsAdmin()));
-            ps.setString(5, toFlag(req.getActivo()));
-            return ps;
-        }, kh);
-        Number key = kh.getKey();
-        return obtenerRol(empresaId, key != null ? key.longValue() : null);
+        Long rolId = jdbcTemplate.queryForObject(
+                """
+                INSERT INTO auth.rol (empresa_id, codigo, nombre, es_admin, flag_estado)
+                VALUES (?,?,?,?,?) RETURNING id
+                """,
+                Long.class,
+                empresaId, req.getCodigo(), req.getNombre(),
+                Boolean.TRUE.equals(req.getEsAdmin()), toFlag(req.getActivo()));
+        return obtenerRol(empresaId, rolId);
     }
 
     public RolDto obtenerRol(long empresaId, long rolId) {
@@ -827,22 +787,21 @@ public class SeguridadService {
                     HttpStatus.UNPROCESSABLE_ENTITY, "GRUPO_SIN_MIEMBROS");
         }
 
-        GeneratedKeyHolder kh = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> {
-            PreparedStatement ps = con.prepareStatement(
+        // RETURNING id (en PostgreSQL, RETURN_GENERATED_KEYS devuelve toda la fila y getKey() falla).
+        Long grupoIdGen;
+        try {
+            grupoIdGen = jdbcTemplate.queryForObject(
                     """
                     INSERT INTO auth.grupo_usuario (empresa_id, codigo, descripcion, flag_estado)
                     VALUES (?,?,?,?)
+                    RETURNING id
                     """,
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setLong(1, empresaId);
-            ps.setString(2, req.getCodigo());
-            ps.setString(3, req.getDescripcion());
-            ps.setString(4, toFlag(req.getActivo()));
-            return ps;
-        }, kh);
-        Number key = kh.getKey();
-        long grupoId = (key != null) ? key.longValue() : 0L;
+                    Long.class, empresaId, req.getCodigo(), req.getDescripcion(), toFlag(req.getActivo()));
+        } catch (DuplicateKeyException e) {
+            throw new BusinessException("Ya existe un grupo con el código '" + req.getCodigo() + "' en esta empresa.",
+                    HttpStatus.CONFLICT, "GRUPO_CODIGO_DUPLICADO");
+        }
+        long grupoId = (grupoIdGen != null) ? grupoIdGen : 0L;
 
         for (Long usuarioId : miembros) {
             Integer ue = jdbcTemplate.queryForObject(
