@@ -82,7 +82,7 @@ export const EDICIONES_CONTENIDO: Record<string, EdicionContenido> = {
   HEALTH: {
     perfil: 'Sector salud',
     idealPara: 'Clínicas, hospitales, policlínicos y consultorios que gestionan insumos, farmacia, facturación y personal asistencial.',
-    modulosDestacados: ['Almacén', 'Compras', 'Comercialización', 'Finanzas', 'RR.HH.', 'Asistencia', 'Contabilidad', 'Activos fijos', 'Seguridad'],
+    modulosDestacados: ['Salud', 'Farmacia', 'Almacén', 'Compras', 'Comercialización', 'Finanzas', 'RR.HH.', 'Asistencia', 'Contabilidad', 'Activos fijos', 'Seguridad'],
     funcionalidades: [
       'Farmacia y almacén de insumos médicos: kardex, control de lotes y vencimientos.',
       'Dispensación de medicamentos y descuento automático de stock por atención.',

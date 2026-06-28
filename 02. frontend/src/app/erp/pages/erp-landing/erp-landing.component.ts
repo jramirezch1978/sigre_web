@@ -218,6 +218,22 @@ export class ErpLandingComponent implements OnInit {
       funciones: ['Maestro de cuartos', 'Alojamiento de huéspedes', 'Reservas', 'Check-in / Check-out', 'Servicios de restaurante', 'Catering y eventos', 'Tarifas y temporadas', 'Facturación hotelera'],
     },
     {
+      codigo: 'SALUD',
+      nombre: 'Salud',
+      descripcion: 'Clínicas, hospitales y consultorios: admisión, citas y atenciones, historia clínica y tarifario de servicios.',
+      icono: 'assets/imagenes/modulos/salud.svg',
+      color: '#0288D1',
+      funciones: ['Especialidades y médicos', 'Tarifario de servicios', 'Admisión de pacientes', 'Citas y atenciones', 'Historia clínica', 'Facturación de servicios'],
+    },
+    {
+      codigo: 'FARMACIA',
+      nombre: 'Farmacia',
+      descripcion: 'Dispensación de medicamentos, recetas, control de lotes y vencimientos e inventario de farmacia.',
+      icono: 'assets/imagenes/modulos/farmacia.svg',
+      color: '#00897B',
+      funciones: ['Maestro de medicamentos', 'Lotes y vencimientos', 'Dispensación', 'Recetas', 'Stock de farmacia'],
+    },
+    {
       codigo: 'SEGURIDAD',
       nombre: 'Configuración',
       descripcion: 'Administración del sistema: usuarios, roles, permisos, empresas, sucursales y parámetros generales.',

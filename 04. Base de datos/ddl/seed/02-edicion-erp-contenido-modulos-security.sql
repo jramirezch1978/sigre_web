@@ -93,6 +93,13 @@ JOIN auth.modulo m ON m.codigo = 'APROVISIONAMIENTO'
 WHERE e.codigo IN ('PROFESSIONAL', 'ENTERPRISE')
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
 
+-- Módulos sectoriales del sector salud (no existían): SALUD (clínicas/hospitales/consultorios)
+-- y FARMACIA (farmacias/dispensación). Quedan incluidos en HEALTH y en ENTERPRISE (que toma todos).
+INSERT INTO auth.modulo (codigo, nombre, flag_estado) VALUES
+    ('SALUD', 'Salud', '1'),
+    ('FARMACIA', 'Farmacia', '1')
+ON CONFLICT (codigo) DO UPDATE SET nombre = EXCLUDED.nombre, flag_estado = EXCLUDED.flag_estado;
+
 -- Ediciones sectoriales: HORECA (hoteles/restaurantes/catering) y HEALTH (salud).
 DELETE FROM auth.edicion_modulo em
 USING auth.edicion_erp e
@@ -114,7 +121,15 @@ SELECT e.id, m.id
 FROM auth.edicion_erp e
 JOIN auth.modulo m ON m.codigo IN (
     'ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'FINANZAS', 'SEGURIDAD',
-    'RRHH', 'ASISTENCIA', 'CONTABILIDAD', 'ACTIVOS_FIJOS'
+    'RRHH', 'ASISTENCIA', 'CONTABILIDAD', 'ACTIVOS_FIJOS', 'SALUD', 'FARMACIA'
 )
 WHERE e.codigo = 'HEALTH'
+ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
+
+-- Asegurar que ENTERPRISE (todos los módulos) incluya los nuevos módulos sectoriales.
+INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
+SELECT e.id, m.id
+FROM auth.edicion_erp e
+JOIN auth.modulo m ON m.codigo IN ('SALUD', 'FARMACIA')
+WHERE e.codigo = 'ENTERPRISE'
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
