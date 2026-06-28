@@ -24,6 +24,10 @@ public class OpcionMenuRequest {
     @Size(max = 250)
     private String rutaFrontend;
 
+    /** Ruta RELATIVA del componente Angular. NULL/vacio => opcion en construccion. */
+    @Size(max = 250)
+    private String pathUrl;
+
     private Long opcionPadreId;
 
     private Integer orden = 0;

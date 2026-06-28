@@ -173,18 +173,15 @@
           @if (moduloActivo?.codigo === modulo.codigo && modulo.secciones.length > 0) {
             <ul class="mm-show">
               @for (seccion of modulo.secciones; track seccion.id) {
-                <li>
-                  <a href="javascript:;" class="has-arrow" (click)="toggleSeccionSidebar(seccion.id)">
+                <li [class.mm-active]="estaExpandido(seccion.id)">
+                  <a href="javascript:;" class="has-arrow" (click)="toggleNodo(seccion.id)">
                     <i class="material-icons-outlined">arrow_right</i>{{ seccion.nombre }}
                   </a>
-                  @if (seccionExpandidaId === seccion.id) {
+                  @if (estaExpandido(seccion.id)) {
                     <ul class="mm-show">
                       @for (opcion of seccion.opciones; track opcion.id) {
-                        <li>
-                          <a href="javascript:;" (click)="navegarOpcion($event, opcion.rutaFrontend, opcion.codigo)">
-                            <i class="material-icons-outlined">arrow_right</i>{{ opcion.nombre }}
-                          </a>
-                        </li>
+                        <ng-container [ngTemplateOutlet]="itemMenuTpl"
+                                      [ngTemplateOutletContext]="{ $implicit: opcion }"></ng-container>
                       }
                     </ul>
                   }
@@ -195,6 +192,30 @@
         </li>
       }
     </ul>
+
+    <!-- Plantilla recursiva de opciones (submenús de profundidad arbitraria). -->
+    <ng-template #itemMenuTpl let-opcion>
+      <li [class.mm-active]="estaExpandido(opcion.id)">
+        @if (opcion.hijos.length > 0) {
+          <a href="javascript:;" class="has-arrow" (click)="toggleNodo(opcion.id)">
+            <i class="material-icons-outlined">arrow_right</i>{{ opcion.nombre }}
+          </a>
+          @if (estaExpandido(opcion.id)) {
+            <ul class="mm-show">
+              @for (hijo of opcion.hijos; track hijo.id) {
+                <ng-container [ngTemplateOutlet]="itemMenuTpl"
+                              [ngTemplateOutletContext]="{ $implicit: hijo }"></ng-container>
+              }
+            </ul>
+          }
+        } @else {
+          <a href="javascript:;" (click)="navegarOpcion($event, opcion)"
+             [title]="opcion.pathUrl ? opcion.nombre : opcion.nombre + ' (en construcción)'">
+            <i class="material-icons-outlined">{{ opcion.pathUrl ? 'arrow_right' : 'construction' }}</i>{{ opcion.nombre }}
+          </a>
+        }
+      </li>
+    </ng-template>
 
     @if (cargandoMenu) {
       <div class="sigre-sidebar-loading">

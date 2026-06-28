@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 /**
  * Página que se muestra dentro del ERP cuando una opción del menú apunta a una ruta
@@ -14,8 +14,12 @@ import { Router } from '@angular/router';
     <div class="nd-wrap">
       <div class="nd-card">
         <i class="material-icons-outlined nd-icon">construction</i>
-        <h2>Opción no desarrollada</h2>
-        <p>Esta opción del menú aún no ha sido implementada o no existe.</p>
+        <h2>Opción en construcción</h2>
+        @if (nombreOpcion) {
+          <p>La opción <strong>{{ nombreOpcion }}</strong> aún no ha sido desarrollada.</p>
+        } @else {
+          <p>Esta opción del menú aún no ha sido implementada o no existe.</p>
+        }
         <p class="nd-ruta">{{ rutaActual }}</p>
         <button class="btn btn-primary" (click)="irADashboard()">Volver al inicio del ERP</button>
       </div>
@@ -35,7 +39,9 @@ import { Router } from '@angular/router';
 })
 export class ErpOpcionNoDesarrolladaComponent {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   readonly rutaActual = this.router.url;
+  readonly nombreOpcion = this.route.snapshot.queryParamMap.get('op') ?? '';
 
   irADashboard(): void {
     void this.router.navigate(['/sigre/dashboard']);

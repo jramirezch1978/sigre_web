@@ -215,6 +215,9 @@ CREATE TABLE auth.opcion_menu (
     codigo VARCHAR(80) NOT NULL UNIQUE,
     nombre VARCHAR(160) NOT NULL,
     ruta_frontend VARCHAR(250),
+    -- Ruta RELATIVA del componente/pagina Angular a cargar al hacer click.
+    -- NULL/vacio => la opcion muestra la pagina "en construccion / no desarrollada".
+    path_url VARCHAR(250),
     opcion_padre_id BIGINT REFERENCES auth.opcion_menu(id),
     orden INTEGER NOT NULL DEFAULT 0,
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1'))

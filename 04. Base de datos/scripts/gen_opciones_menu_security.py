@@ -153,6 +153,14 @@ def parse_tree(lines: list[str]) -> list[dict]:
         if not current_mod or not current_section or section_node is None:
             continue
 
+        if "Path:" in line:
+            # ruta RELATIVA del componente Angular ya desarrollado para esta opcion
+            if stack and not stack[-1][1].get("is_section"):
+                val = line.split("Path:", 1)[1].strip().strip("/")
+                if val:
+                    stack[-1][1]["path_rel"] = val
+            continue
+
         if "Acciones:" in line:
             # marca como hoja al ultimo nodo apilado y le asigna ruta
             if stack and not stack[-1][1].get("is_section"):
@@ -255,12 +263,12 @@ def render_sql(nodes: list[dict]) -> str:
             L.append(",\n".join(vals))
             L.append("    ) AS t(modulo_codigo, codigo, nombre, orden)")
             L.append(")")
-            L.append("INSERT INTO auth.opcion_menu (modulo_id, codigo, nombre, ruta_frontend, opcion_padre_id, orden, flag_estado)")
-            L.append("SELECT m.id, d.codigo, d.nombre, NULL, NULL, d.orden, '1'")
+            L.append("INSERT INTO auth.opcion_menu (modulo_id, codigo, nombre, ruta_frontend, path_url, opcion_padre_id, orden, flag_estado)")
+            L.append("SELECT m.id, d.codigo, d.nombre, NULL, NULL, NULL, d.orden, '1'")
             L.append("FROM d JOIN auth.modulo m ON m.codigo = d.modulo_codigo")
             L.append("ON CONFLICT (codigo) DO UPDATE SET")
             L.append("    modulo_id = EXCLUDED.modulo_id, nombre = EXCLUDED.nombre,")
-            L.append("    ruta_frontend = NULL, opcion_padre_id = NULL, orden = EXCLUDED.orden, flag_estado = '1';")
+            L.append("    ruta_frontend = NULL, path_url = NULL, opcion_padre_id = NULL, orden = EXCLUDED.orden, flag_estado = '1';")
             L.append("")
         else:
             L.append(f"-- Nivel {depth}: hijos")
@@ -269,19 +277,21 @@ def render_sql(nodes: list[dict]) -> str:
             vals = []
             for n in bucket:
                 ruta = esc(n["ruta"]) if n["ruta"] else "NULL"
+                path = esc(n["path_rel"]) if n.get("path_rel") else "NULL"
                 vals.append(
                     f"        ({esc(n['parent_codigo'])}, {esc(n['codigo'])}, "
-                    f"{esc(n['nombre'])}, {ruta}, {n['orden']})"
+                    f"{esc(n['nombre'])}, {ruta}, {path}, {n['orden']})"
                 )
             L.append(",\n".join(vals))
-            L.append("    ) AS t(parent_codigo, codigo, nombre, ruta, orden)")
+            L.append("    ) AS t(parent_codigo, codigo, nombre, ruta, path_url, orden)")
             L.append(")")
-            L.append("INSERT INTO auth.opcion_menu (modulo_id, codigo, nombre, ruta_frontend, opcion_padre_id, orden, flag_estado)")
-            L.append("SELECT p.modulo_id, d.codigo, d.nombre, d.ruta, p.id, d.orden, '1'")
+            L.append("INSERT INTO auth.opcion_menu (modulo_id, codigo, nombre, ruta_frontend, path_url, opcion_padre_id, orden, flag_estado)")
+            L.append("SELECT p.modulo_id, d.codigo, d.nombre, d.ruta, d.path_url, p.id, d.orden, '1'")
             L.append("FROM d JOIN auth.opcion_menu p ON p.codigo = d.parent_codigo")
             L.append("ON CONFLICT (codigo) DO UPDATE SET")
             L.append("    modulo_id = EXCLUDED.modulo_id, nombre = EXCLUDED.nombre,")
-            L.append("    ruta_frontend = EXCLUDED.ruta_frontend, opcion_padre_id = EXCLUDED.opcion_padre_id,")
+            L.append("    ruta_frontend = EXCLUDED.ruta_frontend, path_url = EXCLUDED.path_url,")
+            L.append("    opcion_padre_id = EXCLUDED.opcion_padre_id,")
             L.append("    orden = EXCLUDED.orden, flag_estado = '1';")
             L.append("")
 
@@ -326,8 +336,10 @@ def main() -> None:
     secciones = sum(1 for n in nodes if n.get("is_section"))
     hojas = sum(1 for n in nodes if n.get("is_leaf"))
     grupos = sum(1 for n in nodes if not n.get("is_section") and not n.get("is_leaf"))
+    con_path = sum(1 for n in nodes if n.get("path_rel"))
     maxd = max((n["depth"] for n in nodes), default=0)
     print(f"Generado: {OUT_PATH}")
+    print(f"Items con path_url (conciliados a componente): {con_path}")
     print(f"Modulos: {len(mods)} -> {', '.join(mods)}")
     print(f"Secciones: {secciones}, Submenus(grupos): {grupos}, Items(hojas): {hojas}, Total filas: {len(nodes)}")
     print(f"Profundidad maxima (sin contar modulo): {maxd}")

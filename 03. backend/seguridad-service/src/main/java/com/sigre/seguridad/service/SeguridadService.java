@@ -306,14 +306,14 @@ public class SeguridadService {
         if (moduloId == null) {
             return jdbcTemplate.query(
                     """
-                    SELECT id, modulo_id, codigo, nombre, ruta_frontend, opcion_padre_id, orden, flag_estado
+                    SELECT id, modulo_id, codigo, nombre, ruta_frontend, path_url, opcion_padre_id, orden, flag_estado
                     FROM auth.opcion_menu ORDER BY modulo_id, orden, nombre
                     """,
                     this::mapOpcionMenu);
         }
         return jdbcTemplate.query(
                 """
-                SELECT id, modulo_id, codigo, nombre, ruta_frontend, opcion_padre_id, orden, flag_estado
+                SELECT id, modulo_id, codigo, nombre, ruta_frontend, path_url, opcion_padre_id, orden, flag_estado
                 FROM auth.opcion_menu WHERE modulo_id = ? ORDER BY orden, nombre
                 """,
                 this::mapOpcionMenu,
@@ -327,6 +327,7 @@ public class SeguridadService {
                 .codigo(rs.getString("codigo"))
                 .nombre(rs.getString("nombre"))
                 .rutaFrontend(rs.getString("ruta_frontend"))
+                .pathUrl(rs.getString("path_url"))
                 .opcionPadreId(rs.getObject("opcion_padre_id") != null ? rs.getLong("opcion_padre_id") : null)
                 .orden(rs.getInt("orden"))
                 .activo(fromFlag(rs.getString("flag_estado")))
@@ -338,11 +339,11 @@ public class SeguridadService {
         Long id = jdbcTemplate.queryForObject(
                 """
                 INSERT INTO auth.opcion_menu
-                (modulo_id, codigo, nombre, ruta_frontend, opcion_padre_id, orden, flag_estado)
-                VALUES (?,?,?,?,?,?,?) RETURNING id
+                (modulo_id, codigo, nombre, ruta_frontend, path_url, opcion_padre_id, orden, flag_estado)
+                VALUES (?,?,?,?,?,?,?,?) RETURNING id
                 """,
                 Long.class,
-                req.getModuloId(), req.getCodigo(), req.getNombre(), req.getRutaFrontend(),
+                req.getModuloId(), req.getCodigo(), req.getNombre(), req.getRutaFrontend(), req.getPathUrl(),
                 req.getOpcionPadreId(), req.getOrden() != null ? req.getOrden() : 0, toFlag(req.getActivo()));
         return obtenerOpcionMenu(id);
     }
@@ -350,7 +351,7 @@ public class SeguridadService {
     public OpcionMenuDto obtenerOpcionMenu(Long id) {
         List<OpcionMenuDto> list = jdbcTemplate.query(
                 """
-                SELECT id, modulo_id, codigo, nombre, ruta_frontend, opcion_padre_id, orden, flag_estado
+                SELECT id, modulo_id, codigo, nombre, ruta_frontend, path_url, opcion_padre_id, orden, flag_estado
                 FROM auth.opcion_menu WHERE id = ?
                 """,
                 this::mapOpcionMenu,
@@ -365,10 +366,10 @@ public class SeguridadService {
     public OpcionMenuDto actualizarOpcionMenu(long id, OpcionMenuRequest req) {
         int u = jdbcTemplate.update(
                 """
-                UPDATE auth.opcion_menu SET modulo_id = ?, codigo = ?, nombre = ?, ruta_frontend = ?,
+                UPDATE auth.opcion_menu SET modulo_id = ?, codigo = ?, nombre = ?, ruta_frontend = ?, path_url = ?,
                 opcion_padre_id = ?, orden = ?, flag_estado = ? WHERE id = ?
                 """,
-                req.getModuloId(), req.getCodigo(), req.getNombre(), req.getRutaFrontend(),
+                req.getModuloId(), req.getCodigo(), req.getNombre(), req.getRutaFrontend(), req.getPathUrl(),
                 req.getOpcionPadreId(), req.getOrden() != null ? req.getOrden() : 0,
                 toFlag(req.getActivo()), id);
         if (u == 0) {
@@ -968,7 +969,7 @@ public class SeguridadService {
                 """
                 SELECT uom.id, uom.usuario_id, uom.empresa_id, uom.opcion_menu_id, uom.habilitado, uom.flag_estado,
                        om.id omid, om.modulo_id, om.codigo omcod, om.nombre omnom,
-                       om.ruta_frontend, om.opcion_padre_id, om.orden, om.flag_estado omfs
+                       om.ruta_frontend, om.path_url, om.opcion_padre_id, om.orden, om.flag_estado omfs
                 FROM auth.usuario_opcion_menu uom
                 JOIN auth.opcion_menu om ON om.id = uom.opcion_menu_id
                 WHERE uom.usuario_id = ? AND uom.empresa_id = ?
@@ -987,6 +988,7 @@ public class SeguridadService {
                                 .codigo(rs.getString("omcod"))
                                 .nombre(rs.getString("omnom"))
                                 .rutaFrontend(rs.getString("ruta_frontend"))
+                                .pathUrl(rs.getString("path_url"))
                                 .opcionPadreId(rs.getObject("opcion_padre_id") != null
                                         ? rs.getLong("opcion_padre_id") : null)
                                 .orden(rs.getInt("orden"))
@@ -1107,7 +1109,7 @@ public class SeguridadService {
         return jdbcTemplate.query(
                 """
                 SELECT rom.id AS rom_id, om.id AS om_id, om.modulo_id, om.codigo, om.nombre,
-                       om.ruta_frontend, om.opcion_padre_id, om.orden, om.flag_estado
+                       om.ruta_frontend, om.path_url, om.opcion_padre_id, om.orden, om.flag_estado
                 FROM auth.rol_usuario ru
                 JOIN auth.rol r ON r.id = ru.rol_id AND r.empresa_id = ? AND r.flag_estado = '1' AND ru.flag_estado = '1'
                 JOIN auth.rol_opcion_menu rom ON rom.rol_id = r.id AND rom.flag_estado = '1'
@@ -1122,6 +1124,7 @@ public class SeguridadService {
                                 .codigo(rs.getString("codigo"))
                                 .nombre(rs.getString("nombre"))
                                 .rutaFrontend(rs.getString("ruta_frontend"))
+                                .pathUrl(rs.getString("path_url"))
                                 .opcionPadreId(rs.getObject("opcion_padre_id") != null
                                         ? rs.getLong("opcion_padre_id") : null)
                                 .orden(rs.getInt("orden"))

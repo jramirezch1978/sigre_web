@@ -14,6 +14,8 @@ export interface OpcionMenuDto {
   codigo: string;
   nombre: string;
   rutaFrontend: string | null;
+  /** Ruta RELATIVA del componente Angular a cargar. NULL => opción en construcción. */
+  pathUrl: string | null;
   opcionPadreId: number | null;
   orden: number;
   activo: boolean;
@@ -54,12 +56,17 @@ export interface MenuSeccion {
   opciones: MenuOpcion[];
 }
 
+/** Nodo de menú recursivo: puede ser submenú (con hijos) u opción final (con pathUrl). */
 export interface MenuOpcion {
   id: number;
   codigo: string;
   nombre: string;
   rutaFrontend: string | null;
+  /** Ruta relativa del componente Angular; null => en construcción. */
+  pathUrl: string | null;
   acciones: AccionDto[];
+  /** Submenús/items hijos. Vacío => es una hoja navegable. */
+  hijos: MenuOpcion[];
 }
 
 const ICONOS_MODULO: Record<string, string> = {
@@ -101,67 +108,75 @@ export class ErpMenuService {
     );
   }
 
-  private transformarAModulos(data: MiMenuResponse): MenuModulo[] {
-    const padresPorModulo = new Map<number, OpcionMenuDto[]>();
-    const hijosPorPadre = new Map<number, MiMenuItemDto[]>();
-    const moduloNombres = new Map<number, string>();
+  /** Prefijo del código de sección (1er token) → código de módulo del catálogo. */
+  private static readonly PREFIJO_A_MODULO: Readonly<Record<string, string>> = {
+    ALMACEN: 'ALMACEN', COMPRAS: 'COMPRAS', APROV: 'APROVISIONAMIENTO',
+    COMERC: 'COMERCIALIZACION', FINANZAS: 'FINANZAS', CONTABILIDAD: 'CONTABILIDAD',
+    ACTIVOS: 'ACTIVOS_FIJOS', RRHH: 'RRHH', PRODUCCION: 'PRODUCCION',
+    PRESUP: 'PRESUPUESTO', FLOTA: 'FLOTA', MANT: 'MANTENIMIENTO', AUDIT: 'AUDITORIA',
+    CAMPO: 'CAMPO', COMEDOR: 'COMEDOR', SIG: 'SIG', OPER: 'OPERACIONES',
+    HORECA: 'HORECA', SEGURIDAD: 'SEGURIDAD',
+  };
 
+  private codigoModuloDesdeSeccion(codigoSeccion: string): string {
+    const prefijo = (codigoSeccion ?? '').split('_')[0].toUpperCase();
+    return ErpMenuService.PREFIJO_A_MODULO[prefijo] ?? prefijo;
+  }
+
+  private transformarAModulos(data: MiMenuResponse): MenuModulo[] {
+    // Índice padre → hijos (raíz = null) para reconstruir el árbol de profundidad arbitraria.
+    const hijosPorPadre = new Map<number | null, MiMenuItemDto[]>();
     for (const item of data.items) {
-      const om = item.opcionMenu;
-      if (!om.activo) continue;
-      if (om.opcionPadreId === null) {
-        const arr = padresPorModulo.get(om.moduloId) ?? [];
-        arr.push(om);
-        padresPorModulo.set(om.moduloId, arr);
-      } else {
-        const arr = hijosPorPadre.get(om.opcionPadreId) ?? [];
-        arr.push(item);
-        hijosPorPadre.set(om.opcionPadreId, arr);
-      }
+      if (!item.opcionMenu.activo) continue;
+      const pid = item.opcionMenu.opcionPadreId ?? null;
+      const arr = hijosPorPadre.get(pid) ?? [];
+      arr.push(item);
+      hijosPorPadre.set(pid, arr);
     }
 
-    for (const item of data.items) {
-      const om = item.opcionMenu;
-      if (!om.activo) continue;
-      const codModulo = om.codigo.split('_')[0];
-      if (!moduloNombres.has(om.moduloId)) {
-        moduloNombres.set(om.moduloId, this.nombreModulo(codModulo));
+    const construirHijos = (padreId: number): MenuOpcion[] =>
+      (hijosPorPadre.get(padreId) ?? [])
+        .sort((a, b) => (a.opcionMenu.orden ?? 0) - (b.opcionMenu.orden ?? 0))
+        .map(h => ({
+          id: h.opcionMenu.id,
+          codigo: h.opcionMenu.codigo,
+          nombre: h.opcionMenu.nombre,
+          rutaFrontend: h.opcionMenu.rutaFrontend,
+          pathUrl: h.opcionMenu.pathUrl ?? null,
+          acciones: h.acciones,
+          hijos: construirHijos(h.opcionMenu.id),
+        }));
+
+    const seccionesPorModulo = new Map<number, MenuSeccion[]>();
+    const codigoModuloPorId = new Map<number, string>();
+
+    const raices = (hijosPorPadre.get(null) ?? [])
+      .sort((a, b) => (a.opcionMenu.orden ?? 0) - (b.opcionMenu.orden ?? 0));
+
+    for (const sec of raices) {
+      const om = sec.opcionMenu;
+      const arr = seccionesPorModulo.get(om.moduloId) ?? [];
+      arr.push({
+        id: om.id,
+        codigo: om.codigo,
+        nombre: om.nombre,
+        opciones: construirHijos(om.id),
+      });
+      seccionesPorModulo.set(om.moduloId, arr);
+      if (!codigoModuloPorId.has(om.moduloId)) {
+        codigoModuloPorId.set(om.moduloId, this.codigoModuloDesdeSeccion(om.codigo));
       }
     }
 
     const modulos: MenuModulo[] = [];
-
-    for (const [moduloId, padres] of padresPorModulo) {
-      const primerCodigo = padres[0]?.codigo ?? '';
-      const codModulo = primerCodigo.split('_').slice(0, -1).join('_')
-        .replace(/_TABLAS|_OPERACIONES|_CONSULTAS|_REPORTES|_PROCESOS|_ADELANTOS|_TESORERIA|_CONCILIACIONES/g, '') || primerCodigo.split('_')[0];
-
-      const secciones: MenuSeccion[] = padres
-        .sort((a, b) => a.orden - b.orden)
-        .map(padre => {
-          const hijos = (hijosPorPadre.get(padre.id) ?? [])
-            .sort((a, b) => a.opcionMenu.orden - b.opcionMenu.orden);
-          return {
-            id: padre.id,
-            codigo: padre.codigo,
-            nombre: padre.nombre,
-            opciones: hijos.map(h => ({
-              id: h.opcionMenu.id,
-              codigo: h.opcionMenu.codigo,
-              nombre: h.opcionMenu.nombre,
-              rutaFrontend: this.resolverRutaFrontend(h.opcionMenu.codigo, h.opcionMenu.rutaFrontend),
-              acciones: h.acciones,
-            })),
-          };
-        });
-
-      const codigoKey = codModulo || primerCodigo.split('_')[0];
+    for (const [moduloId, secciones] of seccionesPorModulo) {
+      const codModulo = codigoModuloPorId.get(moduloId) ?? '';
       modulos.push({
         moduloId,
         codigo: codModulo,
-        nombre: moduloNombres.get(moduloId) ?? 'Módulo',
-        icono: ICONOS_MODULO[codigoKey] ?? 'apps',
-        iconoSvg: iconoModulo(codigoKey),
+        nombre: this.nombreModulo(codModulo),
+        icono: ICONOS_MODULO[codModulo] ?? 'apps',
+        iconoSvg: iconoModulo(codModulo),
         secciones,
       });
     }
@@ -220,6 +235,12 @@ export class ErpMenuService {
 
   navegarOpcionDesdeMenu(codigo: string, ruta: string | null): string | null {
     return this.resolverRutaFrontend(codigo, ruta);
+  }
+
+  /** Ruta absoluta del componente a abrir desde el menú. pathUrl null/vacío => en construcción. */
+  rutaDestinoPath(pathUrl: string | null): string {
+    const limpio = (pathUrl ?? '').trim().replace(/^\/+/, '');
+    return limpio ? `/sigre/${limpio}` : '/sigre/en-construccion';
   }
 
   /** Ruta del dashboard interno del módulo (al salir del grid principal). */

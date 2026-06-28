@@ -4,7 +4,7 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { StorageService } from '../../../core/services/storage.service';
 import { AuthService } from '../../../auth/services/auth.service';
-import { ErpMenuService, MenuModulo } from '../../services/erp-menu.service';
+import { ErpMenuService, MenuModulo, MenuOpcion } from '../../services/erp-menu.service';
 import { ErpLayoutService } from '../../services/erp-layout.service';
 import { MetoxiInitService } from '../../services/metoxi-init.service';
 import { ErpNotificacionService, NotificacionItem } from '../../services/erp-notificacion.service';
@@ -43,7 +43,8 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   errorMenu = '';
 
   dropdownActivo: 'apps' | 'notificaciones' | 'usuario' | null = null;
-  seccionExpandidaId: number | null = null;
+  /** Ids de nodos (secciones/submenús) expandidos en el sidebar (profundidad arbitraria). */
+  nodosExpandidos = new Set<number>();
 
   notificaciones: NotificacionItem[] = [];
   notificacionesNoLeidas = 0;
@@ -182,7 +183,7 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
   seleccionarModulo(modulo: MenuModulo): void {
     this.layout.seleccionarModulo(modulo);
     this.dropdownActivo = null;
-    this.seccionExpandidaId = null;
+    this.nodosExpandidos.clear();
     void this.router.navigateByUrl(this.menuService.rutaDashboardModulo(modulo.codigo));
   }
 
@@ -197,14 +198,22 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     this.seleccionarModulo(modulo);
   }
 
-  toggleSeccionSidebar(seccionId: number): void {
-    this.seccionExpandidaId = this.seccionExpandidaId === seccionId ? null : seccionId;
+  toggleNodo(nodoId: number): void {
+    if (this.nodosExpandidos.has(nodoId)) {
+      this.nodosExpandidos.delete(nodoId);
+    } else {
+      this.nodosExpandidos.add(nodoId);
+    }
+  }
+
+  estaExpandido(nodoId: number): boolean {
+    return this.nodosExpandidos.has(nodoId);
   }
 
   irADashboard(): void {
     this.layout.seleccionarModulo(null);
     this.dropdownActivo = null;
-    this.seccionExpandidaId = null;
+    this.nodosExpandidos.clear();
     void this.router.navigate(['/sigre/dashboard']);
   }
 
@@ -213,15 +222,20 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     void this.router.navigate(['/sigre/seguridad-usuarios']);
   }
 
-  navegarOpcion(event: Event, ruta: string | null, codigo?: string): void {
+  /** Click en una opción del menú: si tiene hijos despliega; si es hoja navega a su path_url. */
+  navegarOpcion(event: Event, opcion: MenuOpcion): void {
     event.preventDefault();
     event.stopPropagation();
-    const destino = codigo
-      ? this.menuService.resolverRutaFrontend(codigo, ruta)
-      : this.menuService.normalizarRutaFrontend(ruta);
-    if (!destino) return;
+    if (opcion.hijos && opcion.hijos.length > 0) {
+      this.toggleNodo(opcion.id);
+      return;
+    }
     this.dropdownActivo = null;
-    void this.router.navigateByUrl(destino);
+    if (opcion.pathUrl) {
+      void this.router.navigateByUrl(this.menuService.rutaDestinoPath(opcion.pathUrl));
+    } else {
+      void this.router.navigate(['/sigre/en-construccion'], { queryParams: { op: opcion.nombre } });
+    }
   }
 
   get enDashboard(): boolean {

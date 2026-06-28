@@ -17,6 +17,8 @@ public class OpcionMenuDto {
     private String codigo;
     private String nombre;
     private String rutaFrontend;
+    /** Ruta RELATIVA del componente/pagina Angular a cargar. NULL => opcion en construccion. */
+    private String pathUrl;
     private Long opcionPadreId;
     private Integer orden;
     private Boolean activo;
