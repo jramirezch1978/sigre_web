@@ -34,7 +34,7 @@ export interface ConfigClaveDto {
 }
 
 export interface SelectOptionDto {
-  value: number;
+  value: number | string;
   label: string;
 }
 

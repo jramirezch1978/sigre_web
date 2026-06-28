@@ -178,9 +178,10 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     const necesitaTiposMov = campos.some(c => c.optionsFrom === 'tipos-movimiento');
     const necesitaCentrosCosto = campos.some(c => c.optionsFrom === 'centros-costo');
     const necesitaProveedores = campos.some(c => c.optionsFrom === 'proveedores');
+    const necesitaUbigeos = campos.some(c => c.optionsFrom === 'ubigeos');
 
     if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov
-        && !necesitaCentrosCosto && !necesitaProveedores) {
+        && !necesitaCentrosCosto && !necesitaProveedores && !necesitaUbigeos) {
       this.cargandoOpciones = false;
       return;
     }
@@ -198,8 +199,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       tiposMov: necesitaTiposMov ? resiliente('tipos de movimiento', this.almacenApi.listarTiposMovimiento()) : of([]),
       centrosCosto: necesitaCentrosCosto ? resiliente('centros de costo', this.coreApi.listarCentrosCosto()) : of([]),
       proveedores: necesitaProveedores ? resiliente('proveedores', this.coreApi.listarProveedores()) : of([]),
+      ubigeos: necesitaUbigeos ? resiliente('ubigeos', this.almacenApi.listarUbigeos()) : of([]),
     }).subscribe({
-      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores }) => {
+      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos }) => {
         if (necesitaTipos) {
           this.opciones['tipos-almacen'] = tipos.map(t => ({
             value: t.id,
@@ -229,6 +231,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
         }
         if (necesitaProveedores) {
           this.opciones['proveedores'] = proveedores;
+        }
+        if (necesitaUbigeos) {
+          this.opciones['ubigeos'] = ubigeos;
         }
         this.cargandoOpciones = false;
         // El formulario queda usable; solo se avisa (modal WARNING) de las listas que no cargaron.

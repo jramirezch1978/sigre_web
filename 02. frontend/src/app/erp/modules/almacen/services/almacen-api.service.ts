@@ -168,6 +168,13 @@ export class AlmacenApiService {
       .pipe(map(res => res.data ?? []));
   }
 
+  /** Catálogo TG_UBIGEO para el select de ubigeo. value = código (FK). */
+  listarUbigeos(): Observable<{ value: string; label: string }[]> {
+    return this.http
+      .get<ApiResponse<{ value: string; label: string }[]>>(`${this.base}/ubigeos`)
+      .pipe(map(res => res.data ?? []));
+  }
+
   listarTiposAlmacen(): Observable<AlmacenTipoDto[]> {
     return this.listarTodoPaginado<AlmacenTipoDto>('/almacen-tipos');
   }
