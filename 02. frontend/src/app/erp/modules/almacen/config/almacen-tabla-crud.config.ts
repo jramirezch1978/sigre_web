@@ -136,6 +136,15 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
       CAMPO_FLAG_ESTADO,
     ],
   },
+  'formas-de-embarque': {
+    basePath: '/maestros/formas-embarque',
+    handler: 'standard',
+    campos: [
+      { key: 'formaEmbarque', label: 'Código', type: 'text', required: true, maxLength: 4, readonlyOnEdit: true },
+      { key: 'descripcion', label: 'Descripción', type: 'text', maxLength: 30 },
+      CAMPO_FLAG_ESTADO,
+    ],
+  },
   lotes: {
     basePath: '/lotes-pallets',
     handler: 'standard',

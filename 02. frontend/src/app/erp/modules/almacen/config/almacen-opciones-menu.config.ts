@@ -64,6 +64,13 @@ export const ALMACEN_TABLAS_OPCIONES: readonly AlmacenOpcionMenuDef[] = [
     orden: 6,
   },
   {
+    codigo: 'ALMACEN_TABLAS_FORMAS_DE_EMBARQUE',
+    nombre: 'Formas de embarque',
+    rutaFrontend: '/sigre/almacen/tablas/formas-de-embarque',
+    tablaKey: 'formas-de-embarque',
+    orden: 11,
+  },
+  {
     codigo: 'ALMACEN_TABLAS_LOTES',
     nombre: 'Ingreso de Lotes',
     rutaFrontend: '/sigre/almacen/tablas/lotes',

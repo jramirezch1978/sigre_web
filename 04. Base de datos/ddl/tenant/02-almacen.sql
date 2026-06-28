@@ -88,6 +88,33 @@ CREATE INDEX IF NOT EXISTS ix_almacen_centros_costo ON almacen.almacen (centros_
 CREATE INDEX IF NOT EXISTS ix_almacen_proveedor ON almacen.almacen (proveedor_entidad_id);
 CREATE INDEX IF NOT EXISTS ix_almacen_distrito ON almacen.almacen (distrito_id);
 
+-- Catálogo de formas de embarque (legacy FORMA_EMBARQUE). PK id; forma_embarque = clave de negocio.
+CREATE TABLE almacen.forma_embarque (
+    id BIGSERIAL PRIMARY KEY,
+    forma_embarque CHAR(4) NOT NULL,
+    descripcion VARCHAR(30),
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1',
+    created_by          BIGINT,
+    fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),
+    updated_by          BIGINT,
+    fec_modificacion    TIMESTAMPTZ,
+    CONSTRAINT UK_FORMA_EMBARQUE UNIQUE (forma_embarque)
+);
+
+-- Transportistas por almacén (legacy ALMACEN_TRANSPORT): relación almacén ↔ transportista (entidad).
+CREATE TABLE almacen.almacen_transportista (
+    id BIGSERIAL PRIMARY KEY,
+    almacen_id BIGINT NOT NULL REFERENCES almacen.almacen(id),
+    transportista_id BIGINT NOT NULL REFERENCES core.entidad_contribuyente(id),
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1',
+    created_by          BIGINT,
+    fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),
+    updated_by          BIGINT,
+    fec_modificacion    TIMESTAMPTZ,
+    UNIQUE (almacen_id, transportista_id)
+);
+CREATE INDEX IF NOT EXISTS ix_almacen_transp_almacen ON almacen.almacen_transportista (almacen_id);
+
 -- Almacén tácito: almacén por defecto según la clase del artículo y la sucursal.
 -- Consumido (solo lectura) por ms-compras en GET /ordenes-compra/datos-articulo
 -- (HU_ORDENES_COMPRA §12.2): SELECT almacen_id WHERE cod_clase = :codClase AND sucursal_id = :sucursalId.

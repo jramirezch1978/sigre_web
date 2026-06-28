@@ -50,4 +50,11 @@ export const almacenRoutes: Routes = [
   })),
   { path: 'tablas/tablas-almacenes', redirectTo: 'tablas/almacenes', pathMatch: 'full' },
   { path: 'tablas/almacenes-movimiento', redirectTo: 'tablas/movimientos-almacen', pathMatch: 'full' },
+  // Opción de almacén sin ruta desarrollada: muestra "no desarrollada" dentro del ERP (no la landing).
+  {
+    path: '**',
+    loadComponent: () =>
+      import('../../pages/erp-opcion-no-desarrollada/erp-opcion-no-desarrollada.component')
+        .then(m => m.ErpOpcionNoDesarrolladaComponent),
+  },
 ];

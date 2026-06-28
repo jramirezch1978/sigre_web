@@ -45,6 +45,13 @@ export const erpRoutes: Routes = [
           import('./pages/erp-seguridad-usuarios/erp-seguridad-usuarios.component')
             .then(m => m.ErpSeguridadUsuariosComponent),
       },
+      // Cualquier opción del ERP sin ruta desarrollada cae aquí (NO a la landing pública).
+      {
+        path: '**',
+        loadComponent: () =>
+          import('./pages/erp-opcion-no-desarrollada/erp-opcion-no-desarrollada.component')
+            .then(m => m.ErpOpcionNoDesarrolladaComponent),
+      },
     ],
   },
 ];

@@ -8,6 +8,7 @@ export type AlmacenTablaKey =
   | 'movimientos-almacen'
   | 'posiciones'
   | 'motivos-traslado'
+  | 'formas-de-embarque'
   | 'lotes'
   | 'unidades-conversion'
   | 'numeracion-vales'
@@ -88,6 +89,14 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     columnas: [
       { key: 'codigo', header: 'Código', width: '90px' },
       { key: 'nombre', header: 'Nombre', width: '280px' },
+      { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
+    ],
+  },
+  'formas-de-embarque': {
+    titulo: 'Formas de embarque',
+    columnas: [
+      { key: 'formaEmbarque', header: 'Código', width: '90px' },
+      { key: 'descripcion', header: 'Descripción', width: '280px' },
       { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
     ],
   },
