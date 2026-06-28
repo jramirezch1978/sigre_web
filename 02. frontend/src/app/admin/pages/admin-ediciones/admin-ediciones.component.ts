@@ -52,7 +52,7 @@ export class AdminEdicionesComponent implements OnInit {
     PROFESSIONAL: 'professional',
     ENTERPRISE: 'enterprise',
     HORECA: 'horeca',
-    HEALTH: 'healthcare',
+    HEALTH: 'health_care',
   };
 
   iconoEdicion(codigo: string): string {

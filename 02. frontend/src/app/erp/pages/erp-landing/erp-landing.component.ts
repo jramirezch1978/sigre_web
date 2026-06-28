@@ -315,7 +315,7 @@ export class ErpLandingComponent implements OnInit {
       PROFESSIONAL: 'professional',
       ENTERPRISE: 'enterprise',
       HORECA: 'horeca',
-      HEALTH: 'healthcare',
+      HEALTH: 'health_care',
     };
     const archivo = mapa[codigo];
     return archivo ? `assets/imagenes/ediciones/${archivo}.png` : '';
