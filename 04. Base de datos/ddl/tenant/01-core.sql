@@ -96,17 +96,8 @@ DROP SCHEMA IF EXISTS core CASCADE;
 
 CREATE SCHEMA core;
 
-CREATE TABLE core.num_tablas (
-    nombre_tabla VARCHAR(120) NOT NULL,
-    cod_origen VARCHAR(20) NOT NULL DEFAULT 'XX',
-    ultimo_numero BIGINT NOT NULL DEFAULT 0,
-    created_by          BIGINT,
-    fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),
-    updated_by          BIGINT,
-    fec_modificacion    TIMESTAMPTZ,
-    CONSTRAINT PK_NUM_TABLAS PRIMARY KEY (nombre_tabla, cod_origen),
-    CONSTRAINT CK_NUM_TABLAS_ULTIMO_NUMERO CHECK (ultimo_numero >= 0)
-);
+-- Numeración de documentos: tabla única core.numerador_documento + core.fn_get_document_number
+-- (definidos más abajo). NO existe tabla "num_tablas" (era legacy huérfana, retirada).
 
 -- Ficha fiscal/comercial de la empresa: solo en master.empresa (BD security). Esta BD tenant es ya de una empresa; no se duplica core.empresa aquí.
 -- auth.sucursal: definición CREATE en tenant/01-auth.sql; FK e índices de sucursal más abajo en este script.
