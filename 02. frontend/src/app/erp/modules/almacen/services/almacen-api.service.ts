@@ -28,7 +28,7 @@ export interface AlmacenDto {
   distritoId?: number;
   codSunat?: string;
   flagVirtual?: string;
-  ubigeo?: string;
+  ubigeo?: number;
   flagEstado: string;
 }
 
@@ -168,10 +168,10 @@ export class AlmacenApiService {
       .pipe(map(res => res.data ?? []));
   }
 
-  /** Catálogo TG_UBIGEO para el select de ubigeo. value = código (FK). */
-  listarUbigeos(): Observable<{ value: string; label: string }[]> {
+  /** Catálogo TG_UBIGEO para el select de ubigeo. value = id (FK). */
+  listarUbigeos(): Observable<{ value: number; label: string }[]> {
     return this.http
-      .get<ApiResponse<{ value: string; label: string }[]>>(`${this.base}/ubigeos`)
+      .get<ApiResponse<{ value: number; label: string }[]>>(`${this.base}/ubigeos`)
       .pipe(map(res => res.data ?? []));
   }
 

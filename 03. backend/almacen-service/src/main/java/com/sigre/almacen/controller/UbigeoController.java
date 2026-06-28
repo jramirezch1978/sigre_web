@@ -17,14 +17,14 @@ public class UbigeoController {
 
     private final TgUbigeoRepository repository;
 
-    /** value = código (CHAR 6, FK), label = "código — descripción". */
-    public record UbigeoOption(String value, String label) {}
+    /** value = id (FK), label = "código — descripción". */
+    public record UbigeoOption(Long value, String label) {}
 
     @GetMapping
     public ApiResponse<List<UbigeoOption>> listar() {
         List<UbigeoOption> opciones = repository.findAllByOrderByUbigeDescripcionAsc().stream()
                 .map(u -> new UbigeoOption(
-                        u.getUbigeoCodigo(),
+                        u.getId(),
                         u.getUbigeoCodigo() + " — " + (u.getUbigeDescripcion() != null ? u.getUbigeDescripcion() : "")))
                 .toList();
         return ApiResponse.ok(opciones, "Ubigeos");

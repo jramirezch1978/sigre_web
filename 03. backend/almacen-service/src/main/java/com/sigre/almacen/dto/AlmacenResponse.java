@@ -37,7 +37,7 @@ public class AlmacenResponse {
     private Long distritoId;
     private String codSunat;
     private String flagVirtual;
-    private String ubigeo;
+    private Long ubigeo;
     private String flagEstado;
     private Long createdBy;
     private UsuarioResumenDto createdByUsuario;

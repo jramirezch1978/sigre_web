@@ -1008,12 +1008,14 @@ CREATE TABLE core.distrito (
     CONSTRAINT FK_DISTRITO_01 FOREIGN KEY (provincia_id) REFERENCES core.provincia(id)
 );
 
--- Catálogo TG_UBIGEO (zonas/puertos del SIGRE legacy). PK = ubigeo_codigo (CHAR 6).
+-- Catálogo TG_UBIGEO (zonas/puertos del SIGRE legacy). PK = id autogenerado;
+-- ubigeo_codigo (CHAR 6) es la clave de negocio (UNIQUE).
 CREATE TABLE core.tg_ubigeo (
+    id BIGSERIAL PRIMARY KEY,
     ubigeo_codigo     CHAR(6) NOT NULL,
     ubige_descripcion VARCHAR(20),
     flag_replicacion  VARCHAR(1) DEFAULT '1',
-    CONSTRAINT PK_TG_UBIGEO PRIMARY KEY (ubigeo_codigo)
+    CONSTRAINT UK_TG_UBIGEO_CODIGO UNIQUE (ubigeo_codigo)
 );
 
 ALTER TABLE auth.sucursal

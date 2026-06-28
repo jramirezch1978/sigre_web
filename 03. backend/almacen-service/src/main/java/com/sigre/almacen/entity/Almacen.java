@@ -56,8 +56,8 @@ public class Almacen {
     @Column(name = "flag_cntrl_lote", length = 1)
     private String flagCntrlLote = "1";
 
-    @Column(name = "ubigeo", length = 6)
-    private String ubigeo;
+    @Column(name = "ubigeo")
+    private Long ubigeo;
 
     @Column(name = "distrito_id")
     private Long distritoId;

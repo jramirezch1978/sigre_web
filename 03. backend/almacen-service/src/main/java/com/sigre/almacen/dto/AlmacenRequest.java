@@ -45,8 +45,7 @@ public class AlmacenRequest extends FlagEstadoRequest {
     @Size(max = 1)
     private String flagCntrlLote;
 
-    @Size(max = 6)
-    private String ubigeo;
+    private Long ubigeo;
 
     private Long distritoId;
 

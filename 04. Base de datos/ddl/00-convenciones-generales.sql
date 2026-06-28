@@ -9,6 +9,12 @@
 --   - Todos los scripts deben poder ejecutarse multiples veces sin error.
 --   - Usar CREATE ... IF NOT EXISTS / ALTER ... ADD COLUMN IF NOT EXISTS.
 --   - Para constraints, validar existencia en pg_constraint.
+--
+-- Regla de PRIMARY KEY (OBLIGATORIA):
+--   - TODA tabla debe tener como PK una columna "id" autogenerada:  id BIGSERIAL PRIMARY KEY
+--   - Las claves de negocio (codigo, ubigeo_codigo, etc.) van como UNIQUE, NO como PK.
+--   - Las FK referencian SIEMPRE el "id" de la tabla destino
+--     (p.ej. almacen.ubigeo -> core.tg_ubigeo(id)), nunca la clave de negocio.
 -- ============================================================
 
 SET client_min_messages TO WARNING;
