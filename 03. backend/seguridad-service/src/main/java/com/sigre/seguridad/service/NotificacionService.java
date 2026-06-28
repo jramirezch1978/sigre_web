@@ -39,15 +39,14 @@ public class NotificacionService {
 
     /** Todas las notificaciones del usuario (leídas y no leídas), más recientes primero. */
     public List<Map<String, Object>> listar(long usuarioId, long empresaId) {
-        return jdbcTemplate.queryForList("""
-                SELECT n.id, n.titulo, n.descripcion, n.tipo, n.destino_tipo, n.leido, n.enviado_en,
-                       o.nombre_completo AS origen
-                FROM auth.notificacion n
-                JOIN auth.usuario o ON o.id = n.usuario_id
-                WHERE """ + FILTRO_DESTINO + """
-                ORDER BY n.enviado_en DESC
-                LIMIT 100
-                """, empresaId, usuarioId, usuarioId);
+        // Nota: se usan strings normales (no text block junto a WHERE) porque los text blocks
+        // recortan el espacio final y pegarían 'WHERE' con el filtro ("WHEREn...").
+        String sql = "SELECT n.id, n.titulo, n.descripcion, n.tipo, n.destino_tipo, n.leido, n.enviado_en, "
+                + "o.nombre_completo AS origen "
+                + "FROM auth.notificacion n JOIN auth.usuario o ON o.id = n.usuario_id "
+                + "WHERE " + FILTRO_DESTINO
+                + " ORDER BY n.enviado_en DESC LIMIT 100";
+        return jdbcTemplate.queryForList(sql, empresaId, usuarioId, usuarioId);
     }
 
     @Transactional

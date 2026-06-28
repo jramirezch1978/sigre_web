@@ -1528,6 +1528,35 @@ JOIN core.departamento d ON d.codigo = (SELECT dd.codigo_ubigeo FROM (VALUES
     ('4567', '25')
 ) AS dd(id_ubigeo, codigo_ubigeo) WHERE dd.id_ubigeo = v.dept_ubigeo_id);
 
+-- Catálogo TG_UBIGEO (zonas/puertos del SIGRE legacy).
+INSERT INTO core.tg_ubigeo (ubigeo_codigo, ubige_descripcion, flag_replicacion) VALUES
+    ('000001', 'TUMBES', '1'),
+    ('000002', 'PAITA', '1'),
+    ('000003', 'SECHURA', '1'),
+    ('000004', 'BAYOVAR', '1'),
+    ('000005', 'LAMBAYEQUE', '1'),
+    ('000006', 'COIHSCO', '1'),
+    ('000007', 'TRUJILLO', '1'),
+    ('000008', 'SALAVERRY', '1'),
+    ('000009', 'PISCO', '1'),
+    ('000010', 'ILO', '1'),
+    ('000011', 'CALLAO', '1'),
+    ('000012', 'VEQUETA', '1'),
+    ('000013', 'SUPE', '1'),
+    ('000014', 'HUACHO', '1'),
+    ('000015', 'HUARMEY', '1'),
+    ('000016', 'TAMBO DE MORA', '1'),
+    ('000017', 'CHIMBOTE', '1'),
+    ('000018', 'TALARA', '1'),
+    ('000019', 'SANTA', '1'),
+    ('000020', 'CHANCAY', '1'),
+    ('000021', 'CARAVELI', '1'),
+    ('000022', 'OCOÑA', '1'),
+    ('000023', 'MOLLENDO', '1'),
+    ('000024', 'SANTA', '1'),
+    ('000025', 'EXTRANJERO', '1')
+ON CONFLICT (ubigeo_codigo) DO NOTHING;
+
 INSERT INTO core.distrito (codigo, nombre, provincia_id, flag_estado)
 SELECT CONCAT(p.codigo, v.codigo) AS codigo, v.nombre, p.id, '1'
 FROM (VALUES

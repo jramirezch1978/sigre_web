@@ -42,36 +42,17 @@ public class AlmacenRequest extends FlagEstadoRequest {
 
     private BigDecimal volTotal;
 
-    private Long corrGuia;
-
-    @Size(max = 2)
-    private String codOrigen;
-
     @Size(max = 1)
     private String flagCntrlLote;
 
-    @Size(max = 1)
-    private String flagReplicacion;
-
-    @Size(max = 25)
-    private String distrito;
-
-    @Size(max = 25)
-    private String provincia;
-
-    @Size(max = 25)
-    private String departamento;
+    @Size(max = 6)
+    private String ubigeo;
 
     private Long distritoId;
-
-    private Integer anoApertura;
 
     @Size(max = 4)
     private String codSunat;
 
     @Size(max = 1)
     private String flagVirtual;
-
-    @Size(max = 6)
-    private String ubigeo;
 }

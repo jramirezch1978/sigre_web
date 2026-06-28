@@ -147,15 +147,8 @@ public class AlmacenServiceImpl implements AlmacenService {
         destino.setDireccion(origen.getDireccion());
         destino.setAreaTotal(origen.getAreaTotal());
         destino.setVolTotal(origen.getVolTotal());
-        destino.setCorrGuia(origen.getCorrGuia());
-        destino.setCodOrigen(origen.getCodOrigen());
         destino.setFlagCntrlLote(origen.getFlagCntrlLote());
-        destino.setFlagReplicacion(origen.getFlagReplicacion());
-        destino.setDistrito(origen.getDistrito());
-        destino.setProvincia(origen.getProvincia());
-        destino.setDepartamento(origen.getDepartamento());
         destino.setDistritoId(origen.getDistritoId());
-        destino.setAnoApertura(origen.getAnoApertura());
         destino.setCodSunat(origen.getCodSunat());
         destino.setFlagVirtual(origen.getFlagVirtual());
         destino.setUbigeo(origen.getUbigeo());

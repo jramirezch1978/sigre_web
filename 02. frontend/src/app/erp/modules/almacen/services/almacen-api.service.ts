@@ -24,15 +24,8 @@ export interface AlmacenDto {
   direccion?: string;
   areaTotal?: number;
   volTotal?: number;
-  corrGuia?: number;
-  codOrigen?: string;
   flagCntrlLote?: string;
-  flagReplicacion?: string;
-  distrito?: string;
-  provincia?: string;
-  departamento?: string;
   distritoId?: number;
-  anoApertura?: number;
   codSunat?: string;
   flagVirtual?: string;
   ubigeo?: string;

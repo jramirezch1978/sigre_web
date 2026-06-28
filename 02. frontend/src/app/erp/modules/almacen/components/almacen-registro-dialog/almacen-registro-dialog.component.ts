@@ -142,7 +142,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     if (!reg) {
       if (campo.type === 'switch') {
         if (campo.key === 'flagVirtual') return false;
-        if (['flagCntrlLote', 'flagReplicacion'].includes(campo.key)) return true;
+        if (['flagCntrlLote'].includes(campo.key)) return true;
         return true;
       }
       if (campo.key === 'codSunat') return '0001';

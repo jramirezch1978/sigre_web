@@ -33,15 +33,8 @@ public class AlmacenResponse {
     private String direccion;
     private BigDecimal areaTotal;
     private BigDecimal volTotal;
-    private Long corrGuia;
-    private String codOrigen;
     private String flagCntrlLote;
-    private String flagReplicacion;
-    private String distrito;
-    private String provincia;
-    private String departamento;
     private Long distritoId;
-    private Integer anoApertura;
     private String codSunat;
     private String flagVirtual;
     private String ubigeo;

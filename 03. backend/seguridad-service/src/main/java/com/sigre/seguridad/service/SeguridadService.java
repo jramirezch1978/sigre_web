@@ -1167,10 +1167,20 @@ public class SeguridadService {
                     return o != null ? o : 0;
                 }))
                 .toList();
+        // DISTINCT lógico: evita opciones repetidas (mismo módulo + padre + nombre + ruta)
+        // que pudieran quedar por filas duplicadas heredadas en auth.opcion_menu.
+        Set<String> vistos = new HashSet<>();
         for (Long opcionId : ordenRol) {
+            OpcionMenuDto op = opcionPorId.get(opcionId);
+            String clave = op.getModuloId() + "|" + op.getOpcionPadreId() + "|"
+                    + (op.getNombre() != null ? op.getNombre().trim().toLowerCase() : "")
+                    + "|" + (op.getRutaFrontend() != null ? op.getRutaFrontend().trim().toLowerCase() : "");
+            if (!vistos.add(clave)) {
+                continue;
+            }
             items.add(MiMenuItemDto.builder()
                     .origen("ROL")
-                    .opcionMenu(opcionPorId.get(opcionId))
+                    .opcionMenu(op)
                     .acciones(accionesPorOpcion.getOrDefault(opcionId, List.of()))
                     .build());
         }
