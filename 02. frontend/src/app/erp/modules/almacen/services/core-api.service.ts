@@ -87,14 +87,17 @@ export class CoreApiService {
   }
 
   listarCentrosCosto(): Observable<SelectOptionDto[]> {
-    const finanzasBase = `${this.apiBase.getApiBaseUrl()}/finanzas`;
+    // El catálogo de centros de costo vive en el módulo de CONTABILIDAD (no finanzas), y es paginado.
+    const contabilidadBase = `${this.apiBase.getApiBaseUrl()}/contabilidad`;
+    const params = new HttpParams().set('page', '0').set('size', '500').set('flagEstado', '1');
     return this.http
-      .get<ApiResponse<{ id: number; nombre: string; cencos?: string }[]>>(`${finanzasBase}/centros-costo`)
+      .get<ApiResponse<PageData<{ id: number; cencos?: string; descCencos?: string }>>>(
+        `${contabilidadBase}/centros-costo`, { params })
       .pipe(
         map(res =>
-          (res.data ?? []).map(item => ({
+          (res.data?.content ?? []).map(item => ({
             value: Number(item.id),
-            label: String(item.nombre ?? item.id),
+            label: `${item.cencos ?? item.id}${item.descCencos ? ' — ' + item.descCencos : ''}`,
           }))
         )
       );

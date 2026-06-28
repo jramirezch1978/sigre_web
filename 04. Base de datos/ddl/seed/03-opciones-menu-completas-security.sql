@@ -35,6 +35,11 @@ ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,
     flag_estado = EXCLUDED.flag_estado;
 
+-- Autoritativo: se desactivan TODAS las opciones de menú y luego el seed reactiva ('1')
+-- solo las canónicas. Así las filas obsoletas de menús anteriores (mismo nombre, código viejo)
+-- quedan inactivas y dejan de duplicarse en el menú (mi-menu filtra flag_estado='1').
+UPDATE auth.opcion_menu SET flag_estado = '0';
+
 -- 1) Secciones padre por módulo
 WITH parent_data AS (
     SELECT * FROM (VALUES
