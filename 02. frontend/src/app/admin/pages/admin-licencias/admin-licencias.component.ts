@@ -4,6 +4,8 @@ import { SigreModalService } from '@sigre-common';
 import { StorageService } from '../../../core/services/storage.service';
 import { LoginData } from '../../../auth/services/auth.service';
 import { AdminLicenciasService, LicenciaAdminDto } from '../../services/admin-licencias.service';
+import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
+import { EmpresaAdminDto, EdicionErpDto } from '../../models/admin.models';
 
 @Component({
   selector: 'app-admin-licencias',
@@ -14,11 +16,14 @@ import { AdminLicenciasService, LicenciaAdminDto } from '../../services/admin-li
 export class AdminLicenciasComponent implements OnInit {
 
   private readonly api = inject(AdminLicenciasService);
+  private readonly adminApi = inject(AdminSeguridadApiService);
   private readonly fb = inject(FormBuilder);
   private readonly modal = inject(SigreModalService);
   private readonly storage = inject(StorageService);
 
   licencias: LicenciaAdminDto[] = [];
+  empresas: EmpresaAdminDto[] = [];
+  ediciones: EdicionErpDto[] = [];
   cargando = true;
   guardando = false;
   filtro = '';
@@ -26,7 +31,16 @@ export class AdminLicenciasComponent implements OnInit {
 
   mostrarRenovar = false;
   mostrarAmpliar = false;
+  mostrarNueva = false;
   seleccion: LicenciaAdminDto | null = null;
+
+  readonly formNueva: FormGroup = this.fb.group({
+    empresaId: [null, Validators.required],
+    edicionCodigo: ['', Validators.required],
+    tipo: ['P', Validators.required],
+    maxUsuarios: [null],
+    correoResponsable: ['', [Validators.email, Validators.maxLength(150)]],
+  });
 
   readonly formRenovar: FormGroup = this.fb.group({
     fechaPago: [this.hoy(), Validators.required],
@@ -43,6 +57,63 @@ export class AdminLicenciasComponent implements OnInit {
   ngOnInit(): void {
     this.tipoSales = this.storage.getUser<LoginData>()?.tipoSales ?? null;
     this.cargar();
+    if (this.esLicensing) {
+      this.adminApi.listarEmpresas().subscribe({ next: r => this.empresas = r.data ?? [] });
+      this.adminApi.listarEdiciones().subscribe({ next: r => this.ediciones = (r.data ?? []).filter(e => e.activo !== false) });
+    }
+  }
+
+  // ── Crear licencia (solo LICENSING) ──
+  abrirNueva(): void {
+    this.formNueva.reset({ empresaId: null, edicionCodigo: '', tipo: 'P', maxUsuarios: null, correoResponsable: '' });
+    this.mostrarNueva = true;
+  }
+  cerrarNueva(): void { this.mostrarNueva = false; }
+
+  confirmarNueva(): void {
+    if (this.formNueva.invalid) { this.formNueva.markAllAsTouched(); return; }
+    this.guardando = true;
+    const v = this.formNueva.value;
+    this.api.crear({
+      empresaId: Number(v.empresaId),
+      edicionCodigo: v.edicionCodigo,
+      tipo: v.tipo,
+      maxUsuarios: v.maxUsuarios ? Number(v.maxUsuarios) : null,
+      correoResponsable: v.correoResponsable || null,
+    }).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.cerrarNueva();
+        void this.modal.success('Licencia creada', 'La licencia se asignó correctamente.');
+        this.cargar();
+      },
+      error: e => { this.guardando = false; void this.modal.error(e?.error?.message ?? 'No se pudo crear la licencia.'); },
+    });
+  }
+
+  async anular(l: LicenciaAdminDto): Promise<void> {
+    const ok = await this.modal.confirm({
+      titulo: 'Anular licencia', mensaje: `¿Anular la licencia de ${l.razon_social}?`,
+      tipo: 'warning', textoConfirmar: 'Anular', textoCancelar: 'Cancelar', conCancelar: true,
+    });
+    if (!ok) return;
+    this.api.anular(l.id).subscribe({
+      next: () => { void this.modal.success('Licencia anulada', ''); this.cargar(); },
+      error: e => void this.modal.error(e?.error?.message ?? 'No se pudo anular.'),
+    });
+  }
+
+  async eliminar(l: LicenciaAdminDto): Promise<void> {
+    const ok = await this.modal.confirm({
+      titulo: 'Eliminar licencia', mensaje: `¿Eliminar la licencia de ${l.razon_social}?`,
+      submensaje: 'Esta acción la retira del listado.',
+      tipo: 'warning', textoConfirmar: 'Eliminar', textoCancelar: 'Cancelar', conCancelar: true,
+    });
+    if (!ok) return;
+    this.api.eliminar(l.id).subscribe({
+      next: () => { void this.modal.success('Licencia eliminada', ''); this.cargar(); },
+      error: e => void this.modal.error(e?.error?.message ?? 'No se pudo eliminar.'),
+    });
   }
 
   get licenciasFiltradas(): LicenciaAdminDto[] {

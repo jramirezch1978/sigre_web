@@ -65,6 +65,55 @@ public class LicenciaController {
         return ApiResponse.ok(licenciaService.listarLicencias(), "Licencias");
     }
 
+    public record CrearLicenciaBody(Long empresaId, String edicionCodigo, String tipo,
+                                    Integer maxUsuarios, String correoResponsable) {}
+    public record ModificarLicenciaBody(String edicionCodigo, Integer maxUsuarios, String correoResponsable) {}
+
+    /** Crea y asigna una nueva licencia a una empresa. Solo LICENSING. */
+    @PostMapping("/admin/licencias")
+    public ApiResponse<LicenciaService.LicenciaInfo> crearLicencia(@RequestHeader("Authorization") String auth,
+                                                                   @RequestBody CrearLicenciaBody body) {
+        requireLicensing(auth);
+        if (body.empresaId() == null || body.edicionCodigo() == null || body.edicionCodigo().isBlank()) {
+            throw new BusinessException("Empresa y edición son obligatorias.", HttpStatus.BAD_REQUEST);
+        }
+        LicenciaService.LicenciaInfo lic = licenciaService.crearLicencia(
+                body.empresaId(), body.edicionCodigo(), body.tipo(), body.maxUsuarios(), body.correoResponsable());
+        return ApiResponse.ok(lic, "Licencia creada");
+    }
+
+    /** Modifica una licencia (edición, máximo de usuarios, correo responsable). Solo LICENSING. */
+    @PutMapping("/admin/licencias/{id}")
+    public ApiResponse<LicenciaService.LicenciaInfo> modificarLicencia(@RequestHeader("Authorization") String auth,
+                                                                       @PathVariable long id,
+                                                                       @RequestBody ModificarLicenciaBody body) {
+        requireLicensing(auth);
+        return ApiResponse.ok(
+                licenciaService.modificarLicencia(id, body.edicionCodigo(), body.maxUsuarios(), body.correoResponsable()),
+                "Licencia modificada");
+    }
+
+    /** Anula una licencia. Solo LICENSING. */
+    @PostMapping("/admin/licencias/{id}/anular")
+    public ApiResponse<Void> anularLicencia(@RequestHeader("Authorization") String auth, @PathVariable long id) {
+        requireLicensing(auth);
+        licenciaService.anularLicencia(id);
+        return ApiResponse.ok(null, "Licencia anulada");
+    }
+
+    /** Elimina una licencia. Solo LICENSING. */
+    @DeleteMapping("/admin/licencias/{id}")
+    public ApiResponse<Void> eliminarLicencia(@RequestHeader("Authorization") String auth, @PathVariable long id) {
+        requireLicensing(auth);
+        licenciaService.eliminarLicencia(id);
+        return ApiResponse.ok(null, "Licencia eliminada");
+    }
+
+    private void requireLicensing(String auth) {
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        seguridadService.requireLicensing(uid);
+    }
+
     /** Resumen de la licencia + costo mensual de una empresa (consola admin de licencias). */
     @GetMapping("/admin/{empresaId}")
     public ApiResponse<Map<String, Object>> adminInfo(@RequestHeader("Authorization") String auth,

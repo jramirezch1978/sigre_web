@@ -5,7 +5,7 @@ Small business
 profesional
 Enteprise
 
-La licencia esta asociada a una empresa y a una edicion del software, es la versión o edición adquirida que limita la cantidad de usuarios, en caso sea demo, solo se podrían registrar maximo 5 usuarios nada mas, en las otras versiones, no se limita el usuario, sino la tarifa, cada version del sigre tiene una cantidad de usuarios a un costo estandar (revisar la logica en frontend y colocarla en este prompt indicando la formula del calculo). cuando se registren mas usuarios, se cobra un monto por cada usuario adicional.
+La licencia esta asociada a una empresa y a una edicion del software, es la versión o edición adquirida que limita la cantidad de usuarios, en caso sea demo, solo se podrían registrar maximo 5 usuarios nada mas, en las otras versiones, no se limita el usuario, sino la tarifa, cada version del sigre tiene una cantidad de usuarios a un costo estandar (revisar la logica en frontend y colocarla en este prompt indicando la formula del calculo). cuando se registren mas usuarios, se cobra un monto por cada usuario adicional. Añade a este documento la formula de calculo para cada tipo de suscripcion / licencia, colocalo en este prompt.txt en la parte final, con ejemplo para que tu mismo lo puedas entender.
 
 en caso de la licencia demo, tiene una duración de 15 días y no es ampliable (pero si debe tener una fecha de vencimiento, para en caso sea necesario, y solo con el usuario de tipo sales, puede ampliar dicha fec de vencimiento, pero sin pasarse del mes, todas las licencias tienen una duración mensual, renovable, excepto la licencia demo.
 
@@ -28,7 +28,44 @@ en cuanto a las notifiacciones, en la pantalla principal de dashboard, debes de 
 Por favor en la aplicacion de administración debes de añadir las opciones para las ediciones o versiones del SIGRE y otro para la gestión y mantenimiento de las licencias
 
 
+ojo si un usuario tiene el perfil licensing, puede crear y asignar nuevas licencias, es el unico perfil que puede crear, modificar, anular, y eliminar licencias.
+
+
 REGLAS PARA TODOS LOS FORMULARIOS DE INSERCION / EDICION MODAL POPUP PARA ADMINISTRACION Y ERP, NO TOCAR ASISTENCIA
 --------------------------------------------------------------------------------------------------------------------
 
 Si analizas la captura de pantalla que esta en : E:\Work\sigre_web\prompts\image-1782583849622.png; puedes ver que hay un parte de validación que quiero que integres en esta aplicación. Si se llena correctamente un input correctamente (Como en el caso del nombre de razon social), aparece un check de color verde, si por el contrario no esta bien llenado, esta vacio, no cumple con la regla de dicho campo para llenar (como en el caso del RUC) aparece un logo de error (un icono rojo), y en caso de las cajas de texto que no tiene ningun texto o nada de nada, no aparece nada, ningun icono; quiero que apliques este diseño en todos los formularios que son modal popup ya sea del administrador como del erp, no toque la asistencia por favor porque eso ya esta implementado, procede por favor
+
+====================================================================
+FORMULA DE CALCULO DEL COSTO MENSUAL POR LICENCIA (con ejemplos)
+====================================================================
+Variables:
+  precio        = tarifa de la edicion (USD por usuario y por empresa, al mes)  -> auth.plan_suscripcion.precio
+  max           = usuarios incluidos a tarifa base                              -> auth.plan_suscripcion.max_usuarios
+  RECARGO       = 2 USD por cada usuario ACTIVO por encima de "max"
+  A             = cantidad de usuarios ACTIVOS que han iniciado sesion (auth.log_acceso.exito = true)
+
+Formula:
+  incluidos    = min(A, max)
+  exceso       = max(0, A - max)
+  costoMensual = incluidos * precio + exceso * (precio + RECARGO)
+
+Tarifas por edicion (precio / max):
+  DEMO=0/5 (limite duro, sin cobro) | MYPE=8/5 | SMALL_BUSINESS=12/10 | PROFESSIONAL=16/20 |
+  ENTERPRISE=20/40 | HORECA=16/20 | HEALTH (Healthcare)=20/25
+
+Ejemplos:
+  - MYPE (8/5), A=3   -> 3*8 = 24.00
+  - MYPE (8/5), A=7   -> 5*8 + 2*(8+2) = 40 + 20 = 60.00
+  - SMALL_BUSINESS (12/10), A=12 -> 10*12 + 2*(12+2) = 120 + 28 = 148.00
+  - PROFESSIONAL (16/20), A=22   -> 20*16 + 2*(16+2) = 320 + 36 = 356.00
+  - ENTERPRISE (20/40), A=45     -> 40*20 + 5*(20+2) = 800 + 110 = 910.00
+  - HORECA (16/20), A=25         -> 20*16 + 5*(16+2) = 320 + 90 = 410.00
+  - HEALTH (20/25), A=30         -> 25*20 + 5*(20+2) = 500 + 110 = 610.00
+  - DEMO (0/5)                   -> siempre 0.00 (no se permite el 6to usuario)
+
+Notas:
+  - El exceso se cobra SOLO el mes en que el usuario excedente se activo (auth.licencia_usuario_exceso);
+    no se recobra el siguiente mes salvo que persista el exceso tras la renovacion mensual.
+  - Implementado en seguridad-service: LicenciaService.calcularCostoMensual / calcularCostoPorEdicion.
+    RECARGO debe coincidir con el frontend (erp-landing.component.ts -> recargoUsuarioExtra = 2).

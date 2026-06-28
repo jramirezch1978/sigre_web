@@ -3,9 +3,14 @@
     <div>
       <h1 class="admin-page__title">Licencias</h1>
       <p class="admin-page__subtitle">
-        Renovación mensual (LICENSING o SALES) y ampliación de demos (solo LICENSING).
+        Crear/administrar (LICENSING) · Renovar (LICENSING o SALES) · Ampliar demos (LICENSING).
       </p>
     </div>
+    @if (esLicensing) {
+      <button class="btn btn-primary" (click)="abrirNueva()">
+        <i class="material-icons-outlined fs-6 align-middle">add</i> Nueva licencia
+      </button>
+    }
   </div>
 
   <div class="admin-card">
@@ -64,6 +69,14 @@
                   } @else {
                     <button class="btn btn-sm btn-primary" (click)="abrirRenovar(l)">
                       <i class="material-icons-outlined fs-6 align-middle">autorenew</i> Renovar
+                    </button>
+                  }
+                  @if (esLicensing) {
+                    <button class="btn btn-sm btn-outline-secondary ms-1" title="Anular" (click)="anular(l)">
+                      <i class="material-icons-outlined fs-6 align-middle">block</i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger ms-1" title="Eliminar" (click)="eliminar(l)">
+                      <i class="material-icons-outlined fs-6 align-middle">delete</i>
                     </button>
                   }
                 </td>
@@ -141,6 +154,65 @@
         <button class="btn btn-light" (click)="cerrarAmpliar()" [disabled]="guardando">Cancelar</button>
         <button class="btn btn-primary" (click)="confirmarAmpliar()" [disabled]="guardando">
           {{ guardando ? 'Ampliando…' : 'Ampliar' }}
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal: Nueva licencia (solo LICENSING) -->
+<ion-modal [isOpen]="mostrarNueva" (didDismiss)="cerrarNueva()" class="admin-modal">
+  <ng-template>
+    <div class="admin-modal__box">
+      <div class="admin-modal__header">
+        <h2>Nueva licencia</h2>
+        <button class="admin-modal__close" (click)="cerrarNueva()"><i class="material-icons-outlined">close</i></button>
+      </div>
+      <div class="admin-modal__body">
+        <form [formGroup]="formNueva" (ngSubmit)="confirmarNueva()">
+          <div class="form-row">
+            <ion-item class="full-row">
+              <ion-label position="stacked">Empresa <span class="req">*</span></ion-label>
+              <ion-select sigreValid formControlName="empresaId" interface="popover" placeholder="Seleccione empresa">
+                @for (e of empresas; track e.id) {
+                  <ion-select-option [value]="e.id">{{ e.razonSocial }} ({{ e.ruc }})</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Edición <span class="req">*</span></ion-label>
+              <ion-select sigreValid formControlName="edicionCodigo" interface="popover" placeholder="Seleccione edición">
+                @for (ed of ediciones; track ed.codigo) {
+                  <ion-select-option [value]="ed.codigo">{{ ed.nombre }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Tipo <span class="req">*</span></ion-label>
+              <ion-select sigreValid formControlName="tipo" interface="popover">
+                <ion-select-option value="P">Pago (mensual)</ion-select-option>
+                <ion-select-option value="D">Demo (15 días)</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Máx. usuarios</ion-label>
+              <ion-input sigreValid type="number" formControlName="maxUsuarios" placeholder="Por defecto, el de la edición"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Correo responsable</ion-label>
+              <ion-input sigreValid type="email" formControlName="correoResponsable" maxlength="150"></ion-input>
+            </ion-item>
+          </div>
+        </form>
+      </div>
+      <div class="admin-modal__footer">
+        <button class="btn btn-light" (click)="cerrarNueva()" [disabled]="guardando">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarNueva()" [disabled]="guardando">
+          {{ guardando ? 'Creando…' : 'Crear licencia' }}
         </button>
       </div>
     </div>

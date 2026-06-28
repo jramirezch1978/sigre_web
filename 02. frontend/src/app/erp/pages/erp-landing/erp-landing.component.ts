@@ -315,7 +315,7 @@ export class ErpLandingComponent implements OnInit {
       PROFESSIONAL: 'professional',
       ENTERPRISE: 'enterprise',
       HORECA: 'horeca',
-      HEALTH: 'health',
+      HEALTH: 'healthcare',
     };
     const archivo = mapa[codigo];
     return archivo ? `assets/imagenes/ediciones/${archivo}.png` : '';
@@ -381,7 +381,7 @@ export class ErpLandingComponent implements OnInit {
       },
       {
         codigo: 'HEALTH',
-        nombre: 'SIGRE Health',
+        nombre: 'SIGRE Healthcare',
         descripcion: 'Edición sectorial para clínicas, hospitales y consultorios: insumos, facturación y personal.',
       },
     ];

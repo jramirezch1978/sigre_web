@@ -46,4 +46,33 @@ export class AdminLicenciasService extends AbstractAuthenticatedApiService {
       null, { headers: this.bearerHeaders(), params }
     );
   }
+
+  /** Crea/asigna una nueva licencia a una empresa. Solo LICENSING. */
+  crear(body: { empresaId: number; edicionCodigo: string; tipo: string; maxUsuarios?: number | null; correoResponsable?: string | null }): Observable<ApiResponse<unknown>> {
+    return this.http.post<ApiResponse<unknown>>(
+      this.buildUrl('/auth/seguridad/licencias/admin/licencias'),
+      body, { headers: this.bearerHeaders() }
+    );
+  }
+
+  modificar(id: number, body: { edicionCodigo?: string; maxUsuarios?: number | null; correoResponsable?: string | null }): Observable<ApiResponse<unknown>> {
+    return this.http.put<ApiResponse<unknown>>(
+      this.buildUrl(`/auth/seguridad/licencias/admin/licencias/${id}`),
+      body, { headers: this.bearerHeaders() }
+    );
+  }
+
+  anular(id: number): Observable<ApiResponse<unknown>> {
+    return this.http.post<ApiResponse<unknown>>(
+      this.buildUrl(`/auth/seguridad/licencias/admin/licencias/${id}/anular`),
+      null, { headers: this.bearerHeaders() }
+    );
+  }
+
+  eliminar(id: number): Observable<ApiResponse<unknown>> {
+    return this.http.delete<ApiResponse<unknown>>(
+      this.buildUrl(`/auth/seguridad/licencias/admin/licencias/${id}`),
+      { headers: this.bearerHeaders() }
+    );
+  }
 }

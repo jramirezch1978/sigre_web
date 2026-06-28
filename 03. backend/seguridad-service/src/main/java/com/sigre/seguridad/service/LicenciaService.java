@@ -311,6 +311,92 @@ public class LicenciaService {
         return costo;
     }
 
+    /**
+     * Crea y asigna una licencia a una empresa (solo perfil LICENSING). Demo: 15 días.
+     * Pago: vence en un mes. Bloquea si la empresa ya tiene una licencia activa.
+     */
+    @Transactional
+    public LicenciaInfo crearLicencia(long empresaId, String edicionCodigo, String tipo,
+                                      Integer maxUsuarios, String correoResponsable) {
+        Integer emp = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM master.empresa WHERE id = ?", Integer.class, empresaId);
+        if (emp == null || emp == 0) {
+            throw new BusinessException("La empresa no existe.", HttpStatus.NOT_FOUND);
+        }
+        if (obtenerLicenciaActiva(empresaId) != null) {
+            throw new BusinessException("La empresa ya tiene una licencia activa; anúlela o modifíquela.",
+                    HttpStatus.CONFLICT, "LICENCIA_ACTIVA_EXISTE");
+        }
+        String t = "D".equals(tipo) ? "D" : "P";
+        OffsetDateTime inicio = OffsetDateTime.now();
+        OffsetDateTime vencimiento = "D".equals(t) ? inicio.plusDays(DEMO_DIAS_VIGENCIA) : inicio.plusMonths(1);
+        OffsetDateTime eliminacionBd = "D".equals(t) ? inicio.plusDays(DEMO_DIAS_ELIMINACION_BD) : null;
+        int max = "D".equals(t) ? DEMO_MAX_USUARIOS
+                : (maxUsuarios != null ? maxUsuarios : maxUsuariosEdicion(edicionCodigo));
+
+        for (int intento = 0; intento < 6; intento++) {
+            String codigo = generarCodigo();
+            try {
+                jdbcTemplate.update("""
+                        INSERT INTO auth.licencia (empresa_id, codigo_licencia, edicion_codigo, tipo,
+                            max_usuarios, correo_responsable, fecha_inicio, fecha_vencimiento,
+                            fecha_eliminacion_bd, estado, flag_estado)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'A', '1')
+                        """,
+                        empresaId, codigo, edicionCodigo, t, max, emptyToNull(correoResponsable),
+                        inicio, vencimiento, eliminacionBd);
+                log.info("Licencia {} ({}) creada para empresa {} edición {}", codigo, t, empresaId, edicionCodigo);
+                return obtenerLicenciaActiva(empresaId);
+            } catch (DuplicateKeyException e) {
+                log.warn("Colisión de código de licencia {}, reintentando…", codigo);
+            }
+        }
+        throw new IllegalStateException("No se pudo generar un código de licencia único.");
+    }
+
+    /** Modifica edición, máximo de usuarios y correo responsable de una licencia (LICENSING). */
+    @Transactional
+    public LicenciaInfo modificarLicencia(long licenciaId, String edicionCodigo, Integer maxUsuarios,
+                                          String correoResponsable) {
+        int n = jdbcTemplate.update("""
+                UPDATE auth.licencia
+                SET edicion_codigo = COALESCE(?, edicion_codigo),
+                    max_usuarios = COALESCE(?, max_usuarios),
+                    correo_responsable = ?
+                WHERE id = ?
+                """, edicionCodigo, maxUsuarios, emptyToNull(correoResponsable), licenciaId);
+        if (n == 0) {
+            throw new BusinessException("Licencia no encontrada.", HttpStatus.NOT_FOUND);
+        }
+        Long empresaId = jdbcTemplate.queryForObject(
+                "SELECT empresa_id FROM auth.licencia WHERE id = ?", Long.class, licenciaId);
+        return obtenerLicencia(empresaId, "");
+    }
+
+    /** Anula una licencia (estado='V', baja). LICENSING. */
+    @Transactional
+    public void anularLicencia(long licenciaId) {
+        int n = jdbcTemplate.update(
+                "UPDATE auth.licencia SET estado = 'V', fecha_baja = NOW() WHERE id = ? AND estado <> 'E'",
+                licenciaId);
+        if (n == 0) {
+            throw new BusinessException("Licencia no encontrada o ya eliminada.", HttpStatus.NOT_FOUND);
+        }
+        log.info("Licencia {} anulada", licenciaId);
+    }
+
+    /** Elimina (lógicamente) una licencia. LICENSING. */
+    @Transactional
+    public void eliminarLicencia(long licenciaId) {
+        int n = jdbcTemplate.update(
+                "UPDATE auth.licencia SET flag_estado = '0', fecha_baja = COALESCE(fecha_baja, NOW()) WHERE id = ?",
+                licenciaId);
+        if (n == 0) {
+            throw new BusinessException("Licencia no encontrada.", HttpStatus.NOT_FOUND);
+        }
+        log.info("Licencia {} eliminada (lógica)", licenciaId);
+    }
+
     /** Listado de licencias por empresa para la consola de administración. */
     public List<Map<String, Object>> listarLicencias() {
         return jdbcTemplate.queryForList("""
@@ -319,7 +405,7 @@ public class LicenciaService {
                        GREATEST(0, CEIL(EXTRACT(EPOCH FROM (l.fecha_vencimiento - now())) / 86400))::int AS dias_restantes
                 FROM auth.licencia l
                 JOIN master.empresa e ON e.id = l.empresa_id
-                WHERE l.estado <> 'E'
+                WHERE l.estado <> 'E' AND l.flag_estado = '1'
                 ORDER BY l.fecha_vencimiento ASC
                 """);
     }

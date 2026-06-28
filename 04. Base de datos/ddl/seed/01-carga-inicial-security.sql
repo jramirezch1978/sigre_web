@@ -204,7 +204,7 @@ VALUES
     ('PROFESSIONAL', 'SIGRE Professional', 'Operaciones con OT, mantenimiento, producción y aprovisionamiento avanzado.', 3, '1'),
     ('ENTERPRISE', 'SIGRE Enterprise', 'Suite completa multi-empresa con módulos sectoriales según su giro de negocio.', 4, '1'),
     ('HORECA', 'SIGRE HORECA', 'Edición sectorial para hoteles, restaurantes y catering: operación, comedor y servicio.', 5, '1'),
-    ('HEALTH', 'SIGRE Health', 'Edición sectorial para clínicas, hospitales y consultorios: insumos, facturación y personal.', 6, '1')
+    ('HEALTH', 'SIGRE Healthcare', 'Edición sectorial para clínicas, hospitales y consultorios: insumos, facturación y personal.', 6, '1')
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,
     descripcion = EXCLUDED.descripcion,
@@ -296,8 +296,8 @@ VALUES
         '1'
     ),
     (
-        'HEALTH', 'Health', 20,
-        'Edición SIGRE Health — clínicas, hospitales y consultorios',
+        'HEALTH', 'Healthcare', 20,
+        'Edición SIGRE Healthcare — clínicas, hospitales y consultorios',
         'HEALTH', '#0288d1', FALSE, NULL, 25, 7,
         '["Hasta 25 usuarios incluidos","Almacén de insumos y farmacia","Facturación de servicios","Activos fijos: equipamiento médico","RR.HH., Asistencia y Contabilidad","Soporte prioritario"]'::jsonb,
         '1'
