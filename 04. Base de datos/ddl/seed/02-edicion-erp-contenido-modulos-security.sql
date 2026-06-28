@@ -92,3 +92,29 @@ FROM auth.edicion_erp e
 JOIN auth.modulo m ON m.codigo = 'APROVISIONAMIENTO'
 WHERE e.codigo IN ('PROFESSIONAL', 'ENTERPRISE')
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
+
+-- Ediciones sectoriales: HORECA (hoteles/restaurantes/catering) y HEALTH (salud).
+DELETE FROM auth.edicion_modulo em
+USING auth.edicion_erp e
+WHERE em.edicion_id = e.id
+  AND e.codigo IN ('HORECA', 'HEALTH');
+
+INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
+SELECT e.id, m.id
+FROM auth.edicion_erp e
+JOIN auth.modulo m ON m.codigo IN (
+    'ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'FINANZAS', 'SEGURIDAD',
+    'RRHH', 'ASISTENCIA', 'HORECA', 'COMEDOR'
+)
+WHERE e.codigo = 'HORECA'
+ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
+
+INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
+SELECT e.id, m.id
+FROM auth.edicion_erp e
+JOIN auth.modulo m ON m.codigo IN (
+    'ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'FINANZAS', 'SEGURIDAD',
+    'RRHH', 'ASISTENCIA', 'CONTABILIDAD', 'ACTIVOS_FIJOS'
+)
+WHERE e.codigo = 'HEALTH'
+ON CONFLICT (edicion_id, modulo_id) DO NOTHING;

@@ -31,6 +31,8 @@ export class AdminEdicionesComponent implements OnInit {
     SMALL_BUSINESS: { c1: '#34d399', c2: '#059669', estrellas: 2, etiqueta: 'Crecimiento' },
     PROFESSIONAL:   { c1: '#a78bfa', c2: '#7c3aed', estrellas: 3, etiqueta: 'Profesional' },
     ENTERPRISE:     { c1: '#fbbf24', c2: '#d97706', estrellas: 4, etiqueta: 'Corporativo' },
+    HORECA:         { c1: '#fdba74', c2: '#ea580c', estrellas: 3, etiqueta: 'Hotelería' },
+    HEALTH:         { c1: '#67e8f9', c2: '#0891b2', estrellas: 3, etiqueta: 'Salud' },
   };
 
   ngOnInit(): void {
@@ -49,6 +51,8 @@ export class AdminEdicionesComponent implements OnInit {
     SMALL_BUSINESS: 'small-business',
     PROFESSIONAL: 'professional',
     ENTERPRISE: 'enterprise',
+    HORECA: 'horeca',
+    HEALTH: 'health',
   };
 
   iconoEdicion(codigo: string): string {

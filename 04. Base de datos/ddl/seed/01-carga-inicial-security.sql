@@ -202,7 +202,9 @@ VALUES
     ('MYPE', 'SIGRE Mype', 'Venta, compra e inventario con facturación y control básico de series y numeradores.', 1, '1'),
     ('SMALL_BUSINESS', 'SIGRE Small Business', 'Mype ampliado con finanzas completas, planilla, RR.HH. y control de asistencia.', 2, '1'),
     ('PROFESSIONAL', 'SIGRE Professional', 'Operaciones con OT, mantenimiento, producción y aprovisionamiento avanzado.', 3, '1'),
-    ('ENTERPRISE', 'SIGRE Enterprise', 'Suite completa multi-empresa con módulos sectoriales según su giro de negocio.', 4, '1')
+    ('ENTERPRISE', 'SIGRE Enterprise', 'Suite completa multi-empresa con módulos sectoriales según su giro de negocio.', 4, '1'),
+    ('HORECA', 'SIGRE HORECA', 'Edición sectorial para hoteles, restaurantes y catering: operación, comedor y servicio.', 5, '1'),
+    ('HEALTH', 'SIGRE Health', 'Edición sectorial para clínicas, hospitales y consultorios: insumos, facturación y personal.', 6, '1')
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,
     descripcion = EXCLUDED.descripcion,
@@ -284,6 +286,20 @@ VALUES
         'Edición SIGRE Enterprise — acceso completo',
         'ENTERPRISE', '#e11d48', FALSE, NULL, 40, 5,
         '["Hasta 40 usuarios incluidos","Todos los módulos SIGRE","Contabilidad, Presupuesto y Activos fijos","Flota, HORECA, Campo según giro","API e integraciones","Soporte 24/7 dedicado"]'::jsonb,
+        '1'
+    ),
+    (
+        'HORECA', 'HORECA', 16,
+        'Edición SIGRE HORECA — hoteles, restaurantes y catering',
+        'HORECA', '#fb8c00', FALSE, NULL, 20, 6,
+        '["Hasta 20 usuarios incluidos","Hotelería, restaurante y catering","Comedor: menús, raciones y costos","Almacén, Compras y Comercialización","RR.HH. y Asistencia","Soporte por email"]'::jsonb,
+        '1'
+    ),
+    (
+        'HEALTH', 'Health', 20,
+        'Edición SIGRE Health — clínicas, hospitales y consultorios',
+        'HEALTH', '#0288d1', FALSE, NULL, 25, 7,
+        '["Hasta 25 usuarios incluidos","Almacén de insumos y farmacia","Facturación de servicios","Activos fijos: equipamiento médico","RR.HH., Asistencia y Contabilidad","Soporte prioritario"]'::jsonb,
         '1'
     )
 ON CONFLICT (codigo) DO UPDATE SET

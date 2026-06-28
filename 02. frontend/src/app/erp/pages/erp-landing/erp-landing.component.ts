@@ -39,6 +39,7 @@ interface EdicionERP {
   codigo: string;
   nombre: string;
   descripcion: string;
+  icono: string;
   perfil: string;
   idealPara: string;
   modulosDestacados: string[];
@@ -306,6 +307,20 @@ export class ErpLandingComponent implements OnInit {
     }));
   }
 
+  /** Logo/ícono por edición (PNG en assets). Si no existe el archivo, el <img> se oculta. */
+  private iconoEdicion(codigo: string): string {
+    const mapa: Record<string, string> = {
+      MYPE: 'mype',
+      SMALL_BUSINESS: 'small-business',
+      PROFESSIONAL: 'professional',
+      ENTERPRISE: 'enterprise',
+      HORECA: 'horeca',
+      HEALTH: 'health',
+    };
+    const archivo = mapa[codigo];
+    return archivo ? `assets/imagenes/ediciones/${archivo}.png` : '';
+  }
+
   private mapEdicion(edicion: EdicionErpDto): EdicionERP {
     const contenido = EDICIONES_CONTENIDO[edicion.codigo];
     const modulosApi = (edicion.modulos ?? []).map(m => m.nombre);
@@ -313,6 +328,7 @@ export class ErpLandingComponent implements OnInit {
       codigo: edicion.codigo,
       nombre: edicion.nombre,
       descripcion: edicion.descripcion,
+      icono: this.iconoEdicion(edicion.codigo),
       perfil: contenido?.perfil ?? '',
       idealPara: contenido?.idealPara ?? edicion.descripcion,
       modulosDestacados: contenido?.modulosDestacados ?? modulosApi,
@@ -357,6 +373,16 @@ export class ErpLandingComponent implements OnInit {
         codigo: 'ENTERPRISE',
         nombre: 'SIGRE Enterprise',
         descripcion: 'Suite completa multi-empresa con módulos sectoriales según su giro de negocio.',
+      },
+      {
+        codigo: 'HORECA',
+        nombre: 'SIGRE HORECA',
+        descripcion: 'Edición sectorial para hoteles, restaurantes y catering: operación, comedor y servicio.',
+      },
+      {
+        codigo: 'HEALTH',
+        nombre: 'SIGRE Health',
+        descripcion: 'Edición sectorial para clínicas, hospitales y consultorios: insumos, facturación y personal.',
       },
     ];
     return base.map(e => this.mapEdicion({

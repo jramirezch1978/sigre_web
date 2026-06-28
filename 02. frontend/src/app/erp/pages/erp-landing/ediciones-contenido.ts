@@ -61,4 +61,30 @@ export const EDICIONES_CONTENIDO: Record<string, EdicionContenido> = {
     ],
     notaTecnica: 'Flota, HORECA, Campo y Comedor se activan según el giro de negocio durante la implementación; el resto de módulos viene incluido de forma estándar.',
   },
+  HORECA: {
+    perfil: 'Sector hotelería, restaurantes y catering',
+    idealPara: 'Hoteles, restaurantes, cafeterías y servicios de catering que gestionan habitaciones, consumos, comedor y personal.',
+    modulosDestacados: ['Almacén', 'Compras', 'Comercialización', 'Finanzas', 'RR.HH.', 'Asistencia', 'HORECA', 'Comedor', 'Seguridad'],
+    funcionalidades: [
+      'Gestión hotelera: maestro de cuartos, alojamiento de huéspedes y servicios.',
+      'Restaurante y catering: comandas, raciones, menús y control de consumos.',
+      'Comedor: gestión de menús, raciones y costos de alimentación.',
+      'Compras e inventario de insumos perecibles con control de almacén.',
+      'Planilla, asistencia y facturación de venta integradas.',
+    ],
+    notaTecnica: 'Edición sectorial: incluye el módulo HORECA y Comedor sobre la base administrativa (almacén, compras, comercialización, finanzas, RR.HH. y asistencia).',
+  },
+  HEALTH: {
+    perfil: 'Sector salud',
+    idealPara: 'Clínicas, hospitales, policlínicos y consultorios que gestionan insumos, farmacia, facturación y personal asistencial.',
+    modulosDestacados: ['Almacén', 'Compras', 'Comercialización', 'Finanzas', 'RR.HH.', 'Asistencia', 'Contabilidad', 'Activos fijos', 'Seguridad'],
+    funcionalidades: [
+      'Almacén de insumos médicos y farmacia con kardex y control de lotes.',
+      'Compras y abastecimiento de medicamentos e insumos.',
+      'Facturación de servicios y comercialización.',
+      'Activos fijos: equipamiento médico, depreciación y mantenimiento de inventario.',
+      'Planilla, asistencia del personal asistencial y contabilidad.',
+    ],
+    notaTecnica: 'Edición sectorial salud sobre la base administrativa-contable; los flujos clínicos específicos se parametrizan en la implementación.',
+  },
 };
