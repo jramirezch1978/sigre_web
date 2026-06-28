@@ -212,10 +212,19 @@ export class ErpLandingComponent implements OnInit {
     {
       codigo: 'HORECA',
       nombre: 'HORECA',
-      descripcion: 'Hoteles, restaurantes y catering: reservas, alojamiento, huéspedes, servicios de restaurante y eventos.',
+      descripcion: 'Hoteles, restaurantes y catering: reservas, recepción, restaurante/bar, cocina, housekeeping, lavandería y eventos.',
       icono: 'assets/imagenes/modulos/horeca.png',
       color: '#AD1457',
-      funciones: ['Maestro de cuartos', 'Alojamiento de huéspedes', 'Reservas', 'Check-in / Check-out', 'Servicios de restaurante', 'Catering y eventos', 'Tarifas y temporadas', 'Facturación hotelera'],
+      funciones: [
+        'Habitaciones, tipos y tarifas por temporada',
+        'Reservas y disponibilidad (habitaciones y mesas)',
+        'Recepción: check-in / check-out y folio del huésped',
+        'Restaurante: comandas, pedidos y cocina (KDS)',
+        'Atención de bar, room service y propinas',
+        'Caja y cierre de turno del punto de venta',
+        'Housekeeping: limpieza, lavandería, objetos perdidos y mantenimiento',
+        'Catering y eventos: cotización, menús y montaje',
+      ],
     },
     {
       codigo: 'SALUD',
