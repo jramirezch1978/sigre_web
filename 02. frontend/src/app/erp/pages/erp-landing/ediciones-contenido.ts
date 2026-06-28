@@ -64,7 +64,7 @@ export const EDICIONES_CONTENIDO: Record<string, EdicionContenido> = {
   HORECA: {
     perfil: 'Sector hotelería, restaurantes y catering',
     idealPara: 'Hoteles, restaurantes, cafeterías y servicios de catering que gestionan habitaciones, consumos, comedor y personal.',
-    modulosDestacados: ['Almacén', 'Compras', 'Comercialización', 'Finanzas', 'RR.HH.', 'Asistencia', 'HORECA', 'Comedor', 'Seguridad'],
+    modulosDestacados: ['Hotelería', 'Restaurante y Bar', 'Catering y Eventos', 'Almacén', 'Compras', 'Comercialización', 'Finanzas', 'RR.HH.', 'Asistencia', 'Comedor', 'Seguridad'],
     funcionalidades: [
       'Hotelería: maestro de cuartos, reservas, check-in/check-out y estado de habitaciones.',
       'Alojamiento de huéspedes: folios, cargos por servicios y cuenta corriente del huésped.',

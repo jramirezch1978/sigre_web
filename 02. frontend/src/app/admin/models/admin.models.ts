@@ -64,6 +64,7 @@ export interface EdicionErpDto {
   descripcion?: string;
   orden?: number;
   activo?: boolean;
+  maxUsuarios?: number | null;
   modulos?: ModuloDto[];
 }
 

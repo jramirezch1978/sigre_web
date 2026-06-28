@@ -33,10 +33,13 @@ public class LandingCatalogService {
     public List<EdicionErpDto> listarEdiciones() {
         List<EdicionErpDto> ediciones = jdbcTemplate.query(
                 """
-                SELECT id, codigo, nombre, descripcion, orden, flag_estado
-                FROM auth.edicion_erp
-                WHERE flag_estado = '1'
-                ORDER BY orden, nombre
+                SELECT e.id, e.codigo, e.nombre, e.descripcion, e.orden, e.flag_estado,
+                       (SELECT p.max_usuarios FROM auth.plan_suscripcion p
+                        WHERE p.edicion_codigo = e.codigo AND p.flag_estado = '1'
+                        ORDER BY p.precio DESC LIMIT 1) AS max_usuarios
+                FROM auth.edicion_erp e
+                WHERE e.flag_estado = '1'
+                ORDER BY e.orden, e.nombre
                 """,
                 (rs, i) -> EdicionErpDto.builder()
                         .id(rs.getLong("id"))
@@ -45,6 +48,7 @@ public class LandingCatalogService {
                         .descripcion(rs.getString("descripcion"))
                         .orden(rs.getInt("orden"))
                         .activo("1".equals(rs.getString("flag_estado")))
+                        .maxUsuarios(rs.getObject("max_usuarios") != null ? rs.getInt("max_usuarios") : null)
                         .modulos(new ArrayList<>())
                         .build());
 

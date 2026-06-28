@@ -20,5 +20,7 @@ public class EdicionErpDto {
     private String descripcion;
     private Integer orden;
     private Boolean activo;
+    /** Usuarios incluidos a tarifa base (de plan_suscripcion); null si no tiene plan. */
+    private Integer maxUsuarios;
     private List<ModuloDto> modulos;
 }

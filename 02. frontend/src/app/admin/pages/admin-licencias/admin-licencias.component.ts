@@ -67,7 +67,21 @@ export class AdminLicenciasComponent implements OnInit {
     if (this.esLicensing) {
       this.adminApi.listarEmpresas().subscribe({ next: r => this.empresas = r.data ?? [] });
       this.adminApi.listarEdiciones().subscribe({ next: r => this.ediciones = (r.data ?? []).filter(e => e.activo !== false) });
+      // Autocompletar Máx. usuarios al cambiar edición o tipo.
+      this.formNueva.get('edicionCodigo')?.valueChanges.subscribe(() => this.autoMaxUsuarios());
+      this.formNueva.get('tipo')?.valueChanges.subscribe(() => this.autoMaxUsuarios());
     }
+  }
+
+  /** Máx. usuarios por defecto: Demo = 5; Pago = el de la edición seleccionada. */
+  private autoMaxUsuarios(): void {
+    if (this.formNueva.get('tipo')?.value === 'D') {
+      this.formNueva.get('maxUsuarios')?.setValue(5);
+      return;
+    }
+    const cod = this.formNueva.get('edicionCodigo')?.value;
+    const ed = this.ediciones.find(e => e.codigo === cod);
+    this.formNueva.get('maxUsuarios')?.setValue(ed?.maxUsuarios ?? null);
   }
 
   // ── Crear licencia (solo LICENSING) ──

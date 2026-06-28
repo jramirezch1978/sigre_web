@@ -98,8 +98,16 @@ ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
 INSERT INTO auth.modulo (codigo, nombre, flag_estado) VALUES
     ('SALUD', 'Salud', '1'),
     ('FARMACIA', 'Farmacia', '1'),
-    ('LABORATORIO', 'Laboratorio', '1')
+    ('LABORATORIO', 'Laboratorio', '1'),
+    ('HOTELERIA', 'Hotelería', '1'),
+    ('RESTAURANTE', 'Restaurante y Bar', '1'),
+    ('CATERING', 'Catering y Eventos', '1')
 ON CONFLICT (codigo) DO UPDATE SET nombre = EXCLUDED.nombre, flag_estado = EXCLUDED.flag_estado;
+
+-- HORECA es una EDICION, no un modulo: se desactiva el antiguo modulo 'HORECA' y se reparte su
+-- funcionalidad en los modulos Hoteleria, Restaurante y Catering.
+UPDATE auth.modulo SET flag_estado = '0' WHERE codigo = 'HORECA';
+DELETE FROM auth.edicion_modulo WHERE modulo_id = (SELECT id FROM auth.modulo WHERE codigo = 'HORECA');
 
 -- Ediciones sectoriales: HORECA (hoteles/restaurantes/catering) y HEALTH (salud).
 DELETE FROM auth.edicion_modulo em
@@ -112,7 +120,7 @@ SELECT e.id, m.id
 FROM auth.edicion_erp e
 JOIN auth.modulo m ON m.codigo IN (
     'ALMACEN', 'COMPRAS', 'COMERCIALIZACION', 'FINANZAS', 'SEGURIDAD',
-    'RRHH', 'ASISTENCIA', 'HORECA', 'COMEDOR'
+    'RRHH', 'ASISTENCIA', 'HOTELERIA', 'RESTAURANTE', 'CATERING', 'COMEDOR'
 )
 WHERE e.codigo = 'HORECA'
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
@@ -131,6 +139,6 @@ ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
 INSERT INTO auth.edicion_modulo (edicion_id, modulo_id)
 SELECT e.id, m.id
 FROM auth.edicion_erp e
-JOIN auth.modulo m ON m.codigo IN ('SALUD', 'FARMACIA', 'LABORATORIO')
+JOIN auth.modulo m ON m.codigo IN ('SALUD', 'FARMACIA', 'LABORATORIO', 'HOTELERIA', 'RESTAURANTE', 'CATERING')
 WHERE e.codigo = 'ENTERPRISE'
 ON CONFLICT (edicion_id, modulo_id) DO NOTHING;
