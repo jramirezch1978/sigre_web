@@ -72,6 +72,9 @@
                     </button>
                   }
                   @if (esLicensing) {
+                    <button class="btn btn-sm btn-outline-primary ms-1" title="Editar" (click)="abrirEditar(l)">
+                      <i class="material-icons-outlined fs-6 align-middle">edit</i>
+                    </button>
                     <button class="btn btn-sm btn-outline-secondary ms-1" title="Anular" (click)="anular(l)">
                       <i class="material-icons-outlined fs-6 align-middle">block</i>
                     </button>
@@ -213,6 +216,51 @@
         <button class="btn btn-light" (click)="cerrarNueva()" [disabled]="guardando">Cancelar</button>
         <button class="btn btn-primary" (click)="confirmarNueva()" [disabled]="guardando">
           {{ guardando ? 'Creando…' : 'Crear licencia' }}
+        </button>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal: Editar licencia (solo LICENSING) -->
+<ion-modal [isOpen]="mostrarEditar" (didDismiss)="cerrarEditar()" class="admin-modal">
+  <ng-template>
+    <div class="admin-modal__box">
+      <div class="admin-modal__header">
+        <h2>Editar licencia</h2>
+        <button class="admin-modal__close" (click)="cerrarEditar()"><i class="material-icons-outlined">close</i></button>
+      </div>
+      <div class="admin-modal__body">
+        @if (seleccion) {
+          <p class="text-muted mb-3">{{ seleccion.razon_social }} · {{ seleccion.codigo_licencia }}</p>
+        }
+        <form [formGroup]="formEditar" (ngSubmit)="confirmarEditar()">
+          <div class="form-row">
+            <ion-item class="full-row">
+              <ion-label position="stacked">Edición <span class="req">*</span></ion-label>
+              <ion-select sigreValid formControlName="edicionCodigo" interface="popover" placeholder="Seleccione edición">
+                @for (ed of ediciones; track ed.codigo) {
+                  <ion-select-option [value]="ed.codigo">{{ ed.nombre }}</ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+          </div>
+          <div class="form-row">
+            <ion-item>
+              <ion-label position="stacked">Máx. usuarios</ion-label>
+              <ion-input sigreValid type="number" formControlName="maxUsuarios"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-label position="stacked">Correo responsable</ion-label>
+              <ion-input sigreValid type="email" formControlName="correoResponsable" maxlength="150"></ion-input>
+            </ion-item>
+          </div>
+        </form>
+      </div>
+      <div class="admin-modal__footer">
+        <button class="btn btn-light" (click)="cerrarEditar()" [disabled]="guardando">Cancelar</button>
+        <button class="btn btn-primary" (click)="confirmarEditar()" [disabled]="guardando">
+          {{ guardando ? 'Guardando…' : 'Guardar cambios' }}
         </button>
       </div>
     </div>

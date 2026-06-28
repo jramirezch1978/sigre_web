@@ -13,6 +13,7 @@ export interface LicenciaAdminDto {
   edicion_codigo: string;
   tipo: string;          // D=demo, P=pago
   estado: string;        // A/V
+  max_usuarios: number | null;
   fecha_inicio: string;
   fecha_vencimiento: string;
   correo_responsable: string | null;

@@ -32,7 +32,14 @@ export class AdminLicenciasComponent implements OnInit {
   mostrarRenovar = false;
   mostrarAmpliar = false;
   mostrarNueva = false;
+  mostrarEditar = false;
   seleccion: LicenciaAdminDto | null = null;
+
+  readonly formEditar: FormGroup = this.fb.group({
+    edicionCodigo: ['', Validators.required],
+    maxUsuarios: [null],
+    correoResponsable: ['', [Validators.email, Validators.maxLength(150)]],
+  });
 
   readonly formNueva: FormGroup = this.fb.group({
     empresaId: [null, Validators.required],
@@ -88,6 +95,37 @@ export class AdminLicenciasComponent implements OnInit {
         this.cargar();
       },
       error: e => { this.guardando = false; void this.modal.error(e?.error?.message ?? 'No se pudo crear la licencia.'); },
+    });
+  }
+
+  // ── Editar licencia (solo LICENSING) ──
+  abrirEditar(l: LicenciaAdminDto): void {
+    this.seleccion = l;
+    this.formEditar.reset({
+      edicionCodigo: l.edicion_codigo,
+      maxUsuarios: l.max_usuarios,
+      correoResponsable: l.correo_responsable ?? '',
+    });
+    this.mostrarEditar = true;
+  }
+  cerrarEditar(): void { this.mostrarEditar = false; this.seleccion = null; }
+
+  confirmarEditar(): void {
+    if (this.formEditar.invalid || !this.seleccion) { this.formEditar.markAllAsTouched(); return; }
+    this.guardando = true;
+    const v = this.formEditar.value;
+    this.api.modificar(this.seleccion.id, {
+      edicionCodigo: v.edicionCodigo,
+      maxUsuarios: v.maxUsuarios ? Number(v.maxUsuarios) : null,
+      correoResponsable: v.correoResponsable || null,
+    }).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.cerrarEditar();
+        void this.modal.success('Licencia actualizada', 'Los cambios se guardaron correctamente.');
+        this.cargar();
+      },
+      error: e => { this.guardando = false; void this.modal.error(e?.error?.message ?? 'No se pudo modificar la licencia.'); },
     });
   }
 

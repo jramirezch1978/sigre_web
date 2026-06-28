@@ -401,7 +401,7 @@ public class LicenciaService {
     public List<Map<String, Object>> listarLicencias() {
         return jdbcTemplate.queryForList("""
                 SELECT l.id, l.empresa_id, e.razon_social, e.flag_demo, l.codigo_licencia, l.edicion_codigo,
-                       l.tipo, l.estado, l.fecha_inicio, l.fecha_vencimiento, l.correo_responsable,
+                       l.tipo, l.estado, l.max_usuarios, l.fecha_inicio, l.fecha_vencimiento, l.correo_responsable,
                        GREATEST(0, CEIL(EXTRACT(EPOCH FROM (l.fecha_vencimiento - now())) / 86400))::int AS dias_restantes
                 FROM auth.licencia l
                 JOIN master.empresa e ON e.id = l.empresa_id
