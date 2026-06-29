@@ -23,6 +23,7 @@ import com.sigre.seguridad.dto.DeleteEmpresaRequest;
 import com.sigre.seguridad.dto.EmpresaLogoUploadResponse;
 import com.sigre.seguridad.dto.ProvisionEmpresaRequest;
 import com.sigre.seguridad.dto.ProvisionEmpresaResponse;
+import com.sigre.seguridad.dto.RecreateEmpresaBatchRequest;
 import com.sigre.seguridad.dto.RecreateEmpresaRequest;
 import com.sigre.seguridad.dto.RecreateEmpresaResponse;
 import com.sigre.seguridad.service.TenantProvisioningService;
@@ -102,12 +103,32 @@ public class AdminEmpresaController {
      * Requiere {@code X-Provision-Secret} y JWT temporal (mismo criterio que {@code /provision}).
      */
     @PostMapping("/recreate")
-    public ApiResponse<RecreateEmpresaResponse> recreate(
+    public ApiResponse<?> recreate(
             HttpServletRequest httpRequest,
-            @Valid @RequestBody RecreateEmpresaRequest body) {
+            @Valid @RequestBody RecreateEmpresaBatchRequest body) {
         validateProvisionSecret(httpRequest);
         validateProvisionTemporalToken(httpRequest);
-        RecreateEmpresaResponse data = tenantProvisioningService.recrearTenantDesdeTemplate(body);
+
+        java.util.List<String> dbs = body.getDbName();
+
+        // Modo arreglo: recrea cada BD y devuelve la lista de resultados.
+        if (dbs != null && dbs.size() > 1) {
+            java.util.List<RecreateEmpresaResponse> data = new java.util.ArrayList<>();
+            for (String db : dbs) {
+                RecreateEmpresaRequest single = RecreateEmpresaRequest.builder().dbName(db).build();
+                data.add(tenantProvisioningService.recrearTenantDesdeTemplate(single));
+            }
+            return ApiResponse.ok(data, "Recreadas " + data.size() + " bases tenant");
+        }
+
+        // Modo único (igual que antes): por dbName único o por empresaId/codigo/ruc.
+        RecreateEmpresaRequest single = RecreateEmpresaRequest.builder()
+                .empresaId(body.getEmpresaId())
+                .codigo(body.getCodigo())
+                .ruc(body.getRuc())
+                .dbName(dbs != null && !dbs.isEmpty() ? dbs.get(0) : null)
+                .build();
+        RecreateEmpresaResponse data = tenantProvisioningService.recrearTenantDesdeTemplate(single);
         return ApiResponse.ok(data, data.getMensaje());
     }
 
