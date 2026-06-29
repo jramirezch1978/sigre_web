@@ -1,0 +1,87 @@
+<sigre-metoxi-modal-shell
+  [titulo]="data.titulo"
+  size="xl"
+  [cerrarDeshabilitado]="guardando"
+  (cerrar)="cancelar()">
+
+  @if (cargando) {
+    <div class="sigre-metoxi-modal__loading">
+      <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div>
+      <span>Cargando formulario…</span>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="mov-md">
+      <div class="mov-md__seccion">Cabecera</div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Sucursal *</label>
+          <sigre-searchable-select formControlName="sucursalId" [options]="sucursales" placeholder="Seleccione…" [permitirVacio]="false" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Almacén *</label>
+          <sigre-searchable-select formControlName="almacenId" [options]="almacenes" placeholder="Buscar almacén…" [permitirVacio]="false" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Tipo de movimiento *</label>
+          <sigre-searchable-select formControlName="articuloMovTipoId" [options]="tiposMov" placeholder="Buscar tipo…" [permitirVacio]="false" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Fecha registro *</label>
+          <input type="date" class="form-control" formControlName="fechaMov" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Fecha auxiliar</label>
+          <input type="date" class="form-control" formControlName="fecProduccion" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Proveedor / cliente</label>
+          <sigre-searchable-select formControlName="proveedorId" [options]="proveedores" placeholder="Buscar…" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Recepcionado por</label>
+          <input type="text" class="form-control" formControlName="nomReceptor" maxlength="120" placeholder="Nombre del receptor…" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Documento externo (N°)</label>
+          <input type="text" class="form-control" formControlName="nroDocExt" maxlength="20" placeholder="001-121231" />
+        </div>
+        <div class="col-12">
+          <label class="form-label">Observaciones</label>
+          <input type="text" class="form-control" formControlName="observaciones" maxlength="3000" placeholder="Observaciones…" />
+        </div>
+      </div>
+
+      <div class="mov-md__seccion mov-md__seccion--det">
+        <span>Detalle</span>
+        <button type="button" class="btn btn-sm btn-primary" (click)="agregarLinea()">
+          <i class="material-icons-outlined fs-6">add</i> Agregar ítem
+        </button>
+      </div>
+
+      <div class="mov-md__detalle" formArrayName="lineas">
+        <div class="mov-md__det-head">
+          <span>Artículo *</span><span>Cantidad *</span><span>Precio unit.</span><span>Centro de costo</span><span>Peso neto</span><span></span>
+        </div>
+        @for (ctrl of lineas.controls; track $index; let i = $index) {
+          <div class="mov-md__det-row" [formGroupName]="i">
+            <sigre-articulo-select formControlName="articuloId" />
+            <input type="number" class="form-control" formControlName="cantProcesada" placeholder="0.00" />
+            <input type="number" class="form-control" formControlName="costoUnitario" placeholder="0.00" />
+            <sigre-centros-costo-select formControlName="centrosCostoId" />
+            <input type="number" class="form-control" formControlName="pesoNetoTm" placeholder="0.000" />
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Quitar" (click)="quitarLinea(i)">
+              <i class="material-icons-outlined fs-6">delete</i>
+            </button>
+          </div>
+        }
+      </div>
+    </form>
+  }
+
+  <div sigreMetoxiModalFooter>
+    <sigre-metoxi-modal-actions
+      [mostrarCancelar]="true" [mostrarGuardar]="true"
+      [guardando]="guardando" [deshabilitado]="guardando || cargando"
+      (cancelar)="cancelar()" (guardar)="guardar()" />
+  </div>
+</sigre-metoxi-modal-shell>

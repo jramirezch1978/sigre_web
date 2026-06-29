@@ -1,0 +1,62 @@
+<sigre-metoxi-modal-shell
+  [titulo]="data.titulo"
+  size="lg"
+  [cerrarDeshabilitado]="guardando"
+  (cerrar)="cancelar()">
+
+  @if (cargando) {
+    <div class="sigre-metoxi-modal__loading">
+      <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div>
+      <span>Cargando formulario…</span>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="otr-md">
+      <div class="otr-md__seccion">Cabecera</div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Almacén origen *</label>
+          <sigre-searchable-select formControlName="almacenOrigenId" [options]="almacenes" placeholder="Buscar…" [permitirVacio]="false" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Almacén destino *</label>
+          <sigre-searchable-select formControlName="almacenDestinoId" [options]="almacenes" placeholder="Buscar…" [permitirVacio]="false" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Fecha *</label>
+          <input type="date" class="form-control" formControlName="fecha" />
+        </div>
+        <div class="col-12">
+          <label class="form-label">Observación</label>
+          <input type="text" class="form-control" formControlName="observacion" placeholder="Observación del traslado…" />
+        </div>
+      </div>
+
+      <div class="otr-md__seccion otr-md__seccion--det">
+        <span>Detalle</span>
+        <button type="button" class="btn btn-sm btn-primary" (click)="agregarLinea()">
+          <i class="material-icons-outlined fs-6">add</i> Agregar ítem
+        </button>
+      </div>
+
+      <div class="otr-md__detalle" formArrayName="lineas">
+        <div class="otr-md__det-head"><span>Artículo *</span><span>Cantidad *</span><span></span></div>
+        @for (ctrl of lineas.controls; track $index; let i = $index) {
+          <div class="otr-md__det-row" [formGroupName]="i">
+            <sigre-articulo-select formControlName="articuloId" />
+            <input type="number" class="form-control" formControlName="cantidad" placeholder="0.00" />
+            <button type="button" class="btn btn-sm btn-outline-danger" title="Quitar" (click)="quitarLinea(i)">
+              <i class="material-icons-outlined fs-6">delete</i>
+            </button>
+          </div>
+        }
+      </div>
+    </form>
+  }
+
+  <div sigreMetoxiModalFooter>
+    <sigre-metoxi-modal-actions
+      [mostrarCancelar]="true" [mostrarGuardar]="true"
+      [guardando]="guardando" [deshabilitado]="guardando || cargando"
+      (cancelar)="cancelar()" (guardar)="guardar()" />
+  </div>
+</sigre-metoxi-modal-shell>

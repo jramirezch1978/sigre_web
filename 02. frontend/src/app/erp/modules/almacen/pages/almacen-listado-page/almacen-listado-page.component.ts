@@ -16,6 +16,8 @@ import {
   AlmacenRegistroDialogComponent,
   AlmacenRegistroDialogData,
 } from '../../components/almacen-registro-dialog/almacen-registro-dialog.component';
+import { MovimientoMdDialogComponent } from '../../components/movimiento-md-dialog/movimiento-md-dialog.component';
+import { OrdenTrasladoMdDialogComponent } from '../../components/orden-traslado-md-dialog/orden-traslado-md-dialog.component';
 
 @Component({
   selector: 'app-almacen-listado-page',
@@ -87,12 +89,33 @@ export class AlmacenListadoPageComponent implements OnInit {
 
   anadir(): void {
     if (!this.crudConfig) return;
+    if (this.abrirDocumentoMd('Nuevo ' + this.titulo, null)) return;
     this.abrirDialogo('Nuevo registro', null);
   }
 
   editarRegistro(fila: Record<string, unknown>): void {
     if (!this.crudConfig) return;
+    const id = fila['id'] as number | undefined;
+    if (this.abrirDocumentoMd('Editar ' + this.titulo, id ?? null)) return;
     this.abrirDialogo('Editar registro', fila);
+  }
+
+  /** Abre el form maestro-detalle según el handler. Devuelve true si lo manejó. */
+  private abrirDocumentoMd(titulo: string, registroId: number | null): boolean {
+    const handler = this.crudConfig?.handler;
+    if (handler === 'movimiento') {
+      abrirDialogoMetoxi(this.dialog, MovimientoMdDialogComponent, {
+        data: { titulo, registroId }, width: '1100px',
+      }).afterClosed().subscribe(ok => { if (ok) this.cargarDatos(); });
+      return true;
+    }
+    if (handler === 'otr') {
+      abrirDialogoMetoxi(this.dialog, OrdenTrasladoMdDialogComponent, {
+        data: { titulo, registroId }, width: '820px',
+      }).afterClosed().subscribe(ok => { if (ok) this.cargarDatos(); });
+      return true;
+    }
+    return false;
   }
 
   anularRegistro(fila: Record<string, unknown>): void {
