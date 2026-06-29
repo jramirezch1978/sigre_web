@@ -817,7 +817,7 @@ public class TenantProvisioningService {
         cfg.setPoolName("grant-tenant-" + roleName);
 
         List<String> schemas = List.of(
-                "public", "auth", "core", "almacen", "compras", "ventas", "finanzas",
+                "public", "config", "auth", "core", "almacen", "compras", "ventas", "finanzas",
                 "contabilidad", "rrhh", "activos", "produccion", "auditoria");
 
         try (HikariDataSource ds = new HikariDataSource(cfg)) {

@@ -16,7 +16,7 @@ DECLARE
   r text := %L;
   s name;
   schemas name[] := ARRAY[
-    'public', 'auth', 'core', 'almacen', 'compras', 'ventas', 'finanzas',
+    'public', 'config', 'auth', 'core', 'almacen', 'compras', 'ventas', 'finanzas',
     'contabilidad', 'rrhh', 'activos', 'produccion', 'auditoria'
   ];
 BEGIN
