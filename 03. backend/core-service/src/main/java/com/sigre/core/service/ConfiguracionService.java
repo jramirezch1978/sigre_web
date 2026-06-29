@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ConfiguracionService {
-    List<ConfigClaveResponse> listClaves(String modulo, String nivel, String flagEstado);
+    List<ConfigClaveResponse> listClaves(String modulo, String nivel);
     ConfigResolverResult resolver(ConfigResolverRequest request);
     Map<String, Object> getEmpresa(Long empresaId, List<String> claves);
     Map<String, Object> saveEmpresa(ConfigEmpresaSaveRequest request);

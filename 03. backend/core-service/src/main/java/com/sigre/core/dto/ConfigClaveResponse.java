@@ -15,5 +15,4 @@ public class ConfigClaveResponse {
     private String nivel;
     private String descripcion;
     private String tipoDato;
-    private String flagEstado;
 }

@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ConfiguracionRepository extends JpaRepository<Configuracion, Long> {
-    List<Configuracion> findByFlagEstado(String flagEstado);
-    List<Configuracion> findByModuloAndFlagEstado(String modulo, String flagEstado);
-    Optional<Configuracion> findByParametroAndFlagEstado(String parametro, String flagEstado);
+    List<Configuracion> findByModulo(String modulo);
+    Optional<Configuracion> findByParametro(String parametro);
 }

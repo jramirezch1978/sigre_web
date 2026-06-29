@@ -41,7 +41,6 @@ CREATE TABLE config.configuracion (
     valor_fecha DATE,
     valor_bool BOOLEAN,
     editable BOOLEAN NOT NULL DEFAULT TRUE,
-    activo BOOLEAN NOT NULL DEFAULT TRUE,
     modificado_en TIMESTAMPTZ,
     UNIQUE (modulo, parametro)
 );
@@ -61,7 +60,7 @@ CREATE TABLE config.config_traduccion (
 -- SECCIÓN 3: ÍNDICES
 -- ============================================================
 
-CREATE INDEX IX_CONFIGURACION_01 ON config.configuracion (modulo, activo);
+CREATE INDEX IX_CONFIGURACION_01 ON config.configuracion (modulo);
 CREATE INDEX IX_CONFIG_TRADUCCION_01 ON config.config_traduccion (idioma, modulo);
 
 -- ============================================================
@@ -82,12 +81,11 @@ BEGIN
     SELECT c.valor_texto INTO lvar_valor
     FROM config.configuracion c
     WHERE c.modulo = p_modulo
-      AND c.parametro = p_parametro
-      AND c.activo = TRUE;
+      AND c.parametro = p_parametro;
 
     IF NOT FOUND THEN
-        INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, activo)
-        VALUES (p_modulo, p_parametro, 'TEXT', p_default, TRUE, TRUE)
+        INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable)
+        VALUES (p_modulo, p_parametro, 'TEXT', p_default, TRUE)
         ON CONFLICT (modulo, parametro) DO NOTHING;
         RETURN p_default;
     END IF;
@@ -108,12 +106,11 @@ BEGIN
     SELECT c.valor_entero INTO lint_valor
     FROM config.configuracion c
     WHERE c.modulo = p_modulo
-      AND c.parametro = p_parametro
-      AND c.activo = TRUE;
+      AND c.parametro = p_parametro;
 
     IF NOT FOUND THEN
-        INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_entero, editable, activo)
-        VALUES (p_modulo, p_parametro, 'INTEGER', p_default, TRUE, TRUE)
+        INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_entero, editable)
+        VALUES (p_modulo, p_parametro, 'INTEGER', p_default, TRUE)
         ON CONFLICT (modulo, parametro) DO NOTHING;
         RETURN p_default;
     END IF;
@@ -134,12 +131,11 @@ BEGIN
     SELECT c.valor_decimal INTO ldec_valor
     FROM config.configuracion c
     WHERE c.modulo = p_modulo
-      AND c.parametro = p_parametro
-      AND c.activo = TRUE;
+      AND c.parametro = p_parametro;
 
     IF NOT FOUND THEN
-        INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_decimal, editable, activo)
-        VALUES (p_modulo, p_parametro, 'DECIMAL', p_default, TRUE, TRUE)
+        INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_decimal, editable)
+        VALUES (p_modulo, p_parametro, 'DECIMAL', p_default, TRUE)
         ON CONFLICT (modulo, parametro) DO NOTHING;
         RETURN p_default;
     END IF;
@@ -164,12 +160,11 @@ BEGIN
            END INTO lbol_valor
     FROM config.configuracion c
     WHERE c.modulo = p_modulo
-      AND c.parametro = p_parametro
-      AND c.activo = TRUE;
+      AND c.parametro = p_parametro;
 
     IF NOT FOUND THEN
-        INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, activo)
-        VALUES (p_modulo, p_parametro, 'BOOLEAN', CASE WHEN p_default THEN '1' ELSE '0' END, TRUE, TRUE)
+        INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable)
+        VALUES (p_modulo, p_parametro, 'BOOLEAN', CASE WHEN p_default THEN '1' ELSE '0' END, TRUE)
         ON CONFLICT (modulo, parametro) DO NOTHING;
         RETURN p_default;
     END IF;
@@ -206,10 +201,10 @@ CREATE OR REPLACE FUNCTION config.fn_set_parametro_txt(
 ) RETURNS TEXT
 LANGUAGE plpgsql VOLATILE AS $$
 BEGIN
-    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, activo, modificado_en)
-    VALUES (p_modulo, p_parametro, 'TEXT', p_valor, TRUE, TRUE, NOW())
+    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, modificado_en)
+    VALUES (p_modulo, p_parametro, 'TEXT', p_valor, TRUE, NOW())
     ON CONFLICT (modulo, parametro)
-    DO UPDATE SET valor_texto = EXCLUDED.valor_texto, tipo_dato = 'TEXT', activo = TRUE, modificado_en = NOW();
+    DO UPDATE SET valor_texto = EXCLUDED.valor_texto, tipo_dato = 'TEXT', modificado_en = NOW();
     RETURN p_valor;
 END;
 $$;
@@ -221,10 +216,10 @@ CREATE OR REPLACE FUNCTION config.fn_set_parametro_int(
 ) RETURNS INTEGER
 LANGUAGE plpgsql VOLATILE AS $$
 BEGIN
-    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_entero, editable, activo, modificado_en)
-    VALUES (p_modulo, p_parametro, 'INTEGER', p_valor, TRUE, TRUE, NOW())
+    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_entero, editable, modificado_en)
+    VALUES (p_modulo, p_parametro, 'INTEGER', p_valor, TRUE, NOW())
     ON CONFLICT (modulo, parametro)
-    DO UPDATE SET valor_entero = EXCLUDED.valor_entero, tipo_dato = 'INTEGER', activo = TRUE, modificado_en = NOW();
+    DO UPDATE SET valor_entero = EXCLUDED.valor_entero, tipo_dato = 'INTEGER', modificado_en = NOW();
     RETURN p_valor;
 END;
 $$;
@@ -236,10 +231,10 @@ CREATE OR REPLACE FUNCTION config.fn_set_parametro_dec(
 ) RETURNS NUMERIC(18, 6)
 LANGUAGE plpgsql VOLATILE AS $$
 BEGIN
-    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_decimal, editable, activo, modificado_en)
-    VALUES (p_modulo, p_parametro, 'DECIMAL', p_valor, TRUE, TRUE, NOW())
+    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_decimal, editable, modificado_en)
+    VALUES (p_modulo, p_parametro, 'DECIMAL', p_valor, TRUE, NOW())
     ON CONFLICT (modulo, parametro)
-    DO UPDATE SET valor_decimal = EXCLUDED.valor_decimal, tipo_dato = 'DECIMAL', activo = TRUE, modificado_en = NOW();
+    DO UPDATE SET valor_decimal = EXCLUDED.valor_decimal, tipo_dato = 'DECIMAL', modificado_en = NOW();
     RETURN p_valor;
 END;
 $$;
@@ -252,11 +247,11 @@ CREATE OR REPLACE FUNCTION config.fn_set_parametro_bool(
 ) RETURNS BOOLEAN
 LANGUAGE plpgsql VOLATILE AS $$
 BEGIN
-    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, valor_bool, editable, activo, modificado_en)
-    VALUES (p_modulo, p_parametro, 'BOOLEAN', CASE WHEN p_valor THEN '1' ELSE '0' END, p_valor, TRUE, TRUE, NOW())
+    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, valor_bool, editable, modificado_en)
+    VALUES (p_modulo, p_parametro, 'BOOLEAN', CASE WHEN p_valor THEN '1' ELSE '0' END, p_valor, TRUE, NOW())
     ON CONFLICT (modulo, parametro)
     DO UPDATE SET valor_texto = CASE WHEN p_valor THEN '1' ELSE '0' END, valor_bool = p_valor,
-                  tipo_dato = 'BOOLEAN', activo = TRUE, modificado_en = NOW();
+                  tipo_dato = 'BOOLEAN', modificado_en = NOW();
     RETURN p_valor;
 END;
 $$;

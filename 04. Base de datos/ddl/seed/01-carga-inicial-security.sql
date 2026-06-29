@@ -4400,19 +4400,18 @@ WHERE master.empresa.id = 3
   AND d.codigo = '150131';
 
 -- TX: Parámetros SUNAT (config.configuracion — BD security)
-INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, activo)
+INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable)
 VALUES
-    ('SUNAT', 'API_BASE_URL', 'TEXT', 'http://pegazus.serveftp.com:9080/SunatWebServices', TRUE, TRUE),
-    ('SUNAT', 'API_USUARIO', 'TEXT', 'sigre', TRUE, TRUE),
-    ('SUNAT', 'API_CLAVE', 'TEXT', 'sigre1234', TRUE, TRUE),
-    ('SUNAT', 'API_EMPRESA', 'TEXT', 'SIGRE_WEB', TRUE, TRUE),
-    ('SUNAT', 'API_IP_LOCAL', 'TEXT', '192.168.1.100', TRUE, TRUE),
-    ('SUNAT', 'API_COMPUTER_NAME', 'TEXT', 'SIGRE-WEB', TRUE, TRUE)
+    ('SUNAT', 'API_BASE_URL', 'TEXT', 'http://pegazus.serveftp.com:9080/SunatWebServices', TRUE),
+    ('SUNAT', 'API_USUARIO', 'TEXT', 'sigre', TRUE),
+    ('SUNAT', 'API_CLAVE', 'TEXT', 'sigre1234', TRUE),
+    ('SUNAT', 'API_EMPRESA', 'TEXT', 'SIGRE_WEB', TRUE),
+    ('SUNAT', 'API_IP_LOCAL', 'TEXT', '192.168.1.100', TRUE),
+    ('SUNAT', 'API_COMPUTER_NAME', 'TEXT', 'SIGRE-WEB', TRUE)
 ON CONFLICT (modulo, parametro) DO UPDATE SET
     tipo_dato = EXCLUDED.tipo_dato,
     valor_texto = EXCLUDED.valor_texto,
     editable = EXCLUDED.editable,
-    activo = EXCLUDED.activo,
     modificado_en = NOW();
 
 COMMIT;

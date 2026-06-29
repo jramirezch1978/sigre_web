@@ -826,7 +826,7 @@ CREATE OR REPLACE FUNCTION config._cfg_txt(p_source VARCHAR, p_param VARCHAR)
 RETURNS TEXT
 LANGUAGE sql STABLE AS $$
     SELECT valor_texto FROM config.configuracion
-     WHERE modulo = p_source AND parametro = p_param AND activo = TRUE LIMIT 1;
+     WHERE modulo = p_source AND parametro = p_param LIMIT 1;
 $$;
 
 -- Devuelve valor_entero de config.configuracion o default_val
@@ -835,7 +835,7 @@ RETURNS INTEGER
 LANGUAGE sql STABLE AS $$
     SELECT COALESCE(valor_entero, p_default)
       FROM config.configuracion
-     WHERE modulo = p_source AND parametro = p_param AND activo = TRUE LIMIT 1;
+     WHERE modulo = p_source AND parametro = p_param LIMIT 1;
 $$;
 
 -- Devuelve valor_decimal de config.configuracion
@@ -844,7 +844,7 @@ RETURNS NUMERIC
 LANGUAGE sql STABLE AS $$
     SELECT COALESCE(valor_decimal, p_default)
       FROM config.configuracion
-     WHERE modulo = p_source AND parametro = p_param AND activo = TRUE LIMIT 1;
+     WHERE modulo = p_source AND parametro = p_param LIMIT 1;
 $$;
 
 -- CÃ³digo SIGRE (TEXT preferido; fallback valor_entero legacy) para concepto_planilla o grupo_calculo.
@@ -858,7 +858,7 @@ LANGUAGE sql STABLE AS $$
             NULLIF(TRIM(c.valor_entero::TEXT), '')
         )
            FROM config.configuracion c
-          WHERE c.modulo = p_source AND c.parametro = p_param AND c.activo = TRUE
+          WHERE c.modulo = p_source AND c.parametro = p_param
           LIMIT 1),
         NULLIF(TRIM(p_default), '')
     );

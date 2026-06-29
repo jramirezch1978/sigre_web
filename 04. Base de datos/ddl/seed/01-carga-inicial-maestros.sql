@@ -6296,8 +6296,8 @@ ON CONFLICT (codigo) DO UPDATE SET
 -- TX 8k2: config.configuracion — parámetros del numerador de documentos
 -- ============================================================
 -- NOTA: los parámetros del sistema se guardan en config.configuracion (esquema config del tenant).
-INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_entero, editable, activo)
-SELECT 'CORE', 'NUMERADOR_ANTIGUEDAD_ANIOS', 'INTEGER', 5, TRUE, TRUE
+INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_entero, editable)
+SELECT 'CORE', 'NUMERADOR_ANTIGUEDAD_ANIOS', 'INTEGER', 5, TRUE
 WHERE NOT EXISTS (
     SELECT 1 FROM config.configuracion WHERE modulo = 'CORE' AND parametro = 'NUMERADOR_ANTIGUEDAD_ANIOS'
 );

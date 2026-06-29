@@ -42,12 +42,11 @@ public class ConfiguracionServiceImpl implements ConfiguracionService {
     }
 
     @Override
-    public List<ConfigClaveResponse> listClaves(String modulo, String nivel, String flagEstado) {
-        return (modulo == null ? configuracionRepository.findByFlagEstado("1") : configuracionRepository.findByModuloAndFlagEstado(modulo, "1"))
+    public List<ConfigClaveResponse> listClaves(String modulo, String nivel) {
+        return (modulo == null ? configuracionRepository.findAll() : configuracionRepository.findByModulo(modulo))
                 .stream()
                 .filter(cfg -> nivel == null || cfg.getParametro().startsWith(nivel.toUpperCase()))
-                .filter(cfg -> flagEstado == null || flagEstado.equals(cfg.getFlagEstado()))
-                .map(cfg -> new ConfigClaveResponse(cfg.getParametro(), cfg.getModulo(), inferNivel(cfg.getParametro()), null, cfg.getTipoDato(), cfg.getFlagEstado()))
+                .map(cfg -> new ConfigClaveResponse(cfg.getParametro(), cfg.getModulo(), inferNivel(cfg.getParametro()), null, cfg.getTipoDato()))
                 .toList();
     }
 
@@ -61,24 +60,24 @@ public class ConfiguracionServiceImpl implements ConfiguracionService {
             }
         }
         if (context.getSucursalId() != null) {
-            var suc = configuracionRepository.findByParametroAndFlagEstado(buildScopedKey(request.getClave(), PREFIJO_SUCURSAL, context.getSucursalId()), "1");
+            var suc = configuracionRepository.findByParametro(buildScopedKey(request.getClave(), PREFIJO_SUCURSAL, context.getSucursalId()));
             if (suc.isPresent()) {
                 return new ConfigResolverResult(extractValue(suc.get()), "SUCURSAL");
             }
         }
         if (context.getPaisId() != null) {
-            var pais = configuracionRepository.findByParametroAndFlagEstado(buildScopedKey(request.getClave(), "PAIS", context.getPaisId()), "1");
+            var pais = configuracionRepository.findByParametro(buildScopedKey(request.getClave(), "PAIS", context.getPaisId()));
             if (pais.isPresent()) {
                 return new ConfigResolverResult(extractValue(pais.get()), "PAIS");
             }
         }
         if (context.getEmpresaId() != null) {
-            var emp = configuracionRepository.findByParametroAndFlagEstado(buildScopedKey(request.getClave(), PREFIJO_EMPRESA, context.getEmpresaId()), "1");
+            var emp = configuracionRepository.findByParametro(buildScopedKey(request.getClave(), PREFIJO_EMPRESA, context.getEmpresaId()));
             if (emp.isPresent()) {
                 return new ConfigResolverResult(extractValue(emp.get()), "EMPRESA");
             }
         }
-        var defaultValue = configuracionRepository.findByParametroAndFlagEstado(request.getClave(), "1");
+        var defaultValue = configuracionRepository.findByParametro(request.getClave());
         return new ConfigResolverResult(defaultValue.map(this::extractValue).orElse(null), "EMPRESA");
     }
 
@@ -136,7 +135,7 @@ public class ConfiguracionServiceImpl implements ConfiguracionService {
 
     private Map<String, Object> getScoped(String scope, Long scopeId, List<String> claves) {
         String prefix = scope + "_" + scopeId + "_";
-        return configuracionRepository.findByFlagEstado("1").stream()
+        return configuracionRepository.findAll().stream()
                 .filter(cfg -> cfg.getParametro().startsWith(prefix))
                 .filter(cfg -> claves == null || claves.isEmpty() || claves.contains(stripScope(cfg.getParametro())))
                 .collect(LinkedHashMap::new, (acc, cfg) -> acc.put(stripScope(cfg.getParametro()), extractValue(cfg)), Map::putAll);
@@ -145,14 +144,13 @@ public class ConfiguracionServiceImpl implements ConfiguracionService {
     private void saveScoped(String scope, Long scopeId, Map<String, Object> valores) {
         valores.forEach((clave, valor) -> {
             String scopedKey = buildScopedKey(clave, scope, scopeId);
-            Configuracion cfg = configuracionRepository.findByParametroAndFlagEstado(scopedKey, "1")
+            Configuracion cfg = configuracionRepository.findByParametro(scopedKey)
                     .orElseGet(Configuracion::new);
             cfg.setModulo("GENERAL");
             cfg.setParametro(scopedKey);
             cfg.setTipoDato("STRING");
             cfg.setValorTexto(valor == null ? null : String.valueOf(valor));
             cfg.setEditable(true);
-            cfg.setFlagEstado("1");
             configuracionRepository.save(cfg);
         });
     }

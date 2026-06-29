@@ -43,9 +43,4 @@ public class Configuracion {
 
     @Column(nullable = false)
     private Boolean editable = true;
-
-    // config.configuracion.activo es BOOLEAN; se mapea a "1"/"0" para conservar la lógica de dominio.
-    @Column(name = "activo", nullable = false)
-    @Convert(converter = ActivoFlagConverter.class)
-    private String flagEstado = "1";
 }

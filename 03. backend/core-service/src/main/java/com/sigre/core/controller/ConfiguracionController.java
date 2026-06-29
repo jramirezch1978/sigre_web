@@ -19,10 +19,9 @@ public class ConfiguracionController {
     @GetMapping("/claves")
     public ApiResponse<List<ConfigClaveResponse>> listClaves(
             @RequestParam(required = false) String modulo,
-            @RequestParam(required = false) String nivel,
-            @RequestParam(required = false) String flagEstado
+            @RequestParam(required = false) String nivel
     ) {
-        return ApiResponse.ok(service.listClaves(modulo, nivel, flagEstado));
+        return ApiResponse.ok(service.listClaves(modulo, nivel));
     }
 
     @PostMapping("/resolver")
