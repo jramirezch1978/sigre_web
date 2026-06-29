@@ -1,0 +1,68 @@
+<sigre-metoxi-modal-shell titulo="Artículos" size="xl" (cerrar)="cancelar()">
+
+  <div class="art-busc">
+    <div class="art-busc__search">
+      <input type="text" class="form-control" [(ngModel)]="q" (keyup.enter)="buscar()"
+             placeholder="Buscar por código, descripción, SKU, categoría…" />
+      <button type="button" class="btn btn-primary" (click)="buscar()">
+        <i class="material-icons-outlined fs-6">search</i> Buscar
+      </button>
+    </div>
+
+    <div class="art-busc__titulo">Listado de artículos</div>
+    <div class="art-busc__grid">
+      <table class="table table-sm table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Código</th><th>Categoría</th><th>Sub categoría</th><th>Descripción</th><th>Und</th><th class="text-end">Precio vta.</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (cargando) {
+            <tr><td colspan="6" class="text-center text-muted py-3">Buscando…</td></tr>
+          } @else {
+            @for (a of articulos; track a.id) {
+              <tr [class.table-active]="esArticuloPadre(a)" (click)="seleccionarArticulo(a)" (dblclick)="seleccionarArticulo(a); aceptar()">
+                <td>{{ a.codigo }}</td>
+                <td>{{ a.categoria }}</td>
+                <td>{{ a.subCategoria }}</td>
+                <td>{{ a.descripcion }}</td>
+                <td>{{ a.unidad }}</td>
+                <td class="text-end">{{ (a.precioVenta ?? 0) | number:'1.2-2' }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="text-center text-muted py-3">Sin resultados</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="art-busc__titulo art-busc__titulo--equiv">Equivalencias</div>
+    <div class="art-busc__grid art-busc__grid--equiv">
+      <table class="table table-sm table-hover mb-0">
+        <thead><tr><th>Código</th><th>Descripción</th><th>Und</th></tr></thead>
+        <tbody>
+          @for (e of equivalencias; track e.id) {
+            <tr [class.table-active]="esSeleccionado(e)" (click)="seleccionarEquivalencia(e)" (dblclick)="seleccionarEquivalencia(e); aceptar()">
+              <td>{{ e.codigo }}</td><td>{{ e.descripcion }}</td><td>{{ e.unidad }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="3" class="text-center text-muted py-2">Sin equivalencias</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (seleccionado) {
+      <div class="art-busc__sel">Seleccionado: <strong>{{ seleccionado.codigo }} — {{ seleccionado.descripcion }}</strong></div>
+    }
+  </div>
+
+  <div sigreMetoxiModalFooter>
+    <div class="d-flex justify-content-end gap-2">
+      <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">Cancelar</button>
+      <button type="button" class="btn btn-primary" [disabled]="!seleccionado" (click)="aceptar()">Aceptar</button>
+    </div>
+  </div>
+</sigre-metoxi-modal-shell>
