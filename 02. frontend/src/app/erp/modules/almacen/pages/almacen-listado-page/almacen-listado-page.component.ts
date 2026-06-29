@@ -45,6 +45,7 @@ export class AlmacenListadoPageComponent implements OnInit {
   error = '';
   crudConfig: VistaCrudConfig | null = null;
   ordenInicial: string | null = null;
+  tamanoPaginaPersistido: number | null = null;
   private codigoVentana = '';
 
   private vista: AlmacenVistaDef | null = null;
@@ -75,12 +76,17 @@ export class AlmacenListadoPageComponent implements OnInit {
       this.crudConfig = this.vista ? crudConfigPorCodigoVista(this.vista.codigo) : null;
       this.codigoVentana = this.vista?.codigo ?? this.normalizarRuta(this.router.url);
       this.ordenConfig.leerOrden(this.codigoVentana).subscribe(v => { this.ordenInicial = v; });
+      this.ordenConfig.leerTamanoPagina(this.codigoVentana).subscribe(n => { this.tamanoPaginaPersistido = n; });
       this.cargarDatos();
     });
   }
 
   onOrdenCambiado(valor: string): void {
     this.ordenConfig.guardarOrden(this.codigoVentana, valor);
+  }
+
+  onTamanoPaginaCambiado(tamano: number): void {
+    this.ordenConfig.guardarTamanoPagina(this.codigoVentana, tamano);
   }
 
   recargar(): void {

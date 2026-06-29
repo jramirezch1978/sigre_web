@@ -53,6 +53,7 @@ export class AlmacenTablaPageComponent implements OnInit {
   error = '';
   crudConfig: TablaCrudConfig | null = null;
   ordenInicial: string | null = null;
+  tamanoPaginaPersistido: number | null = null;
   private codigoVentana = '';
 
   private tablaKey: AlmacenTablaKey = 'almacenes';
@@ -88,12 +89,17 @@ export class AlmacenTablaPageComponent implements OnInit {
       this.crudConfig = crudConfigPorTabla(this.tablaKey);
       this.codigoVentana = (data['opcionMenuCodigo'] as string) ?? `ALMACEN_TABLA_${this.tablaKey}`;
       this.ordenConfig.leerOrden(this.codigoVentana).subscribe(v => { this.ordenInicial = v; });
+      this.ordenConfig.leerTamanoPagina(this.codigoVentana).subscribe(n => { this.tamanoPaginaPersistido = n; });
       this.cargarDatos();
     });
   }
 
   onOrdenCambiado(valor: string): void {
     this.ordenConfig.guardarOrden(this.codigoVentana, valor);
+  }
+
+  onTamanoPaginaCambiado(tamano: number): void {
+    this.ordenConfig.guardarTamanoPagina(this.codigoVentana, tamano);
   }
 
   recargar(): void {

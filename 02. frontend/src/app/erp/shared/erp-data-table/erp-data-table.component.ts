@@ -24,19 +24,23 @@ export class ErpDataTableComponent implements OnChanges {
   @Input() tamanoPaginaInicial = 10;
   /** Orden inicial persistido: "columna:direccion" (ej. "nombre:asc"). Vacío = sin orden. */
   @Input() ordenInicial: string | null = null;
+  /** Tamaño de página persistido por usuario+ventana (null = usar el default). */
+  @Input() tamanoPaginaPersistido: number | null = null;
 
   @Output() editar = new EventEmitter<Record<string, unknown>>();
   @Output() anular = new EventEmitter<Record<string, unknown>>();
   @Output() eliminar = new EventEmitter<Record<string, unknown>>();
   /** Emite "columna:direccion" cuando el usuario cambia el ordenamiento (para persistir). */
   @Output() ordenCambiado = new EventEmitter<string>();
+  /** Emite la cantidad de registros por página cuando el usuario la cambia (para persistir). */
+  @Output() tamanoPaginaCambiado = new EventEmitter<number>();
 
   ordenColumna: string | null = null;
   ordenDir: 'asc' | 'desc' = 'asc';
 
   private readonly exportSvc = inject(ErpExportService);
 
-  readonly opcionesTamanoPagina = [10, 25, 50, 100];
+  readonly opcionesTamanoPagina = [10, 20, 50, 100];
 
   tamanoPagina = 10;
   paginaActual = 1;
@@ -50,6 +54,15 @@ export class ErpDataTableComponent implements OnChanges {
     if (!this.tamanoInicializado && changes['tamanoPaginaInicial']) {
       this.tamanoPagina = this.tamanoPaginaInicial;
       this.tamanoInicializado = true;
+    }
+    // Aplica la preferencia persistida cuando llega (async). No emite — solo refleja lo guardado.
+    if (changes['tamanoPaginaPersistido'] && this.tamanoPaginaPersistido != null) {
+      const n = this.tamanoPaginaPersistido;
+      if (this.opcionesTamanoPagina.includes(n)) {
+        this.tamanoPagina = n;
+        this.tamanoInicializado = true;
+        this.paginaActual = 1;
+      }
     }
     // Mantener la página actual dentro de rango; NO forzar a 1 en cada cambio.
     if (this.paginaActual > this.totalPaginas) {
@@ -195,6 +208,7 @@ export class ErpDataTableComponent implements OnChanges {
 
   onTamanoPaginaChange(): void {
     this.paginaActual = 1;
+    this.tamanoPaginaCambiado.emit(this.tamanoPagina);
   }
 
   abrirModalExport(): void {
