@@ -15,19 +15,20 @@ DO $_inner$
 DECLARE
   r text := %L;
   s name;
-  schemas name[] := ARRAY[
-    'public', 'config', 'auth', 'core', 'almacen', 'compras', 'ventas', 'finanzas',
-    'contabilidad', 'rrhh', 'activos', 'produccion', 'auditoria'
-  ];
 BEGIN
-  FOREACH s IN ARRAY schemas LOOP
-    IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = s) THEN
-      EXECUTE format('GRANT ALL ON SCHEMA %%I TO %%I', s, r);
-      EXECUTE format('GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA %%I TO %%I', s, r);
-      EXECUTE format('GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA %%I TO %%I', s, r);
-      EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %%I GRANT ALL ON TABLES TO %%I', s, r);
-      EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %%I GRANT ALL ON SEQUENCES TO %%I', s, r);
-    END IF;
+  -- TODOS los esquemas de aplicación (dinámico): nunca se queda ninguno sin permisos
+  -- (config, master, auth, core, almacen, ...). Se excluyen los esquemas de sistema.
+  FOR s IN
+    SELECT nspname FROM pg_namespace
+    WHERE nspname NOT LIKE 'pg\_%%' AND nspname <> 'information_schema'
+  LOOP
+    EXECUTE format('GRANT ALL ON SCHEMA %%I TO %%I', s, r);
+    EXECUTE format('GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA %%I TO %%I', s, r);
+    EXECUTE format('GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA %%I TO %%I', s, r);
+    EXECUTE format('GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA %%I TO %%I', s, r);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %%I GRANT ALL ON TABLES TO %%I', s, r);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %%I GRANT ALL ON SEQUENCES TO %%I', s, r);
+    EXECUTE format('ALTER DEFAULT PRIVILEGES IN SCHEMA %%I GRANT EXECUTE ON FUNCTIONS TO %%I', s, r);
   END LOOP;
 END
 $_inner$;

@@ -816,30 +816,29 @@ public class TenantProvisioningService {
         cfg.setMaximumPoolSize(1);
         cfg.setPoolName("grant-tenant-" + roleName);
 
-        List<String> schemas = List.of(
-                "public", "config", "auth", "core", "almacen", "compras", "ventas", "finanzas",
-                "contabilidad", "rrhh", "activos", "produccion", "auditoria");
-
         try (HikariDataSource ds = new HikariDataSource(cfg)) {
             JdbcTemplate jdbc = new JdbcTemplate(ds);
+            // TODOS los esquemas de aplicación (dinámico): así nunca se queda ninguno sin permisos
+            // (p.ej. config, master). Se excluyen los esquemas de sistema de PostgreSQL.
+            List<String> schemas = jdbc.queryForList(
+                    "SELECT nspname FROM pg_namespace " +
+                    "WHERE nspname NOT LIKE 'pg\\_%' AND nspname <> 'information_schema' ORDER BY nspname",
+                    String.class);
             for (String schema : schemas) {
                 try {
-                    Integer exists = jdbc.queryForObject(
-                            "SELECT count(*)::int FROM pg_namespace WHERE nspname = ?",
-                            Integer.class,
-                            schema);
-                    if (exists == null || exists == 0) {
-                        continue;
-                    }
                     jdbc.execute("GRANT ALL ON SCHEMA " + quoteIdent(schema) + " TO " + quoteIdent(roleName));
                     jdbc.execute("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA " + quoteIdent(schema)
                             + " TO " + quoteIdent(roleName));
                     jdbc.execute("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA " + quoteIdent(schema)
                             + " TO " + quoteIdent(roleName));
+                    jdbc.execute("GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA " + quoteIdent(schema)
+                            + " TO " + quoteIdent(roleName));
                     jdbc.execute("ALTER DEFAULT PRIVILEGES IN SCHEMA " + quoteIdent(schema)
                             + " GRANT ALL ON TABLES TO " + quoteIdent(roleName));
                     jdbc.execute("ALTER DEFAULT PRIVILEGES IN SCHEMA " + quoteIdent(schema)
                             + " GRANT ALL ON SEQUENCES TO " + quoteIdent(roleName));
+                    jdbc.execute("ALTER DEFAULT PRIVILEGES IN SCHEMA " + quoteIdent(schema)
+                            + " GRANT EXECUTE ON FUNCTIONS TO " + quoteIdent(roleName));
                 } catch (Exception ex) {
                     log.warn("Grant en schema {} ({}): {}", schema, empresa.getDbName(), ex.getMessage());
                 }
