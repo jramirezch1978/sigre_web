@@ -822,7 +822,7 @@ END;
 $$;
 
 -- Devuelve valor_texto de config.configuracion o NULL
-CREATE OR REPLACE FUNCTION rrhh._cfg_txt(p_source VARCHAR, p_param VARCHAR)
+CREATE OR REPLACE FUNCTION config._cfg_txt(p_source VARCHAR, p_param VARCHAR)
 RETURNS TEXT
 LANGUAGE sql STABLE AS $$
     SELECT valor_texto FROM config.configuracion
@@ -830,7 +830,7 @@ LANGUAGE sql STABLE AS $$
 $$;
 
 -- Devuelve valor_entero de config.configuracion o default_val
-CREATE OR REPLACE FUNCTION rrhh._cfg_int(p_source VARCHAR, p_param VARCHAR, p_default INTEGER DEFAULT NULL)
+CREATE OR REPLACE FUNCTION config._cfg_int(p_source VARCHAR, p_param VARCHAR, p_default INTEGER DEFAULT NULL)
 RETURNS INTEGER
 LANGUAGE sql STABLE AS $$
     SELECT COALESCE(valor_entero, p_default)
@@ -839,7 +839,7 @@ LANGUAGE sql STABLE AS $$
 $$;
 
 -- Devuelve valor_decimal de config.configuracion
-CREATE OR REPLACE FUNCTION rrhh._cfg_dec(p_source VARCHAR, p_param VARCHAR, p_default NUMERIC DEFAULT NULL)
+CREATE OR REPLACE FUNCTION config._cfg_dec(p_source VARCHAR, p_param VARCHAR, p_default NUMERIC DEFAULT NULL)
 RETURNS NUMERIC
 LANGUAGE sql STABLE AS $$
     SELECT COALESCE(valor_decimal, p_default)
@@ -848,7 +848,7 @@ LANGUAGE sql STABLE AS $$
 $$;
 
 -- CÃ³digo SIGRE (TEXT preferido; fallback valor_entero legacy) para concepto_planilla o grupo_calculo.
-CREATE OR REPLACE FUNCTION rrhh._cfg_codigo(
+CREATE OR REPLACE FUNCTION config._cfg_codigo(
     p_source VARCHAR, p_param VARCHAR, p_default TEXT DEFAULT NULL
 ) RETURNS TEXT
 LANGUAGE sql STABLE AS $$
@@ -872,7 +872,7 @@ LANGUAGE plpgsql STABLE AS $$
 DECLARE
     v_raw TEXT;
 BEGIN
-    v_raw := rrhh._cfg_codigo(p_source, p_param, p_default);
+    v_raw := config._cfg_codigo(p_source, p_param, p_default);
     IF v_raw IS NULL THEN
         RETURN NULL;
     END IF;
@@ -1760,7 +1760,7 @@ DECLARE
     v_cnc_total_ing VARCHAR;
     v_concepto_id   BIGINT;
 BEGIN
-    v_cnc_total_ing := rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT;
+    v_cnc_total_ing := config._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT;
     v_concepto_id   := rrhh._fn_concepto_id(v_cnc_total_ing);
 
     SELECT COALESCE(SUM(cd.imp_soles), 0),
@@ -1898,9 +1898,9 @@ BEGIN
     IF v_afp IS NULL THEN RETURN; END IF;
 
     -- Conceptos destino (RRHHPARAM_CCONCEP)
-    v_cnc_jub := rrhh._cfg_codigo('RRHHPARAM_CCONCEP', 'AFP_JUBILACION', '020');
-    v_cnc_inv := rrhh._cfg_codigo('RRHHPARAM_CCONCEP', 'AFP_INVALIDEZ',  '021');
-    v_cnc_com := rrhh._cfg_codigo('RRHHPARAM_CCONCEP', 'AFP_COMISION',   '022');
+    v_cnc_jub := config._cfg_codigo('RRHHPARAM_CCONCEP', 'AFP_JUBILACION', '020');
+    v_cnc_inv := config._cfg_codigo('RRHHPARAM_CCONCEP', 'AFP_INVALIDEZ',  '021');
+    v_cnc_com := config._cfg_codigo('RRHHPARAM_CCONCEP', 'AFP_COMISION',   '022');
 
     -- JubilaciÃ³n (aporte_obligatorio)
     IF COALESCE(v_afp.aporte_obligatorio, 0) > 0 THEN
@@ -1976,7 +1976,7 @@ BEGIN
     IF v_retencion = 0 THEN RETURN; END IF;
 
     -- Concepto quinta categorÃ­a (RRHHPARAM_CCONCEP.QUINTA_CAT_PROYECTA = 24)
-    v_cnc_qta := rrhh._cfg_codigo('RRHHPARAM_CCONCEP', 'QUINTA_CAT_PROYECTA', '024');
+    v_cnc_qta := config._cfg_codigo('RRHHPARAM_CCONCEP', 'QUINTA_CAT_PROYECTA', '024');
     BEGIN
         v_concepto_id := rrhh._fn_concepto_id(v_cnc_qta::TEXT);
     EXCEPTION WHEN OTHERS THEN RETURN; END;
@@ -2016,7 +2016,7 @@ DECLARE
     v_concepto_id   BIGINT;
     v_cnc_dsct      VARCHAR;
 BEGIN
-    v_cnc_dsct    := rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_DSCT', 2398)::TEXT;
+    v_cnc_dsct    := config._cfg_int('RRHHPARAM', 'CNC_TOTAL_DSCT', 2398)::TEXT;
     v_concepto_id := rrhh._fn_concepto_id(v_cnc_dsct);
 
     SELECT COALESCE(SUM(cd.imp_soles), 0)
@@ -2048,9 +2048,9 @@ DECLARE
     v_cnc_ing_int   INTEGER;
     v_cnc_dsc_int   INTEGER;
 BEGIN
-    v_cnc_pgd  := rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_PGD',  2399)::TEXT;
-    v_cnc_ing_int := rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499);
-    v_cnc_dsc_int := rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_DSCT', 2398);
+    v_cnc_pgd  := config._cfg_int('RRHHPARAM', 'CNC_TOTAL_PGD',  2399)::TEXT;
+    v_cnc_ing_int := config._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499);
+    v_cnc_dsc_int := config._cfg_int('RRHHPARAM', 'CNC_TOTAL_DSCT', 2398);
 
     v_concepto_id := rrhh._fn_concepto_id(v_cnc_pgd);
 
@@ -2182,7 +2182,7 @@ DECLARE
     v_concepto_id   BIGINT;
     v_cnc_aport     VARCHAR;
 BEGIN
-    v_cnc_aport   := rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_APORT', 3099)::TEXT;
+    v_cnc_aport   := config._cfg_int('RRHHPARAM', 'CNC_TOTAL_APORT', 3099)::TEXT;
     BEGIN
         v_concepto_id := rrhh._fn_concepto_id(v_cnc_aport);
     EXCEPTION WHEN OTHERS THEN RETURN; END;
@@ -2483,7 +2483,7 @@ BEGIN
     IF v_grp_id IS NULL THEN RETURN; END IF;
 
     v_total_ing := rrhh._sum_det_codigo(p_calculo_id,
-        rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT);
+        config._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT);
 
     FOR rec IN
         SELECT gdf.concepto_id, gdf.imp_gan_desc, gdf.porcentaje
@@ -2714,7 +2714,7 @@ DECLARE
     v_item          SMALLINT := 60;
 BEGIN
     v_total_ing := rrhh._sum_det_codigo(p_calculo_id,
-        rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT);
+        config._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT);
     IF v_total_ing <= 0 THEN RETURN; END IF;
 
     v_grp_id := rrhh._cfg_grupo_id('RRHHPARAM_CCONCEP', 'CNTA_CNTE', '029');
@@ -2904,7 +2904,7 @@ DECLARE
     v_item      SMALLINT := 10;
 BEGIN
     v_total_ing := rrhh._sum_det_codigo(p_calculo_id,
-        rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT);
+        config._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT);
 
     FOR rec IN
         SELECT gdf.concepto_id, cp.factor_pago, cp.codigo
@@ -2955,7 +2955,7 @@ DECLARE
     v_monto         NUMERIC;
 BEGIN
     v_con_eps_id := rrhh._fn_concepto_id(
-        rrhh._cfg_codigo('RRHHPARAM_CCONCEP', 'CNC_CRED_EPS', '3010'));
+        config._cfg_codigo('RRHHPARAM_CCONCEP', 'CNC_CRED_EPS', '3010'));
     v_grp_ess_id := rrhh._cfg_grupo_id('RRHHPARAM_CCONCEP', 'CONCEP_ESSALUD', '077');
     IF v_grp_ess_id IS NULL THEN RETURN; END IF;
 
@@ -3014,7 +3014,7 @@ BEGIN
          WHERE c.trabajador_id = p_trabajador_id
            AND cd.concepto_id IN (
                v_concepto_id,
-               rrhh._fn_concepto_id(rrhh._cfg_codigo('RRHHPARAM_CCONCEP', 'CNC_ESSALUD_675', '3009'))
+               rrhh._fn_concepto_id(config._cfg_codigo('RRHHPARAM_CCONCEP', 'CNC_ESSALUD_675', '3009'))
            )
            AND c.fec_proceso < v_fec_proceso;
         v_base := GREATEST(v_base - v_hist_pagado, 0);
@@ -3024,13 +3024,13 @@ BEGIN
 
     BEGIN
         v_con_eps_id := rrhh._fn_concepto_id(
-            rrhh._cfg_codigo('RRHHPARAM_CCONCEP', 'CNC_CRED_EPS', '3010'));
+            config._cfg_codigo('RRHHPARAM_CCONCEP', 'CNC_CRED_EPS', '3010'));
         IF EXISTS (
             SELECT 1 FROM rrhh.calculo_det cd
              WHERE cd.calculo_id = p_calculo_id AND cd.concepto_id = v_con_eps_id AND cd.imp_soles <> 0
         ) THEN
             v_concepto_id := rrhh._fn_concepto_id(
-                rrhh._cfg_codigo('RRHHPARAM_CCONCEP', 'CNC_ESSALUD_675', '3009'));
+                config._cfg_codigo('RRHHPARAM_CCONCEP', 'CNC_ESSALUD_675', '3009'));
         END IF;
     EXCEPTION WHEN OTHERS THEN NULL;
     END;
@@ -3061,7 +3061,7 @@ LANGUAGE plpgsql AS $$
 DECLARE
     v_cnc_pgd VARCHAR;
 BEGIN
-    v_cnc_pgd := rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_PGD', 2399)::TEXT;
+    v_cnc_pgd := config._cfg_int('RRHHPARAM', 'CNC_TOTAL_PGD', 2399)::TEXT;
 
     DELETE FROM rrhh.calculo_det cd
      WHERE cd.calculo_id = p_calculo_id
@@ -3075,7 +3075,7 @@ BEGIN
            SELECT cd2.concepto_id FROM rrhh.calculo_det cd2
             JOIN rrhh.concepto_planilla cp ON cp.id = cd2.concepto_id
            WHERE cd2.calculo_id = p_calculo_id
-             AND cp.codigo = rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT
+             AND cp.codigo = config._cfg_int('RRHHPARAM', 'CNC_TOTAL_ING', 1499)::TEXT
        );
 END;
 $$;
@@ -3087,7 +3087,7 @@ LANGUAGE plpgsql AS $$
 DECLARE
     v_cnc_pgd VARCHAR;
 BEGIN
-    v_cnc_pgd := rrhh._cfg_int('RRHHPARAM', 'CNC_TOTAL_PGD', 2399)::TEXT;
+    v_cnc_pgd := config._cfg_int('RRHHPARAM', 'CNC_TOTAL_PGD', 2399)::TEXT;
 
     DELETE FROM rrhh.calculo_det cd
      USING rrhh.calculo c
@@ -3170,9 +3170,9 @@ BEGIN
         RAISE EXCEPTION 'Tipo de planilla no existe: %', p_tipo_planilla_codigo;
     END IF;
 
-    v_tipo_emp_codigo  := COALESCE(rrhh._cfg_txt('RRHHPARAM', 'TIPO_TRAB_EMPLEADO'), 'EMP');
-    v_tipo_trip_codigo := COALESCE(rrhh._cfg_txt('RRHHPARAM', 'TIPO_TRAB_TRIPULANTE'), 'TRI');
-    v_dias_mes         := COALESCE(rrhh._cfg_int('RRHHPARAM', 'DIAS_MES_EMPLEADO'), 30);
+    v_tipo_emp_codigo  := COALESCE(config._cfg_txt('RRHHPARAM', 'TIPO_TRAB_EMPLEADO'), 'EMP');
+    v_tipo_trip_codigo := COALESCE(config._cfg_txt('RRHHPARAM', 'TIPO_TRAB_TRIPULANTE'), 'TRI');
+    v_dias_mes         := COALESCE(config._cfg_int('RRHHPARAM', 'DIAS_MES_EMPLEADO'), 30);
 
     SELECT id INTO v_tipo_emp_id
       FROM rrhh.tipo_trabajador WHERE codigo = v_tipo_emp_codigo LIMIT 1;
