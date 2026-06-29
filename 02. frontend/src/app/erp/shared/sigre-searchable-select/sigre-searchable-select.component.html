@@ -1,0 +1,46 @@
+<button type="button"
+        class="sigre-ss2__toggle"
+        [class.sigre-ss2__toggle--placeholder]="!tieneValor"
+        [class.sigre-ss2__toggle--disabled]="disabled"
+        [disabled]="disabled"
+        cdkOverlayOrigin #ssOrigin="cdkOverlayOrigin"
+        (click)="toggleDropdown(ssOrigin)">
+  <span class="sigre-ss2__valor">{{ etiquetaSeleccionada }}</span>
+  <span class="sigre-ss2__caret"></span>
+</button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="ssOrigin"
+  [cdkConnectedOverlayOpen]="dropdownAbierto"
+  [cdkConnectedOverlayWidth]="anchoPanel"
+  [cdkConnectedOverlayPositions]="posicionesOverlay"
+  (overlayOutsideClick)="cerrarDropdown()"
+  (detach)="cerrarDropdown()">
+  <div class="sigre-ss__panel">
+    <div class="sigre-ss__search">
+      <i class="material-icons-outlined">search</i>
+      <input #ssInput
+             type="text"
+             class="form-control form-control-sm"
+             placeholder="Buscar…"
+             [value]="filtro"
+             (input)="onFiltro($event)"
+             (keydown.escape)="cerrarDropdown()" />
+    </div>
+    <ul class="sigre-ss__list">
+      @if (permitirVacio) {
+        <li class="sigre-ss__option"
+            [class.is-selected]="!tieneValor"
+            (click)="seleccionar(null)">{{ placeholder }}</li>
+      }
+      @for (opt of opcionesFiltradas; track opt.value) {
+        <li class="sigre-ss__option"
+            [class.is-selected]="esSeleccionada(opt.value)"
+            (click)="seleccionar(opt.value)">{{ opt.label }}</li>
+      } @empty {
+        <li class="sigre-ss__empty">Sin resultados</li>
+      }
+    </ul>
+  </div>
+</ng-template>

@@ -8,6 +8,7 @@ import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../auth/services/auth.service';
 import { ErpConsultaRucService } from '../../services/erp-consulta-ruc.service';
 import { ErpUbigeoService, UbigeoItem } from '../../services/erp-ubigeo.service';
+import { SigreSearchableSelectComponent, SigreSelectOption } from '../../shared/sigre-searchable-select/sigre-searchable-select.component';
 
 interface UsuarioDemo {
   username: string;
@@ -46,7 +47,7 @@ interface RegistroDemoRequest {
 @Component({
   selector: 'app-erp-registro-demo',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SigreSearchableSelectComponent],
   templateUrl: './erp-registro-demo.component.html',
   styleUrls: ['./erp-registro-demo.component.scss'],
 })
@@ -108,6 +109,22 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
     this.ubigeoService.listarDepartamentos().subscribe({
       next: (items) => { this.departamentos = items; },
     });
+  }
+
+  private mapUbigeo(items: UbigeoItem[]): SigreSelectOption[] {
+    return items.map(i => ({ value: i.id, label: i.nombre }));
+  }
+
+  get opcionesDepartamentos(): SigreSelectOption[] {
+    return this.mapUbigeo(this.departamentos);
+  }
+
+  get opcionesProvincias(): SigreSelectOption[] {
+    return this.mapUbigeo(this.provincias);
+  }
+
+  get opcionesDistritos(): SigreSelectOption[] {
+    return this.mapUbigeo(this.distritos);
   }
 
   get totalUsuarios(): number {
