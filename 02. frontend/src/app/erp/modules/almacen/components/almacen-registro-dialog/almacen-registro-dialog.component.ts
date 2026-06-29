@@ -9,7 +9,6 @@ import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService, SelectOptionDto } from '../../services/core-api.service';
 import {
-  extraerMensajeErrorApi,
   SigreModalService,
   SigreMetoxiModalActionsComponent,
   SigreMetoxiModalShellComponent,
@@ -89,10 +88,8 @@ export class AlmacenRegistroDialogComponent implements OnInit {
 
     this.crudService.guardar(this.data.config, this.data.registro ?? null, body).subscribe({
       next: () => this.dialogRef.close(true),
-      error: err => {
-        this.guardando = false;
-        void this.modal.error(extraerMensajeErrorApi(err, 'No se pudo guardar el registro'), 'Error');
-      },
+      // El error lo muestra el interceptor global (ApiErrorInterceptor); aquí solo se restaura el estado.
+      error: () => { this.guardando = false; },
     });
   }
 

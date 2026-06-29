@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import {
-  extraerMensajeErrorApi, SigreModalService,
+  SigreModalService,
   SigreMetoxiModalShellComponent, SigreMetoxiModalActionsComponent,
 } from '@sigre-common';
 import { ApiBaseService } from '../../../../../services/api-base.service';
@@ -120,10 +120,8 @@ export class OrdenTrasladoMdDialogComponent implements OnInit {
       : this.almacenApi.crearRegistro('/ordenes-traslado', body);
     req.subscribe({
       next: () => this.dialogRef.close(true),
-      error: err => {
-        this.guardando = false;
-        void this.modal.error(extraerMensajeErrorApi(err, 'No se pudo guardar la orden de traslado'), 'Error');
-      },
+      // El error lo muestra el interceptor global (ApiErrorInterceptor); aquí solo se restaura el estado.
+      error: () => { this.guardando = false; },
     });
   }
 }

@@ -10,6 +10,7 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { routes } from './app.routes';
 import { ConfigService } from './services/config.service';
 import { AuthInterceptor } from './auth/interceptors/auth.interceptor';
+import { ApiErrorInterceptor } from './core/interceptors/api-error.interceptor';
 import { ChunkLoadErrorHandler } from './core/handlers/chunk-load-error.handler';
 
 registerLocaleData(localeEsPe);
@@ -31,6 +32,9 @@ export const appConfig: ApplicationConfig = {
     provideCharts(withDefaultRegisterables()),
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     { provide: LOCALE_ID, useValue: 'es-PE' },
+    // ApiErrorInterceptor primero = más externo: muestra modal de cualquier error de API
+    // (excepto 401, que gestiona AuthInterceptor). Ningún error de API queda silencioso.
+    { provide: HTTP_INTERCEPTORS, useClass: ApiErrorInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     {
       provide: APP_INITIALIZER,

@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import {
-  extraerMensajeErrorApi, SigreModalService,
+  SigreModalService,
   SigreMetoxiModalShellComponent, SigreMetoxiModalActionsComponent,
 } from '@sigre-common';
 import { ApiBaseService } from '../../../../../services/api-base.service';
@@ -149,10 +149,8 @@ export class MovimientoMdDialogComponent implements OnInit {
       : this.almacenApi.crearRegistro('/movimientos', body);
     req.subscribe({
       next: () => this.dialogRef.close(true),
-      error: err => {
-        this.guardando = false;
-        void this.modal.error(extraerMensajeErrorApi(err, 'No se pudo guardar el movimiento'), 'Error');
-      },
+      // El error lo muestra el interceptor global (ApiErrorInterceptor); aquí solo se restaura el estado.
+      error: () => { this.guardando = false; },
     });
   }
 
