@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { StorageService } from './storage.service';
+import { SigreOverlayService } from '@sigre-common';
 
 /**
  * Cierra sesión tras 30 min de inactividad (prompt login): invalida token en servidor y redirige al login.
@@ -15,6 +16,7 @@ export class SessionIdleService {
   private readonly storage = inject(StorageService);
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
+  private readonly overlay = inject(SigreOverlayService);
 
   private readonly idleMs = 30 * 60 * 1000;
   private timer: ReturnType<typeof setTimeout> | null = null;
@@ -68,6 +70,9 @@ export class SessionIdleService {
       }
     }
     this.storage.clearSession();
+    // Cierra cualquier modal/popup abierto (MatDialog del ERP, overlays Ionic) para que
+    // no quede ninguna ventana encima del login al expirar la sesión por inactividad.
+    await this.overlay.cerrarTodos();
     const loginUrl = this.router.url.startsWith('/admin') ? '/admin/login' : '/auth/signin';
     await this.router.navigateByUrl(loginUrl);
   }
