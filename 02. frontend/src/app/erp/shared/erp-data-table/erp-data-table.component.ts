@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TablaColumna } from '../models/api-page.model';
-import { exportarTablaExcel, exportarTablaPdf } from '../utils/erp-table-export.util';
+import { exportarTablaExcel, exportarTablaPdf, exportarTablaWord } from '../utils/erp-table-export.util';
 
 @Component({
   selector: 'app-erp-data-table',
@@ -31,6 +31,8 @@ export class ErpDataTableComponent implements OnChanges {
 
   tamanoPagina = 10;
   paginaActual = 1;
+  mostrarModalExport = false;
+  exportando = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['filas'] || changes['tamanoPaginaInicial']) {
@@ -130,13 +132,35 @@ export class ErpDataTableComponent implements OnChanges {
     this.paginaActual = 1;
   }
 
+  abrirModalExport(): void {
+    if (this.filas.length === 0) return;
+    this.mostrarModalExport = true;
+  }
+
+  cerrarModalExport(): void {
+    this.mostrarModalExport = false;
+  }
+
   exportarExcel(): void {
     if (this.filas.length === 0) return;
     exportarTablaExcel(this.columnas, this.filas, this.nombreExport, (f, c) => this.valorCelda(f, c));
+    this.cerrarModalExport();
   }
 
   exportarPdf(): void {
     if (this.filas.length === 0) return;
     exportarTablaPdf(this.columnas, this.filas, this.nombreExport, (f, c) => this.valorCelda(f, c));
+    this.cerrarModalExport();
+  }
+
+  async exportarWord(): Promise<void> {
+    if (this.filas.length === 0 || this.exportando) return;
+    this.exportando = true;
+    try {
+      await exportarTablaWord(this.columnas, this.filas, this.nombreExport, (f, c) => this.valorCelda(f, c));
+    } finally {
+      this.exportando = false;
+      this.cerrarModalExport();
+    }
   }
 }

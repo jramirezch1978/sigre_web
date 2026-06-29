@@ -39,36 +39,14 @@
       <div class="col-sm-12 col-md-6">
         @if (habilitarExportacion) {
           <div class="d-flex justify-content-md-end">
-            <div class="dt-buttons btn-group btn-group-sm">
-              <button
-                type="button"
-                class="btn btn-filter sigre-export-btn sigre-export-btn--xls"
-                title="Exportar Excel"
-                (click)="exportarExcel()">
-                <span class="sigre-export-btn__icon" aria-hidden="true">
-                  <svg viewBox="0 0 32 32" width="22" height="22" role="img">
-                    <rect x="4" y="2" width="24" height="28" rx="2" fill="#1d6f42"/>
-                    <path d="M20 2v6h6" fill="#145a32"/>
-                    <text x="16" y="21" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Arial,sans-serif">XLS</text>
-                  </svg>
-                </span>
-                <span class="visually-hidden">Exportar Excel</span>
-              </button>
-              <button
-                type="button"
-                class="btn btn-filter sigre-export-btn sigre-export-btn--pdf"
-                title="Exportar PDF"
-                (click)="exportarPdf()">
-                <span class="sigre-export-btn__icon" aria-hidden="true">
-                  <svg viewBox="0 0 32 32" width="22" height="22" role="img">
-                    <rect x="4" y="2" width="24" height="28" rx="2" fill="#dc3545"/>
-                    <path d="M20 2v6h6" fill="#b02a37"/>
-                    <text x="16" y="21" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Arial,sans-serif">PDF</text>
-                  </svg>
-                </span>
-                <span class="visually-hidden">Exportar PDF</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1"
+              title="Exportar"
+              (click)="abrirModalExport()">
+              <i class="material-icons-outlined fs-6">file_download</i>
+              Exportar
+            </button>
           </div>
         }
       </div>
@@ -173,5 +151,43 @@
         </div>
       </div>
     }
+  </div>
+}
+
+@if (mostrarModalExport) {
+  <div class="sigre-export-modal__backdrop" (click)="cerrarModalExport()">
+    <div class="sigre-export-modal" (click)="$event.stopPropagation()">
+      <div class="sigre-export-modal__header">
+        <h5 class="mb-0">Exportar</h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalExport()"></button>
+      </div>
+      <p class="sigre-export-modal__hint">Elige el formato de exportación:</p>
+      <div class="sigre-export-modal__options">
+        <button type="button" class="sigre-export-opt" (click)="exportarExcel()" [disabled]="exportando">
+          <svg viewBox="0 0 32 32" width="34" height="34" role="img" aria-hidden="true">
+            <rect x="4" y="2" width="24" height="28" rx="2" fill="#1d6f42"/>
+            <path d="M20 2v6h6" fill="#145a32"/>
+            <text x="16" y="22" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Arial,sans-serif">XLS</text>
+          </svg>
+          <span>Excel</span>
+        </button>
+        <button type="button" class="sigre-export-opt" (click)="exportarWord()" [disabled]="exportando">
+          <svg viewBox="0 0 32 32" width="34" height="34" role="img" aria-hidden="true">
+            <rect x="4" y="2" width="24" height="28" rx="2" fill="#2b579a"/>
+            <path d="M20 2v6h6" fill="#1c3d6e"/>
+            <text x="16" y="22" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Arial,sans-serif">DOC</text>
+          </svg>
+          <span>Word</span>
+        </button>
+        <button type="button" class="sigre-export-opt" (click)="exportarPdf()" [disabled]="exportando">
+          <svg viewBox="0 0 32 32" width="34" height="34" role="img" aria-hidden="true">
+            <rect x="4" y="2" width="24" height="28" rx="2" fill="#dc3545"/>
+            <path d="M20 2v6h6" fill="#b02a37"/>
+            <text x="16" y="22" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Arial,sans-serif">PDF</text>
+          </svg>
+          <span>PDF</span>
+        </button>
+      </div>
+    </div>
   </div>
 }

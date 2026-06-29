@@ -2,6 +2,9 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import {
+  Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType,
+} from 'docx';
 import { TablaColumna } from '../models/api-page.model';
 
 type ValorCeldaFn = (fila: Record<string, unknown>, col: TablaColumna) => string;
@@ -58,4 +61,43 @@ export function exportarTablaPdf(
   });
 
   doc.save(`${nombreArchivoSeguro(nombreArchivo)}.pdf`);
+}
+
+export async function exportarTablaWord(
+  columnas: TablaColumna[],
+  filas: Record<string, unknown>[],
+  nombreArchivo: string,
+  valorCelda: ValorCeldaFn
+): Promise<void> {
+  const headerRow = new TableRow({
+    tableHeader: true,
+    children: columnas.map(c => new TableCell({
+      shading: { fill: '0D6EFD' },
+      children: [new Paragraph({ children: [new TextRun({ text: c.header, bold: true, color: 'FFFFFF', size: 18 })] })],
+    })),
+  });
+
+  const dataRows = filas.map(fila => new TableRow({
+    children: columnas.map(col => new TableCell({
+      children: [new Paragraph({ children: [new TextRun({ text: valorCelda(fila, col), size: 18 })] })],
+    })),
+  }));
+
+  const tabla = new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    rows: [headerRow, ...dataRows],
+  });
+
+  const doc = new Document({
+    sections: [{
+      children: [
+        new Paragraph({ children: [new TextRun({ text: nombreArchivo, bold: true, size: 28 })] }),
+        new Paragraph({ children: [] }),
+        tabla,
+      ],
+    }],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, `${nombreArchivoSeguro(nombreArchivo)}.docx`);
 }
