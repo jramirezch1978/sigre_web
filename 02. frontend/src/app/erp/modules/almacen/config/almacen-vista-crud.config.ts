@@ -37,78 +37,30 @@ const camposInventario: TablaCrudCampo[] = [
 
 /** CRUD por código de opción de menú (operaciones, consultas editables, reportes con datos maestros). */
 export const ALMACEN_VISTA_CRUD: Readonly<Record<string, VistaCrudConfig>> = {
-  // Operaciones
-  ALMACEN_OP_REQ_TRASLADO: { basePath: '/ordenes-traslado', handler: 'otr', campos: camposOtr },
-  ALMACEN_OP_DESPACHO: {
+  // Operaciones (alta/edición sobre endpoints reales). Conciliadas con opciones_menu.txt.
+  ALMACEN_OP_MOV_GENERAL: {
     basePath: '/movimientos',
     handler: 'movimiento',
     campos: camposMovimiento,
-    movimientoDefaults: { tipoReferenciaOrigen: 'V' },
   },
-  ALMACEN_OP_RECEPCION: {
+  ALMACEN_OP_MOV_TRANSITO: {
     basePath: '/movimientos',
     handler: 'movimiento',
     campos: camposMovimiento,
-    movimientoDefaults: { tipoReferenciaOrigen: 'C' },
   },
-  ALMACEN_OP_ALMACENAMIENTO: {
-    basePath: '/movimientos',
-    handler: 'movimiento',
-    campos: camposMovimiento,
-    movimientoDefaults: { tipoReferenciaOrigen: 'I' },
-  },
-  ALMACEN_OP_DEVOLUCIONES: {
-    basePath: '/movimientos',
-    handler: 'movimiento',
-    campos: camposMovimiento,
-    movimientoDefaults: { tipoReferenciaOrigen: 'I' },
-  },
-  ALMACEN_OP_REPOSICION: {
-    basePath: '/movimientos',
-    handler: 'movimiento',
-    campos: camposMovimiento,
-    movimientoDefaults: { tipoReferenciaOrigen: 'I' },
-  },
-  ALMACEN_OP_COMPARACION_INV: {
+  ALMACEN_OP_OTR_GENERACION: { basePath: '/ordenes-traslado', handler: 'otr', campos: camposOtr },
+  ALMACEN_OP_OTR_APROBACION: { basePath: '/ordenes-traslado', handler: 'otr', campos: camposOtr },
+  ALMACEN_OP_INV_CONTEO: {
     basePath: '/tomas-inventario',
     handler: 'inventario',
     campos: camposInventario,
   },
-  ALMACEN_OP_MERMAS: {
-    basePath: '/movimientos',
-    handler: 'movimiento',
-    campos: camposMovimiento,
-    movimientoDefaults: { tipoReferenciaOrigen: 'I' },
+  ALMACEN_OP_INV_MONITOR: {
+    basePath: '/tomas-inventario',
+    handler: 'inventario',
+    campos: camposInventario,
   },
-  // Consultas (movimientos editables donde aplica)
-  ALMACEN_CONS_KARDEX: {
-    basePath: '/movimientos',
-    handler: 'movimiento',
-    campos: camposMovimiento,
-  },
-  ALMACEN_CONS_PRODUCTOS: {
-    basePath: '/movimientos',
-    handler: 'movimiento',
-    campos: camposMovimiento,
-    movimientoDefaults: { tipoReferenciaOrigen: 'I' },
-  },
-  ALMACEN_CONS_ORD_COMPRA: {
-    basePath: '/movimientos',
-    handler: 'movimiento',
-    campos: camposMovimiento,
-    movimientoDefaults: { tipoReferenciaOrigen: 'C' },
-  },
-  ALMACEN_CONS_PRESTAMOS: {
-    basePath: '/movimientos',
-    handler: 'movimiento',
-    campos: camposMovimiento,
-  },
-  ALMACEN_CONS_DEV_PROV: {
-    basePath: '/movimientos',
-    handler: 'movimiento',
-    campos: camposMovimiento,
-    movimientoDefaults: { tipoReferenciaOrigen: 'C' },
-  },
+  // Consultas: solo lectura (sin CRUD).
   // Reportes con datos transaccionales
   ALMACEN_REP_HIST_MOV: {
     basePath: '/movimientos',
