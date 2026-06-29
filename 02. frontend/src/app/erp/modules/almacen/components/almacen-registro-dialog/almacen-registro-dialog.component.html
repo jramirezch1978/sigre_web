@@ -11,22 +11,40 @@
       <span>Cargando formulario…</span>
     </div>
   } @else {
-    <form [formGroup]="form" class="row g-3 sigre-metoxi-form">
-      @for (campo of data.config.campos; track campo.key) {
-        <erp-metoxi-form-field
-          [control]="controlDe(campo)"
-          [fieldId]="'campo-' + campo.key"
-          [fieldKey]="campo.key"
-          [label]="campo.label"
-          [required]="!!campo.required"
-          [type]="campo.type"
-          [colClass]="colClassDe(campo)"
-          [placeholder]="placeholderDe(campo)"
-          [maxLength]="campo.maxLength ?? null"
-          [options]="opcionesDe(campo)"
-          [switchOnLabel]="campo.switchOnLabel ?? 'Activo'"
-          [switchOffLabel]="campo.switchOffLabel ?? 'Anulado'"
-          [layout]="layoutDe(campo)" />
+    <form [formGroup]="form" class="sigre-metoxi-form">
+      <div class="row g-3">
+        @for (campo of camposNoSwitch; track campo.key) {
+          <erp-metoxi-form-field
+            [control]="controlDe(campo)"
+            [fieldId]="'campo-' + campo.key"
+            [fieldKey]="campo.key"
+            [label]="campo.label"
+            [required]="!!campo.required"
+            [type]="campo.type"
+            [colClass]="colClassDe(campo)"
+            [placeholder]="placeholderDe(campo)"
+            [maxLength]="campo.maxLength ?? null"
+            [options]="opcionesDe(campo)"
+            [switchOnLabel]="campo.switchOnLabel ?? 'Activo'"
+            [switchOffLabel]="campo.switchOffLabel ?? 'Anulado'"
+            [layout]="layoutDe(campo)" />
+        }
+      </div>
+      @if (camposSwitch.length) {
+        <div class="row g-3 mt-1">
+          @for (campo of camposSwitch; track campo.key) {
+            <erp-metoxi-form-field
+              [control]="controlDe(campo)"
+              [fieldId]="'campo-' + campo.key"
+              [fieldKey]="campo.key"
+              [label]="campo.label"
+              [required]="!!campo.required"
+              [type]="campo.type"
+              [colClass]="colClassDe(campo)"
+              [switchOnLabel]="campo.switchOnLabel ?? 'Activo'"
+              [switchOffLabel]="campo.switchOffLabel ?? 'Anulado'" />
+          }
+        </div>
       }
     </form>
   }

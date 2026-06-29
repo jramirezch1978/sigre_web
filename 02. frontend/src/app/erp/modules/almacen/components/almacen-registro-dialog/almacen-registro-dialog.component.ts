@@ -134,6 +134,16 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     return colClassMetoxiCampo(campo.key, campo.type);
   }
 
+  /** Campos normales (no flags) — van en la fila principal. */
+  get camposNoSwitch(): TablaCrudCampo[] {
+    return this.data.config.campos.filter(c => c.type !== 'switch');
+  }
+
+  /** Flags (switch) — van juntos en una fila aparte al final. */
+  get camposSwitch(): TablaCrudCampo[] {
+    return this.data.config.campos.filter(c => c.type === 'switch');
+  }
+
   placeholderDe(campo: TablaCrudCampo): string {
     return `Ingrese ${campo.label.toLowerCase()}…`;
   }
