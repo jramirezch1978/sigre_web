@@ -103,6 +103,29 @@ export class CoreApiService {
       );
   }
 
+  /** Usuarios activos asignados a la empresa actual (para el FK Responsable). */
+  listarUsuariosEmpresa(): Observable<SelectOptionDto[]> {
+    const empresaId = this.leerEmpresaId();
+    if (!empresaId) return of([]);
+    const url = `${this.apiBase.getApiBaseUrl()}/auth/seguridad/empresas/${empresaId}/usuarios`;
+    return this.http
+      .get<ApiResponse<Array<{ id: number; nombreCompleto?: string; nombres?: string; apellidos?: string; username?: string; email?: string; activo?: boolean }>>>(url)
+      .pipe(
+        map(res =>
+          (res.data ?? [])
+            .filter(u => u.activo !== false)
+            .map(u => ({
+              value: u.id,
+              label: u.nombreCompleto?.trim()
+                || `${u.nombres ?? ''} ${u.apellidos ?? ''}`.trim()
+                || u.username
+                || u.email
+                || String(u.id),
+            }))
+        )
+      );
+  }
+
   listarProveedores(): Observable<SelectOptionDto[]> {
     const params = new HttpParams()
       .set('esProveedor', 'true')

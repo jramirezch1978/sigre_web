@@ -35,10 +35,20 @@ export class ErpDataTableComponent implements OnChanges {
   paginaActual = 1;
   mostrarModalExport = false;
   exportando = false;
+  private tamanoInicializado = false;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['filas'] || changes['tamanoPaginaInicial']) {
+    // Inicializa el tamaño de página UNA sola vez (no pisar la elección del usuario
+    // en cada cambio de @Input filas — el padre puede recrear el array por CD).
+    if (!this.tamanoInicializado && changes['tamanoPaginaInicial']) {
       this.tamanoPagina = this.tamanoPaginaInicial;
+      this.tamanoInicializado = true;
+    }
+    // Mantener la página actual dentro de rango; NO forzar a 1 en cada cambio.
+    if (this.paginaActual > this.totalPaginas) {
+      this.paginaActual = this.totalPaginas;
+    }
+    if (this.paginaActual < 1) {
       this.paginaActual = 1;
     }
   }

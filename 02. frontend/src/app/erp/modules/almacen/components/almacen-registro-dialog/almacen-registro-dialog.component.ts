@@ -184,9 +184,10 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     const necesitaCentrosCosto = campos.some(c => c.optionsFrom === 'centros-costo');
     const necesitaProveedores = campos.some(c => c.optionsFrom === 'proveedores');
     const necesitaUbigeos = campos.some(c => c.optionsFrom === 'ubigeos');
+    const necesitaUsuarios = campos.some(c => c.optionsFrom === 'usuarios-empresa');
 
     if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov
-        && !necesitaCentrosCosto && !necesitaProveedores && !necesitaUbigeos) {
+        && !necesitaCentrosCosto && !necesitaProveedores && !necesitaUbigeos && !necesitaUsuarios) {
       this.cargandoOpciones = false;
       return;
     }
@@ -205,8 +206,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       centrosCosto: necesitaCentrosCosto ? resiliente('centros de costo', this.coreApi.listarCentrosCosto()) : of([]),
       proveedores: necesitaProveedores ? resiliente('proveedores', this.coreApi.listarProveedores()) : of([]),
       ubigeos: necesitaUbigeos ? resiliente('ubigeos', this.almacenApi.listarUbigeos()) : of([]),
+      usuarios: necesitaUsuarios ? resiliente('responsables', this.coreApi.listarUsuariosEmpresa()) : of([]),
     }).subscribe({
-      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos }) => {
+      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos, usuarios }) => {
         if (necesitaTipos) {
           this.opciones['tipos-almacen'] = this.soloActivos(tipos).map(t => ({
             value: t.id,
@@ -239,6 +241,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
         }
         if (necesitaUbigeos) {
           this.opciones['ubigeos'] = ubigeos;
+        }
+        if (necesitaUsuarios) {
+          this.opciones['usuarios-empresa'] = usuarios;
         }
         this.cargandoOpciones = false;
         // El formulario queda usable; solo se avisa (modal WARNING) de las listas que no cargaron.

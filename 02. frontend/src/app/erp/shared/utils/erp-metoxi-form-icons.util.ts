@@ -59,7 +59,11 @@ export function iconoMetoxiCampo(fieldKey: string, type: ErpMetoxiFormFieldType)
 }
 
 export function colClassMetoxiCampo(fieldKey: string, type: ErpMetoxiFormFieldType): string {
-  if (type === 'switch' || type === 'date') {
+  // Flags (switch) compactos y en la misma fila (hasta 3 por fila).
+  if (type === 'switch') {
+    return 'col-6 col-md-4';
+  }
+  if (type === 'date') {
     return 'col-12';
   }
   if (['pasillo', 'estante', 'nivel'].includes(fieldKey)) {

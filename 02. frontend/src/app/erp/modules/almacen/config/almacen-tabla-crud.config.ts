@@ -22,7 +22,7 @@ export interface TablaCrudCampo {
   required?: boolean;
   maxLength?: number;
   readonlyOnEdit?: boolean;
-  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento' | 'centros-costo' | 'proveedores' | 'ubigeos';
+  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento' | 'centros-costo' | 'proveedores' | 'ubigeos' | 'usuarios-empresa';
   /** Etiqueta cuando el switch está encendido (flag_estado = 1). */
   switchOnLabel?: string;
   /** Etiqueta cuando el switch está apagado (flag_estado = 0). */
@@ -62,7 +62,7 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
       { key: 'almacenTipoId', label: 'Tipo de almacén', type: 'select', optionsFrom: 'tipos-almacen' },
       { key: 'centrosCostoId', label: 'Centro de costo', type: 'select', optionsFrom: 'centros-costo' },
       { key: 'proveedorEntidadId', label: 'Proveedor', type: 'select', optionsFrom: 'proveedores' },
-      { key: 'responsableUsuarioId', label: 'Responsable (usuario ID)', type: 'number' },
+      { key: 'responsableUsuarioId', label: 'Responsable', type: 'select', optionsFrom: 'usuarios-empresa' },
       { key: 'direccion', label: 'Dirección', type: 'text', maxLength: 80 },
       { key: 'ubigeo', label: 'Ubigeo', type: 'select', optionsFrom: 'ubigeos' },
       { key: 'areaTotal', label: 'Área total (m²)', type: 'number' },
