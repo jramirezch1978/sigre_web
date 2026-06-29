@@ -57,7 +57,15 @@
         <thead>
           <tr>
             @for (col of columnas; track col.key) {
-              <th scope="col" [style.min-width]="col.width">{{ col.header }}</th>
+              <th scope="col" [style.min-width]="col.width"
+                  class="sigre-th-sort" (click)="ordenarPor(col.key)" title="Ordenar por {{ col.header }}">
+                {{ col.header }}
+                @if (ordenColumna === col.key) {
+                  <i class="material-icons-outlined sigre-th-sort__ico">{{ ordenDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</i>
+                } @else {
+                  <i class="material-icons-outlined sigre-th-sort__ico sigre-th-sort__ico--idle">unfold_more</i>
+                }
+              </th>
             }
             @if (mostrarAcciones) {
               <th scope="col" class="text-end sigre-metoxi-table__actions-head">Acción</th>

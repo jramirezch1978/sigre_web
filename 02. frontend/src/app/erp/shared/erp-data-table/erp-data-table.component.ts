@@ -22,10 +22,17 @@ export class ErpDataTableComponent implements OnChanges {
   @Input() habilitarExportacion = true;
   @Input() habilitarPaginacion = true;
   @Input() tamanoPaginaInicial = 10;
+  /** Orden inicial persistido: "columna:direccion" (ej. "nombre:asc"). Vacío = sin orden. */
+  @Input() ordenInicial: string | null = null;
 
   @Output() editar = new EventEmitter<Record<string, unknown>>();
   @Output() anular = new EventEmitter<Record<string, unknown>>();
   @Output() eliminar = new EventEmitter<Record<string, unknown>>();
+  /** Emite "columna:direccion" cuando el usuario cambia el ordenamiento (para persistir). */
+  @Output() ordenCambiado = new EventEmitter<string>();
+
+  ordenColumna: string | null = null;
+  ordenDir: 'asc' | 'desc' = 'asc';
 
   private readonly exportSvc = inject(ErpExportService);
 
@@ -51,6 +58,51 @@ export class ErpDataTableComponent implements OnChanges {
     if (this.paginaActual < 1) {
       this.paginaActual = 1;
     }
+    if (changes['ordenInicial']) {
+      this.aplicarOrdenInicial();
+    }
+  }
+
+  private aplicarOrdenInicial(): void {
+    const raw = (this.ordenInicial ?? '').trim();
+    if (!raw) { this.ordenColumna = null; return; }
+    const [col, dir] = raw.split(':');
+    if (this.columnas.some(c => c.key === col)) {
+      this.ordenColumna = col;
+      this.ordenDir = dir === 'desc' ? 'desc' : 'asc';
+    } else {
+      this.ordenColumna = null;
+    }
+  }
+
+  ordenarPor(columna: string): void {
+    if (!columna) return;
+    if (this.ordenColumna === columna) {
+      this.ordenDir = this.ordenDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.ordenColumna = columna;
+      this.ordenDir = 'asc';
+    }
+    this.paginaActual = 1;
+    this.ordenCambiado.emit(`${this.ordenColumna}:${this.ordenDir}`);
+  }
+
+  private comparar(a: Record<string, unknown>, b: Record<string, unknown>, key: string): number {
+    const va = a[key];
+    const vb = b[key];
+    if (va == null && vb == null) return 0;
+    if (va == null) return -1;
+    if (vb == null) return 1;
+    if (typeof va === 'number' && typeof vb === 'number') return va - vb;
+    return String(va).localeCompare(String(vb), 'es', { numeric: true, sensitivity: 'base' });
+  }
+
+  /** Filas ordenadas según la columna/dirección activa (antes de paginar). */
+  get filasOrdenadas(): Record<string, unknown>[] {
+    if (!this.ordenColumna) return this.filas;
+    const col = this.ordenColumna;
+    const factor = this.ordenDir === 'desc' ? -1 : 1;
+    return [...this.filas].sort((a, b) => this.comparar(a, b, col) * factor);
   }
 
   get totalPaginas(): number {
@@ -59,9 +111,10 @@ export class ErpDataTableComponent implements OnChanges {
   }
 
   get filasPagina(): Record<string, unknown>[] {
-    if (!this.habilitarPaginacion) return this.filas;
+    const fuente = this.filasOrdenadas;
+    if (!this.habilitarPaginacion) return fuente;
     const inicio = (this.paginaActual - 1) * this.tamanoPagina;
-    return this.filas.slice(inicio, inicio + this.tamanoPagina);
+    return fuente.slice(inicio, inicio + this.tamanoPagina);
   }
 
   get indiceInicio(): number {
