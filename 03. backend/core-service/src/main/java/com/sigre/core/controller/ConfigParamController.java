@@ -2,14 +2,15 @@ package com.sigre.core.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import com.sigre.common.dto.ApiResponse;
 
 /**
- * Get/Set genérico de un parámetro de texto en config.configuracion (esquema config del tenant).
- * Usado, p.ej., para persistir preferencias de UI por usuario+ventana (orden de columnas, tamaño
- * de página). Clave = parámetro; el módulo agrupa estas preferencias bajo 'UI'.
- * La configuración es por empresa (cada BD tenant tiene su propio esquema config).
+ * Get/Set genérico de un parámetro de texto en config.configuracion (esquema config del tenant),
+ * usando las funciones config.fn_get_parametro_txt / config.fn_set_parametro_txt. Usado, p.ej.,
+ * para persistir preferencias de UI por usuario+ventana (orden de columnas, tamaño de página).
+ * Clave = parámetro; el módulo agrupa estas preferencias bajo 'UI'. Es por empresa (BD tenant).
  */
 @RestController
 @RequestMapping("/api/core/config")
@@ -25,23 +26,19 @@ public class ConfigParamController {
 
     /** Devuelve el valor_texto del parámetro (null si no existe / vacío). */
     @GetMapping("/param")
+    @Transactional
     public ApiResponse<String> getParam(@RequestParam String clave) {
         String valor = jdbcTemplate.queryForObject(
                 "SELECT config.fn_get_parametro_txt(?, ?, NULL)", String.class, MODULO_UI, clave);
         return ApiResponse.ok(valor, "Parametro");
     }
 
-    /** Upsert del valor_texto del parámetro en config.configuracion (clave única modulo+parametro). */
+    /** Graba (upsert) el valor_texto del parámetro vía config.fn_set_parametro_txt. */
     @PutMapping("/param")
+    @Transactional
     public ApiResponse<String> saveParam(@RequestBody ParamSaveRequest req) {
-        jdbcTemplate.update(
-                """
-                INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, activo, modificado_en)
-                VALUES (?, ?, 'TEXT', ?, TRUE, TRUE, NOW())
-                ON CONFLICT (modulo, parametro)
-                DO UPDATE SET valor_texto = EXCLUDED.valor_texto, activo = TRUE, modificado_en = NOW()
-                """,
-                MODULO_UI, req.clave(), req.valor());
-        return ApiResponse.ok(req.valor(), "Parametro guardado");
+        String valor = jdbcTemplate.queryForObject(
+                "SELECT config.fn_set_parametro_txt(?, ?, ?)", String.class, MODULO_UI, req.clave(), req.valor());
+        return ApiResponse.ok(valor, "Parametro guardado");
     }
 }

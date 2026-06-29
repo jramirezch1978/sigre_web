@@ -87,7 +87,8 @@ BEGIN
 
     IF NOT FOUND THEN
         INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, activo)
-        VALUES (p_modulo, p_parametro, 'TEXT', p_default, TRUE, TRUE);
+        VALUES (p_modulo, p_parametro, 'TEXT', p_default, TRUE, TRUE)
+        ON CONFLICT (modulo, parametro) DO NOTHING;
         RETURN p_default;
     END IF;
 
@@ -112,7 +113,8 @@ BEGIN
 
     IF NOT FOUND THEN
         INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_entero, editable, activo)
-        VALUES (p_modulo, p_parametro, 'INTEGER', p_default, TRUE, TRUE);
+        VALUES (p_modulo, p_parametro, 'INTEGER', p_default, TRUE, TRUE)
+        ON CONFLICT (modulo, parametro) DO NOTHING;
         RETURN p_default;
     END IF;
 
@@ -137,7 +139,8 @@ BEGIN
 
     IF NOT FOUND THEN
         INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_decimal, editable, activo)
-        VALUES (p_modulo, p_parametro, 'DECIMAL', p_default, TRUE, TRUE);
+        VALUES (p_modulo, p_parametro, 'DECIMAL', p_default, TRUE, TRUE)
+        ON CONFLICT (modulo, parametro) DO NOTHING;
         RETURN p_default;
     END IF;
 
@@ -166,7 +169,8 @@ BEGIN
 
     IF NOT FOUND THEN
         INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, activo)
-        VALUES (p_modulo, p_parametro, 'BOOLEAN', CASE WHEN p_default THEN '1' ELSE '0' END, TRUE, TRUE);
+        VALUES (p_modulo, p_parametro, 'BOOLEAN', CASE WHEN p_default THEN '1' ELSE '0' END, TRUE, TRUE)
+        ON CONFLICT (modulo, parametro) DO NOTHING;
         RETURN p_default;
     END IF;
 
@@ -185,3 +189,83 @@ COMMENT ON FUNCTION config.fn_get_parametro_bool(VARCHAR, VARCHAR, BOOLEAN)
 
 -- Migración idempotente: valor_bool para parámetros RRHH SIGRE
 ALTER TABLE config.configuracion ADD COLUMN IF NOT EXISTS valor_bool BOOLEAN;
+
+-- ============================================================
+-- Funciones de GRABADO en config.configuracion: fn_set_parametro_<sufijo>(modulo, parametro, valor).
+-- Upsert atómico por la clave única (modulo, parametro): si existe ACTUALIZA, si no INSERTA.
+-- Son VOLATILE y se ejecutan dentro de la transacción del invocador (como toda función plpgsql);
+-- el INSERT ... ON CONFLICT garantiza atomicidad sin condiciones de carrera (no requiere SELECT
+-- FOR UPDATE previo, a diferencia de core.fn_get_document_number que sí necesita TX explícita
+-- porque mantiene un lock entre el SELECT y el UPDATE del correlativo).
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION config.fn_set_parametro_txt(
+    p_modulo VARCHAR(60),
+    p_parametro VARCHAR(120),
+    p_valor TEXT
+) RETURNS TEXT
+LANGUAGE plpgsql VOLATILE AS $$
+BEGIN
+    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, activo, modificado_en)
+    VALUES (p_modulo, p_parametro, 'TEXT', p_valor, TRUE, TRUE, NOW())
+    ON CONFLICT (modulo, parametro)
+    DO UPDATE SET valor_texto = EXCLUDED.valor_texto, tipo_dato = 'TEXT', activo = TRUE, modificado_en = NOW();
+    RETURN p_valor;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION config.fn_set_parametro_int(
+    p_modulo VARCHAR(60),
+    p_parametro VARCHAR(120),
+    p_valor INTEGER
+) RETURNS INTEGER
+LANGUAGE plpgsql VOLATILE AS $$
+BEGIN
+    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_entero, editable, activo, modificado_en)
+    VALUES (p_modulo, p_parametro, 'INTEGER', p_valor, TRUE, TRUE, NOW())
+    ON CONFLICT (modulo, parametro)
+    DO UPDATE SET valor_entero = EXCLUDED.valor_entero, tipo_dato = 'INTEGER', activo = TRUE, modificado_en = NOW();
+    RETURN p_valor;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION config.fn_set_parametro_dec(
+    p_modulo VARCHAR(60),
+    p_parametro VARCHAR(120),
+    p_valor NUMERIC(18, 6)
+) RETURNS NUMERIC(18, 6)
+LANGUAGE plpgsql VOLATILE AS $$
+BEGIN
+    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_decimal, editable, activo, modificado_en)
+    VALUES (p_modulo, p_parametro, 'DECIMAL', p_valor, TRUE, TRUE, NOW())
+    ON CONFLICT (modulo, parametro)
+    DO UPDATE SET valor_decimal = EXCLUDED.valor_decimal, tipo_dato = 'DECIMAL', activo = TRUE, modificado_en = NOW();
+    RETURN p_valor;
+END;
+$$;
+
+-- Boolean se persiste en valor_texto ('1'/'0') para ser consistente con fn_get_parametro_bool.
+CREATE OR REPLACE FUNCTION config.fn_set_parametro_bool(
+    p_modulo VARCHAR(60),
+    p_parametro VARCHAR(120),
+    p_valor BOOLEAN
+) RETURNS BOOLEAN
+LANGUAGE plpgsql VOLATILE AS $$
+BEGIN
+    INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, valor_bool, editable, activo, modificado_en)
+    VALUES (p_modulo, p_parametro, 'BOOLEAN', CASE WHEN p_valor THEN '1' ELSE '0' END, p_valor, TRUE, TRUE, NOW())
+    ON CONFLICT (modulo, parametro)
+    DO UPDATE SET valor_texto = CASE WHEN p_valor THEN '1' ELSE '0' END, valor_bool = p_valor,
+                  tipo_dato = 'BOOLEAN', activo = TRUE, modificado_en = NOW();
+    RETURN p_valor;
+END;
+$$;
+
+COMMENT ON FUNCTION config.fn_set_parametro_txt(VARCHAR, VARCHAR, TEXT)
+    IS 'Upsert de parámetro TEXT en config.configuracion (atómico por modulo+parametro).';
+COMMENT ON FUNCTION config.fn_set_parametro_int(VARCHAR, VARCHAR, INTEGER)
+    IS 'Upsert de parámetro INTEGER en config.configuracion (atómico por modulo+parametro).';
+COMMENT ON FUNCTION config.fn_set_parametro_dec(VARCHAR, VARCHAR, NUMERIC)
+    IS 'Upsert de parámetro DECIMAL en config.configuracion (atómico por modulo+parametro).';
+COMMENT ON FUNCTION config.fn_set_parametro_bool(VARCHAR, VARCHAR, BOOLEAN)
+    IS 'Upsert de parámetro BOOLEAN en config.configuracion (atómico por modulo+parametro).';
