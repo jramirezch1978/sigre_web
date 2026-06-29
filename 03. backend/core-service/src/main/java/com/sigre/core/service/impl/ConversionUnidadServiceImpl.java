@@ -11,6 +11,7 @@ import com.sigre.common.exception.ResourceNotFoundException;
 import com.sigre.core.dto.ConversionUnidadRequest;
 import com.sigre.core.dto.ConversionUnidadResponse;
 import com.sigre.core.entity.ConversionUnidad;
+import com.sigre.core.entity.UnidadMedida;
 import com.sigre.core.mapper.ConversionUnidadMapper;
 import com.sigre.core.repository.ConversionUnidadRepository;
 import com.sigre.core.repository.UnidadMedidaRepository;
@@ -28,13 +29,13 @@ public class ConversionUnidadServiceImpl implements ConversionUnidadService {
     private final ConversionUnidadMapper mapper;
 
     @Override
-    public Page<ConversionUnidad> list(Long articuloId, Long umOrigenId, Long umDestinoId, Pageable pageable) {
-        return repository.findAll(pageable);
+    public Page<ConversionUnidadResponse> list(Long umOrigenId, Long umDestinoId, Pageable pageable) {
+        return repository.findAll(pageable).map(this::toEnrichedResponse);
     }
 
     @Override
     public ConversionUnidadResponse getById(Long id) {
-        return mapper.toResponse(getEntity(id));
+        return toEnrichedResponse(getEntity(id));
     }
 
     @Override
@@ -42,10 +43,9 @@ public class ConversionUnidadServiceImpl implements ConversionUnidadService {
     public ConversionUnidadResponse create(ConversionUnidadRequest request) {
         validateForeignKeys(request);
         ConversionUnidad entity = mapper.toEntity(request);
-        entity.setArticuloId(request.getArticuloId());
         entity.setCreatedBy(TenantContext.getUsuarioId());
         entity.setFecCreacion(Instant.now());
-        return mapper.toResponse(repository.save(entity));
+        return toEnrichedResponse(repository.save(entity));
     }
 
     @Override
@@ -54,10 +54,9 @@ public class ConversionUnidadServiceImpl implements ConversionUnidadService {
         ConversionUnidad entity = getEntity(id);
         validateForeignKeys(request);
         mapper.updateEntity(request, entity);
-        entity.setArticuloId(request.getArticuloId());
         entity.setUpdatedBy(TenantContext.getUsuarioId());
         entity.setFecModificacion(Instant.now());
-        return mapper.toResponse(repository.save(entity));
+        return toEnrichedResponse(repository.save(entity));
     }
 
     @Override
@@ -72,29 +71,43 @@ public class ConversionUnidadServiceImpl implements ConversionUnidadService {
     @Timed(value = "app.db.query", extraTags = {"table", "conversion_unidad", "operation", "activate"})
     @Override
     @Transactional
-    public ConversionUnidad activate(Long id) {
+    public ConversionUnidadResponse activate(Long id) {
         log.info("Activando ConversionUnidad con id: {}", id);
         ConversionUnidad existing = getEntity(id);
         existing.setFlagEstado("1");
         existing.setUpdatedBy(TenantContext.getUsuarioId());
         existing.setFecModificacion(Instant.now());
-        return repository.save(existing);
+        return toEnrichedResponse(repository.save(existing));
     }
 
     @Timed(value = "app.db.query", extraTags = {"table", "conversion_unidad", "operation", "deactivate"})
     @Override
     @Transactional
-    public ConversionUnidad deactivate(Long id) {
+    public ConversionUnidadResponse deactivate(Long id) {
         log.info("Desactivando ConversionUnidad con id: {}", id);
         ConversionUnidad existing = getEntity(id);
         existing.setFlagEstado("0");
         existing.setUpdatedBy(TenantContext.getUsuarioId());
         existing.setFecModificacion(Instant.now());
-        return repository.save(existing);
+        return toEnrichedResponse(repository.save(existing));
     }
 
     private ConversionUnidad getEntity(Long id) {
         return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("ConversionUnidad", id));
+    }
+
+    /** Mapea + resuelve código y nombre de la unidad de medida origen/destino (FK -> código + nombre, no id). */
+    private ConversionUnidadResponse toEnrichedResponse(ConversionUnidad entity) {
+        ConversionUnidadResponse resp = mapper.toResponse(entity);
+        unidadMedidaRepository.findById(entity.getUmOrigenId()).ifPresent(um -> {
+            resp.setUmOrigenCodigo(um.getCodigo());
+            resp.setUmOrigenNombre(um.getNombre());
+        });
+        unidadMedidaRepository.findById(entity.getUmDestinoId()).ifPresent(um -> {
+            resp.setUmDestinoCodigo(um.getCodigo());
+            resp.setUmDestinoNombre(um.getNombre());
+        });
+        return resp;
     }
 
     private void validateForeignKeys(ConversionUnidadRequest request) {

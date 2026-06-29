@@ -21,13 +21,12 @@ public class ConversionUnidadController {
 
     @GetMapping
     public ApiResponse<PageData<ConversionUnidadResponse>> list(
-            @RequestParam(required = false) Long articuloId,
             @RequestParam(required = false) Long umOrigenId,
             @RequestParam(required = false) Long umDestinoId,
             Pageable pageable
     ) {
-        var page = service.list(articuloId, umOrigenId, umDestinoId, pageable);
-        return ApiResponse.ok(PageData.of(page, page.getContent().stream().map(mapper::toResponse).toList()));
+        var page = service.list(umOrigenId, umDestinoId, pageable);
+        return ApiResponse.ok(PageData.of(page, page.getContent()));
     }
 
     @GetMapping("/{id}")
@@ -54,11 +53,11 @@ public class ConversionUnidadController {
 
     @PatchMapping("/{id}/activar")
     public ApiResponse<ConversionUnidadResponse> activate(@PathVariable Long id) {
-        return ApiResponse.ok(mapper.toResponse(service.activate(id)), "Registro activado");
+        return ApiResponse.ok(service.activate(id), "Registro activado");
     }
 
     @PatchMapping("/{id}/desactivar")
     public ApiResponse<ConversionUnidadResponse> deactivate(@PathVariable Long id) {
-        return ApiResponse.ok(mapper.toResponse(service.deactivate(id)), "Registro desactivado");
+        return ApiResponse.ok(service.deactivate(id), "Registro desactivado");
     }
 }

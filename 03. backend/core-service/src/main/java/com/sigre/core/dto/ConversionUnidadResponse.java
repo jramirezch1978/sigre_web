@@ -13,9 +13,12 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ConversionUnidadResponse {
     private Long id;
-    private Long articuloId;
     private Long umOrigenId;
+    private String umOrigenCodigo;
+    private String umOrigenNombre;
     private Long umDestinoId;
+    private String umDestinoCodigo;
+    private String umDestinoNombre;
     private BigDecimal factorConversion;
     private String flagEstado;
 }

@@ -106,10 +106,11 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
   'unidades-conversion': {
     titulo: 'Unidades de Conversión',
     columnas: [
-      { key: 'articuloId', header: 'Artículo ID', width: '100px' },
-      { key: 'umOrigenId', header: 'UM origen', width: '100px' },
-      { key: 'umDestinoId', header: 'UM destino', width: '100px' },
-      { key: 'factorConversion', header: 'Factor', width: '100px', format: 'numero' },
+      { key: 'umOrigenCodigo', header: 'UM origen', width: '100px' },
+      { key: 'umOrigenNombre', header: 'Descripción origen', width: '180px' },
+      { key: 'umDestinoCodigo', header: 'UM destino', width: '100px' },
+      { key: 'umDestinoNombre', header: 'Descripción destino', width: '180px' },
+      { key: 'factorConversion', header: 'Factor', width: '90px', format: 'numero' },
       { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
     ],
   },

@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConversionUnidadRequest {
-    private Long articuloId;
     @NotNull
     private Long umOrigenId;
     @NotNull

@@ -25,7 +25,4 @@ public class ConversionUnidad extends BaseEntity {
 
     @Column(name = "factor_conversion", nullable = false, precision = 18, scale = 6)
     private BigDecimal factorConversion;
-
-    @Transient
-    private Long articuloId;
 }

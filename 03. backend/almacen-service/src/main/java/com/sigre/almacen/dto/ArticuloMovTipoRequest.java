@@ -23,9 +23,6 @@ public class ArticuloMovTipoRequest {
     @Size(max = 200)
     private String descTipoMov;
 
-    @Size(max = 40)
-    private String cntaCntbl;
-
     @Size(max = 1)
     private String flagContabiliza;
 

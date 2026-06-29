@@ -7,9 +7,12 @@ import { StorageService } from '../../../../core/services/storage.service';
 
 export interface ConversionUnidadDto {
   id: number;
-  articuloId: number;
   umOrigenId: number;
+  umOrigenCodigo?: string;
+  umOrigenNombre?: string;
   umDestinoId: number;
+  umDestinoCodigo?: string;
+  umDestinoNombre?: string;
   factorConversion: number;
   flagEstado: string;
 }
@@ -52,6 +55,14 @@ export class CoreApiService {
 
   private get base(): string {
     return `${this.apiBase.getApiBaseUrl()}/core`;
+  }
+
+  listarUnidadesMedida(): Observable<{ id: number; codigo?: string; nombre: string; flagEstado?: string }[]> {
+    const params = new HttpParams().set('page', '0').set('size', '500');
+    return this.http
+      .get<ApiResponse<PageData<{ id: number; codigo?: string; nombre: string; flagEstado?: string }>>>(
+        `${this.base}/unidades-medida`, { params })
+      .pipe(map(res => res.data?.content ?? []));
   }
 
   listarConversionesUnidad(): Observable<ConversionUnidadDto[]> {

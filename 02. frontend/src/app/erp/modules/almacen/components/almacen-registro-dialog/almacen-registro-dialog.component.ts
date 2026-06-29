@@ -195,9 +195,11 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     const necesitaProveedores = campos.some(c => c.optionsFrom === 'proveedores');
     const necesitaUbigeos = campos.some(c => c.optionsFrom === 'ubigeos');
     const necesitaUsuarios = campos.some(c => c.optionsFrom === 'usuarios-empresa');
+    const necesitaUnidades = campos.some(c => c.optionsFrom === 'unidades');
 
     if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov
-        && !necesitaCentrosCosto && !necesitaProveedores && !necesitaUbigeos && !necesitaUsuarios) {
+        && !necesitaCentrosCosto && !necesitaProveedores && !necesitaUbigeos && !necesitaUsuarios
+        && !necesitaUnidades) {
       this.cargandoOpciones = false;
       return;
     }
@@ -217,8 +219,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       proveedores: necesitaProveedores ? resiliente('proveedores', this.coreApi.listarProveedores()) : of([]),
       ubigeos: necesitaUbigeos ? resiliente('ubigeos', this.almacenApi.listarUbigeos()) : of([]),
       usuarios: necesitaUsuarios ? resiliente('responsables', this.coreApi.listarUsuariosEmpresa()) : of([]),
+      unidades: necesitaUnidades ? resiliente('unidades de medida', this.coreApi.listarUnidadesMedida()) : of([]),
     }).subscribe({
-      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos, usuarios }) => {
+      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos, usuarios, unidades }) => {
         if (necesitaTipos) {
           this.opciones['tipos-almacen'] = this.soloActivos(tipos).map(t => ({
             value: t.id,
@@ -254,6 +257,12 @@ export class AlmacenRegistroDialogComponent implements OnInit {
         }
         if (necesitaUsuarios) {
           this.opciones['usuarios-empresa'] = usuarios;
+        }
+        if (necesitaUnidades) {
+          this.opciones['unidades'] = this.soloActivos(unidades).map(u => ({
+            value: u.id,
+            label: `${u.codigo ?? u.id} — ${u.nombre}`,
+          }));
         }
         this.cargandoOpciones = false;
         // El formulario queda usable; solo se avisa (modal WARNING) de las listas que no cargaron.

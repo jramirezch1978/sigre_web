@@ -29,9 +29,6 @@ public class ArticuloMovTipo {
     @Column(name = "desc_tipo_mov", nullable = false, length = 200)
     private String descTipoMov;
 
-    @Column(name = "cnta_cntbl", length = 40)
-    private String cntaCntbl;
-
     @Column(name = "flag_contabiliza", nullable = false, length = 1)
     private String flagContabiliza = "0";
 

@@ -17,7 +17,6 @@ public class ArticuloMovTipoResponse {
     private Long id;
     private String tipoMov;
     private String descTipoMov;
-    private String cntaCntbl;
     private String flagContabiliza;
     private String flagAjusteValorizacion;
     private String flagMovEntreAlm;
