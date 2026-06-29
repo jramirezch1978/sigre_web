@@ -29,6 +29,7 @@ import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
 import com.sigre.common.security.TenantContext;
 import com.sigre.common.service.NumeradorDocumentoService;
+import com.sigre.common.service.ConfiguracionParametroService;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -62,7 +63,7 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
     private final OrdenCompraCalculator calculator;
     private final OrdenCompraValidator validator;
     private final OrdenCompraPdfService pdfService;
-    private final ConfiguracionRefRepository configuracionRefRepository;
+    private final ConfiguracionParametroService configParam;
     private final EntidadContribuyenteRefRepository entidadContribuyenteRefRepository;
     private final ArticuloRefRepository articuloRefRepository;
     private final UnidadMedidaRefRepository unidadMedidaRefRepository;
@@ -685,12 +686,7 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
         Boolean flagPercepcion = null;
         BigDecimal percepcionTasa = null;
         if (articulo != null) {
-            percepcionTasa = configuracionRefRepository.findFirstByParametro("TASA_PERCEPCION")
-                    .map(c -> {
-                        try { return new BigDecimal(c.getValorTexto()); }
-                        catch (Exception e) { return null; }
-                    })
-                    .orElse(null);
+            percepcionTasa = configParam.getDecimal("CORE", "TASA_PERCEPCION", null);
             flagPercepcion = percepcionTasa != null;
         }
 
@@ -779,9 +775,7 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
     }
 
     private boolean isAprobacionRequerida() {
-        return configuracionRefRepository.findFirstByParametro("COMPRA_APROBACION_OC")
-                .map(c -> "1".equals(c.getValorTexto()))
-                .orElse(false);
+        return configParam.getBooleano("COMPRAS", "COMPRA_APROBACION_OC", false);
     }
 
     private String resolverEmailDestino(EnviarProveedorRequest request, Long proveedorId) {

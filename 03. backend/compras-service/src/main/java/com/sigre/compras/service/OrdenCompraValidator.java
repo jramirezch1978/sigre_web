@@ -13,6 +13,7 @@ import com.sigre.compras.entity.*;
 import com.sigre.compras.repository.*;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.security.TenantContext;
+import com.sigre.common.service.ConfiguracionParametroService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,7 +35,7 @@ public class OrdenCompraValidator {
     private final SucursalRefRepository sucursalRefRepository;
     private final ArticuloRefRepository articuloRefRepository;
     private final TiposImpuestoRefRepository tiposImpuestoRefRepository;
-    private final ConfiguracionRefRepository configuracionRefRepository;
+    private final ConfiguracionParametroService configParam;
     private final ValeMovRefRepository valeMovRefRepository;
     private final JdbcTemplate jdbcTemplate;
 
@@ -230,9 +231,7 @@ public class OrdenCompraValidator {
     }
 
     public boolean isFondosControlActivo() {
-        return configuracionRefRepository.findFirstByParametro("flag_cntrl_fondos")
-                .map(c -> "1".equals(c.getValorTexto()))
-                .orElse(false);
+        return configParam.getBooleano("COMPRAS", "flag_cntrl_fondos", false);
     }
 
     public void verificarFondosDisponibles(OrdenCompra oc) {

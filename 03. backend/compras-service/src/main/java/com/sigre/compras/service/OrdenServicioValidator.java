@@ -15,6 +15,7 @@ import com.sigre.compras.entity.OrdenServicioDet;
 import com.sigre.compras.repository.*;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.security.TenantContext;
+import com.sigre.common.service.ConfiguracionParametroService;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -35,7 +36,7 @@ public class OrdenServicioValidator {
     private final EntidadContribuyenteRefRepository entidadContribuyenteRefRepository;
     private final MonedaRefRepository monedaRefRepository;
     private final SucursalRefRepository sucursalRefRepository;
-    private final ConfiguracionRefRepository configuracionRefRepository;
+    private final ConfiguracionParametroService configParam;
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired(required = false)
@@ -211,9 +212,7 @@ public class OrdenServicioValidator {
     }
 
     private boolean isValidaLimiteOs() {
-        return configuracionRefRepository.findFirstByParametro("FLAG_VALIDA_LIMITE_OS")
-                .map(c -> "1".equals(c.getValorTexto()))
-                .orElse(false);
+        return configParam.getBooleano("COMPRAS", "FLAG_VALIDA_LIMITE_OS", false);
     }
 
     // ── §20 Restricción cencos por usuario ──────────────────────────────────
@@ -239,9 +238,7 @@ public class OrdenServicioValidator {
     }
 
     private boolean isRestriccionCencosActiva() {
-        return configuracionRefRepository.findFirstByParametro("flag_restr_cencos_usr")
-                .map(c -> "1".equals(c.getValorTexto()))
-                .orElse(false);
+        return configParam.getBooleano("COMPRAS", "flag_restr_cencos_usr", false);
     }
 
     // ── §15 Validaciones de anulación ────────────────────────────────────────

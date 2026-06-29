@@ -23,6 +23,7 @@ import com.sigre.compras.spec.OrdenServicioSpecifications;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
 import com.sigre.common.security.TenantContext;
+import com.sigre.common.service.ConfiguracionParametroService;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -54,7 +55,7 @@ public class OrdenServicioServiceImpl implements OrdenServicioService {
     private final AsignacionOsOcRepository asignacionOsOcRepository;
     private final OrdenCompraRepository ordenCompraRepository;
     private final EntidadBancoCntaRepository entidadBancoCntaRepository;
-    private final ConfiguracionRefRepository configuracionRefRepository;
+    private final ConfiguracionParametroService configParam;
     private final EntidadContribuyenteRefRepository entidadContribuyenteRefRepository;
     private final CompradorRepository compradorRepository;
     private final ServicioCatalogoRepository servicioCatalogoRepository;
@@ -594,12 +595,7 @@ public class OrdenServicioServiceImpl implements OrdenServicioService {
         ServicioCatalogo serv = servicioCatalogoRepository.findById(servicioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio", servicioId));
 
-        BigDecimal tasaIgv = configuracionRefRepository.findFirstByParametro("TASA_IGV")
-                .map(c -> {
-                    try { return new BigDecimal(c.getValorTexto()); }
-                    catch (Exception e) { return null; }
-                })
-                .orElse(null);
+        BigDecimal tasaIgv = configParam.getDecimal("CORE", "TASA_IGV", null);
 
         return DatosServicioResponse.builder()
                 .servicioId(serv.getId())
@@ -815,9 +811,7 @@ public class OrdenServicioServiceImpl implements OrdenServicioService {
     }
 
     private boolean isAprobacionRequerida() {
-        return configuracionRefRepository.findFirstByParametro("COMPRA_APROBACION_OS")
-                .map(c -> "1".equals(c.getValorTexto()))
-                .orElse(true);
+        return configParam.getBooleano("COMPRAS", "COMPRA_APROBACION_OS", true);
     }
 
     private String generarNroOs(Long sucursalId, String codOrigen) {
