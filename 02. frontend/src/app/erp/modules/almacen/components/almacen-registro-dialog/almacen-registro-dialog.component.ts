@@ -100,6 +100,11 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     return campo.optionsFrom ? (this.opciones[campo.optionsFrom] ?? []) : [];
   }
 
+  /** Excluye de los desplegables FK los registros anulados/inactivos (flag_estado = '0'). */
+  private soloActivos<T>(items: T[]): T[] {
+    return items.filter(i => String((i as { flagEstado?: unknown }).flagEstado ?? '1') !== '0');
+  }
+
   esCampoDate(campo: TablaCrudCampo): boolean {
     return campo.type === 'date';
   }
@@ -203,25 +208,25 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     }).subscribe({
       next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos }) => {
         if (necesitaTipos) {
-          this.opciones['tipos-almacen'] = tipos.map(t => ({
+          this.opciones['tipos-almacen'] = this.soloActivos(tipos).map(t => ({
             value: t.id,
             label: `${t.codigo} — ${t.nombre}`,
           }));
         }
         if (necesitaSucursales) {
-          this.opciones['sucursales'] = sucursales.map(s => ({
+          this.opciones['sucursales'] = this.soloActivos(sucursales).map(s => ({
             value: s.id,
             label: `${s.codigo ?? s.id} — ${s.nombre}`,
           }));
         }
         if (necesitaAlmacenes) {
-          this.opciones['almacenes'] = almacenes.map(a => ({
+          this.opciones['almacenes'] = this.soloActivos(almacenes).map(a => ({
             value: a.id,
             label: `${a.codigo} — ${a.nombre}`,
           }));
         }
         if (necesitaTiposMov) {
-          this.opciones['tipos-movimiento'] = tiposMov.map(t => ({
+          this.opciones['tipos-movimiento'] = this.soloActivos(tiposMov).map(t => ({
             value: t.id,
             label: `${t.tipoMov} — ${t.descTipoMov}`,
           }));
