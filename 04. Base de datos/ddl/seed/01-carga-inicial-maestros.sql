@@ -5635,7 +5635,8 @@ VALUES
     ('PT', 'PRODUCTO TERMINADO', '1'),
     ('SP', 'SUBPRODUCTO', '1'),
     ('IN', 'INSUMO', '1'),
-    ('AF', 'ACTIVO FIJO', '1')
+    ('AF', 'ACTIVO FIJO', '1'),
+    ('MT', 'ALMACEN DE MATERIALES', '1')
 ON CONFLICT (codigo) DO UPDATE SET nombre = EXCLUDED.nombre, flag_estado = EXCLUDED.flag_estado;
 
 COMMIT;
