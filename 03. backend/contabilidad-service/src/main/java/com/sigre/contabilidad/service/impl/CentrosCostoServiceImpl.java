@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -12,12 +13,14 @@ import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
 import com.sigre.common.security.TenantContext;
 import com.sigre.contabilidad.dto.request.CentrosCostoRequest;
+import com.sigre.contabilidad.dto.response.CentroCostoArbolItem;
 import com.sigre.contabilidad.entity.CentrosCosto;
 import com.sigre.contabilidad.mapper.CentrosCostoMapper;
 import com.sigre.contabilidad.repository.CentrosCostoRepository;
 import com.sigre.contabilidad.service.CentrosCostoService;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,35 @@ public class CentrosCostoServiceImpl implements CentrosCostoService {
 
     private final CentrosCostoRepository repository;
     private final CentrosCostoMapper mapper;
+    private final JdbcTemplate jdbcTemplate;
+
+    @Override
+    public List<CentroCostoArbolItem> arbolActivos() {
+        return jdbcTemplate.query(
+                """
+                SELECT cc.id, cc.cencos, cc.desc_cencos,
+                       n1.cod_n1, n1.descripcion AS desc_n1,
+                       n2.cod_n2, n2.descripcion AS desc_n2,
+                       n3.cod_n3, n3.descripcion AS desc_n3
+                FROM contabilidad.centros_costo cc
+                JOIN contabilidad.cencos_niv3 n3 ON n3.id = cc.cencos_niv3_id
+                JOIN contabilidad.cencos_niv2 n2 ON n2.id = n3.cencos_niv2_id
+                JOIN contabilidad.cencos_niv1 n1 ON n1.id = n2.cencos_niv1_id
+                WHERE cc.flag_estado = '1'
+                  AND n1.flag_estado = '1' AND n2.flag_estado = '1' AND n3.flag_estado = '1'
+                ORDER BY n1.cod_n1, n2.cod_n2, n3.cod_n3, cc.cencos
+                """,
+                (rs, i) -> new CentroCostoArbolItem(
+                        rs.getLong("id"),
+                        rs.getString("cencos"),
+                        rs.getString("desc_cencos"),
+                        rs.getString("cod_n1"),
+                        rs.getString("desc_n1"),
+                        rs.getString("cod_n2"),
+                        rs.getString("desc_n2"),
+                        rs.getString("cod_n3"),
+                        rs.getString("desc_n3")));
+    }
 
     @Override
     public Page<CentrosCosto> findAll(String q, String flagEstado, Pageable pageable) {

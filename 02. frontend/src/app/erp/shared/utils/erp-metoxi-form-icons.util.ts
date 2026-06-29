@@ -1,4 +1,4 @@
-export type ErpMetoxiFormFieldType = 'text' | 'number' | 'select' | 'date' | 'switch';
+export type ErpMetoxiFormFieldType = 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo';
 
 const ICONOS_POR_CAMPO: Record<string, string> = {
   codigo: 'tag',

@@ -4,6 +4,7 @@ import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { CdkOverlayOrigin, ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { SigreValidatedFieldComponent } from '@sigre-common';
 import { ErpMetoxiFormFieldType, iconoMetoxiCampo } from '../utils/erp-metoxi-form-icons.util';
+import { SigreCentrosCostoSelectComponent } from '../sigre-centros-costo-select/sigre-centros-costo-select.component';
 
 export type { ErpMetoxiFormFieldType };
 
@@ -15,7 +16,7 @@ export interface ErpMetoxiSelectOption {
 @Component({
   selector: 'erp-metoxi-form-field',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SigreValidatedFieldComponent, OverlayModule],
+  imports: [CommonModule, ReactiveFormsModule, SigreValidatedFieldComponent, OverlayModule, SigreCentrosCostoSelectComponent],
   templateUrl: './erp-metoxi-form-field.component.html',
   styleUrls: ['./erp-metoxi-form-field.component.scss'],
 })

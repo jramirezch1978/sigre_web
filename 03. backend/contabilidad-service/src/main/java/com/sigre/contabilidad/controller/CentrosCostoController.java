@@ -9,7 +9,9 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.sigre.common.dto.ApiResponse;
+import java.util.List;
 import com.sigre.contabilidad.dto.request.CentrosCostoRequest;
+import com.sigre.contabilidad.dto.response.CentroCostoArbolItem;
 import com.sigre.contabilidad.dto.response.CentrosCostoResponse;
 import com.sigre.contabilidad.dto.response.PageData;
 import com.sigre.contabilidad.mapper.CentrosCostoMapper;
@@ -32,6 +34,12 @@ public class CentrosCostoController {
             @PageableDefault(size = 20) Pageable pageable) {
         var page = service.findAll(q, flagEstado, pageable);
         return ApiResponse.ok(PageData.of(page, mapper.toResponseList(page.getContent())));
+    }
+
+    @GetMapping("/arbol")
+    @Operation(summary = "Centros de costo activos con jerarquía (niv1/niv2/niv3) para treeview")
+    public ApiResponse<List<CentroCostoArbolItem>> arbol() {
+        return ApiResponse.ok(service.arbolActivos(), "Árbol de centros de costo");
     }
 
     @GetMapping("/{id}")

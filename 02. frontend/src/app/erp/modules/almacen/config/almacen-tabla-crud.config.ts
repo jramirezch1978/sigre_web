@@ -1,6 +1,6 @@
 import { AlmacenTablaKey } from './almacen-tablas.config';
 
-export type TablaCampoTipo = 'text' | 'number' | 'select' | 'date' | 'switch';
+export type TablaCampoTipo = 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo';
 
 export type CrudApiSource = 'almacen' | 'core';
 
@@ -60,7 +60,7 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
       { key: 'sucursalId', label: 'Sucursal', type: 'select', optionsFrom: 'sucursales', required: true },
       // Opcionales (nullable en BD, sin @NotNull en DTO)
       { key: 'almacenTipoId', label: 'Tipo de almacén', type: 'select', optionsFrom: 'tipos-almacen' },
-      { key: 'centrosCostoId', label: 'Centro de costo', type: 'select', optionsFrom: 'centros-costo' },
+      { key: 'centrosCostoId', label: 'Centro de costo', type: 'centros-costo' },
       { key: 'proveedorEntidadId', label: 'Proveedor', type: 'select', optionsFrom: 'proveedores' },
       { key: 'responsableUsuarioId', label: 'Responsable', type: 'select', optionsFrom: 'usuarios-empresa' },
       { key: 'direccion', label: 'Dirección', type: 'text', maxLength: 80 },
