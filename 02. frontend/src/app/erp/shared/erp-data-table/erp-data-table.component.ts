@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TablaColumna } from '../models/api-page.model';
-import { exportarTablaExcel, exportarTablaPdf, exportarTablaWord } from '../utils/erp-table-export.util';
+import { ErpExportService, ExportFormato } from '../utils/erp-export.service';
 
 @Component({
   selector: 'app-erp-data-table',
@@ -26,6 +26,8 @@ export class ErpDataTableComponent implements OnChanges {
   @Output() editar = new EventEmitter<Record<string, unknown>>();
   @Output() anular = new EventEmitter<Record<string, unknown>>();
   @Output() eliminar = new EventEmitter<Record<string, unknown>>();
+
+  private readonly exportSvc = inject(ErpExportService);
 
   readonly opcionesTamanoPagina = [10, 25, 50, 100];
 
@@ -142,25 +144,26 @@ export class ErpDataTableComponent implements OnChanges {
   }
 
   exportarExcel(): void {
-    if (this.filas.length === 0) return;
-    exportarTablaExcel(this.columnas, this.filas, this.nombreExport, (f, c) => this.valorCelda(f, c));
-    this.cerrarModalExport();
+    this.ejecutarExport('xlsx');
   }
 
   exportarPdf(): void {
-    if (this.filas.length === 0) return;
-    exportarTablaPdf(this.columnas, this.filas, this.nombreExport, (f, c) => this.valorCelda(f, c));
-    this.cerrarModalExport();
+    this.ejecutarExport('pdf');
   }
 
-  async exportarWord(): Promise<void> {
+  exportarWord(): void {
+    this.ejecutarExport('docx');
+  }
+
+  /** El documento lo genera el backend (core-service); aquí solo se descarga. */
+  private ejecutarExport(formato: ExportFormato): void {
     if (this.filas.length === 0 || this.exportando) return;
     this.exportando = true;
-    try {
-      await exportarTablaWord(this.columnas, this.filas, this.nombreExport, (f, c) => this.valorCelda(f, c));
-    } finally {
-      this.exportando = false;
-      this.cerrarModalExport();
-    }
+    this.exportSvc
+      .exportar(formato, this.columnas, this.filas, this.nombreExport, (f, c) => this.valorCelda(f, c))
+      .subscribe({
+        next: () => { this.exportando = false; this.cerrarModalExport(); },
+        error: () => { this.exportando = false; this.cerrarModalExport(); },
+      });
   }
 }
