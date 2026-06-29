@@ -23,11 +23,25 @@ import java.math.BigDecimal;
 @Service
 public class ConfiguracionParametroService {
 
+    /** Módulo por defecto cuando no se especifica uno: configuraciones generales. */
+    public static final String MODULO_GENERAL = "GENERAL";
+
     private final JdbcTemplate jdbcTemplate;
 
     public ConfiguracionParametroService(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
+
+    // ── Atajos sin módulo: usan 'GENERAL' ────────────────────────────────────
+    public String getTexto(String parametro, String defecto) { return getTexto(MODULO_GENERAL, parametro, defecto); }
+    public Integer getEntero(String parametro, Integer defecto) { return getEntero(MODULO_GENERAL, parametro, defecto); }
+    public BigDecimal getDecimal(String parametro, BigDecimal defecto) { return getDecimal(MODULO_GENERAL, parametro, defecto); }
+    public Boolean getBooleano(String parametro, Boolean defecto) { return getBooleano(MODULO_GENERAL, parametro, defecto); }
+
+    public String setTexto(String parametro, String valor) { return setTexto(MODULO_GENERAL, parametro, valor); }
+    public Integer setEntero(String parametro, Integer valor) { return setEntero(MODULO_GENERAL, parametro, valor); }
+    public BigDecimal setDecimal(String parametro, BigDecimal valor) { return setDecimal(MODULO_GENERAL, parametro, valor); }
+    public Boolean setBooleano(String parametro, Boolean valor) { return setBooleano(MODULO_GENERAL, parametro, valor); }
 
     // ── Lectura ────────────────────────────────────────────────────────────
     public String getTexto(String modulo, String parametro, String defecto) {
