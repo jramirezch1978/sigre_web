@@ -6293,13 +6293,13 @@ ON CONFLICT (codigo) DO UPDATE SET
     flag_doc_bbva = EXCLUDED.flag_doc_bbva;
 
 -- ============================================================
--- TX 8k2: core.configuracion — parámetros del numerador de documentos
+-- TX 8k2: config.configuracion — parámetros del numerador de documentos
 -- ============================================================
--- NOTA: los parámetros del sistema se guardan en core.configuracion, NO en core.parametro_sistema.
-INSERT INTO core.configuracion (module, parameter, data_type, value_int, editable)
-SELECT 'CORE', 'NUMERADOR_ANTIGUEDAD_ANIOS', 'INTEGER', 5, TRUE
+-- NOTA: los parámetros del sistema se guardan en config.configuracion (esquema config del tenant).
+INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_entero, editable, activo)
+SELECT 'CORE', 'NUMERADOR_ANTIGUEDAD_ANIOS', 'INTEGER', 5, TRUE, TRUE
 WHERE NOT EXISTS (
-    SELECT 1 FROM core.configuracion WHERE parameter = 'NUMERADOR_ANTIGUEDAD_ANIOS'
+    SELECT 1 FROM config.configuracion WHERE modulo = 'CORE' AND parametro = 'NUMERADOR_ANTIGUEDAD_ANIOS'
 );
 
 -- ============================================================

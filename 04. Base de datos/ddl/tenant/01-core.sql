@@ -638,144 +638,11 @@ COMMENT ON COLUMN core.uit.importe IS 'Valor de la UIT en soles';
 COMMENT ON COLUMN core.uit.fec_ini_vigen IS 'Fecha desde la que rige el importe';
 
 -- ============================================================
--- core.configuracion: TODOS los parámetros del sistema a nivel de tenant vienen de esta tabla.
--- Esquema: core. Los parámetros se CREAN, ACTUALIZAN o ELIMINAN; NO tienen flag_estado.
--- NO usar core.parametro_sistema (legacy, pendiente de eliminación).
+-- Parámetros del sistema a nivel de tenant: se almacenan en config.configuracion
+-- (esquema config, creado por security/02-config.sql, también presente en cada tenant).
+-- Acceso vía funciones config.fn_get_parametro_<sufijo>(modulo, parametro, default).
+-- La antigua core.configuracion + core.fn_get_parameter_* se ELIMINARON (duplicaban config).
 -- ============================================================
-CREATE TABLE core.configuracion (
-    id BIGSERIAL PRIMARY KEY,
-    module VARCHAR(60),
-    parameter VARCHAR(120) NOT NULL,
-    data_type VARCHAR(20) NOT NULL,
-    value_text TEXT,
-    value_int INTEGER,
-    value_dec NUMERIC(18, 6),
-    value_date DATE,
-    value_bool BOOLEAN,
-    editable BOOLEAN NOT NULL DEFAULT TRUE,
-    created_by          BIGINT,
-    fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),
-    updated_by          BIGINT,
-    fec_modificacion    TIMESTAMPTZ
-);
-
--- ============================================================
--- Funciones de acceso a core.configuracion: fn_config_<sufijo>(parametro, default).
--- Si el parámetro no existe lo INSERTA con el valor por defecto y lo retorna.
--- Sufijos: _txt (texto), _int (entero), _dec (decimal), _date (fecha), _bool (boolean).
--- Nomenclatura: core.fn_get_parameter_<sufijo>(parametro, default).
--- ============================================================
-
-CREATE OR REPLACE FUNCTION core.fn_get_parameter_txt(
-    p_parameter VARCHAR(120),
-    p_default TEXT DEFAULT NULL
-) RETURNS TEXT
-LANGUAGE plpgsql VOLATILE AS $$
-DECLARE
-    lvar_valor TEXT;
-BEGIN
-    SELECT c.value_text INTO lvar_valor
-    FROM core.configuracion c WHERE c.parameter = p_parameter;
-
-    IF NOT FOUND THEN
-        INSERT INTO core.configuracion (parameter, data_type, value_text, fec_creacion)
-        VALUES (p_parameter, 'TEXT', p_default, NOW());
-        RETURN p_default;
-    END IF;
-
-    RETURN COALESCE(lvar_valor, p_default);
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION core.fn_get_parameter_int(
-    p_parameter VARCHAR(120),
-    p_default INTEGER DEFAULT 0
-) RETURNS INTEGER
-LANGUAGE plpgsql VOLATILE AS $$
-DECLARE
-    lint_valor INTEGER;
-BEGIN
-    SELECT c.value_int INTO lint_valor
-    FROM core.configuracion c WHERE c.parameter = p_parameter;
-
-    IF NOT FOUND THEN
-        INSERT INTO core.configuracion (parameter, data_type, value_int, fec_creacion)
-        VALUES (p_parameter, 'INTEGER', p_default, NOW());
-        RETURN p_default;
-    END IF;
-
-    RETURN COALESCE(lint_valor, p_default);
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION core.fn_get_parameter_dec(
-    p_parameter VARCHAR(120),
-    p_default NUMERIC DEFAULT 0
-) RETURNS NUMERIC(18, 6)
-LANGUAGE plpgsql VOLATILE AS $$
-DECLARE
-    ldec_valor NUMERIC(18, 6);
-BEGIN
-    SELECT c.value_dec INTO ldec_valor
-    FROM core.configuracion c WHERE c.parameter = p_parameter;
-
-    IF NOT FOUND THEN
-        INSERT INTO core.configuracion (parameter, data_type, value_dec, fec_creacion)
-        VALUES (p_parameter, 'DECIMAL', p_default, NOW());
-        RETURN p_default;
-    END IF;
-
-    RETURN COALESCE(ldec_valor, p_default);
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION core.fn_get_parameter_date(
-    p_parameter VARCHAR(120),
-    p_default DATE DEFAULT NULL
-) RETURNS DATE
-LANGUAGE plpgsql VOLATILE AS $$
-DECLARE
-    ldat_valor DATE;
-BEGIN
-    SELECT c.value_date INTO ldat_valor
-    FROM core.configuracion c WHERE c.parameter = p_parameter;
-
-    IF NOT FOUND THEN
-        INSERT INTO core.configuracion (parameter, data_type, value_date, fec_creacion)
-        VALUES (p_parameter, 'DATE', p_default, NOW());
-        RETURN p_default;
-    END IF;
-
-    RETURN COALESCE(ldat_valor, p_default);
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION core.fn_get_parameter_bool(
-    p_parameter VARCHAR(120),
-    p_default BOOLEAN DEFAULT FALSE
-) RETURNS BOOLEAN
-LANGUAGE plpgsql VOLATILE AS $$
-DECLARE
-    lbol_valor BOOLEAN;
-BEGIN
-    SELECT c.value_bool INTO lbol_valor
-    FROM core.configuracion c WHERE c.parameter = p_parameter;
-
-    IF NOT FOUND THEN
-        INSERT INTO core.configuracion (parameter, data_type, value_bool, fec_creacion)
-        VALUES (p_parameter, 'BOOLEAN', p_default, NOW());
-        RETURN p_default;
-    END IF;
-
-    RETURN COALESCE(lbol_valor, p_default);
-END;
-$$;
-
-COMMENT ON FUNCTION core.fn_get_parameter_txt(VARCHAR, TEXT) IS 'Parámetro TEXT de core.configuracion; si no existe lo crea con el default.';
-COMMENT ON FUNCTION core.fn_get_parameter_int(VARCHAR, INTEGER) IS 'Parámetro INTEGER de core.configuracion; si no existe lo crea con el default.';
-COMMENT ON FUNCTION core.fn_get_parameter_dec(VARCHAR, NUMERIC) IS 'Parámetro DECIMAL de core.configuracion; si no existe lo crea con el default.';
-COMMENT ON FUNCTION core.fn_get_parameter_date(VARCHAR, DATE) IS 'Parámetro DATE de core.configuracion; si no existe lo crea con el default.';
-COMMENT ON FUNCTION core.fn_get_parameter_bool(VARCHAR, BOOLEAN) IS 'Parámetro BOOLEAN nativo de core.configuracion; si no existe lo crea con el default.';
 
 CREATE TABLE core.configuracion_usuario (
     id BIGSERIAL PRIMARY KEY,
@@ -1179,14 +1046,14 @@ BEGIN
         RAISE EXCEPTION 'sucursalId % no tiene código asignado', p_sucursalId;
     END IF;
 
-    -- 3. Validar año: no mayor al actual; antigüedad máx. desde core.configuracion
+    -- 3. Validar año: no mayor al actual; antigüedad máx. desde config.configuracion
     lint_ano_actual := EXTRACT(YEAR FROM NOW())::INTEGER;
 
     IF p_ano > lint_ano_actual THEN
         RAISE EXCEPTION 'ano % supera el año en curso (%)', p_ano, lint_ano_actual;
     END IF;
 
-    lint_antiguedad := core.fn_get_parameter_int('NUMERADOR_ANTIGUEDAD_ANIOS', 5);
+    lint_antiguedad := config.fn_get_parametro_int('CORE', 'NUMERADOR_ANTIGUEDAD_ANIOS', 5);
 
     IF p_ano < (lint_ano_actual - lint_antiguedad) THEN
         RAISE EXCEPTION 'ano % excede la antigüedad máxima permitida (% años desde %)',
@@ -1393,7 +1260,6 @@ CREATE INDEX IX_ENTIDAD_DIRECCION_05 ON core.entidad_direccion (cod_tienda);
 CREATE INDEX IX_DOC_TIPO_USUARIO_01 ON core.doc_tipo_usuario (usuario_id, flag_estado);
 CREATE INDEX IX_DOC_TIPO_NUM_01 ON core.doc_tipo_num (sucursal_id, doc_tipo_id, origen_id, anio, flag_estado);
 CREATE INDEX IX_DOC_TIPO_NUM_SERIE_01 ON core.doc_tipo_num_serie (sucursal_id, doc_tipo_id, serie, flag_estado);
-CREATE INDEX IX_CONFIGURACION_01 ON core.configuracion (parameter);
 CREATE INDEX IX_CATALOGO_SUNAT_DET_01 ON core.catalogo_sunat_det (catalogo_sunat_id, flag_estado);
 CREATE INDEX IX_SUNAT_CUBSO_01 ON core.sunat_cubso (cod_clase);
 CREATE INDEX IX_SUNAT_CUBSO_02 ON core.sunat_cubso (flag_estado);

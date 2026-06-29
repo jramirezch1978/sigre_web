@@ -1,0 +1,79 @@
+<sigre-metoxi-modal-shell titulo="Centros de costo" size="lg" (cerrar)="cancelar()">
+
+  <div class="cc-busc">
+    <div class="cc-busc__search">
+      <i class="material-icons-outlined">search</i>
+      <input type="text" class="form-control" [(ngModel)]="filtro" (input)="onFiltro()"
+             placeholder="Buscar por código o descripción en cualquier nivel…" />
+    </div>
+
+    <div class="cc-busc__tree">
+      @if (cargando) {
+        <div class="cc-busc__estado">Cargando centros de costo…</div>
+      } @else {
+        <ul class="sigre-cc__tree">
+          @for (n1 of arbolVisible; track n1.key) {
+            <li>
+              <div class="sigre-cc__node sigre-cc__node--n1" (click)="toggleNodo(n1.key, $event)">
+                <i class="material-icons-outlined">{{ estaExpandido(n1.key) ? 'expand_more' : 'chevron_right' }}</i>
+                <span>{{ n1.cod }} — {{ n1.desc }}</span>
+              </div>
+              @if (estaExpandido(n1.key)) {
+                <ul>
+                  @for (n2 of n1.hijos; track n2.key) {
+                    <li>
+                      <div class="sigre-cc__node sigre-cc__node--n2" (click)="toggleNodo(n2.key, $event)">
+                        <i class="material-icons-outlined">{{ estaExpandido(n2.key) ? 'expand_more' : 'chevron_right' }}</i>
+                        <span>{{ n2.cod }} — {{ n2.desc }}</span>
+                      </div>
+                      @if (estaExpandido(n2.key)) {
+                        <ul>
+                          @for (n3 of n2.hijos; track n3.key) {
+                            <li>
+                              <div class="sigre-cc__node sigre-cc__node--n3" (click)="toggleNodo(n3.key, $event)">
+                                <i class="material-icons-outlined">{{ estaExpandido(n3.key) ? 'expand_more' : 'chevron_right' }}</i>
+                                <span>{{ n3.cod }} — {{ n3.desc }}</span>
+                              </div>
+                              @if (estaExpandido(n3.key)) {
+                                <ul>
+                                  @for (leaf of n3.leaves; track leaf.id) {
+                                    <li class="sigre-cc__leaf"
+                                        [class.is-selected]="esSeleccionada(leaf.id)"
+                                        (click)="seleccionar(leaf)"
+                                        (dblclick)="seleccionar(leaf); aceptar()">
+                                      {{ leaf.cencos }} — {{ leaf.descCencos }}
+                                    </li>
+                                  }
+                                </ul>
+                              }
+                            </li>
+                          }
+                        </ul>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </li>
+          } @empty {
+            <li class="cc-busc__estado">Sin resultados</li>
+          }
+        </ul>
+      }
+    </div>
+
+    @if (seleccionado) {
+      <div class="cc-busc__sel">Seleccionado: <strong>{{ seleccionado.cencos }} — {{ seleccionado.descCencos }}</strong></div>
+    }
+  </div>
+
+  <div sigreMetoxiModalFooter>
+    <div class="d-flex justify-content-between gap-2 w-100">
+      <button type="button" class="btn btn-outline-danger" (click)="limpiar()">Sin asignar</button>
+      <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary" (click)="cancelar()">Cancelar</button>
+        <button type="button" class="btn btn-primary" [disabled]="!seleccionado" (click)="aceptar()">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</sigre-metoxi-modal-shell>

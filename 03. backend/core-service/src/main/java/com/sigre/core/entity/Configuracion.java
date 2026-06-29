@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "configuracion", schema = "core")
+@Table(name = "configuracion", schema = "config")
 public class Configuracion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +44,8 @@ public class Configuracion {
     @Column(nullable = false)
     private Boolean editable = true;
 
-    @Column(name = "flag_estado", nullable = false, length = 1)
+    // config.configuracion.activo es BOOLEAN; se mapea a "1"/"0" para conservar la lógica de dominio.
+    @Column(name = "activo", nullable = false)
+    @Convert(converter = ActivoFlagConverter.class)
     private String flagEstado = "1";
 }

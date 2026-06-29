@@ -9,15 +9,15 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @Entity
-@Table(name = "configuracion", schema = "core")
+@Table(name = "configuracion", schema = "config")
 public class ConfiguracionRef {
 
     @Id
     private Long id;
 
-    @Column(name = "parameter", length = 120)
+    @Column(name = "parametro", length = 120)
     private String parametro;
 
-    @Column(name = "value_text", columnDefinition = "TEXT")
+    @Column(name = "valor_texto", columnDefinition = "TEXT")
     private String valorTexto;
 }

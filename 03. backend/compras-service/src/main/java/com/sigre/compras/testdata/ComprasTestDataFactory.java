@@ -123,11 +123,11 @@ public class ComprasTestDataFactory {
     }
 
     private Integer ensureConfiguracionAprobacion(JdbcTemplate jdbc) {
-        jdbc.update("DELETE FROM core.configuracion WHERE parameter IN ('COMPRA_APROBACION_OC', 'COMPRA_APROBACION_OS')");
+        jdbc.update("DELETE FROM config.configuracion WHERE parametro IN ('COMPRA_APROBACION_OC', 'COMPRA_APROBACION_OS')");
         return jdbc.update("""
-                INSERT INTO core.configuracion (parameter, data_type, value_text)
-                VALUES ('COMPRA_APROBACION_OC', 'TEXT', '1'),
-                       ('COMPRA_APROBACION_OS', 'TEXT', '1')
+                INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable, activo)
+                VALUES ('COMPRAS', 'COMPRA_APROBACION_OC', 'TEXT', '1', TRUE, TRUE),
+                       ('COMPRAS', 'COMPRA_APROBACION_OS', 'TEXT', '1', TRUE, TRUE)
                 """);
     }
 
