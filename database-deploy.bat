@@ -295,7 +295,7 @@ if "!FORCE!"=="1" (
     echo ^>^>   Cerrando conexiones activas...
     call :psql_maint_cmd "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '!TARGETDB!' AND pid ^<^> pg_backend_pid();"
     echo ^>^>   Eliminando BD existente...
-    call :psql_maint_cmd "DROP DATABASE IF EXISTS !TARGETDB!;"
+    call :psql_maint_cmd "DROP DATABASE IF EXISTS !TARGETDB! WITH (FORCE);"
     echo ^>^>   Creando BD !TARGETDB! ^(owner: !DBOWNER!^)...
     call :psql_maint_cmd "CREATE DATABASE !TARGETDB! OWNER !DBOWNER!;"
     if errorlevel 1 (
@@ -467,7 +467,7 @@ echo.
 echo ^>^> Modo: clone  Plantilla: !PGTEMPLATE!  Nueva BD: !CLONE_NEWDB!
 if "!FORCE!"=="1" (
     call :psql_maint_cmd "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '!CLONE_NEWDB!' AND pid ^<^> pg_backend_pid();"
-    call :psql_maint_cmd "DROP DATABASE IF EXISTS !CLONE_NEWDB!;"
+    call :psql_maint_cmd "DROP DATABASE IF EXISTS !CLONE_NEWDB! WITH (FORCE);"
 )
 call :psql_maint_cmd "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '!PGTEMPLATE!' AND pid ^<^> pg_backend_pid();"
 call :psql_maint_cmd "CREATE DATABASE !CLONE_NEWDB! TEMPLATE !PGTEMPLATE! OWNER !PGUSER!;"
@@ -547,7 +547,7 @@ if "!FORCE!"=="0" (
     if /i not "!DELCONF!"=="SI" exit /b 1
 )
 call :psql_maint_cmd "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '!DELDB!' AND pid ^<^> pg_backend_pid();"
-call :psql_maint_cmd "DROP DATABASE IF EXISTS !DELDB!;"
+call :psql_maint_cmd "DROP DATABASE IF EXISTS !DELDB! WITH (FORCE);"
 exit /b %ERRORLEVEL%
 
 :do_delete_dev
@@ -560,7 +560,7 @@ if "!FORCE!"=="0" (
 for /f "usebackq delims=" %%D in (`docker run --rm -e "PGPASSWORD=!PGPASSWORD!" -e PGSSLMODE=!PGSSLMODE! !PGSQLIMG! psql -h "!PGHOST!" -p "!PGPORT!" -U "!PGUSER!" -d "!PGMAINTDB!" -t -A -c "SELECT datname FROM pg_database WHERE datistemplate = false AND LENGTH(datname) >= 4 AND RIGHT(datname, 4) = '_dev' AND datname NOT IN ('postgres','template0','template1','sigre_security','sigre_template','sonarqube') ORDER BY 1;"`) do (
     if not "%%D"=="" (
         call :psql_maint_cmd "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '%%D' AND pid ^<^> pg_backend_pid();"
-        call :psql_maint_cmd "DROP DATABASE IF EXISTS %%D;"
+        call :psql_maint_cmd "DROP DATABASE IF EXISTS %%D WITH (FORCE);"
     )
 )
 exit /b 0
