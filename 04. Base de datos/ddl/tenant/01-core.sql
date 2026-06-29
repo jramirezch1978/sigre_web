@@ -999,14 +999,16 @@ CREATE TABLE core.distrito (
     CONSTRAINT FK_DISTRITO_01 FOREIGN KEY (provincia_id) REFERENCES core.provincia(id)
 );
 
--- Catálogo TG_UBIGEO (zonas/puertos del SIGRE legacy). PK = id autogenerado;
--- ubigeo_codigo (CHAR 6) es la clave de negocio (UNIQUE).
-CREATE TABLE core.tg_ubigeo (
+-- Ubigeo SUNAT (departamento/provincia/distrito completo de Perú). Origen: SUNAT_UBIGEO.
+-- PK = id autogenerado; ubigeo (CHAR 6) es la clave de negocio (UNIQUE).
+CREATE TABLE core.sunat_ubigeo (
     id BIGSERIAL PRIMARY KEY,
-    ubigeo_codigo     CHAR(6) NOT NULL,
-    ubige_descripcion VARCHAR(20),
-    flag_replicacion  VARCHAR(1) DEFAULT '1',
-    CONSTRAINT UK_TG_UBIGEO_CODIGO UNIQUE (ubigeo_codigo)
+    ubigeo       CHAR(6) NOT NULL,
+    distrito     VARCHAR(200) NOT NULL,
+    provincia    VARCHAR(200) NOT NULL,
+    departamento VARCHAR(200) NOT NULL,
+    flag_estado  VARCHAR(1) NOT NULL DEFAULT '1',
+    CONSTRAINT UK_SUNAT_UBIGEO_CODIGO UNIQUE (ubigeo)
 );
 
 ALTER TABLE auth.sucursal

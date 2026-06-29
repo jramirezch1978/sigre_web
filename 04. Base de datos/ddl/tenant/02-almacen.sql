@@ -72,7 +72,7 @@ CREATE TABLE almacen.almacen (
     area_total NUMERIC(7, 2),
     vol_total NUMERIC(7, 2),
     flag_cntrl_lote VARCHAR(1) DEFAULT '1',
-    ubigeo BIGINT REFERENCES core.tg_ubigeo(id),
+    ubigeo BIGINT REFERENCES core.sunat_ubigeo(id),
     distrito_id BIGINT REFERENCES core.distrito(id),
     cod_sunat VARCHAR(4) NOT NULL DEFAULT '0001',
     flag_virtual VARCHAR(1) DEFAULT '0',
