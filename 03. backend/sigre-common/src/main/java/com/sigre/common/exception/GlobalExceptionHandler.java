@@ -244,8 +244,35 @@ public class GlobalExceptionHandler {
             return "Faltan datos obligatorios para completar la operación. Por favor, verifique la información enviada.";
         }
         
-        // Mensaje genérico para otros errores de base de datos
-        return "Ocurrió un error al procesar la operación. Por favor, intente nuevamente o contacte al administrador.";
+        // Objeto de BD inexistente (tabla/función/columna): la base del tenant está
+        // desactualizada respecto al DDL (falta recrear plantilla y volver a clonar).
+        Matcher rel = Pattern.compile("relation \"([^\"]+)\" does not exist").matcher(rootMessage);
+        if (rel.find()) {
+            return "La tabla '" + rel.group(1) + "' no existe en la base de datos de esta empresa. "
+                 + "La base está desactualizada respecto al modelo: recree la plantilla y vuelva a clonar. "
+                 + "(detalle: " + recortar(rootMessage) + ")";
+        }
+        Matcher fn = Pattern.compile("function ([^ ]+) does not exist").matcher(rootMessage);
+        if (fn.find()) {
+            return "La función '" + fn.group(1) + "' no existe en la base de datos de esta empresa. "
+                 + "La base está desactualizada respecto al modelo: recree la plantilla y vuelva a clonar. "
+                 + "(detalle: " + recortar(rootMessage) + ")";
+        }
+        Matcher col = Pattern.compile("column \"?([^\" ]+)\"? does not exist").matcher(rootMessage);
+        if (col.find()) {
+            return "La columna '" + col.group(1) + "' no existe en la base de datos. "
+                 + "(detalle: " + recortar(rootMessage) + ")";
+        }
+
+        // Otros errores de base de datos: incluir la causa técnica para diagnóstico.
+        return "Ocurrió un error al procesar la operación. (detalle técnico: " + recortar(rootMessage) + ")";
+    }
+
+    /** Recorta el mensaje técnico para no desbordar el modal. */
+    private String recortar(String msg) {
+        if (msg == null) return "";
+        String limpio = msg.replaceAll("\\s+", " ").trim();
+        return limpio.length() > 400 ? limpio.substring(0, 400) + "…" : limpio;
     }
 
     // ── Fallback general ────────────────────────────────────────────────
