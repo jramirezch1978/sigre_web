@@ -830,7 +830,6 @@ WITH d AS (
         ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_UBICACION_DE_ARTICULO', 'Ubicacion de Articulo', '/sigre/almacen/tablas/almacenes/ubicacion-de-articulo', 'almacen/tablas/ubicaciones', 5),
         ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_MOVIMIENTOS_POR_ALMACEN', 'Movimientos por almacen', '/sigre/almacen/tablas/almacenes/movimientos-por-almacen', 'almacen/tablas/movimientos-almacen', 6),
         ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_TRANSPORTISTAS_X_ALMACEN', 'Transportistas x Almacén', '/sigre/almacen/tablas/almacenes/transportistas-x-almacen', NULL, 7),
-        ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_POSICIONES_POR_ALMACEN', 'Posiciones por Almacen', '/sigre/almacen/tablas/almacenes/posiciones-por-almacen', 'almacen/tablas/posiciones', 8),
         ('ALMACEN_TABLAS_NUMERACION', 'ALMACEN_TABLAS_VALES', 'Vales', '/sigre/almacen/tablas/numeracion/vales', 'almacen/tablas/numeracion-vales', 1),
         ('ALMACEN_TABLAS_NUMERACION', 'ALMACEN_TABLAS_ORDEN_DE_TRASLADO', 'Orden de Traslado', '/sigre/almacen/tablas/numeracion/orden-de-traslado', 'almacen/tablas/numeracion-otr', 2),
         ('ALMACEN_OPERACIONES_MOVIMIENTO_DE_ALMACEN', 'ALMACEN_OPERACIONES_GENERAL', 'General', '/sigre/almacen/operaciones/movimiento-de-almacen/general', 'almacen/operaciones/movimiento-general', 1),
