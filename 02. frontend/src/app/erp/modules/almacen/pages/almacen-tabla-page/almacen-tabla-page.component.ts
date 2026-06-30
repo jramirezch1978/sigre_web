@@ -19,7 +19,7 @@ import { crudConfigPorTabla, TablaCrudConfig } from '../../config/almacen-tabla-
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService } from '../../services/core-api.service';
-import { ErpOrdenConfigService } from '../../../../shared/utils/erp-orden-config.service';
+import { ErpTablaPageBase } from '../../../../shared/base/erp-tabla-page-base';
 import { abrirDialogoMetoxi, SigreModalService } from '@sigre-common';
 import {
   AlmacenRegistroDialogComponent,
@@ -33,7 +33,7 @@ import {
   templateUrl: './almacen-tabla-page.component.html',
   styleUrls: ['./almacen-tabla-page.component.scss'],
 })
-export class AlmacenTablaPageComponent implements OnInit {
+export class AlmacenTablaPageComponent extends ErpTablaPageBase implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly almacenApi = inject(AlmacenApiService);
@@ -41,7 +41,6 @@ export class AlmacenTablaPageComponent implements OnInit {
   private readonly crudService = inject(AlmacenCrudService);
   private readonly dialog = inject(MatDialog);
   private readonly confirmService = inject(SigreModalService);
-  private readonly ordenConfig = inject(ErpOrdenConfigService);
 
   titulo = '';
   subtitulo = '';
@@ -52,9 +51,6 @@ export class AlmacenTablaPageComponent implements OnInit {
   cargando = true;
   error = '';
   crudConfig: TablaCrudConfig | null = null;
-  ordenInicial: string | null = null;
-  tamanoPaginaPersistido: number | null = null;
-  private codigoVentana = '';
 
   private tablaKey: AlmacenTablaKey = 'almacenes';
   private nombreTablaDocumento: string | null = null;
@@ -87,19 +83,10 @@ export class AlmacenTablaPageComponent implements OnInit {
       this.subtitulo = def.subtitulo ?? '';
       this.columnas = def.columnas;
       this.crudConfig = crudConfigPorTabla(this.tablaKey);
-      this.codigoVentana = (data['opcionMenuCodigo'] as string) ?? `ALMACEN_TABLA_${this.tablaKey}`;
-      this.ordenConfig.leerOrden(this.codigoVentana).subscribe(v => { this.ordenInicial = v; });
-      this.ordenConfig.leerTamanoPagina(this.codigoVentana).subscribe(n => { this.tamanoPaginaPersistido = n; });
+      this.nombre = (data['opcionMenuCodigo'] as string) ?? `ALMACEN_TABLA_${this.tablaKey}`;
+      this.cargarPreferenciasTabla();
       this.cargarDatos();
     });
-  }
-
-  onOrdenCambiado(valor: string): void {
-    this.ordenConfig.guardarOrden(this.codigoVentana, valor);
-  }
-
-  onTamanoPaginaCambiado(tamano: number): void {
-    this.ordenConfig.guardarTamanoPagina(this.codigoVentana, tamano);
   }
 
   recargar(): void {

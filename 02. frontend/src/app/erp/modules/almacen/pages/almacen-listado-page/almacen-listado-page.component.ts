@@ -10,7 +10,7 @@ import { AlmacenVistaDef, ALMACEN_VISTAS_POR_RUTA } from '../../config/almacen-v
 import { crudConfigPorCodigoVista, VistaCrudConfig } from '../../config/almacen-vista-crud.config';
 import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
-import { ErpOrdenConfigService } from '../../../../shared/utils/erp-orden-config.service';
+import { ErpTablaPageBase } from '../../../../shared/base/erp-tabla-page-base';
 import { abrirDialogoMetoxi, SigreModalService } from '@sigre-common';
 import {
   AlmacenRegistroDialogComponent,
@@ -26,14 +26,13 @@ import { OrdenTrasladoMdDialogComponent } from '../../components/orden-traslado-
   templateUrl: './almacen-listado-page.component.html',
   styleUrls: ['./almacen-listado-page.component.scss'],
 })
-export class AlmacenListadoPageComponent implements OnInit {
+export class AlmacenListadoPageComponent extends ErpTablaPageBase implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly almacenApi = inject(AlmacenApiService);
   private readonly crudService = inject(AlmacenCrudService);
   private readonly dialog = inject(MatDialog);
   private readonly confirmService = inject(SigreModalService);
-  private readonly ordenConfig = inject(ErpOrdenConfigService);
 
   titulo = '';
   subtitulo = '';
@@ -44,9 +43,6 @@ export class AlmacenListadoPageComponent implements OnInit {
   cargando = true;
   error = '';
   crudConfig: VistaCrudConfig | null = null;
-  ordenInicial: string | null = null;
-  tamanoPaginaPersistido: number | null = null;
-  private codigoVentana = '';
 
   private vista: AlmacenVistaDef | null = null;
 
@@ -74,19 +70,10 @@ export class AlmacenListadoPageComponent implements OnInit {
       this.subtitulo = (data['subtitulo'] as string) ?? this.vista?.subtitulo ?? '';
       this.columnas = (data['columnas'] as TablaColumna[]) ?? this.vista?.columnas ?? [];
       this.crudConfig = this.vista ? crudConfigPorCodigoVista(this.vista.codigo) : null;
-      this.codigoVentana = this.vista?.codigo ?? this.normalizarRuta(this.router.url);
-      this.ordenConfig.leerOrden(this.codigoVentana).subscribe(v => { this.ordenInicial = v; });
-      this.ordenConfig.leerTamanoPagina(this.codigoVentana).subscribe(n => { this.tamanoPaginaPersistido = n; });
+      this.nombre = this.vista?.codigo ?? this.normalizarRuta(this.router.url);
+      this.cargarPreferenciasTabla();
       this.cargarDatos();
     });
-  }
-
-  onOrdenCambiado(valor: string): void {
-    this.ordenConfig.guardarOrden(this.codigoVentana, valor);
-  }
-
-  onTamanoPaginaCambiado(tamano: number): void {
-    this.ordenConfig.guardarTamanoPagina(this.codigoVentana, tamano);
   }
 
   recargar(): void {

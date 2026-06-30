@@ -236,11 +236,19 @@ export class ErpDataTableComponent implements OnChanges {
   private ejecutarExport(formato: ExportFormato): void {
     if (this.filas.length === 0 || this.exportando) return;
     this.exportando = true;
+    const nombreArchivo = `${this.nombreExport}_${this.sufijoFechaHora()}`;
     this.exportSvc
-      .exportar(formato, this.columnas, this.filas, this.nombreExport, (f, c) => this.valorCelda(f, c))
+      .exportar(formato, this.columnas, this.filas, nombreArchivo, (f, c) => this.valorCelda(f, c))
       .subscribe({
         next: () => { this.exportando = false; this.cerrarModalExport(); },
         error: () => { this.exportando = false; this.cerrarModalExport(); },
       });
+  }
+
+  /** Sufijo de fecha y hora de la descarga: yyyymmdd_hhmmss. */
+  private sufijoFechaHora(): string {
+    const d = new Date();
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
   }
 }
