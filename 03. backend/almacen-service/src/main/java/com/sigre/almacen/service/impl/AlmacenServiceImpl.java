@@ -16,6 +16,9 @@ import com.sigre.almacen.repository.EntidadContribuyenteRefRepository;
 import com.sigre.almacen.service.AlmacenService;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
+import com.sigre.common.security.TenantContext;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -35,6 +38,15 @@ public class AlmacenServiceImpl implements AlmacenService {
         Page<Almacen> page = repository.findAll(pageable);
         log.info("Almacenes encontrados: {}", page.getTotalElements());
         return page;
+    }
+
+    @Override
+    public List<Almacen> findMisAlmacenes() {
+        Long usuarioId = TenantContext.getUsuarioId();
+        if (usuarioId == null) {
+            return List.of();
+        }
+        return repository.findMisAlmacenes(usuarioId);
     }
 
     @Timed(value = "app.db.query", extraTags = {"table", "almacen", "operation", "findById"})

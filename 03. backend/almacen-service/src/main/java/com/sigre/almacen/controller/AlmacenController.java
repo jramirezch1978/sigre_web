@@ -52,6 +52,13 @@ public class AlmacenController {
         return ApiResponse.ok(toResponseEnriched(almacenService.findById(id)));
     }
 
+    /** Almacenes activos asignados al usuario actual (almacen.almacen_user). */
+    @GetMapping("/mis-almacenes")
+    public ApiResponse<List<AlmacenResponse>> misAlmacenes() {
+        return ApiResponse.ok(
+                almacenService.findMisAlmacenes().stream().map(this::toResponseEnriched).toList());
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<AlmacenResponse> create(@Valid @RequestBody AlmacenRequest request) {

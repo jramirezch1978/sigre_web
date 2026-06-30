@@ -4,9 +4,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.sigre.almacen.entity.Almacen;
 
+import java.util.List;
+
 public interface AlmacenService {
 
     Page<Almacen> findAll(Pageable pageable);
+
+    /** Almacenes activos asignados al usuario actual (almacen_user). */
+    List<Almacen> findMisAlmacenes();
 
     Almacen findById(Long id);
 

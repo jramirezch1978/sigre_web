@@ -183,6 +183,26 @@ export class AlmacenApiService {
     return this.listarTodoPaginado<ArticuloMovTipoDto>('/maestros/tipos-movimiento-catalogo');
   }
 
+  /** Tipos de movimiento ASIGNADOS a un almacén (almacen.almacen_tipo_mov). */
+  listarTiposMovimientoPorAlmacen(almacenId: number): Observable<AlmacenTipoMovDto[]> {
+    return this.listarTodoPaginado<AlmacenTipoMovDto>(`/almacenes/${almacenId}/tipos-movimiento`);
+  }
+
+  /** Almacenes asignados al usuario actual y activos (almacen.almacen_user). */
+  listarMisAlmacenes(): Observable<AlmacenDto[]> {
+    return this.http
+      .get<ApiResponse<AlmacenDto[]>>(`${this.base}/almacenes/mis-almacenes`)
+      .pipe(map(res => res.data ?? []));
+  }
+
+  /** Hora del servidor de BD (sin zona horaria) para fijar la fecha de registro. */
+  obtenerHoraServidor(): Observable<{ fecha: string; fechaHora: string }> {
+    const coreBase = `${this.apiBase.getApiBaseUrl()}/core`;
+    return this.http
+      .get<ApiResponse<{ fecha: string; fechaHora: string }>>(`${coreBase}/server-time`)
+      .pipe(map(res => res.data ?? { fecha: '', fechaHora: '' }));
+  }
+
   listarMotivosTraslado(): Observable<MotivoTrasladoDto[]> {
     return this.listarTodoPaginado<MotivoTrasladoDto>('/maestros/motivos-traslado');
   }

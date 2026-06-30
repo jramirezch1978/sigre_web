@@ -59,11 +59,13 @@ export class MovimientoMdDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      sucursalId: [null, Validators.required],
+      // Sucursal fija a la del usuario (no editable).
+      sucursalId: [{ value: null, disabled: true }, Validators.required],
       almacenId: [null, Validators.required],
       articuloMovTipoId: [null, Validators.required],
-      fechaMov: [this.hoy(), Validators.required],
-      fecProduccion: [null],
+      // Fecha de registro = hora de la BD, no editable.
+      fechaMov: [{ value: this.hoy(), disabled: true }, Validators.required],
+      fecProduccion: [null], // Fecha auxiliar (por defecto = fecha registro)
       proveedorId: [null],
       nomReceptor: [null],
       nroDocExt: [null],
@@ -71,22 +73,42 @@ export class MovimientoMdDialogComponent implements OnInit {
       lineas: this.fb.array([]),
     });
 
+    // Al cambiar de almacén: recargar SOLO los tipos de movimiento asignados a ese almacén (activos).
+    this.form.get('almacenId')!.valueChanges.subscribe((almId: number | null) => {
+      this.form.get('articuloMovTipoId')!.setValue(null);
+      this.cargarTiposPorAlmacen(almId);
+    });
+
     forkJoin({
       suc: this.coreApi.listarMisSucursales().pipe(catchError(() => of([]))),
-      alm: this.almacenApi.listarAlmacenes().pipe(catchError(() => of([]))),
-      tip: this.almacenApi.listarTiposMovimiento().pipe(catchError(() => of([]))),
+      alm: this.almacenApi.listarMisAlmacenes().pipe(catchError(() => of([]))),
       prov: this.coreApi.listarProveedores().pipe(catchError(() => of([]))),
-    }).subscribe(({ suc, alm, tip, prov }) => {
+      hora: this.almacenApi.obtenerHoraServidor().pipe(catchError(() => of({ fecha: this.hoy(), fechaHora: '' }))),
+    }).subscribe(({ suc, alm, prov, hora }) => {
       this.sucursales = suc.map(s => ({ value: s.id, label: `${s.codigo ?? s.id} — ${s.nombre}` }));
       this.almacenes = this.activos(alm).map(a => ({ value: a.id, label: `${a.codigo} — ${a.nombre}` }));
-      this.tiposMov = this.activos(tip).map((t: { id: number; tipoMov: string; descTipoMov: string }) => ({ value: t.id, label: `${t.tipoMov} — ${t.descTipoMov}` }));
       this.proveedores = prov;
+
       if (this.data.registroId) {
         this.cargarRegistro(this.data.registroId);
       } else {
+        // Sucursal del usuario (la primera de sus sucursales) y fecha de BD.
+        if (this.sucursales.length) this.form.get('sucursalId')!.setValue(this.sucursales[0].value);
+        const fecha = hora?.fecha || this.hoy();
+        this.form.get('fechaMov')!.setValue(fecha);
+        this.form.get('fecProduccion')!.setValue(fecha); // auxiliar = registro por defecto
         this.agregarLinea();
         this.cargando = false;
       }
+    });
+  }
+
+  /** Carga los tipos de movimiento asignados a un almacén (activos). */
+  private cargarTiposPorAlmacen(almacenId: number | null): void {
+    if (!almacenId) { this.tiposMov = []; return; }
+    this.almacenApi.listarTiposMovimientoPorAlmacen(almacenId).pipe(catchError(() => of([]))).subscribe(tipos => {
+      this.tiposMov = this.activos(tipos)
+        .map(t => ({ value: t.articuloMovTipoId ?? t.id, label: `${t.tipoMov} — ${t.descTipoMov}` }));
     });
   }
 
