@@ -321,6 +321,7 @@ public class RelacionComercialServiceImpl implements RelacionComercialService {
         linea.setMonedaId(request.getMonedaId());
         linea.setLimiteCredito(request.getLimiteCredito());
         linea.setDiasCredito(request.getDiasCredito());
+        linea.setFechaVencimiento(request.getFechaVencimiento());
         linea.setCreatedBy(TenantContext.getUsuarioId());
         linea.setFecCreacion(Instant.now());
         return mapper.toLineaResponse(lineaCreditoRepository.save(linea));
@@ -341,6 +342,7 @@ public class RelacionComercialServiceImpl implements RelacionComercialService {
         linea.setMonedaId(request.getMonedaId());
         linea.setLimiteCredito(request.getLimiteCredito());
         linea.setDiasCredito(request.getDiasCredito());
+        linea.setFechaVencimiento(request.getFechaVencimiento());
         linea.setUpdatedBy(TenantContext.getUsuarioId());
         linea.setFecModificacion(Instant.now());
         return mapper.toLineaResponse(lineaCreditoRepository.save(linea));

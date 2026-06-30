@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -16,5 +17,6 @@ public class LineaCreditoResponse {
     private Long monedaId;
     private BigDecimal limiteCredito;
     private Integer diasCredito;
+    private LocalDate fechaVencimiento;
     private String flagEstado;
 }

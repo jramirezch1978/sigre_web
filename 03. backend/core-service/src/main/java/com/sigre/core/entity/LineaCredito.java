@@ -8,6 +8,7 @@ import lombok.Setter;
 import com.sigre.common.entity.BaseEntity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 /** Línea de crédito de una relación comercial (ventas.entidad_creditos_cxc). */
 @Getter
@@ -30,4 +31,7 @@ public class LineaCredito extends BaseEntity {
 
     @Column(name = "dias_credito", nullable = false)
     private Integer diasCredito = 0;
+
+    @Column(name = "fecha_vencimiento")
+    private LocalDate fechaVencimiento;
 }

@@ -59,6 +59,7 @@ public class RelacionComercialMapper {
                 entity.getMonedaId(),
                 entity.getLimiteCredito(),
                 entity.getDiasCredito(),
+                entity.getFechaVencimiento(),
                 entity.getFlagEstado()
         );
     }

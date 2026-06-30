@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -24,4 +25,6 @@ public class LineaCreditoRequest {
     @NotNull
     @PositiveOrZero
     private Integer diasCredito;
+
+    private LocalDate fechaVencimiento;
 }

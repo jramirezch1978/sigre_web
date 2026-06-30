@@ -219,6 +219,7 @@ CREATE TABLE ventas.entidad_creditos_cxc (
     moneda_id BIGINT REFERENCES core.moneda(id),
     limite_credito NUMERIC(18, 4) NOT NULL DEFAULT 0,
     dias_credito INTEGER NOT NULL DEFAULT 0,
+    fecha_vencimiento DATE,
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1',
     created_by          BIGINT,
     fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),
