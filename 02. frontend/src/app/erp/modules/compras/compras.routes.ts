@@ -9,6 +9,15 @@ export const comprasRoutes: Routes = [
         m => m.ProveedoresListPageComponent,
       ),
   },
+  // Maestros de catálogo (CRUD genérico por config).
+  ...['marcas', 'colores', 'clases-articulo', 'categorias', 'sub-categorias'].map(key => ({
+    path: `tablas/${key}`,
+    loadComponent: () =>
+      import('./pages/catalogo-maestro-page/catalogo-maestro-page.component').then(
+        m => m.CatalogoMaestroPageComponent,
+      ),
+    data: { catalogoKey: key },
+  })),
   // Opciones de compras aún sin desarrollar: muestran "en construcción".
   {
     path: '**',
