@@ -128,12 +128,12 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   }
 
   colClassDe(campo: TablaCrudCampo): string {
-    return colClassMetoxiCampo(campo.key, campo.type);
+    return colClassMetoxiCampo(campo.key, this.tipoFormField(campo));
   }
 
-  /** Campos normales (no flags) — van en la fila principal. */
+  /** Campos normales (no flags ni factores de saldo) — van en la fila principal. */
   get camposNoSwitch(): TablaCrudCampo[] {
-    return this.data.config.campos.filter(c => c.type !== 'switch');
+    return this.data.config.campos.filter(c => c.type !== 'switch' && c.type !== 'saldo-factor');
   }
 
   /** Flags (switch) — van juntos en una fila aparte al final. */
@@ -141,12 +141,38 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     return this.data.config.campos.filter(c => c.type === 'switch');
   }
 
+  /** Factores de saldo (tri-estado) — van en su propio panel al final. */
+  get camposSaldo(): TablaCrudCampo[] {
+    return this.data.config.campos.filter(c => c.type === 'saldo-factor');
+  }
+
+  /** Tipo que ve el form-field compartido (select-text se renderiza como select). */
+  tipoFormField(campo: TablaCrudCampo): 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo' {
+    if (campo.type === 'select-text') return 'select';
+    if (campo.type === 'saldo-factor') return 'number';
+    return campo.type as 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo';
+  }
+
+  /** Opciones del radio tri-estado para los factores de saldo. */
+  readonly opcionesSaldo: ReadonlyArray<{ valor: number; etiqueta: string }> = [
+    { valor: 1, etiqueta: 'Incrementa' },
+    { valor: -1, etiqueta: 'Disminuye' },
+    { valor: 0, etiqueta: 'Nada' },
+  ];
+
+  /** Marca el valor tri-estado de un factor de saldo. */
+  setSaldo(campo: TablaCrudCampo, valor: number): void {
+    const c = this.form.get(campo.key);
+    c?.setValue(valor);
+    c?.markAsDirty();
+  }
+
   placeholderDe(campo: TablaCrudCampo): string {
     return `Ingrese ${campo.label.toLowerCase()}…`;
   }
 
   layoutDe(campo: TablaCrudCampo): 'icon-inside' | 'input-group' {
-    return campo.type === 'select' ? 'input-group' : 'icon-inside';
+    return campo.type === 'select' || campo.type === 'select-text' ? 'input-group' : 'icon-inside';
   }
 
   private valorInicial(campo: TablaCrudCampo): unknown {
@@ -163,7 +189,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
         // Activos por defecto solo el estado y el control de lote; el resto, apagado.
         return ['flagEstado', 'flagCntrlLote'].includes(campo.key);
       }
-      if (campo.key === 'codSunat') return '0001';
+      if (campo.type === 'saldo-factor') return 0;
       if (campo.key === 'ano') return new Date().getFullYear();
       if (campo.key === 'fechaMov' || campo.key === 'fecha' || campo.key === 'fechaConteo') {
         return new Date().toISOString().slice(0, 10);
@@ -174,6 +200,17 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     if (campo.type === 'switch') {
       const raw = reg[campo.key];
       return raw === '1' || raw === 1 || raw === true;
+    }
+    if (campo.type === 'saldo-factor') {
+      const raw = reg[campo.key];
+      if (raw == null || raw === '') return 0;
+      const n = Number(raw);
+      // Normaliza a tri-estado: >0 -> 1, <0 -> -1, 0 -> 0.
+      return Number.isNaN(n) ? 0 : (n > 0 ? 1 : (n < 0 ? -1 : 0));
+    }
+    if (campo.type === 'select-text') {
+      const raw = reg[campo.key];
+      return raw == null || raw === '—' ? '' : String(raw);
     }
     if (campo.type === 'select') {
       const raw = reg[campo.key];
@@ -200,10 +237,11 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     const necesitaUsuarios = campos.some(c => c.optionsFrom === 'usuarios-empresa');
     const necesitaUnidades = campos.some(c => c.optionsFrom === 'unidades');
     const necesitaLibros = campos.some(c => c.optionsFrom === 'libros-contables');
+    const necesitaSunat = campos.some(c => c.optionsFrom === 'sunat-tab12');
 
     if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov
         && !necesitaCentrosCosto && !necesitaProveedores && !necesitaUbigeos && !necesitaUsuarios
-        && !necesitaUnidades && !necesitaLibros) {
+        && !necesitaUnidades && !necesitaLibros && !necesitaSunat) {
       this.cargandoOpciones = false;
       return;
     }
@@ -225,8 +263,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       usuarios: necesitaUsuarios ? resiliente('responsables', this.coreApi.listarUsuariosEmpresa()) : of([]),
       unidades: necesitaUnidades ? resiliente('unidades de medida', this.coreApi.listarUnidadesMedida()) : of([]),
       libros: necesitaLibros ? resiliente('libros contables', this.coreApi.listarLibrosContables()) : of([]),
+      sunat: necesitaSunat ? resiliente('códigos SUNAT', this.coreApi.listarSunatTab12()) : of([]),
     }).subscribe({
-      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos, usuarios, unidades, libros }) => {
+      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos, usuarios, unidades, libros, sunat }) => {
         if (necesitaTipos) {
           this.opciones['tipos-almacen'] = this.soloActivos(tipos).map(t => ({
             value: t.id,
@@ -272,6 +311,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
         if (necesitaLibros) {
           this.opciones['libros-contables'] = libros;
         }
+        if (necesitaSunat) {
+          this.opciones['sunat-tab12'] = sunat;
+        }
         this.cargandoOpciones = false;
         // El formulario queda usable; solo se avisa (modal WARNING) de las listas que no cargaron.
         if (fallidas.length) {
@@ -293,8 +335,13 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       let valor = raw[campo.key];
       if (campo.type === 'switch') {
         valor = valor === true || valor === '1' || valor === 1 ? '1' : '0';
+      } else if (campo.type === 'saldo-factor') {
+        const n = Number(valor);
+        valor = Number.isNaN(n) ? 0 : (n > 0 ? 1 : (n < 0 ? -1 : 0));
       } else if (campo.type === 'number' || campo.type === 'select') {
         valor = valor === '' || valor == null ? null : Number(valor);
+      } else if (campo.type === 'select-text') {
+        valor = valor == null || valor === '' ? null : String(valor);
       } else if (campo.type === 'date') {
         valor = valor === '' ? null : valor;
       } else if (typeof valor === 'string') {

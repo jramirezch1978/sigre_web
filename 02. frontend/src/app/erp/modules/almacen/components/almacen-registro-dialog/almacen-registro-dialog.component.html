@@ -20,7 +20,7 @@
             [fieldKey]="campo.key"
             [label]="campo.label"
             [required]="!!campo.required"
-            [type]="campo.type"
+            [type]="tipoFormField(campo)"
             [colClass]="colClassDe(campo)"
             [placeholder]="placeholderDe(campo)"
             [maxLength]="campo.maxLength ?? null"
@@ -30,6 +30,30 @@
             [layout]="layoutDe(campo)" />
         }
       </div>
+
+      @if (camposSaldo.length) {
+        <div class="sigre-saldos mt-3">
+          <div class="sigre-saldos__titulo">Saldos (afectación de stock)</div>
+          <div class="sigre-saldos__grid">
+            @for (campo of camposSaldo; track campo.key) {
+              <div class="sigre-saldos__item">
+                <span class="sigre-saldos__label">{{ campo.label }}</span>
+                <div class="sigre-saldos__radios">
+                  @for (op of opcionesSaldo; track op.valor) {
+                    <label class="sigre-saldos__radio"
+                           [class.sigre-saldos__radio--on]="controlDe(campo)?.value === op.valor">
+                      <input type="radio" [name]="'saldo-' + campo.key"
+                             [checked]="controlDe(campo)?.value === op.valor"
+                             (change)="setSaldo(campo, op.valor)" />
+                      {{ op.etiqueta }}
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
       @if (camposSwitch.length) {
         <div class="row g-3 mt-1">
           @for (campo of camposSwitch; track campo.key) {

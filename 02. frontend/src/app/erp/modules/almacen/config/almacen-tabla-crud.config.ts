@@ -1,6 +1,6 @@
 import { AlmacenTablaKey } from './almacen-tablas.config';
 
-export type TablaCampoTipo = 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo';
+export type TablaCampoTipo = 'text' | 'number' | 'select' | 'select-text' | 'date' | 'switch' | 'centros-costo' | 'saldo-factor';
 
 export type CrudApiSource = 'almacen' | 'core';
 
@@ -22,7 +22,7 @@ export interface TablaCrudCampo {
   required?: boolean;
   maxLength?: number;
   readonlyOnEdit?: boolean;
-  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento' | 'centros-costo' | 'proveedores' | 'ubigeos' | 'usuarios-empresa' | 'unidades' | 'libros-contables';
+  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento' | 'centros-costo' | 'proveedores' | 'ubigeos' | 'usuarios-empresa' | 'unidades' | 'libros-contables' | 'sunat-tab12';
   /** Etiqueta cuando el switch está encendido (flag_estado = 1). */
   switchOnLabel?: string;
   /** Etiqueta cuando el switch está apagado (flag_estado = 0). */
@@ -45,9 +45,9 @@ function flagSiNo(key: string, label: string): TablaCrudCampo {
   return { key, label, type: 'switch', switchOnLabel: 'Sí', switchOffLabel: 'No', defaultValue: false };
 }
 
-/** Helper: factor numérico de saldo (default 0). */
+/** Helper: factor de saldo tri-estado (Incrementa=1 / Disminuye=-1 / Nada=0). */
 function factor(key: string, label: string): TablaCrudCampo {
-  return { key, label, type: 'number', defaultValue: 0 };
+  return { key, label, type: 'saldo-factor', defaultValue: 0 };
 }
 
 export interface TablaCrudConfig {
@@ -102,9 +102,9 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
       // Identificación
       { key: 'tipoMov', label: 'Código', type: 'text', required: true, maxLength: 10, readonlyOnEdit: true },
       { key: 'descTipoMov', label: 'Descripción', type: 'text', required: true, maxLength: 200 },
-      { key: 'flagClaseMov', label: 'Clase (I = Ingreso / S = Salida)', type: 'text', maxLength: 1 },
       { key: 'tipoMovDev', label: 'Tipo mov. devolución', type: 'text', maxLength: 10 },
-      { key: 'codSunat', label: 'Código SUNAT', type: 'text', maxLength: 10 },
+      // El ingreso/salida lo define "Factor saldo total" (+1 ingreso / -1 salida); no hay campo Clase.
+      { key: 'codSunat', label: 'Código SUNAT (Tabla 12)', type: 'select-text', optionsFrom: 'sunat-tab12' },
       // Factores de saldo (afectación de stock)
       factor('factorSldoTotal', 'Factor saldo total'),
       factor('factorSldoXLlegar', 'Factor saldo por llegar'),

@@ -129,9 +129,8 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
   'numeracion-vales': {
     codigo: 'AL010',
     titulo: 'Numeración — Vales',
-    subtitulo: 'Correlativo por sucursal y año (tabla almacen.vale_mov)',
+    subtitulo: 'Correlativo por sucursal y año (VALE_MOV)',
     columnas: [
-      { key: 'nombreTabla', header: 'Tabla destino', width: '160px' },
       { key: 'sucursalCodigo', header: 'Sucursal', width: '90px' },
       { key: 'sucursalNombre', header: 'Nombre sucursal', width: '160px' },
       { key: 'ano', header: 'Año', width: '70px' },
@@ -142,9 +141,8 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
   'numeracion-otr': {
     codigo: 'AL011',
     titulo: 'Numeración — OTR',
-    subtitulo: 'Correlativo por sucursal y año (tabla almacen.orden_traslado)',
+    subtitulo: 'Correlativo por sucursal y año (ORDEN_TRASLADO)',
     columnas: [
-      { key: 'nombreTabla', header: 'Tabla destino', width: '180px' },
       { key: 'sucursalCodigo', header: 'Sucursal', width: '90px' },
       { key: 'sucursalNombre', header: 'Nombre sucursal', width: '160px' },
       { key: 'ano', header: 'Año', width: '70px' },

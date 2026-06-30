@@ -114,6 +114,33 @@ export class CoreApiService {
       );
   }
 
+  /**
+   * Ítems del catálogo SUNAT "Tabla 12 - Tipo de Operación" (core.catalogo_sunat_det)
+   * para el Código SUNAT del tipo de movimiento. Resuelve el id del catálogo TAB12 y
+   * lista sus ítems activos. El value es el codigo_item (string), no el id.
+   */
+  listarSunatTab12(): Observable<SelectOptionDto[]> {
+    const coreBase = `${this.apiBase.getApiBaseUrl()}/core`;
+    const pCat = new HttpParams().set('codigoCatalogo', 'TAB12').set('size', '1');
+    return this.http
+      .get<ApiResponse<PageData<{ id: number }>>>(`${coreBase}/catalogos-sunat`, { params: pCat })
+      .pipe(
+        switchMap(res => {
+          const catId = res.data?.content?.[0]?.id;
+          if (catId == null) return of([] as SelectOptionDto[]);
+          return this.http
+            .get<ApiResponse<{ codigoItem?: string; nombreItem?: string }[]>>(
+              `${coreBase}/catalogos-sunat/detalles/catalogo/${catId}/activos`)
+            .pipe(
+              map(r => (r.data ?? []).map(it => ({
+                value: it.codigoItem ?? '',
+                label: `${it.codigoItem ?? ''}${it.nombreItem ? ' — ' + it.nombreItem : ''}`,
+              })))
+            );
+        })
+      );
+  }
+
   /** Libros contables activos (contabilidad.cntbl_libro) para el FK del tipo de almacén. */
   listarLibrosContables(): Observable<SelectOptionDto[]> {
     const contabilidadBase = `${this.apiBase.getApiBaseUrl()}/contabilidad`;
