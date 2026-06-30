@@ -8,6 +8,7 @@ import { StorageService } from '../../../core/services/storage.service';
 import { JwtClaimsReaderService } from '../../services/jwt-claims-reader.service';
 import { RolDto, ModuloDto, OpcionMenuDto, AccionDto, RolOpcionMenuDto, RolOpcionAccionDto } from '../../models/admin.models';
 import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 export interface NodoArbol {
   opcionMenuId: number;
@@ -23,7 +24,7 @@ export interface NodoArbol {
   styleUrls: ['./admin-roles.component.scss'],
   standalone: false,
 })
-export class AdminRolesComponent implements OnInit {
+export class AdminRolesComponent extends AdminTablaPageBase<RolDto> implements OnInit {
 
   private readonly api = inject(AdminSeguridadApiService);
   private readonly fb = inject(FormBuilder);
@@ -101,18 +102,15 @@ export class AdminRolesComponent implements OnInit {
     { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
   ];
 
-  get filasTabla(): Record<string, unknown>[] {
-    return this.rolesFiltrados.map(r => ({
+  protected get registrosTabla(): RolDto[] { return this.rolesFiltrados; }
+  protected aFila(r: RolDto): Record<string, unknown> {
+    return {
       id: r.id, codigo: r.codigo, nombre: r.nombre,
       tipo: r.esAdmin ? 'Administrador' : 'Normal',
       flagEstado: r.activo ? '1' : '0',
-    }));
+    };
   }
-
-  onEditarFila(row: Record<string, unknown>): void {
-    const r = this.roles.find(x => x.id === row['id']);
-    if (r) this.abrirEditar(r);
-  }
+  protected override editarRegistro(r: RolDto): void { this.abrirEditar(r); }
 
   get opcionesDisponibles(): OpcionMenuDto[] {
     const asignadas = new Set(this.opcionesDelRol.map(o => o.opcionMenuId));

@@ -5,6 +5,7 @@ import { ModalConfirmationComponent } from '@sigre-common';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { ModuloDto, OpcionMenuDto } from '../../models/admin.models';
 import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
   selector: 'app-admin-opciones-menu',
@@ -12,7 +13,7 @@ import { TablaColumna } from '../../../erp/shared/models/api-page.model';
   styleUrls: ['./admin-opciones-menu.component.scss'],
   standalone: false,
 })
-export class AdminOpcionesMenuComponent implements OnInit {
+export class AdminOpcionesMenuComponent extends AdminTablaPageBase<OpcionMenuDto> implements OnInit {
 
   private readonly api = inject(AdminSeguridadApiService);
   private readonly fb = inject(FormBuilder);
@@ -71,8 +72,9 @@ export class AdminOpcionesMenuComponent implements OnInit {
     { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
   ];
 
-  get filasTabla(): Record<string, unknown>[] {
-    return this.opcionesFiltradas.map(o => ({
+  protected get registrosTabla(): OpcionMenuDto[] { return this.opcionesFiltradas; }
+  protected aFila(o: OpcionMenuDto): Record<string, unknown> {
+    return {
       id: o.id,
       codigo: o.codigo ?? '—',
       nombre: o.nombre,
@@ -80,13 +82,9 @@ export class AdminOpcionesMenuComponent implements OnInit {
       rutaFrontend: o.rutaFrontend ?? '—',
       orden: o.orden ?? 0,
       flagEstado: o.activo ? '1' : '0',
-    }));
+    };
   }
-
-  onEditarFila(row: Record<string, unknown>): void {
-    const o = this.opciones.find(x => x.id === row['id']);
-    if (o) this.abrirEditar(o);
-  }
+  protected override editarRegistro(o: OpcionMenuDto): void { this.abrirEditar(o); }
 
   moduloNombre(id?: number): string {
     if (id == null) return '—';

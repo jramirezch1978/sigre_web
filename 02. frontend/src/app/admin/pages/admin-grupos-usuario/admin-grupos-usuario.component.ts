@@ -8,6 +8,7 @@ import { StorageService } from '../../../core/services/storage.service';
 import { JwtClaimsReaderService } from '../../services/jwt-claims-reader.service';
 import { GrupoUsuarioDto, GrupoUsuarioMiembroDto, UsuarioAdminDto } from '../../models/admin.models';
 import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
   selector: 'app-admin-grupos-usuario',
@@ -15,7 +16,7 @@ import { TablaColumna } from '../../../erp/shared/models/api-page.model';
   styleUrls: ['./admin-grupos-usuario.component.scss'],
   standalone: false,
 })
-export class AdminGruposUsuarioComponent implements OnInit {
+export class AdminGruposUsuarioComponent extends AdminTablaPageBase<GrupoUsuarioDto> implements OnInit {
 
   private readonly api = inject(AdminSeguridadApiService);
   private readonly fb = inject(FormBuilder);
@@ -80,16 +81,11 @@ export class AdminGruposUsuarioComponent implements OnInit {
     { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
   ];
 
-  get filasTabla(): Record<string, unknown>[] {
-    return this.gruposFiltrados.map(g => ({
-      id: g.id, codigo: g.codigo, descripcion: g.descripcion, flagEstado: g.activo ? '1' : '0',
-    }));
+  protected get registrosTabla(): GrupoUsuarioDto[] { return this.gruposFiltrados; }
+  protected aFila(g: GrupoUsuarioDto): Record<string, unknown> {
+    return { id: g.id, codigo: g.codigo, descripcion: g.descripcion, flagEstado: g.activo ? '1' : '0' };
   }
-
-  onEditarFila(row: Record<string, unknown>): void {
-    const g = this.grupos.find(x => x.id === row['id']);
-    if (g) this.abrirEditar(g);
-  }
+  protected override editarRegistro(g: GrupoUsuarioDto): void { this.abrirEditar(g); }
 
   get usuariosDisponibles(): UsuarioAdminDto[] {
     const asignados = new Set<number>(this.miembros.map(m => m.usuarioId));

@@ -5,6 +5,7 @@ import { ModalConfirmationComponent } from '@sigre-common';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { UsuarioAdminDto } from '../../models/admin.models';
 import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
   selector: 'app-admin-usuarios',
@@ -12,7 +13,7 @@ import { TablaColumna } from '../../../erp/shared/models/api-page.model';
   styleUrls: ['./admin-usuarios.component.scss'],
   standalone: false,
 })
-export class AdminUsuariosComponent implements OnInit {
+export class AdminUsuariosComponent extends AdminTablaPageBase<UsuarioAdminDto> implements OnInit {
 
   private readonly api = inject(AdminSeguridadApiService);
   private readonly fb = inject(FormBuilder);
@@ -77,19 +78,16 @@ export class AdminUsuariosComponent implements OnInit {
     { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
   ];
 
-  get filasTabla(): Record<string, unknown>[] {
-    return this.usuariosFiltrados.map(u => ({
+  protected get registrosTabla(): UsuarioAdminDto[] { return this.usuariosFiltrados; }
+  protected aFila(u: UsuarioAdminDto): Record<string, unknown> {
+    return {
       id: u.id, nombreCompleto: u.nombreCompleto, username: u.username, email: u.email,
       flagAdminSistema: u.flagAdminSistema ? '1' : '0',
       bloqueado: u.bloqueado ? '1' : '0',
       flagEstado: u.activo ? '1' : '0',
-    }));
+    };
   }
-
-  onEditarFila(row: Record<string, unknown>): void {
-    const u = this.usuarios.find(x => x.id === row['id']);
-    if (u) this.abrirEditar(u);
-  }
+  protected override editarRegistro(u: UsuarioAdminDto): void { this.abrirEditar(u); }
 
   get formActivo(): FormGroup { return this.editandoId != null ? this.formEditar : this.formCrear; }
   get esCreacion(): boolean { return this.editandoId == null; }

@@ -5,6 +5,7 @@ import { ModalConfirmationComponent } from '@sigre-common';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { AccionDto } from '../../models/admin.models';
 import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
   selector: 'app-admin-acciones',
@@ -12,7 +13,7 @@ import { TablaColumna } from '../../../erp/shared/models/api-page.model';
   styleUrls: ['./admin-acciones.component.scss'],
   standalone: false,
 })
-export class AdminAccionesComponent implements OnInit {
+export class AdminAccionesComponent extends AdminTablaPageBase<AccionDto> implements OnInit {
 
   private readonly api = inject(AdminSeguridadApiService);
   private readonly fb = inject(FormBuilder);
@@ -55,16 +56,11 @@ export class AdminAccionesComponent implements OnInit {
     { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
   ];
 
-  get filasTabla(): Record<string, unknown>[] {
-    return this.accionesFiltradas.map(a => ({
-      id: a.id, codigo: a.codigo, nombre: a.nombre, flagEstado: a.activo ? '1' : '0',
-    }));
+  protected get registrosTabla(): AccionDto[] { return this.accionesFiltradas; }
+  protected aFila(a: AccionDto): Record<string, unknown> {
+    return { id: a.id, codigo: a.codigo, nombre: a.nombre, flagEstado: a.activo ? '1' : '0' };
   }
-
-  onEditarFila(row: Record<string, unknown>): void {
-    const a = this.acciones.find(x => x.id === row['id']);
-    if (a) this.abrirEditar(a);
-  }
+  protected override editarRegistro(a: AccionDto): void { this.abrirEditar(a); }
 
   abrirCrear(): void { this.editandoId = null; this.form.reset({ codigo: '', nombre: '', activo: true }); this.mostrandoForm = true; }
 
