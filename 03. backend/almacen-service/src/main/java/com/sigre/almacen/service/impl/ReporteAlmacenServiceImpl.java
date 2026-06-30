@@ -143,7 +143,6 @@ public class ReporteAlmacenServiceImpl implements ReporteAlmacenService {
                 : null;
         return LoteVencimientoResponse.builder()
                 .id(l.getId())
-                .almacenId(l.getAlmacenId())
                 .articuloId(l.getArticuloId())
                 .articuloCodigo(art != null ? art.getCodigo() : null)
                 .articuloNombre(art != null ? art.getNombre() : null)
