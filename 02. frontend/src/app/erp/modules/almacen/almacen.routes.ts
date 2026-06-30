@@ -15,8 +15,16 @@ export const almacenRoutes: Routes = [
   },
   ...ALMACEN_TABLAS_OPCIONES.map(opcion => ({
     path: rutaRelativaAlmacen(opcion.rutaFrontend),
-    loadComponent: () =>
-      import('./pages/almacen-tabla-page/almacen-tabla-page.component').then(m => m.AlmacenTablaPageComponent),
+    loadComponent:
+      opcion.tablaKey === 'movimientos-almacen'
+        ? () =>
+            import('./pages/almacen-mov-agrupado-page/almacen-mov-agrupado-page.component').then(
+              m => m.AlmacenMovAgrupadoPageComponent,
+            )
+        : () =>
+            import('./pages/almacen-tabla-page/almacen-tabla-page.component').then(
+              m => m.AlmacenTablaPageComponent,
+            ),
     data: {
       tablaKey: opcion.tablaKey,
       opcionMenuCodigo: opcion.codigo,

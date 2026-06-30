@@ -1,0 +1,94 @@
+<app-erp-metoxi-list-page
+  modulo="Almacén"
+  [codigo]="codigo"
+  [titulo]="nombre"
+  subtitulo="Almacenes y los tipos de movimiento que tienen asignados"
+  [totalRegistros]="grupos.length"
+  [mostrarTabsEstado]="false"
+  [puedeGestionar]="puedeGestionar"
+  [cargando]="cargando"
+  textoBotonAnadir="Asignar tipo"
+  placeholderBusqueda="Buscar almacén o tipo de movimiento…"
+  [(busqueda)]="busqueda"
+  (anadir)="anadir()"
+  (recargar)="recargar()">
+
+  @if (cargando) {
+    <div class="sigre-metoxi-table__state">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando…</span>
+      </div>
+      <span>Cargando movimientos por almacén…</span>
+    </div>
+  } @else if (error) {
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-0" role="alert">
+      <i class="material-icons-outlined">error_outline</i>
+      <span>{{ error }}</span>
+    </div>
+  } @else if (gruposVisibles.length === 0) {
+    <div class="sigre-metoxi-table__state">
+      <i class="material-icons-outlined sigre-metoxi-table__state-icon">inbox</i>
+      <span>No hay almacenes con tipos de movimiento asignados</span>
+    </div>
+  } @else {
+    <div class="sigre-acc">
+      @for (g of gruposVisibles; track g.almacenId) {
+        <div class="sigre-acc__item">
+          <button type="button" class="sigre-acc__head" (click)="toggle(g.almacenId)">
+            <i class="material-icons-outlined sigre-acc__chev">
+              {{ estaAbierto(g.almacenId) ? 'expand_more' : 'chevron_right' }}
+            </i>
+            <i class="material-icons-outlined sigre-acc__ico">warehouse</i>
+            <span class="sigre-acc__cod">{{ g.codigo }}</span>
+            <span class="sigre-acc__nom">{{ g.nombre }}</span>
+            <span class="sigre-acc__badge">{{ g.tipos.length }} tipo(s)</span>
+          </button>
+
+          @if (estaAbierto(g.almacenId)) {
+            <div class="sigre-acc__body">
+              <table class="table table-striped table-bordered align-middle mb-0 sigre-metoxi-table w-100">
+                <thead>
+                  <tr>
+                    <th scope="col" style="width: 120px">Tipo mov.</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col" style="width: 100px">Estado</th>
+                    @if (puedeGestionar) {
+                      <th scope="col" class="text-end" style="width: 90px">Acción</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (t of g.tipos; track t.id) {
+                    <tr>
+                      <td class="fw-semibold">{{ t.tipoMov }}</td>
+                      <td>{{ t.descTipoMov }}</td>
+                      <td>
+                        @if (estaActivo(t.flagEstado)) {
+                          <span class="lable-table bg-success-subtle text-success rounded border border-success-subtle font-text2 fw-bold">
+                            Activo <i class="material-icons-outlined sigre-metoxi-table__badge-icon">check</i>
+                          </span>
+                        } @else {
+                          <span class="lable-table bg-danger-subtle text-danger rounded border border-danger-subtle font-text2 fw-bold">
+                            Inactivo <i class="material-icons-outlined sigre-metoxi-table__badge-icon">close</i>
+                          </span>
+                        }
+                      </td>
+                      @if (puedeGestionar) {
+                        <td class="text-end">
+                          <button type="button" class="btn btn-sm btn-outline-danger"
+                                  title="Quitar del almacén" (click)="eliminarTipo(g, t)">
+                            <i class="material-icons-outlined fs-6">delete</i>
+                          </button>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</app-erp-metoxi-list-page>

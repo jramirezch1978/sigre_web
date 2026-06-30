@@ -208,6 +208,7 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
       { key: 'sucursalId', label: 'Sucursal', type: 'select', optionsFrom: 'sucursales', required: true, readonlyOnEdit: true },
       { key: 'ano', label: 'Año', type: 'number', required: true, readonlyOnEdit: true },
       { key: 'ultNro', label: 'Próximo N°', type: 'number', required: true },
+      CAMPO_FLAG_ESTADO,
     ],
   },
   'numeracion-otr': {
@@ -220,6 +221,7 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
       { key: 'sucursalId', label: 'Sucursal', type: 'select', optionsFrom: 'sucursales', required: true, readonlyOnEdit: true },
       { key: 'ano', label: 'Año', type: 'number', required: true, readonlyOnEdit: true },
       { key: 'ultNro', label: 'Próximo N°', type: 'number', required: true },
+      CAMPO_FLAG_ESTADO,
     ],
   },
   parametros: {
