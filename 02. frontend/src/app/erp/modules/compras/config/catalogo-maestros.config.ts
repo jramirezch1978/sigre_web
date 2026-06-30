@@ -4,7 +4,7 @@ import { TablaColumna } from '../../../shared/models/api-page.model';
 export interface CatalogoCampo {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'select' | 'switch';
+  type: 'text' | 'number' | 'select' | 'switch' | 'date';
   required?: boolean;
   maxLength?: number;
   readonlyOnEdit?: boolean;

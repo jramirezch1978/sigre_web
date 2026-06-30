@@ -90,7 +90,7 @@ export class CatalogoFormDialogComponent implements OnInit {
     return this.opciones[campo.key] ?? [];
   }
 
-  tipoFormField(campo: CatalogoCampo): 'text' | 'number' | 'select' | 'switch' {
+  tipoFormField(campo: CatalogoCampo): 'text' | 'number' | 'select' | 'switch' | 'date' {
     return campo.type;
   }
 
@@ -125,6 +125,10 @@ export class CatalogoFormDialogComponent implements OnInit {
       const raw = reg[campo.key];
       return raw == null || raw === '' ? null : Number(raw);
     }
+    if (campo.type === 'date') {
+      const raw = reg[campo.key];
+      return raw == null ? '' : String(raw).slice(0, 10);
+    }
     return reg[campo.key] ?? (campo.type === 'number' ? null : '');
   }
 
@@ -136,6 +140,8 @@ export class CatalogoFormDialogComponent implements OnInit {
         valor = valor === true || valor === '1' || valor === 1 ? '1' : '0';
       } else if (campo.type === 'number' || campo.type === 'select') {
         valor = valor === '' || valor == null ? null : Number(valor);
+      } else if (campo.type === 'date') {
+        valor = valor === '' || valor == null ? null : valor;
       } else if (typeof valor === 'string') {
         valor = valor.trim();
       }

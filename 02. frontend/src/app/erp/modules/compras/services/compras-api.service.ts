@@ -46,6 +46,32 @@ export class ComprasApiService {
     return this.listarTodoPaginado<RelacionComercialDto>('/relaciones-comerciales', 200, this.coreBase);
   }
 
+  /** Detalle de una relación (incluye contactos, cuentas, teléfonos, representantes, líneas de crédito). */
+  detalleRelacion(id: number): Observable<Record<string, unknown>> {
+    return this.http
+      .get<ApiResponse<Record<string, unknown>>>(`${this.coreBase}/relaciones-comerciales/${id}`)
+      .pipe(map(r => r.data ?? {}));
+  }
+
+  crearRelacion(body: Record<string, unknown>): Observable<{ id?: number }> {
+    return this.http
+      .post<ApiResponse<{ id?: number }>>(`${this.coreBase}/relaciones-comerciales`, body)
+      .pipe(map(r => r.data ?? {}));
+  }
+
+  actualizarRelacion(id: number, body: Record<string, unknown>): Observable<unknown> {
+    return this.http
+      .put<ApiResponse<unknown>>(`${this.coreBase}/relaciones-comerciales/${id}`, body)
+      .pipe(map(r => r.data));
+  }
+
+  /** Lista plana de un sub-recurso de la relación (cuentas, teléfonos, tiendas, etc.). */
+  listarSub(id: number, suffix: string): Observable<Record<string, unknown>[]> {
+    return this.http
+      .get<ApiResponse<Record<string, unknown>[]>>(`${this.coreBase}/relaciones-comerciales/${id}/${suffix}`)
+      .pipe(map(r => r.data ?? []));
+  }
+
   /** Tipos de proveedor/entidad (para mostrar el nombre del tipo en la lista). */
   listarTiposEntidad(): Observable<TipoEntidadDto[]> {
     return this.listarTodoPaginado<TipoEntidadDto>(

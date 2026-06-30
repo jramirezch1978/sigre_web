@@ -1,0 +1,106 @@
+<sigre-metoxi-modal-shell
+  titulo="Ficha de Proveedores/Clientes (CM002)"
+  size="xl"
+  [cerrarDeshabilitado]="guardando"
+  (cerrar)="cerrar()">
+
+  @if (cargando) {
+    <div class="sigre-metoxi-modal__loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando…</span>
+      </div>
+      <span>Cargando ficha…</span>
+    </div>
+  } @else {
+    <!-- Pestañas -->
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <a class="nav-link" href="javascript:;"
+           [class.active]="tabActiva === 'generales'"
+           (click)="seleccionarTab('generales')">Datos generales</a>
+      </li>
+      @for (tab of subtabs; track tab.key) {
+        <li class="nav-item">
+          <a class="nav-link" href="javascript:;"
+             [class.active]="tabActiva === tab.key"
+             [class.disabled]="!esEdicion"
+             [title]="esEdicion ? '' : 'Guarde primero los datos generales'"
+             (click)="seleccionarTab(tab.key)">{{ tab.label }}</a>
+        </li>
+      }
+    </ul>
+
+    <!-- Datos generales -->
+    @if (tabActiva === 'generales') {
+      <form [formGroup]="form" class="sigre-metoxi-form">
+        <div class="row g-3">
+          @for (campo of camposGeneralesNoSwitch; track campo.key) {
+            <erp-metoxi-form-field
+              [control]="controlDe(campo)"
+              [fieldId]="'gen-' + campo.key"
+              [fieldKey]="campo.key"
+              [label]="campo.label"
+              [required]="!!campo.required"
+              [type]="campo.type"
+              colClass="col-md-4"
+              [placeholder]="'Ingrese ' + campo.label.toLowerCase() + '…'"
+              [maxLength]="campo.maxLength ?? null"
+              [options]="opcionesDe(campo)"
+              [layout]="layoutDe(campo)" />
+          }
+        </div>
+        <div class="row g-3 mt-1">
+          @for (campo of camposGeneralesSwitch; track campo.key) {
+            <erp-metoxi-form-field
+              [control]="controlDe(campo)"
+              [fieldId]="'gen-' + campo.key"
+              [fieldKey]="campo.key"
+              [label]="campo.label"
+              [type]="'switch'"
+              colClass="col-md-4"
+              switchOnLabel="Sí"
+              switchOffLabel="No" />
+          }
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+          <button type="button" class="btn btn-primary px-4"
+                  [disabled]="guardando" (click)="guardarGenerales()">
+            <i class="material-icons-outlined fs-6 align-middle me-1">save</i>
+            {{ esEdicion ? 'Actualizar' : 'Crear ficha' }}
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- Sub-recursos -->
+    @for (tab of subtabs; track tab.key) {
+      @if (tabActiva === tab.key) {
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="text-muted">{{ tab.label }}</span>
+          <button type="button" class="btn btn-primary btn-sm" (click)="agregarSub(tab)">
+            <i class="material-icons-outlined fs-6 align-middle me-1">add</i>Agregar
+          </button>
+        </div>
+        <app-erp-data-table
+          [columnas]="tab.columnas"
+          [filas]="filasSub(tab)"
+          [nombreExport]="tab.label"
+          [totalRegistros]="filasSub(tab).length"
+          [habilitarExportacion]="false"
+          [mostrarAcciones]="tab.editable"
+          (editar)="editarSub(tab, $event)"
+          (eliminar)="eliminarSub(tab, $event)" />
+        @if (!tab.editable) {
+          <p class="text-muted small mt-2 mb-0">
+            <i class="material-icons-outlined fs-6 align-middle">info</i>
+            Este detalle permite registrar y consultar (la edición/eliminación se habilitará próximamente).
+          </p>
+        }
+      }
+    }
+  }
+
+  <div sigreMetoxiModalFooter>
+    <button type="button" class="btn btn-light px-4" (click)="cerrar()">Cerrar</button>
+  </div>
+</sigre-metoxi-modal-shell>

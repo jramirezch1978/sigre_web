@@ -1,12 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ErpDataTableComponent } from '../../../../shared/erp-data-table/erp-data-table.component';
 import { ErpMetoxiListPageComponent, ErpMetoxiFiltroTab } from '../../../../shared/erp-metoxi-list-page/erp-metoxi-list-page.component';
 import { contarRegistrosPorEstado, filtrarFilasListado } from '../../../../shared/utils/erp-list-filter.util';
 import { TablaColumna } from '../../../../shared/models/api-page.model';
 import { ErpTablaPageBase } from '../../../../shared/base/erp-tabla-page-base';
 import { forkJoin } from 'rxjs';
+import { abrirDialogoMetoxi } from '@sigre-common';
 import { ComprasApiService, RelacionComercialDto } from '../../services/compras-api.service';
+import { ProveedorDialogComponent, ProveedorDialogData } from '../../components/proveedor-dialog/proveedor-dialog.component';
 
 const COLUMNAS: TablaColumna[] = [
   { key: 'razonSocial', header: 'Razón social / Nombre', width: '240px' },
@@ -22,11 +25,12 @@ const COLUMNAS: TablaColumna[] = [
 @Component({
   selector: 'app-proveedores-list-page',
   standalone: true,
-  imports: [CommonModule, ErpDataTableComponent, ErpMetoxiListPageComponent],
+  imports: [CommonModule, MatDialogModule, ErpDataTableComponent, ErpMetoxiListPageComponent],
   templateUrl: './proveedores-list-page.component.html',
 })
 export class ProveedoresListPageComponent extends ErpTablaPageBase implements OnInit {
   private readonly api = inject(ComprasApiService);
+  private readonly dialog = inject(MatDialog);
 
   override codigo = 'CM002';
   override nombre = 'Ficha de Proveedores/Clientes';
@@ -53,6 +57,21 @@ export class ProveedoresListPageComponent extends ErpTablaPageBase implements On
 
   recargar(): void {
     this.cargar();
+  }
+
+  anadir(): void {
+    this.abrirFicha(null);
+  }
+
+  editar(fila: Record<string, unknown>): void {
+    this.abrirFicha((fila['id'] as number) ?? null);
+  }
+
+  private abrirFicha(registroId: number | null): void {
+    const data: ProveedorDialogData = { registroId };
+    abrirDialogoMetoxi(this.dialog, ProveedorDialogComponent, { data, width: '1100px' })
+      .afterClosed()
+      .subscribe(() => this.cargar());
   }
 
   private cargar(): void {
