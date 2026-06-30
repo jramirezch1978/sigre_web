@@ -5639,6 +5639,15 @@ VALUES
     ('MT', 'ALMACEN DE MATERIALES', '1')
 ON CONFLICT (codigo) DO UPDATE SET nombre = EXCLUDED.nombre, flag_estado = EXCLUDED.flag_estado;
 
+-- Tipos de proveedor (compras.tipo_entidad_contribuyente) — datos iniciales SIGRE (PROVEEDOR_TIPO).
+INSERT INTO compras.tipo_entidad_contribuyente (tipo, descripcion, flag_estado)
+VALUES
+    ('01', 'BIENES', '1'),
+    ('02', 'SERVICIOS', '1'),
+    ('03', 'BIENES Y SERVICIOS', '1'),
+    ('04', 'MATERIA PRIMA', '1')
+ON CONFLICT (tipo) DO UPDATE SET descripcion = EXCLUDED.descripcion, flag_estado = EXCLUDED.flag_estado;
+
 COMMIT;
 
 -- ============================================================

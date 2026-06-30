@@ -495,7 +495,8 @@ CREATE TABLE compras.tipo_entidad_contribuyente (
     fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),
     updated_by          BIGINT,
     fec_modificacion    TIMESTAMPTZ,
-    CONSTRAINT PK_TIPO_ENTIDAD_CONTRIBUYENTE PRIMARY KEY (id)
+    CONSTRAINT PK_TIPO_ENTIDAD_CONTRIBUYENTE PRIMARY KEY (id),
+    CONSTRAINT UQ_TIPO_ENTIDAD_CONTRIBUYENTE UNIQUE (tipo)
 );
 
 DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='fk_entidad_tipo_entidad_contrib')
