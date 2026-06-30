@@ -908,7 +908,7 @@ WITH d AS (
         ('ALMACEN_REPORTES_SALDOS_RESERVADOS_Y_LIBR', 'ALMACEN_REPORTES_SALDOS_LIBRES', 'Saldos Libres', '/sigre/almacen/reportes/saldos-reservados-y-libres/saldos-libres', NULL, 2),
         ('ALMACEN_PROCESOS_MISCELANEOS', 'ALMACEN_PROCESOS_MODIFICAR_TIPO_MOV_EN_VA', 'Modificar Tipo_mov en Vale_mov', '/sigre/almacen/procesos/miscelaneos/modificar-tipo-mov-en-vale-mov', NULL, 1),
         ('ALMACEN_PROCESOS_MISCELANEOS', 'ALMACEN_PROCESOS_LIBERACION_DE_RESERVACIO', 'Liberación de Reservaciones', '/sigre/almacen/procesos/miscelaneos/liberacion-de-reservaciones', NULL, 2),
-        ('COMPRAS_TABLAS_MAESTRO_DE_PROVEEDORES_C', 'COMPRAS_TABLAS_TIPOS_DE_PROVEEDORES', 'Tipos de Proveedores', '/sigre/compras/tablas/maestro-de-proveedores-clientes/tipos-de-proveedores', NULL, 1),
+        ('COMPRAS_TABLAS_MAESTRO_DE_PROVEEDORES_C', 'COMPRAS_TABLAS_TIPOS_DE_PROVEEDORES', 'Tipos de Proveedores', '/sigre/compras/tablas/maestro-de-proveedores-clientes/tipos-de-proveedores', 'compras/tablas/tipos-proveedor', 1),
         ('COMPRAS_TABLAS_MAESTRO_DE_PROVEEDORES_C', 'COMPRAS_TABLAS_FICHA_DE_PROVEEDORES_CLI', 'Ficha de Proveedores/Clientes', '/sigre/compras/tablas/maestro-de-proveedores-clientes/ficha-de-proveedores-clientes', 'compras/tablas/proveedores', 2),
         ('COMPRAS_TABLAS_MAESTRO_DE_PROVEEDORES_C', 'COMPRAS_TABLAS_PROVEEDORES_CALIFICADOS', 'Proveedores calificados', '/sigre/compras/tablas/maestro-de-proveedores-clientes/proveedores-calificados', NULL, 3),
         ('COMPRAS_TABLAS_MAESTRO_DE_PROVEEDORES_C', 'COMPRAS_TABLAS_GRUPO_PROVEEDORES', 'Grupo Proveedores', '/sigre/compras/tablas/maestro-de-proveedores-clientes/grupo-proveedores', NULL, 4),

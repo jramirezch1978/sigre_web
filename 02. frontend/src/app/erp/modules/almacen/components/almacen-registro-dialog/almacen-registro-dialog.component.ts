@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { forkJoin, of, Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { TablaCrudCampo, TablaCrudConfig } from '../../config/almacen-tabla-crud.config';
@@ -9,10 +9,15 @@ import { AlmacenApiService } from '../../services/almacen-api.service';
 import { AlmacenCrudService } from '../../services/almacen-crud.service';
 import { CoreApiService, SelectOptionDto } from '../../services/core-api.service';
 import {
+  abrirDialogoMetoxi,
   SigreModalService,
   SigreMetoxiModalActionsComponent,
   SigreMetoxiModalShellComponent,
 } from '@sigre-common';
+import {
+  ArticuloBuscadorDialogComponent,
+  ArticuloBuscarItem,
+} from '../../../../shared/articulo-buscador-dialog/articulo-buscador-dialog.component';
 import { ErpMetoxiFormFieldComponent } from '../../../../shared/erp-metoxi-form-field/erp-metoxi-form-field.component';
 import { colClassMetoxiCampo } from '../../../../shared/utils/erp-metoxi-form-icons.util';
 import { noSoloEspaciosValidator } from '../../../../shared/utils/erp-form-validators.util';
@@ -43,6 +48,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   private readonly coreApi = inject(CoreApiService);
   private readonly crudService = inject(AlmacenCrudService);
   private readonly modal = inject(SigreModalService);
+  private readonly matDialog = inject(MatDialog);
   readonly data = inject<AlmacenRegistroDialogData>(MAT_DIALOG_DATA);
 
   form!: FormGroup;
@@ -50,7 +56,33 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   guardando = false;
   error = '';
   opciones: Record<string, SelectOptionDto[]> = {};
+  /** Etiqueta visible del artículo elegido por campo (key -> "codigo — descripción"). */
+  articuloLabels: Record<string, string> = {};
   private esEdicion = false;
+
+  /** Abre el buscador de artículos activos (con equivalencias) y fija el id elegido. */
+  abrirBuscadorArticulo(campo: TablaCrudCampo): void {
+    abrirDialogoMetoxi(this.matDialog, ArticuloBuscadorDialogComponent, { width: '900px' })
+      .afterClosed()
+      .subscribe((item: ArticuloBuscarItem | null) => {
+        if (!item) return;
+        this.form.get(campo.key)?.setValue(item.id);
+        this.form.get(campo.key)?.markAsDirty();
+        this.articuloLabels[campo.key] = `${item.codigo} — ${item.descripcion}`;
+      });
+  }
+
+  /** Texto a mostrar en el botón del campo artículo. */
+  etiquetaArticulo(campo: TablaCrudCampo): string {
+    if (this.articuloLabels[campo.key]) return this.articuloLabels[campo.key];
+    const v = this.form.get(campo.key)?.value;
+    return v ? `Artículo #${v}` : 'Buscar artículo…';
+  }
+
+  limpiarArticulo(campo: TablaCrudCampo): void {
+    this.form.get(campo.key)?.setValue(null);
+    delete this.articuloLabels[campo.key];
+  }
 
   ngOnInit(): void {
     this.esEdicion = !!this.data.registro?.['id'] || this.data.config.handler === 'parametro';
@@ -147,10 +179,10 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   }
 
   /** Tipo que ve el form-field compartido (select-text se renderiza como select). */
-  tipoFormField(campo: TablaCrudCampo): 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo' {
+  tipoFormField(campo: TablaCrudCampo): 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo' | 'textarea' {
     if (campo.type === 'select-text') return 'select';
     if (campo.type === 'saldo-factor') return 'number';
-    return campo.type as 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo';
+    return campo.type as 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo' | 'textarea';
   }
 
   /** Opciones del radio tri-estado para los factores de saldo. */
@@ -190,6 +222,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
         return ['flagEstado', 'flagCntrlLote'].includes(campo.key);
       }
       if (campo.type === 'saldo-factor') return 0;
+      if (campo.type === 'articulo') return null;
       if (campo.key === 'ano') return new Date().getFullYear();
       if (campo.key === 'fechaMov' || campo.key === 'fecha' || campo.key === 'fechaConteo') {
         return new Date().toISOString().slice(0, 10);
@@ -211,6 +244,10 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     if (campo.type === 'select-text') {
       const raw = reg[campo.key];
       return raw == null || raw === '—' ? '' : String(raw);
+    }
+    if (campo.type === 'articulo') {
+      const raw = reg[campo.key];
+      return raw == null || raw === '' ? null : Number(raw);
     }
     if (campo.type === 'select') {
       const raw = reg[campo.key];
@@ -338,7 +375,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       } else if (campo.type === 'saldo-factor') {
         const n = Number(valor);
         valor = Number.isNaN(n) ? 0 : (n > 0 ? 1 : (n < 0 ? -1 : 0));
-      } else if (campo.type === 'number' || campo.type === 'select') {
+      } else if (campo.type === 'number' || campo.type === 'select' || campo.type === 'articulo') {
         valor = valor === '' || valor == null ? null : Number(valor);
       } else if (campo.type === 'select-text') {
         valor = valor == null || valor === '' ? null : String(valor);

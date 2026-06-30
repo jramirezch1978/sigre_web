@@ -74,8 +74,8 @@ export class CatalogoFormDialogComponent implements OnInit {
     const body = this.normalizarBody(this.form.getRawValue());
     const id = this.data.registro?.['id'] as number | undefined;
     const obs = id != null
-      ? this.catalogoSvc.actualizar(this.data.config.endpoint, id, body)
-      : this.catalogoSvc.crear(this.data.config.endpoint, body);
+      ? this.catalogoSvc.actualizar(this.data.config.endpoint, id, body, this.data.config.base)
+      : this.catalogoSvc.crear(this.data.config.endpoint, body, this.data.config.base);
     obs.subscribe({
       next: () => this.dialogRef.close(true),
       error: () => { this.guardando = false; },

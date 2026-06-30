@@ -75,7 +75,7 @@ export class CatalogoMaestroPageComponent extends ErpTablaPageBase implements On
     const etiqueta = String(fila['nombre'] ?? fila['descClase'] ?? fila['descCateg'] ?? fila['descSubcateg'] ?? fila['codigo'] ?? id);
     this.modal.confirmEliminar$(etiqueta).subscribe(ok => {
       if (!ok) return;
-      this.catalogoSvc.eliminar(this.cfg!.endpoint, id).subscribe({
+      this.catalogoSvc.eliminar(this.cfg!.endpoint, id, this.cfg!.base).subscribe({
         next: () => this.cargar(),
         error: err => { this.error = err?.error?.message ?? 'No se pudo eliminar el registro'; },
       });
@@ -85,7 +85,7 @@ export class CatalogoMaestroPageComponent extends ErpTablaPageBase implements On
   anular(fila: Record<string, unknown>): void {
     if (!this.cfg) return;
     const id = fila['id'] as number;
-    this.catalogoSvc.desactivar(this.cfg.endpoint, id).subscribe({
+    this.catalogoSvc.desactivar(this.cfg.endpoint, id, this.cfg.base).subscribe({
       next: () => this.cargar(),
       error: err => { this.error = err?.error?.message ?? 'No se pudo anular el registro'; },
     });
@@ -103,7 +103,7 @@ export class CatalogoMaestroPageComponent extends ErpTablaPageBase implements On
     if (!this.cfg) { this.cargando = false; return; }
     this.cargando = true;
     this.error = '';
-    this.catalogoSvc.listar<Record<string, unknown>>(this.cfg.endpoint).subscribe({
+    this.catalogoSvc.listar<Record<string, unknown>>(this.cfg.endpoint, 200, this.cfg.base).subscribe({
       next: filas => { this.filas = filas; this.cargando = false; },
       error: err => {
         this.cargando = false;

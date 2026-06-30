@@ -20,7 +20,9 @@ export interface CatalogoCampo {
 export interface CatalogoMaestroConfig {
   codigo: string;
   nombre: string;
-  /** Endpoint core relativo, p.ej. '/marcas'. */
+  /** Servicio base del endpoint (core por defecto). */
+  base?: 'core' | 'compras';
+  /** Endpoint relativo al servicio base, p.ej. '/marcas'. */
   endpoint: string;
   columnas: TablaColumna[];
   campos: CatalogoCampo[];
@@ -30,6 +32,19 @@ const ESTADO_COL: TablaColumna = { key: 'flagEstado', header: 'Estado', width: '
 const ESTADO_CAMPO: CatalogoCampo = { key: 'flagEstado', label: 'Estado', type: 'switch' };
 
 export const CATALOGO_MAESTROS: Record<string, CatalogoMaestroConfig> = {
+  'tipos-proveedor': {
+    codigo: 'CM001', nombre: 'Tipos de Proveedores', base: 'compras', endpoint: '/maestros/tipos-entidad-contribuyente',
+    columnas: [
+      { key: 'tipo', header: 'Código', width: '120px' },
+      { key: 'descripcion', header: 'Descripción', width: '260px' },
+      ESTADO_COL,
+    ],
+    campos: [
+      { key: 'tipo', label: 'Código', type: 'text', required: true, maxLength: 10, readonlyOnEdit: true },
+      { key: 'descripcion', label: 'Descripción', type: 'text', required: true, maxLength: 120 },
+      ESTADO_CAMPO,
+    ],
+  },
   marcas: {
     codigo: 'CM010', nombre: 'Marcas', endpoint: '/marcas',
     columnas: [

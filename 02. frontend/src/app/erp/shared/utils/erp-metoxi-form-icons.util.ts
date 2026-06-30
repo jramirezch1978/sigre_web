@@ -1,4 +1,4 @@
-export type ErpMetoxiFormFieldType = 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo' | 'cuenta-contable';
+export type ErpMetoxiFormFieldType = 'text' | 'number' | 'select' | 'date' | 'switch' | 'centros-costo' | 'cuenta-contable' | 'textarea';
 
 const ICONOS_POR_CAMPO: Record<string, string> = {
   codigo: 'tag',
@@ -74,6 +74,9 @@ export function colClassMetoxiCampo(fieldKey: string, type: ErpMetoxiFormFieldTy
     return 'col-6 col-md-4';
   }
   if (type === 'date') {
+    return 'col-12';
+  }
+  if (type === 'textarea') {
     return 'col-12';
   }
   if (['pasillo', 'estante', 'nivel'].includes(fieldKey)) {

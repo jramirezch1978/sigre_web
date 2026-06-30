@@ -14,20 +14,44 @@
     <form [formGroup]="form" class="sigre-metoxi-form">
       <div class="row g-3">
         @for (campo of camposNoSwitch; track campo.key) {
-          <erp-metoxi-form-field
-            [control]="controlDe(campo)"
-            [fieldId]="'campo-' + campo.key"
-            [fieldKey]="campo.key"
-            [label]="campo.label"
-            [required]="!!campo.required"
-            [type]="tipoFormField(campo)"
-            [colClass]="colClassDe(campo)"
-            [placeholder]="placeholderDe(campo)"
-            [maxLength]="campo.maxLength ?? null"
-            [options]="opcionesDe(campo)"
-            [switchOnLabel]="campo.switchOnLabel ?? 'Activo'"
-            [switchOffLabel]="campo.switchOffLabel ?? 'Anulado'"
-            [layout]="layoutDe(campo)" />
+          @if (campo.type === 'articulo') {
+            <div [class]="colClassDe(campo)">
+              <label class="form-label">{{ campo.label }}{{ campo.required ? ' *' : '' }}</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="material-icons-outlined fs-5">inventory_2</i></span>
+                <button type="button" class="form-control text-start"
+                        [class.text-muted]="!controlDe(campo)?.value"
+                        (click)="abrirBuscadorArticulo(campo)">
+                  {{ etiquetaArticulo(campo) }}
+                </button>
+                @if (controlDe(campo)?.value) {
+                  <button type="button" class="btn btn-outline-secondary" title="Quitar"
+                          (click)="limpiarArticulo(campo)">
+                    <i class="material-icons-outlined fs-6">close</i>
+                  </button>
+                }
+                <button type="button" class="btn btn-outline-primary" title="Buscar"
+                        (click)="abrirBuscadorArticulo(campo)">
+                  <i class="material-icons-outlined fs-6">search</i>
+                </button>
+              </div>
+            </div>
+          } @else {
+            <erp-metoxi-form-field
+              [control]="controlDe(campo)"
+              [fieldId]="'campo-' + campo.key"
+              [fieldKey]="campo.key"
+              [label]="campo.label"
+              [required]="!!campo.required"
+              [type]="tipoFormField(campo)"
+              [colClass]="colClassDe(campo)"
+              [placeholder]="placeholderDe(campo)"
+              [maxLength]="campo.maxLength ?? null"
+              [options]="opcionesDe(campo)"
+              [switchOnLabel]="campo.switchOnLabel ?? 'Activo'"
+              [switchOffLabel]="campo.switchOffLabel ?? 'Anulado'"
+              [layout]="layoutDe(campo)" />
+          }
         }
       </div>
 
