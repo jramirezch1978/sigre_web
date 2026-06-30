@@ -82,6 +82,29 @@ export const CATALOGO_MAESTROS: Record<string, CatalogoMaestroConfig> = {
       ESTADO_CAMPO,
     ],
   },
+  articulos: {
+    codigo: 'CM005', nombre: 'Maestro de Artículos', endpoint: '/articulos',
+    columnas: [
+      { key: 'codigo', header: 'Código', width: '120px' },
+      { key: 'nombre', header: 'Nombre', width: '260px' },
+      { key: 'tipo', header: 'Tipo', width: '110px' },
+      { key: 'descripcion', header: 'Descripción', width: '220px' },
+      ESTADO_COL,
+    ],
+    campos: [
+      { key: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 30, readonlyOnEdit: true },
+      { key: 'nombre', label: 'Nombre', type: 'text', required: true, maxLength: 220 },
+      { key: 'tipo', label: 'Tipo', type: 'text', required: true, maxLength: 20 },
+      { key: 'descripcion', label: 'Descripción', type: 'text', maxLength: 500 },
+      { key: 'unidadMedidaId', label: 'Unidad de medida', type: 'select', required: true, optionsEndpoint: '/unidades-medida', optionsLabelKeys: ['codigo', 'nombre'] },
+      { key: 'articuloCategId', label: 'Categoría', type: 'select', optionsEndpoint: '/categorias', optionsLabelKeys: ['catArt', 'descCateg'] },
+      { key: 'articuloSubCategId', label: 'Subcategoría', type: 'select', optionsEndpoint: '/sub-categorias', optionsLabelKeys: ['codSubCat', 'descSubcateg'] },
+      { key: 'articuloClaseId', label: 'Clase', type: 'select', optionsEndpoint: '/clases-articulo', optionsLabelKeys: ['codClase', 'descClase'] },
+      { key: 'marcaId', label: 'Marca', type: 'select', optionsEndpoint: '/marcas', optionsLabelKeys: ['codigo', 'nombre'] },
+      { key: 'colorId', label: 'Color', type: 'select', optionsEndpoint: '/colores', optionsLabelKeys: ['codigo', 'nombre'] },
+      ESTADO_CAMPO,
+    ],
+  },
   'sub-categorias': {
     codigo: 'CM014', nombre: 'Subcategorías de artículo', endpoint: '/sub-categorias',
     columnas: [

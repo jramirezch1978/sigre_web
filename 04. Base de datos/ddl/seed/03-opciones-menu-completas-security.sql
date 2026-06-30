@@ -915,7 +915,7 @@ WITH d AS (
         ('COMPRAS_TABLAS_CATALOGACION_CLASIFICACI', 'COMPRAS_TABLAS_CLASES', 'Clases', '/sigre/compras/tablas/catalogacion-clasificacion/clases', 'compras/tablas/clases-articulo', 1),
         ('COMPRAS_TABLAS_CATALOGACION_CLASIFICACI', 'COMPRAS_TABLAS_UNIDADES', 'Unidades', '/sigre/compras/tablas/catalogacion-clasificacion/unidades', NULL, 2),
         ('COMPRAS_TABLAS_CATALOGACION_CLASIFICACI', 'COMPRAS_TABLAS_CM009_CATEGORIAS_SUB_CAT', '[CM009 ]Categorias - Sub Categorias', '/sigre/compras/tablas/catalogacion-clasificacion/cm009-categorias-sub-categorias', 'compras/tablas/categorias', 3),
-        ('COMPRAS_TABLAS_CATALOGACION_CLASIFICACI', 'COMPRAS_TABLAS_MAESTRO_DE_ARTICULOS', 'Maestro de Articulos', '/sigre/compras/tablas/catalogacion-clasificacion/maestro-de-articulos', NULL, 4),
+        ('COMPRAS_TABLAS_CATALOGACION_CLASIFICACI', 'COMPRAS_TABLAS_MAESTRO_DE_ARTICULOS', 'Maestro de Articulos', '/sigre/compras/tablas/catalogacion-clasificacion/maestro-de-articulos', 'compras/tablas/articulos', 4),
         ('COMPRAS_TABLAS_CATALOGACION_CLASIFICACI', 'COMPRAS_TABLAS_GRUPOS_SUPER_GRUPOS', 'Grupos - Super Grupos', '/sigre/compras/tablas/catalogacion-clasificacion/grupos-super-grupos', NULL, 5),
         ('COMPRAS_TABLAS_CATALOGACION_CLASIFICACI', 'COMPRAS_TABLAS_ARTICULOS_VS_CUBSO_DEL_E', 'Articulos vs CUBSO del Estado', '/sigre/compras/tablas/catalogacion-clasificacion/articulos-vs-cubso-del-estado', NULL, 6),
         ('COMPRAS_TABLAS_CATALOGACION_CLASIFICACI', 'COMPRAS_TABLAS_OTROS_MAESTROS', 'Otros Maestros', NULL, NULL, 7),

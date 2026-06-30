@@ -10,7 +10,7 @@ export const comprasRoutes: Routes = [
       ),
   },
   // Maestros de catálogo (CRUD genérico por config).
-  ...['marcas', 'colores', 'clases-articulo', 'categorias', 'sub-categorias'].map(key => ({
+  ...['marcas', 'colores', 'clases-articulo', 'categorias', 'sub-categorias', 'articulos'].map(key => ({
     path: `tablas/${key}`,
     loadComponent: () =>
       import('./pages/catalogo-maestro-page/catalogo-maestro-page.component').then(
