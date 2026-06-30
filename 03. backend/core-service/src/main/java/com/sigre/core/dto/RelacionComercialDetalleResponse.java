@@ -14,4 +14,5 @@ public class RelacionComercialDetalleResponse extends RelacionComercialResponse 
     private List<CuentaBancariaResponse> cuentasBancarias;
     private List<EntidadContribuyenteTelefonoResponse> telefonos;
     private List<EntidadContribuyenteRepresentanteResponse> representantes;
+    private List<LineaCreditoResponse> lineasCredito;
 }

@@ -18,6 +18,7 @@ import com.sigre.core.entity.EntidadContribuyenteRepresentante;
 import com.sigre.core.entity.EntidadContribuyenteTelefono;
 import com.sigre.core.entity.EntidadTienda;
 import com.sigre.core.entity.EntidadTransporte;
+import com.sigre.core.entity.LineaCredito;
 import com.sigre.core.entity.RelacionComercial;
 import com.sigre.core.mapper.EntidadContribuyenteRepresentanteMapper;
 import com.sigre.core.mapper.EntidadContribuyenteTelefonoMapper;
@@ -27,6 +28,7 @@ import com.sigre.core.mapper.RelacionComercialMapper;
 import com.sigre.core.repository.ArticuloProveedorRepository;
 import com.sigre.core.repository.ContactoRepository;
 import com.sigre.core.repository.CuentaBancariaRepository;
+import com.sigre.core.repository.LineaCreditoRepository;
 import com.sigre.core.repository.EntidadContribuyenteRepresentanteRepository;
 import com.sigre.core.repository.EntidadContribuyenteTelefonoRepository;
 import com.sigre.core.repository.EntidadTiendaRepository;
@@ -47,6 +49,7 @@ public class RelacionComercialServiceImpl implements RelacionComercialService {
     private final RelacionComercialRepository repository;
     private final ContactoRepository contactoRepository;
     private final CuentaBancariaRepository cuentaBancariaRepository;
+    private final LineaCreditoRepository lineaCreditoRepository;
     private final EntidadTiendaRepository entidadTiendaRepository;
     private final EntidadTransporteRepository entidadTransporteRepository;
     private final ArticuloProveedorRepository articuloProveedorRepository;
@@ -105,6 +108,7 @@ public class RelacionComercialServiceImpl implements RelacionComercialService {
         response.setCuentasBancarias(listCuentas(id));
         response.setTelefonos(listTelefonos(id));
         response.setRepresentantes(listRepresentantes(id));
+        response.setLineasCredito(listLineasCredito(id));
         return response;
     }
 
@@ -294,6 +298,67 @@ public class RelacionComercialServiceImpl implements RelacionComercialService {
         cuenta.setUpdatedBy(TenantContext.getUsuarioId());
         cuenta.setFecModificacion(Instant.now());
         cuentaBancariaRepository.save(cuenta);
+    }
+
+    // ── Líneas de crédito (ventas.entidad_creditos_cxc) ──────────────
+    @Override
+    public List<LineaCreditoResponse> listLineasCredito(Long relacionId) {
+        getEntity(relacionId);
+        return lineaCreditoRepository.findByRelacionComercialIdAndFlagEstado(relacionId, "1").stream()
+                .map(mapper::toLineaResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public LineaCreditoResponse createLineaCredito(Long relacionId, LineaCreditoRequest request) {
+        RelacionComercial relacion = getEntity(relacionId);
+        if (request.getMonedaId() != null && !monedaRepository.existsById(request.getMonedaId())) {
+            throw new ResourceNotFoundException("Moneda", request.getMonedaId());
+        }
+        LineaCredito linea = new LineaCredito();
+        linea.setRelacionComercial(relacion);
+        linea.setMonedaId(request.getMonedaId());
+        linea.setLimiteCredito(request.getLimiteCredito());
+        linea.setDiasCredito(request.getDiasCredito());
+        linea.setCreatedBy(TenantContext.getUsuarioId());
+        linea.setFecCreacion(Instant.now());
+        return mapper.toLineaResponse(lineaCreditoRepository.save(linea));
+    }
+
+    @Override
+    @Transactional
+    public LineaCreditoResponse updateLineaCredito(Long relacionId, Long lineaId, LineaCreditoRequest request) {
+        getEntity(relacionId);
+        LineaCredito linea = lineaCreditoRepository.findById(lineaId)
+                .filter(l -> l.getRelacionComercial() != null
+                        && relacionId.equals(l.getRelacionComercial().getId()))
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "LineaCredito", "id (relacion " + relacionId + ")", String.valueOf(lineaId)));
+        if (request.getMonedaId() != null && !monedaRepository.existsById(request.getMonedaId())) {
+            throw new ResourceNotFoundException("Moneda", request.getMonedaId());
+        }
+        linea.setMonedaId(request.getMonedaId());
+        linea.setLimiteCredito(request.getLimiteCredito());
+        linea.setDiasCredito(request.getDiasCredito());
+        linea.setUpdatedBy(TenantContext.getUsuarioId());
+        linea.setFecModificacion(Instant.now());
+        return mapper.toLineaResponse(lineaCreditoRepository.save(linea));
+    }
+
+    @Override
+    @Transactional
+    public void deleteLineaCredito(Long relacionId, Long lineaId) {
+        getEntity(relacionId);
+        LineaCredito linea = lineaCreditoRepository.findById(lineaId)
+                .filter(l -> l.getRelacionComercial() != null
+                        && relacionId.equals(l.getRelacionComercial().getId()))
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "LineaCredito", "id (relacion " + relacionId + ")", String.valueOf(lineaId)));
+        linea.setFlagEstado("0");
+        linea.setUpdatedBy(TenantContext.getUsuarioId());
+        linea.setFecModificacion(Instant.now());
+        lineaCreditoRepository.save(linea);
     }
 
     @Override

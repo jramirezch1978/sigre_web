@@ -34,6 +34,14 @@ public interface RelacionComercialService {
 
     void deleteCuenta(Long relacionId, Long cuentaId);
 
+    java.util.List<LineaCreditoResponse> listLineasCredito(Long relacionId);
+
+    LineaCreditoResponse createLineaCredito(Long relacionId, LineaCreditoRequest request);
+
+    LineaCreditoResponse updateLineaCredito(Long relacionId, Long lineaId, LineaCreditoRequest request);
+
+    void deleteLineaCredito(Long relacionId, Long lineaId);
+
     java.util.List<EntidadTiendaResponse> listTiendas(Long relacionId);
 
     EntidadTiendaResponse createTienda(Long relacionId, EntidadTiendaRequest request);

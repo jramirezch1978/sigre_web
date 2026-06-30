@@ -3,9 +3,11 @@ package com.sigre.core.mapper;
 import org.springframework.stereotype.Component;
 import com.sigre.core.dto.ContactoResponse;
 import com.sigre.core.dto.CuentaBancariaResponse;
+import com.sigre.core.dto.LineaCreditoResponse;
 import com.sigre.core.dto.RelacionComercialResponse;
 import com.sigre.core.entity.Contacto;
 import com.sigre.core.entity.CuentaBancaria;
+import com.sigre.core.entity.LineaCredito;
 import com.sigre.core.entity.RelacionComercial;
 
 @Component
@@ -48,6 +50,16 @@ public class RelacionComercialMapper {
                 entity.getCci(),
                 entity.getMonedaId(),
                 null
+        );
+    }
+
+    public LineaCreditoResponse toLineaResponse(LineaCredito entity) {
+        return new LineaCreditoResponse(
+                entity.getId(),
+                entity.getMonedaId(),
+                entity.getLimiteCredito(),
+                entity.getDiasCredito(),
+                entity.getFlagEstado()
         );
     }
 

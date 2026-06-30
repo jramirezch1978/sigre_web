@@ -106,6 +106,30 @@ public class RelacionComercialController {
         return ApiResponse.ok(true, "Cuenta bancaria eliminada");
     }
 
+    @GetMapping("/{relacionId}/lineas-credito")
+    public ApiResponse<List<LineaCreditoResponse>> listLineasCredito(@PathVariable Long relacionId) {
+        return ApiResponse.ok(service.listLineasCredito(relacionId));
+    }
+
+    @PostMapping("/{relacionId}/lineas-credito")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<LineaCreditoResponse> createLineaCredito(@PathVariable Long relacionId, @Valid @RequestBody LineaCreditoRequest request) {
+        return ApiResponse.ok(service.createLineaCredito(relacionId, request), "Línea de crédito creada");
+    }
+
+    @PutMapping("/{relacionId}/lineas-credito/{lineaId}")
+    public ApiResponse<LineaCreditoResponse> updateLineaCredito(@PathVariable Long relacionId,
+                                                                @PathVariable Long lineaId,
+                                                                @Valid @RequestBody LineaCreditoRequest request) {
+        return ApiResponse.ok(service.updateLineaCredito(relacionId, lineaId, request), "Línea de crédito actualizada");
+    }
+
+    @DeleteMapping("/{relacionId}/lineas-credito/{lineaId}")
+    public ApiResponse<Boolean> deleteLineaCredito(@PathVariable Long relacionId, @PathVariable Long lineaId) {
+        service.deleteLineaCredito(relacionId, lineaId);
+        return ApiResponse.ok(true, "Línea de crédito eliminada");
+    }
+
     @GetMapping("/{relacionId}/tiendas")
     public ApiResponse<List<EntidadTiendaResponse>> listTiendas(@PathVariable Long relacionId) {
         return ApiResponse.ok(service.listTiendas(relacionId));
