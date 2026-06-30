@@ -291,6 +291,7 @@ cd e:\Work\sigre_web
 .\deploy.bat seguridad-service --force
 .\deploy.bat api-gateway --force
 .\deploy.bat backend --force
+
 .\database-deploy.bat create-security
 .\build.bat frontend
 
@@ -305,13 +306,18 @@ cd e:\Work\sigre_web
 .\download-log.bat backend core-service seguridad-service
 .\download-log.bat stack all    REM postgres17, sonarqube
 
-.\download-log.bat backend asistencia-service contabilidad-service
+.\download-log.bat backend asistencia-service contabilidad-service almacen-service
 
 
 cd e:\Work\sigre_web
 .\download-log.bat asistencia-service
 .\download-log.bat core asistencia-service seguridad-service
-.\download-log.bat backend seguridad-service sigre-frontend api-gateway core-service almacen-service
+.\download-log.bat backend seguridad-service sigre-frontend api-gateway core-service almacen-service contabilidad-service
+
+
+docker builder prune -af
+docker image prune -f
+./deploy.bat frontend --force
 
 
 Aquí tienes los enlaces para ingresar a SIGRE en cronos:
