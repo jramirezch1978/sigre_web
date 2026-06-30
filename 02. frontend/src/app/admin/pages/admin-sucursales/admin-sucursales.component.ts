@@ -3,6 +3,7 @@ import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.ser
 import { AdminCoreMaestrosApiService } from '../../services/admin-core-maestros-api.service';
 import { EmpresaAdminDto } from '../../models/admin.models';
 import { SucursalCatalogoDto } from '../../models/admin-core-maestros.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
 
 @Component({
   selector: 'app-admin-sucursales',
@@ -81,5 +82,21 @@ export class AdminSucursalesComponent implements OnInit {
       || s.codigo?.toLowerCase().includes(q)
       || s.ciudad?.toLowerCase().includes(q)
     );
+  }
+
+  readonly columnasSucursales: TablaColumna[] = [
+    { key: 'id', header: 'ID', width: '70px' },
+    { key: 'codigo', header: 'Código', width: '110px' },
+    { key: 'nombre', header: 'Nombre', width: '200px' },
+    { key: 'direccion', header: 'Dirección', width: '220px' },
+    { key: 'ciudad', header: 'Ciudad', width: '130px' },
+    { key: 'departamento', header: 'Departamento', width: '140px' },
+  ];
+
+  get filasSucursales(): Record<string, unknown>[] {
+    return this.sucursalesFiltradas.map(s => ({
+      id: s.id, codigo: s.codigo || '—', nombre: s.nombre,
+      direccion: s.direccion || '—', ciudad: s.ciudad || '—', departamento: s.departamento || '—',
+    }));
   }
 }
