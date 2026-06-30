@@ -27,6 +27,8 @@ export interface TablaCrudCampo {
   switchOnLabel?: string;
   /** Etiqueta cuando el switch está apagado (flag_estado = 0). */
   switchOffLabel?: string;
+  /** Valor inicial al crear un registro nuevo (switch: boolean; number: numérico). */
+  defaultValue?: unknown;
 }
 
 /** Campo reutilizable para flag_estado binario (0/1). */
@@ -37,6 +39,16 @@ export const CAMPO_FLAG_ESTADO: TablaCrudCampo = {
   switchOnLabel: 'Activo',
   switchOffLabel: 'Anulado',
 };
+
+/** Helper: flag binario Sí/No (apagado por defecto). */
+function flagSiNo(key: string, label: string): TablaCrudCampo {
+  return { key, label, type: 'switch', switchOnLabel: 'Sí', switchOffLabel: 'No', defaultValue: false };
+}
+
+/** Helper: factor numérico de saldo (default 0). */
+function factor(key: string, label: string): TablaCrudCampo {
+  return { key, label, type: 'number', defaultValue: 0 };
+}
 
 export interface TablaCrudConfig {
   basePath: string;
@@ -86,8 +98,35 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
     basePath: '/maestros/tipos-movimiento-catalogo',
     handler: 'standard',
     campos: [
+      // Identificación
       { key: 'tipoMov', label: 'Código', type: 'text', required: true, maxLength: 10, readonlyOnEdit: true },
       { key: 'descTipoMov', label: 'Descripción', type: 'text', required: true, maxLength: 200 },
+      { key: 'flagClaseMov', label: 'Clase (I = Ingreso / S = Salida)', type: 'text', maxLength: 1 },
+      { key: 'tipoMovDev', label: 'Tipo mov. devolución', type: 'text', maxLength: 10 },
+      { key: 'codSunat', label: 'Código SUNAT', type: 'text', maxLength: 10 },
+      // Factores de saldo (afectación de stock)
+      factor('factorSldoTotal', 'Factor saldo total'),
+      factor('factorSldoXLlegar', 'Factor saldo por llegar'),
+      factor('factorSldoSol', 'Factor saldo solicitado'),
+      factor('factorSldoDev', 'Factor saldo devolución'),
+      factor('factorSldoPres', 'Factor saldo préstamo'),
+      factor('factorSldoConsig', 'Factor saldo consignación'),
+      factor('factorSldoReservado', 'Factor saldo reservado'),
+      factor('factorCtrlTempla', 'Factor control templado'),
+      // Banderas de comportamiento
+      flagSiNo('flagContabiliza', 'Contabiliza'),
+      flagSiNo('flagAjusteValorizacion', 'Ajuste valorización'),
+      flagSiNo('flagMovEntreAlm', 'Movimiento entre almacenes'),
+      flagSiNo('flagSolicitaProv', 'Solicita proveedor'),
+      flagSiNo('flagSolicitaDocInt', 'Solicita doc. interno'),
+      flagSiNo('flagSolicitaDocExt', 'Solicita doc. externo'),
+      flagSiNo('flagSolicitaRef', 'Solicita referencia'),
+      flagSiNo('flagSolicitaLote', 'Solicita lote'),
+      flagSiNo('flagSolicitaPrecio', 'Solicita precio'),
+      flagSiNo('flagSolicitaCenbef', 'Solicita centro beneficio'),
+      flagSiNo('flagCntrlCtaCte', 'Controla cuenta corriente'),
+      flagSiNo('flagCambiaPrecio', 'Permite cambiar precio'),
+      flagSiNo('flagAmp', 'Afecta AMP (costo promedio)'),
       CAMPO_FLAG_ESTADO,
     ],
   },

@@ -152,10 +152,16 @@ export class AlmacenRegistroDialogComponent implements OnInit {
   private valorInicial(campo: TablaCrudCampo): unknown {
     const reg = this.data.registro;
     if (!reg) {
+      // Valor por defecto explícito en la config (tiene prioridad).
+      if (campo.defaultValue !== undefined) {
+        if (campo.type === 'switch') {
+          return campo.defaultValue === true || campo.defaultValue === '1' || campo.defaultValue === 1;
+        }
+        return campo.defaultValue;
+      }
       if (campo.type === 'switch') {
-        if (campo.key === 'flagVirtual') return false;
-        if (['flagCntrlLote'].includes(campo.key)) return true;
-        return true;
+        // Activos por defecto solo el estado y el control de lote; el resto, apagado.
+        return ['flagEstado', 'flagCntrlLote'].includes(campo.key);
       }
       if (campo.key === 'codSunat') return '0001';
       if (campo.key === 'ano') return new Date().getFullYear();

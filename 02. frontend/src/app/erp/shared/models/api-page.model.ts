@@ -21,7 +21,7 @@ export interface TablaColumna {
   key: string;
   header: string;
   width?: string;
-  format?: 'text' | 'estado' | 'fecha' | 'numero';
+  format?: 'text' | 'estado' | 'fecha' | 'numero' | 'flag';
 }
 
 export interface TablaPageConfig {

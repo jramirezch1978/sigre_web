@@ -38,11 +38,21 @@ const ICONOS_POR_CAMPO: Record<string, string> = {
   flagReplicacion: 'sync',
   flagVirtual: 'cloud',
   flagEstado: 'toggle_on',
+  flagClaseMov: 'swap_vert',
+  tipoMovDev: 'undo',
+  flagContabiliza: 'calculate',
 };
 
 export function iconoMetoxiCampo(fieldKey: string, type: ErpMetoxiFormFieldType): string {
   if (ICONOS_POR_CAMPO[fieldKey]) {
     return ICONOS_POR_CAMPO[fieldKey];
+  }
+  // Familias de campos por prefijo (factores de saldo, banderas).
+  if (fieldKey.startsWith('factor')) {
+    return 'calculate';
+  }
+  if (fieldKey.startsWith('flag')) {
+    return 'toggle_on';
   }
   switch (type) {
     case 'number':
