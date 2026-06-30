@@ -42,7 +42,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
       { key: 'tipoMov', header: 'Código', width: '90px' },
       { key: 'descTipoMov', header: 'Descripción', width: '280px' },
       { key: 'flagContabiliza', header: 'Contabiliza', width: '100px', format: 'flag' },
-      { key: 'codSunat', header: 'Cód. SUNAT', width: '100px' },
+      { key: 'codSunatLabel', header: 'Cód. SUNAT', width: '220px' },
       { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
     ],
   },

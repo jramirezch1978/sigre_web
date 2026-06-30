@@ -22,7 +22,7 @@ export interface TablaCrudCampo {
   required?: boolean;
   maxLength?: number;
   readonlyOnEdit?: boolean;
-  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento' | 'centros-costo' | 'proveedores' | 'ubigeos' | 'usuarios-empresa' | 'unidades' | 'libros-contables' | 'sunat-tab12';
+  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento' | 'tipos-movimiento-codigo' | 'centros-costo' | 'proveedores' | 'ubigeos' | 'usuarios-empresa' | 'unidades' | 'libros-contables' | 'sunat-tab12';
   /** Etiqueta cuando el switch está encendido (flag_estado = 1). */
   switchOnLabel?: string;
   /** Etiqueta cuando el switch está apagado (flag_estado = 0). */
@@ -102,7 +102,7 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
       // Identificación
       { key: 'tipoMov', label: 'Código', type: 'text', required: true, maxLength: 10, readonlyOnEdit: true },
       { key: 'descTipoMov', label: 'Descripción', type: 'text', required: true, maxLength: 200 },
-      { key: 'tipoMovDev', label: 'Tipo mov. devolución', type: 'text', maxLength: 10 },
+      { key: 'tipoMovDev', label: 'Tipo mov. devolución', type: 'select-text', optionsFrom: 'tipos-movimiento-codigo' },
       // El ingreso/salida lo define "Factor saldo total" (+1 ingreso / -1 salida); no hay campo Clase.
       { key: 'codSunat', label: 'Código SUNAT (Tabla 12)', type: 'select-text', optionsFrom: 'sunat-tab12' },
       // Factores de saldo (afectación de stock)

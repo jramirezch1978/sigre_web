@@ -268,6 +268,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     const necesitaSucursales = campos.some(c => c.optionsFrom === 'sucursales');
     const necesitaAlmacenes = campos.some(c => c.optionsFrom === 'almacenes');
     const necesitaTiposMov = campos.some(c => c.optionsFrom === 'tipos-movimiento');
+    const necesitaTiposMovCod = campos.some(c => c.optionsFrom === 'tipos-movimiento-codigo');
     const necesitaCentrosCosto = campos.some(c => c.optionsFrom === 'centros-costo');
     const necesitaProveedores = campos.some(c => c.optionsFrom === 'proveedores');
     const necesitaUbigeos = campos.some(c => c.optionsFrom === 'ubigeos');
@@ -276,7 +277,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     const necesitaLibros = campos.some(c => c.optionsFrom === 'libros-contables');
     const necesitaSunat = campos.some(c => c.optionsFrom === 'sunat-tab12');
 
-    if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov
+    if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov && !necesitaTiposMovCod
         && !necesitaCentrosCosto && !necesitaProveedores && !necesitaUbigeos && !necesitaUsuarios
         && !necesitaUnidades && !necesitaLibros && !necesitaSunat) {
       this.cargandoOpciones = false;
@@ -293,7 +294,7 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       tipos: necesitaTipos ? resiliente('tipos de almacén', this.almacenApi.listarTiposAlmacen()) : of([]),
       sucursales: necesitaSucursales ? resiliente('sucursales', this.coreApi.listarMisSucursales()) : of([]),
       almacenes: necesitaAlmacenes ? resiliente('almacenes', this.almacenApi.listarAlmacenes()) : of([]),
-      tiposMov: necesitaTiposMov ? resiliente('tipos de movimiento', this.almacenApi.listarTiposMovimiento()) : of([]),
+      tiposMov: (necesitaTiposMov || necesitaTiposMovCod) ? resiliente('tipos de movimiento', this.almacenApi.listarTiposMovimiento()) : of([]),
       centrosCosto: necesitaCentrosCosto ? resiliente('centros de costo', this.coreApi.listarCentrosCosto()) : of([]),
       proveedores: necesitaProveedores ? resiliente('proveedores', this.coreApi.listarProveedores()) : of([]),
       ubigeos: necesitaUbigeos ? resiliente('ubigeos', this.almacenApi.listarUbigeos()) : of([]),
@@ -324,6 +325,13 @@ export class AlmacenRegistroDialogComponent implements OnInit {
         if (necesitaTiposMov) {
           this.opciones['tipos-movimiento'] = this.soloActivos(tiposMov).map(t => ({
             value: t.id,
+            label: `${t.tipoMov} — ${t.descTipoMov}`,
+          }));
+        }
+        if (necesitaTiposMovCod) {
+          // Para tipoMovDev: el valor es el CÓDIGO (tipoMov), no el id; solo activos.
+          this.opciones['tipos-movimiento-codigo'] = this.soloActivos(tiposMov).map(t => ({
+            value: t.tipoMov,
             label: `${t.tipoMov} — ${t.descTipoMov}`,
           }));
         }

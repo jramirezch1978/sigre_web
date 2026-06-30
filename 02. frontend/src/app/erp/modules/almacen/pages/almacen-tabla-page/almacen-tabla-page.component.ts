@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { Observable, map, of } from 'rxjs';
+import { Observable, forkJoin, map, of, catchError } from 'rxjs';
 import { ErpDataTableComponent } from '../../../../shared/erp-data-table/erp-data-table.component';
 import { ErpMetoxiListPageComponent, ErpMetoxiFiltroTab } from '../../../../shared/erp-metoxi-list-page/erp-metoxi-list-page.component';
 import { contarRegistrosPorEstado, filtrarFilasListado } from '../../../../shared/utils/erp-list-filter.util';
@@ -181,7 +181,20 @@ export class AlmacenTablaPageComponent extends ErpTablaPageBase implements OnIni
       case 'almacenes':
         return this.almacenApi.listarAlmacenes().pipe(mapToRows());
       case 'tipos-movimiento':
-        return this.almacenApi.listarTiposMovimiento().pipe(mapToRows());
+        // Enriquecer cada fila con la descripción del código SUNAT (catálogo TAB12).
+        return forkJoin({
+          tipos: this.almacenApi.listarTiposMovimiento(),
+          sunat: this.coreApi.listarSunatTab12().pipe(
+            catchError(() => of([] as Array<{ value: number | string; label: string }>))),
+        }).pipe(
+          map(({ tipos, sunat }) => {
+            const m = new Map(sunat.map(s => [String(s.value), s.label]));
+            return tipos.map(t => ({
+              ...t,
+              codSunatLabel: t.codSunat ? (m.get(String(t.codSunat)) ?? String(t.codSunat)) : '—',
+            })) as unknown as Record<string, unknown>[];
+          }),
+        );
       case 'tipos-almacen':
         return this.almacenApi.listarTiposAlmacen().pipe(mapToRows());
       case 'ubicaciones':
