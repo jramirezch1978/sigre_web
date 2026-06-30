@@ -4,6 +4,7 @@ import { ModalController } from '@ionic/angular';
 import { ModalConfirmationComponent } from '@sigre-common';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { AccionDto } from '../../models/admin.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
 
 @Component({
   selector: 'app-admin-acciones',
@@ -45,6 +46,24 @@ export class AdminAccionesComponent implements OnInit {
     if (!this.filtro.trim()) return this.acciones;
     const q = this.filtro.toLowerCase();
     return this.acciones.filter(a => a.codigo.toLowerCase().includes(q) || a.nombre.toLowerCase().includes(q));
+  }
+
+  readonly columnasTabla: TablaColumna[] = [
+    { key: 'id', header: 'ID', width: '70px' },
+    { key: 'codigo', header: 'Código', width: '180px' },
+    { key: 'nombre', header: 'Nombre', width: '260px' },
+    { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
+  ];
+
+  get filasTabla(): Record<string, unknown>[] {
+    return this.accionesFiltradas.map(a => ({
+      id: a.id, codigo: a.codigo, nombre: a.nombre, flagEstado: a.activo ? '1' : '0',
+    }));
+  }
+
+  onEditarFila(row: Record<string, unknown>): void {
+    const a = this.acciones.find(x => x.id === row['id']);
+    if (a) this.abrirEditar(a);
   }
 
   abrirCrear(): void { this.editandoId = null; this.form.reset({ codigo: '', nombre: '', activo: true }); this.mostrandoForm = true; }

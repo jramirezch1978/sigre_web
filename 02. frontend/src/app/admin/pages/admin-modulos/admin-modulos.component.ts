@@ -4,6 +4,7 @@ import { ModalController } from '@ionic/angular';
 import { ModalConfirmationComponent } from '@sigre-common';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { ModuloDto } from '../../models/admin.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
 
 @Component({
   selector: 'app-admin-modulos',
@@ -55,6 +56,24 @@ export class AdminModulosComponent implements OnInit {
     return this.modulos.filter(m =>
       m.codigo.toLowerCase().includes(q) || m.nombre.toLowerCase().includes(q)
     );
+  }
+
+  readonly columnasTabla: TablaColumna[] = [
+    { key: 'id', header: 'ID', width: '70px' },
+    { key: 'codigo', header: 'Código', width: '180px' },
+    { key: 'nombre', header: 'Nombre', width: '260px' },
+    { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
+  ];
+
+  get filasTabla(): Record<string, unknown>[] {
+    return this.modulosFiltrados.map(m => ({
+      id: m.id, codigo: m.codigo, nombre: m.nombre, flagEstado: m.activo ? '1' : '0',
+    }));
+  }
+
+  onEditarFila(row: Record<string, unknown>): void {
+    const m = this.modulos.find(x => x.id === row['id']);
+    if (m) this.abrirEditar(m);
   }
 
   abrirCrear(): void {

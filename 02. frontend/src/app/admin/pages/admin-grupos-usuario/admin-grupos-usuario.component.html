@@ -25,44 +25,16 @@
     }
 
     @if (!loading) {
-      <div class="admin-table-wrapper">
-        <table class="admin-table admin-table--plain">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Código</th>
-              <th>Descripción</th>
-              <th>Estado</th>
-              <th class="admin-acciones-col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (g of gruposFiltrados; track g.id) {
-              <tr (dblclick)="abrirEditar(g)">
-                <td>{{ g.id }}</td>
-                <td>{{ g.codigo }}</td>
-                <td>{{ g.descripcion }}</td>
-                <td>
-                  @if (g.activo) {
-                    <span class="badge-estado badge-activo">Activo</span>
-                  } @else {
-                    <span class="badge-estado badge-inactivo">Inactivo</span>
-                  }
-                </td>
-                <td class="admin-acciones-col">
-                  <div class="admin-acciones-wrap" (click)="$event.stopPropagation()">
-                    <ion-button fill="clear" size="small" class="admin-acciones-btn" title="Editar grupo (también doble clic)"
-                      (click)="abrirEditar(g)">
-                      <ion-icon slot="icon-only" name="create-outline"></ion-icon>
-                    </ion-button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr><td colspan="5" style="text-align:center;color:#6b7280">No hay grupos registrados.</td></tr>
-            }
-          </tbody>
-        </table>
+      <div class="admin-table-wrapper" style="padding: 0.75rem 1rem 1rem;">
+        <app-erp-data-table
+          [columnas]="columnasTabla"
+          [filas]="filasTabla"
+          nombreExport="grupos-de-usuario"
+          [totalRegistros]="filasTabla.length"
+          [mostrarAcciones]="true"
+          [mostrarAnular]="false"
+          [mostrarEliminar]="false"
+          (editar)="onEditarFila($event)" />
       </div>
     }
   }

@@ -7,6 +7,7 @@ import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.ser
 import { StorageService } from '../../../core/services/storage.service';
 import { JwtClaimsReaderService } from '../../services/jwt-claims-reader.service';
 import { GrupoUsuarioDto, GrupoUsuarioMiembroDto, UsuarioAdminDto } from '../../models/admin.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
 
 @Component({
   selector: 'app-admin-grupos-usuario',
@@ -70,6 +71,24 @@ export class AdminGruposUsuarioComponent implements OnInit {
     if (!this.filtro.trim()) return this.grupos;
     const q = this.filtro.toLowerCase();
     return this.grupos.filter(g => g.codigo.toLowerCase().includes(q) || g.descripcion.toLowerCase().includes(q));
+  }
+
+  readonly columnasTabla: TablaColumna[] = [
+    { key: 'id', header: 'ID', width: '70px' },
+    { key: 'codigo', header: 'Código', width: '180px' },
+    { key: 'descripcion', header: 'Descripción', width: '300px' },
+    { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
+  ];
+
+  get filasTabla(): Record<string, unknown>[] {
+    return this.gruposFiltrados.map(g => ({
+      id: g.id, codigo: g.codigo, descripcion: g.descripcion, flagEstado: g.activo ? '1' : '0',
+    }));
+  }
+
+  onEditarFila(row: Record<string, unknown>): void {
+    const g = this.grupos.find(x => x.id === row['id']);
+    if (g) this.abrirEditar(g);
   }
 
   get usuariosDisponibles(): UsuarioAdminDto[] {

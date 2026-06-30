@@ -4,6 +4,7 @@ import { ModalController } from '@ionic/angular';
 import { ModalConfirmationComponent } from '@sigre-common';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { UsuarioAdminDto } from '../../models/admin.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
 
 @Component({
   selector: 'app-admin-usuarios',
@@ -64,6 +65,30 @@ export class AdminUsuariosComponent implements OnInit {
       u.email.toLowerCase().includes(q) ||
       u.nombreCompleto.toLowerCase().includes(q)
     );
+  }
+
+  readonly columnasTabla: TablaColumna[] = [
+    { key: 'id', header: 'ID', width: '70px' },
+    { key: 'nombreCompleto', header: 'Nombre completo', width: '220px' },
+    { key: 'username', header: 'Username', width: '150px' },
+    { key: 'email', header: 'Email', width: '220px' },
+    { key: 'flagAdminSistema', header: 'Admin Sistema', width: '120px', format: 'flag' },
+    { key: 'bloqueado', header: 'Bloqueado', width: '110px', format: 'flag' },
+    { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
+  ];
+
+  get filasTabla(): Record<string, unknown>[] {
+    return this.usuariosFiltrados.map(u => ({
+      id: u.id, nombreCompleto: u.nombreCompleto, username: u.username, email: u.email,
+      flagAdminSistema: u.flagAdminSistema ? '1' : '0',
+      bloqueado: u.bloqueado ? '1' : '0',
+      flagEstado: u.activo ? '1' : '0',
+    }));
+  }
+
+  onEditarFila(row: Record<string, unknown>): void {
+    const u = this.usuarios.find(x => x.id === row['id']);
+    if (u) this.abrirEditar(u);
   }
 
   get formActivo(): FormGroup { return this.editandoId != null ? this.formEditar : this.formCrear; }
