@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "b176334b-d6f1-4290-981e-b5c715c9b273",
+    "_postman_id": "6f3f0a0f-26bd-41e7-97a8-3f8bab113b6e",
     "name": "SIGRE Web ERP",
     "description": "Coleccion SIGRE Web generada desde controllers Java. Servidor cronos: API Gateway {{base_url}} (9080), frontend {{frontend_url}} (8080). Importar tambien el entorno SIGRE Web ERP - cronos.postman_environment.json.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -328,27 +328,23 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "function saveSigreAuthTokens(data) {",
                       "  if (!data) return;",
                       "  var token = data.accessToken || data.token;",
                       "  if (!token) return;",
-                      "  if (data.temporal === true) {",
-                      "    pm.collectionVariables.set(\"jwt_temporal_token\", token);",
-                      "  } else {",
-                      "    pm.collectionVariables.set(\"jwt_definitive_token\", token);",
-                      "  }",
-                      "  if (data.refreshToken) {",
-                      "    pm.collectionVariables.set(\"refresh_token\", data.refreshToken);",
-                      "  }",
+                      "  pm.collectionVariables.set(\"jwt_temporal_token\", token);",
+                      "  ",
                       "}",
                       "if (pm.response.code === 200) {",
                       "  var json = pm.response.json();",
                       "  var data = json.data || json;",
                       "  saveSigreAuthTokens(data);",
                       "}"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -553,7 +549,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "function saveSigreAuthTokens(data) {",
                       "  if (!data) return;",
@@ -573,7 +568,10 @@
                       "  var data = json.data || json;",
                       "  saveSigreAuthTokens(data);",
                       "}"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -583,7 +581,7 @@
                   "bearer": [
                     {
                       "key": "token",
-                      "value": "{{jwt_definitive_token}}",
+                      "value": "",
                       "type": "string"
                     }
                   ]
@@ -54478,7 +54476,7 @@
           "  var url = pm.request.url.toString();",
           "  var temporal = pm.collectionVariables.get(\"jwt_temporal_token\") || \"\";",
           "  var definitive = pm.collectionVariables.get(\"jwt_definitive_token\") || \"\";",
-          "  var needsTemporal = /\\/api\\/auth\\/(empresas|seleccionar-empresa)(?:\\?|$|\\/)/.test(url);",
+          "  var needsTemporal = /\\/api\\/auth\\/(empresas|seleccionar-empresa)(?:\\?|$|\\/)/.test(url) || /\\/api\\/admin\\/empresas\\/(provision|recreate)(?:\\?|$|\\/)/.test(url);",
           "  var token = needsTemporal ? temporal : (definitive || temporal);",
           "  if (token) {",
           "    pm.request.auth.bearer = [{ key: \"token\", value: token, type: \"string\" }];",
@@ -54561,6 +54559,10 @@
     {
       "key": "usuario_id",
       "value": "3"
+    },
+    {
+      "key": "centros_costo_id",
+      "value": ""
     }
   ]
 }
