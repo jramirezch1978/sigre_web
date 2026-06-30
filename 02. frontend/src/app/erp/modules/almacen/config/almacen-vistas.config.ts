@@ -3,7 +3,10 @@ import { TablaColumna } from '../../../shared/models/api-page.model';
 export type AlmacenVistaTipo = 'listado' | 'proceso';
 
 export interface AlmacenVistaDef {
+  /** Código funcional (clave de crud-config y conciliación con el menú). NO cambiar. */
   codigo: string;
+  /** Código de ventana estilo PowerBuilder (AL013…). Clave de persistencia + prefijo de título. */
+  codigoVentana?: string;
   nombre: string;
   rutaFrontend: string;
   tipo: AlmacenVistaTipo;
@@ -80,6 +83,7 @@ const colsTomaInv: TablaColumna[] = [
 export const ALMACEN_OPERACIONES_VISTAS: readonly AlmacenVistaDef[] = [
   {
     codigo: 'ALMACEN_OP_MOV_GENERAL',
+    codigoVentana: 'AL013',
     nombre: 'Movimiento de Almacén — General',
     rutaFrontend: '/sigre/almacen/operaciones/movimiento-general',
     tipo: 'listado',
@@ -90,6 +94,7 @@ export const ALMACEN_OPERACIONES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_OP_MOV_TRANSITO',
+    codigoVentana: 'AL014',
     nombre: 'Movimiento de Almacén — Tránsito',
     rutaFrontend: '/sigre/almacen/operaciones/movimiento-transito',
     tipo: 'listado',
@@ -100,6 +105,7 @@ export const ALMACEN_OPERACIONES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_OP_OTR_GENERACION',
+    codigoVentana: 'AL015',
     nombre: 'Orden de Traslado — Generación',
     rutaFrontend: '/sigre/almacen/operaciones/orden-traslado-generacion',
     tipo: 'listado',
@@ -109,6 +115,7 @@ export const ALMACEN_OPERACIONES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_OP_OTR_APROBACION',
+    codigoVentana: 'AL016',
     nombre: 'Orden de Traslado — Aprobación',
     rutaFrontend: '/sigre/almacen/operaciones/orden-traslado-aprobacion',
     tipo: 'listado',
@@ -119,6 +126,7 @@ export const ALMACEN_OPERACIONES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_OP_INV_CONTEO',
+    codigoVentana: 'AL017',
     nombre: 'Inventarios — Ingreso por Conteo',
     rutaFrontend: '/sigre/almacen/operaciones/inventario-conteo',
     tipo: 'listado',
@@ -128,6 +136,7 @@ export const ALMACEN_OPERACIONES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_OP_INV_MONITOR',
+    codigoVentana: 'AL018',
     nombre: 'Inventarios — Monitor por Conteo',
     rutaFrontend: '/sigre/almacen/operaciones/inventario-monitor',
     tipo: 'listado',
@@ -141,6 +150,7 @@ export const ALMACEN_OPERACIONES_VISTAS: readonly AlmacenVistaDef[] = [
 export const ALMACEN_CONSULTAS_VISTAS: readonly AlmacenVistaDef[] = [
   {
     codigo: 'ALMACEN_CONS_MOV_ARTICULO',
+    codigoVentana: 'AL019',
     nombre: 'Movimientos x artículo',
     rutaFrontend: '/sigre/almacen/consultas/movimientos-x-articulo',
     tipo: 'listado',
@@ -150,6 +160,7 @@ export const ALMACEN_CONSULTAS_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_CONS_MOV_ALMACEN',
+    codigoVentana: 'AL020',
     nombre: 'Consulta de movimientos de almacén',
     rutaFrontend: '/sigre/almacen/consultas/consulta-movimientos-almacen',
     tipo: 'listado',
@@ -159,6 +170,7 @@ export const ALMACEN_CONSULTAS_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_CONS_DEV_PREST',
+    codigoVentana: 'AL021',
     nombre: 'Devoluciones y Préstamos',
     rutaFrontend: '/sigre/almacen/consultas/devoluciones-y-prestamos',
     tipo: 'listado',
@@ -168,6 +180,7 @@ export const ALMACEN_CONSULTAS_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_CONS_DESPACHOS',
+    codigoVentana: 'AL022',
     nombre: 'Despachos',
     rutaFrontend: '/sigre/almacen/consultas/despachos',
     tipo: 'listado',
@@ -178,6 +191,7 @@ export const ALMACEN_CONSULTAS_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_CONS_ESP_ARTICULOS',
+    codigoVentana: 'AL023',
     nombre: 'Consulta Especializada de Artículos',
     rutaFrontend: '/sigre/almacen/consultas/consulta-especializada-articulos',
     tipo: 'listado',
@@ -190,6 +204,7 @@ export const ALMACEN_CONSULTAS_VISTAS: readonly AlmacenVistaDef[] = [
 export const ALMACEN_REPORTES_VISTAS: readonly AlmacenVistaDef[] = [
   {
     codigo: 'ALMACEN_REP_STOCK_FECHA',
+    codigoVentana: 'AL024',
     nombre: 'Stock a la fecha',
     rutaFrontend: '/sigre/almacen/reportes/stock-fecha',
     tipo: 'listado',
@@ -199,6 +214,7 @@ export const ALMACEN_REPORTES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_REP_HIST_MOV',
+    codigoVentana: 'AL025',
     nombre: 'Historial de movimiento',
     rutaFrontend: '/sigre/almacen/reportes/historial-movimiento',
     tipo: 'listado',
@@ -208,6 +224,7 @@ export const ALMACEN_REPORTES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_REP_VALORIZACION',
+    codigoVentana: 'AL026',
     nombre: 'Valorización',
     rutaFrontend: '/sigre/almacen/reportes/valorizacion',
     tipo: 'listado',
@@ -217,6 +234,7 @@ export const ALMACEN_REPORTES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_REP_VENDIDOS_PERIODO',
+    codigoVentana: 'AL027',
     nombre: 'Productos vendidos por periodo',
     rutaFrontend: '/sigre/almacen/reportes/productos-vendidos-por-periodo',
     tipo: 'listado',
@@ -227,6 +245,7 @@ export const ALMACEN_REPORTES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_REP_STOCK_MINIMO',
+    codigoVentana: 'AL028',
     nombre: 'Stock mínimo',
     rutaFrontend: '/sigre/almacen/reportes/stock-minimo',
     tipo: 'listado',
@@ -237,6 +256,7 @@ export const ALMACEN_REPORTES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_REP_DIAG',
+    codigoVentana: 'AL029',
     nombre: 'Diagnostico de almacenes',
     rutaFrontend: '/sigre/almacen/reportes/diagnostico-almacenes',
     tipo: 'listado',
@@ -247,6 +267,7 @@ export const ALMACEN_REPORTES_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_REP_TOMA_INV',
+    codigoVentana: 'AL030',
     nombre: 'Reportes de tomas de inventario',
     rutaFrontend: '/sigre/almacen/reportes/reporte-tomas-inventario',
     tipo: 'listado',
@@ -259,6 +280,7 @@ export const ALMACEN_REPORTES_VISTAS: readonly AlmacenVistaDef[] = [
 export const ALMACEN_PROCESOS_VISTAS: readonly AlmacenVistaDef[] = [
   {
     codigo: 'ALMACEN_PROC_RECALCULO',
+    codigoVentana: 'AL031',
     nombre: 'Recálculo de precios promedio',
     rutaFrontend: '/sigre/almacen/procesos/recalcular',
     tipo: 'proceso',
@@ -269,6 +291,7 @@ export const ALMACEN_PROCESOS_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_PROC_CUADRE_STOCK',
+    codigoVentana: 'AL032',
     nombre: 'Cuadres de stock',
     rutaFrontend: '/sigre/almacen/procesos/cuadre-stock',
     tipo: 'proceso',
@@ -279,6 +302,7 @@ export const ALMACEN_PROCESOS_VISTAS: readonly AlmacenVistaDef[] = [
   },
   {
     codigo: 'ALMACEN_PROC_ACT_AUTO',
+    codigoVentana: 'AL033',
     nombre: 'Actualización automática',
     rutaFrontend: '/sigre/almacen/procesos/actualizacion',
     tipo: 'proceso',

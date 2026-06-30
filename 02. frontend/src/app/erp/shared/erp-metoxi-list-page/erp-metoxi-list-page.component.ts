@@ -13,6 +13,8 @@ export type ErpMetoxiFiltroTab = 'todos' | 'activos' | 'inactivos';
 })
 export class ErpMetoxiListPageComponent {
   @Input({ required: true }) modulo = '';
+  /** Código de ventana (AL001). Si viene, se muestra como prefijo: "(AL001) Título". */
+  @Input() codigo = '';
   @Input({ required: true }) titulo = '';
   @Input() subtitulo = '';
   @Input() totalRegistros = 0;

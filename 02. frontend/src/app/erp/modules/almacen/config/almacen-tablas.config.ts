@@ -15,6 +15,8 @@ export type AlmacenTablaKey =
   | 'parametros';
 
 export interface AlmacenTablaDef {
+  /** Código de ventana estilo PowerBuilder (AL001). Clave de persistencia + prefijo de título. */
+  codigo: string;
   titulo: string;
   subtitulo?: string;
   columnas: TablaColumna[];
@@ -22,6 +24,7 @@ export interface AlmacenTablaDef {
 
 export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
   almacenes: {
+    codigo: 'AL001',
     titulo: 'Maestro de almacenes',
     columnas: [
       { key: 'codigo', header: 'Código', width: '90px' },
@@ -33,6 +36,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'tipos-movimiento': {
+    codigo: 'AL002',
     titulo: 'Tipos de movimientos de almacenes',
     columnas: [
       { key: 'tipoMov', header: 'Código', width: '90px' },
@@ -43,6 +47,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'tipos-almacen': {
+    codigo: 'AL003',
     titulo: 'Tipos de almacén',
     columnas: [
       { key: 'codigo', header: 'Código', width: '90px' },
@@ -51,6 +56,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   ubicaciones: {
+    codigo: 'AL004',
     titulo: 'Ubicacion de Articulo',
     columnas: [
       { key: 'almacenCodigo', header: 'Almacén', width: '90px' },
@@ -63,6 +69,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'movimientos-almacen': {
+    codigo: 'AL005',
     titulo: 'Movimientos por almacen',
     columnas: [
       { key: 'almacenCodigo', header: 'Almacén', width: '90px' },
@@ -73,6 +80,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   posiciones: {
+    codigo: 'AL006',
     titulo: 'Posiciones por Almacen',
     columnas: [
       { key: 'almacenCodigo', header: 'Almacén', width: '90px' },
@@ -84,6 +92,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'motivos-traslado': {
+    codigo: 'AL007',
     titulo: 'Motivos de traslado',
     columnas: [
       { key: 'codigo', header: 'Código', width: '90px' },
@@ -92,6 +101,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   lotes: {
+    codigo: 'AL008',
     titulo: 'Ingreso de Lotes',
     columnas: [
       { key: 'nroLote', header: 'N° Lote', width: '120px' },
@@ -104,6 +114,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'unidades-conversion': {
+    codigo: 'AL009',
     titulo: 'Unidades de Conversión',
     columnas: [
       { key: 'umOrigenCodigo', header: 'UM origen', width: '100px' },
@@ -115,6 +126,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'numeracion-vales': {
+    codigo: 'AL010',
     titulo: 'Numeración — Vales',
     subtitulo: 'Correlativo por sucursal y año (tabla almacen.vale_mov)',
     columnas: [
@@ -127,6 +139,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   'numeracion-otr': {
+    codigo: 'AL011',
     titulo: 'Numeración — OTR',
     subtitulo: 'Correlativo por sucursal y año (tabla almacen.orden_traslado)',
     columnas: [
@@ -139,6 +152,7 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     ],
   },
   parametros: {
+    codigo: 'AL012',
     titulo: 'Parametros del Sistema',
     columnas: [
       { key: 'clave', header: 'Clave', width: '160px' },

@@ -79,11 +79,12 @@ export class AlmacenTablaPageComponent extends ErpTablaPageBase implements OnIni
         'almacenes';
       this.nombreTablaDocumento = (data['nombreTablaDocumento'] as string | null) ?? null;
       const def = ALMACEN_TABLAS[this.tablaKey];
-      this.titulo = (data['titulo'] as string) ?? def.titulo;
+      this.nombre = (data['titulo'] as string) ?? def.titulo;
+      this.titulo = this.nombre;
       this.subtitulo = def.subtitulo ?? '';
       this.columnas = def.columnas;
       this.crudConfig = crudConfigPorTabla(this.tablaKey);
-      this.nombre = (data['opcionMenuCodigo'] as string) ?? `ALMACEN_TABLA_${this.tablaKey}`;
+      this.codigo = def.codigo;
       this.cargarPreferenciasTabla();
       this.cargarDatos();
     });

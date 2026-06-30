@@ -236,13 +236,23 @@ export class ErpDataTableComponent implements OnChanges {
   private ejecutarExport(formato: ExportFormato): void {
     if (this.filas.length === 0 || this.exportando) return;
     this.exportando = true;
-    const nombreArchivo = `${this.nombreExport}_${this.sufijoFechaHora()}`;
+    const nombreArchivo = `${this.slugNombre(this.nombreExport)}_${this.sufijoFechaHora()}`;
     this.exportSvc
       .exportar(formato, this.columnas, this.filas, nombreArchivo, (f, c) => this.valorCelda(f, c))
       .subscribe({
         next: () => { this.exportando = false; this.cerrarModalExport(); },
         error: () => { this.exportando = false; this.cerrarModalExport(); },
       });
+  }
+
+  /** Convierte el nombre de la ventana/reporte en un slug seguro para nombre de archivo. */
+  private slugNombre(nombre: string): string {
+    const base = (nombre || 'sigre-tabla')
+      .normalize('NFD').replace(/[̀-ͯ]/g, '') // quita acentos
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_') // no alfanumérico -> _
+      .replace(/^_+|_+$/g, '');    // recorta _ de los extremos
+    return base || 'sigre-tabla';
   }
 
   /** Sufijo de fecha y hora de la descarga: yyyymmdd_hhmmss. */

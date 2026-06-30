@@ -66,11 +66,12 @@ export class AlmacenListadoPageComponent extends ErpTablaPageBase implements OnI
     this.route.data.subscribe(data => {
       const ruta = (data['rutaFrontend'] as string) ?? this.normalizarRuta(this.router.url);
       this.vista = (data['vista'] as AlmacenVistaDef) ?? ALMACEN_VISTAS_POR_RUTA[ruta] ?? null;
-      this.titulo = (data['titulo'] as string) ?? this.vista?.nombre ?? 'Consulta';
+      this.nombre = (data['titulo'] as string) ?? this.vista?.nombre ?? 'Consulta';
+      this.titulo = this.nombre;
       this.subtitulo = (data['subtitulo'] as string) ?? this.vista?.subtitulo ?? '';
       this.columnas = (data['columnas'] as TablaColumna[]) ?? this.vista?.columnas ?? [];
       this.crudConfig = this.vista ? crudConfigPorCodigoVista(this.vista.codigo) : null;
-      this.nombre = this.vista?.codigo ?? this.normalizarRuta(this.router.url);
+      this.codigo = this.vista?.codigoVentana ?? this.vista?.codigo ?? this.normalizarRuta(this.router.url);
       this.cargarPreferenciasTabla();
       this.cargarDatos();
     });
