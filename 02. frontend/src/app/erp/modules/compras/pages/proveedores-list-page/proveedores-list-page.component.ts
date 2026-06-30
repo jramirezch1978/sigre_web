@@ -5,14 +5,16 @@ import { ErpMetoxiListPageComponent, ErpMetoxiFiltroTab } from '../../../../shar
 import { contarRegistrosPorEstado, filtrarFilasListado } from '../../../../shared/utils/erp-list-filter.util';
 import { TablaColumna } from '../../../../shared/models/api-page.model';
 import { ErpTablaPageBase } from '../../../../shared/base/erp-tabla-page-base';
+import { forkJoin } from 'rxjs';
 import { ComprasApiService, RelacionComercialDto } from '../../services/compras-api.service';
 
 const COLUMNAS: TablaColumna[] = [
-  { key: 'razonSocial', header: 'Razón social / Nombre', width: '260px' },
+  { key: 'razonSocial', header: 'Razón social / Nombre', width: '240px' },
   { key: 'nroDocumento', header: 'N° documento', width: '120px' },
-  { key: 'tipo', header: 'Tipo', width: '120px' },
+  { key: 'tipo', header: 'Relación', width: '130px' },
+  { key: 'tipoProveedor', header: 'Tipo de proveedor', width: '160px' },
   { key: 'telefono', header: 'Teléfono', width: '120px' },
-  { key: 'email', header: 'Email', width: '200px' },
+  { key: 'email', header: 'Email', width: '190px' },
   { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
 ];
 
@@ -56,9 +58,19 @@ export class ProveedoresListPageComponent extends ErpTablaPageBase implements On
   private cargar(): void {
     this.cargando = true;
     this.error = '';
-    this.api.listarRelaciones().subscribe({
-      next: filas => {
-        this.filas = filas.map(f => ({ ...f, tipo: this.etiquetaTipo(f) }));
+    forkJoin({
+      relaciones: this.api.listarRelaciones(),
+      tipos: this.api.listarTiposEntidad(),
+    }).subscribe({
+      next: ({ relaciones, tipos }) => {
+        const nombreTipo = new Map(tipos.map(t => [t.id, t.descripcion || t.tipo]));
+        this.filas = relaciones.map(f => ({
+          ...f,
+          tipo: this.etiquetaTipo(f),
+          tipoProveedor: f.tipoEntidadContribuyenteId
+            ? (nombreTipo.get(f.tipoEntidadContribuyenteId) ?? '—')
+            : '—',
+        }));
         this.cargando = false;
       },
       error: err => {
