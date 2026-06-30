@@ -314,7 +314,8 @@ CREATE TABLE auth.codigo_recuperacion (
 CREATE TABLE auth.log_acceso (
     id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT REFERENCES auth.usuario(id),
-    empresa_id BIGINT NOT NULL REFERENCES master.empresa(id),
+    -- Nullable: los eventos de sistema/provisión (token temporal) no tienen empresa asociada.
+    empresa_id BIGINT REFERENCES master.empresa(id),
     evento VARCHAR(60) NOT NULL,
     exito BOOLEAN NOT NULL,
     flag_nivel VARCHAR(1) NOT NULL DEFAULT 'I' CHECK (flag_nivel IN ('I', 'W', 'E')),
