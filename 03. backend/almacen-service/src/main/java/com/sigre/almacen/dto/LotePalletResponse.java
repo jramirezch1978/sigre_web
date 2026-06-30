@@ -14,7 +14,6 @@ import java.time.LocalDate;
 public class LotePalletResponse {
 
     private Long id;
-    private Long almacenId;
     private Long articuloId;
     private String nroLote;
     private LocalDate fechaProduccion;

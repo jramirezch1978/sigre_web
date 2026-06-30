@@ -21,7 +21,6 @@ public interface LotePalletMapper {
     List<LotePalletResponse> toResponseList(List<LotePallet> entities);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "almacenId", ignore = true)
     @Mapping(target = "articuloId", ignore = true)
     @Mapping(target = "flagEstado", source = "flagEstado", defaultValue = "1")
     void updateEntity(LotePalletRequest request, @MappingTarget LotePallet entity);

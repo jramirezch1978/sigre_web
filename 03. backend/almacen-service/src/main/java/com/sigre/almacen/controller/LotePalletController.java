@@ -22,10 +22,9 @@ public class LotePalletController {
 
     @GetMapping
     public ApiResponse<PageData<LotePalletResponse>> buscar(
-            @RequestParam(required = false) Long almacenId,
             @RequestParam(required = false) Long articuloId,
             Pageable pageable) {
-        var page = service.buscar(almacenId, articuloId, pageable);
+        var page = service.buscar(articuloId, pageable);
         return ApiResponse.ok(PageData.of(page, mapper.toResponseList(page.getContent())));
     }
 

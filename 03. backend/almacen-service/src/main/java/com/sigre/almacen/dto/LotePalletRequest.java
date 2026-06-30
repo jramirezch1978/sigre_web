@@ -16,7 +16,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class LotePalletRequest extends FlagEstadoRequest {
 
-    @NotNull private Long almacenId;
     @NotNull private Long articuloId;
 
     @NotBlank

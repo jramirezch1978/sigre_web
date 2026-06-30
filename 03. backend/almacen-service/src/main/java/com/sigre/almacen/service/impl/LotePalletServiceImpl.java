@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.sigre.almacen.entity.LotePallet;
-import com.sigre.almacen.repository.AlmacenRepository;
 import com.sigre.almacen.repository.LotePalletRepository;
 import com.sigre.almacen.service.LotePalletService;
 import com.sigre.common.exception.BusinessException;
@@ -21,13 +20,12 @@ import com.sigre.common.exception.ResourceNotFoundException;
 public class LotePalletServiceImpl implements LotePalletService {
 
     private final LotePalletRepository repository;
-    private final AlmacenRepository almacenRepository;
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     @Timed(value = "app.db.query", extraTags = {"table", "lote_pallet", "operation", "buscar"})
-    public Page<LotePallet> buscar(Long almacenId, Long articuloId, Pageable pageable) {
-        return repository.findFiltrado(almacenId, articuloId, pageable);
+    public Page<LotePallet> buscar(Long articuloId, Pageable pageable) {
+        return repository.findFiltrado(articuloId, pageable);
     }
 
     @Override
@@ -41,11 +39,8 @@ public class LotePalletServiceImpl implements LotePalletService {
     @Transactional
     @Timed(value = "app.db.query", extraTags = {"table", "lote_pallet", "operation", "create"})
     public LotePallet create(LotePallet entity) {
-        if (!almacenRepository.existsById(entity.getAlmacenId())) {
-            throw new ResourceNotFoundException("Almacen", entity.getAlmacenId());
-        }
         assertArticuloExiste(entity.getArticuloId());
-        validarUqLote(null, entity.getAlmacenId(), entity.getArticuloId(), entity.getNroLote());
+        validarUqLote(null, entity.getArticuloId(), entity.getNroLote());
         if (entity.getFlagEstado() == null) {
             entity.setFlagEstado("1");
         }
@@ -57,12 +52,8 @@ public class LotePalletServiceImpl implements LotePalletService {
     @Timed(value = "app.db.query", extraTags = {"table", "lote_pallet", "operation", "update"})
     public LotePallet update(Long id, LotePallet entity) {
         LotePallet existing = findById(id);
-        if (!almacenRepository.existsById(entity.getAlmacenId())) {
-            throw new ResourceNotFoundException("Almacen", entity.getAlmacenId());
-        }
         assertArticuloExiste(entity.getArticuloId());
-        validarUqLote(id, entity.getAlmacenId(), entity.getArticuloId(), entity.getNroLote());
-        existing.setAlmacenId(entity.getAlmacenId());
+        validarUqLote(id, entity.getArticuloId(), entity.getNroLote());
         existing.setArticuloId(entity.getArticuloId());
         existing.setNroLote(entity.getNroLote());
         existing.setFechaProduccion(entity.getFechaProduccion());
@@ -102,14 +93,14 @@ public class LotePalletServiceImpl implements LotePalletService {
         }
     }
 
-    private void validarUqLote(Long idExcluir, Long almacenId, Long articuloId, String nroLote) {
+    private void validarUqLote(Long idExcluir, Long articuloId, String nroLote) {
         boolean dup = (idExcluir == null)
-                ? repository.existsByAlmacenIdAndArticuloIdAndNroLoteIgnoreCase(almacenId, articuloId, nroLote)
-                : repository.existsByAlmacenIdAndArticuloIdAndNroLoteIgnoreCaseAndIdNot(
-                almacenId, articuloId, nroLote, idExcluir);
+                ? repository.existsByArticuloIdAndNroLoteIgnoreCase(articuloId, nroLote)
+                : repository.existsByArticuloIdAndNroLoteIgnoreCaseAndIdNot(
+                articuloId, nroLote, idExcluir);
         if (dup) {
             throw new BusinessException(
-                    "Ya existe un lote con el mismo número para este almacén y artículo.",
+                    "Ya existe un lote con el mismo número para este artículo.",
                     HttpStatus.CONFLICT,
                     "LOTE_PALLET_DUPLICADO");
         }

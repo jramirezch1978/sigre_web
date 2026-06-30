@@ -158,9 +158,10 @@ CREATE TABLE almacen.motivo_traslado (
     fec_modificacion    TIMESTAMPTZ
 );
 
+-- El lote pertenece al ARTÍCULO (no al almacén). El saldo por almacén/lote vive en
+-- almacen.articulo_almacen_lote (que referencia lote_pallet.id).
 CREATE TABLE almacen.lote_pallet (
     id                      BIGSERIAL NOT NULL,
-    almacen_id              BIGINT NOT NULL,
     articulo_id             BIGINT NOT NULL,
     nro_lote                VARCHAR(40) NOT NULL,
     fecha_produccion        DATE,
@@ -172,9 +173,8 @@ CREATE TABLE almacen.lote_pallet (
     updated_by          BIGINT,
     fec_modificacion    TIMESTAMPTZ,
     CONSTRAINT PK_LOTE_PALLET PRIMARY KEY (id),
-    CONSTRAINT FK_LOTE_PALLET_01 FOREIGN KEY (almacen_id) REFERENCES almacen.almacen(id),
     CONSTRAINT FK_LOTE_PALLET_02 FOREIGN KEY (articulo_id) REFERENCES core.articulo(id),
-    CONSTRAINT UQ_LOTE_PALLET_01 UNIQUE (almacen_id, articulo_id, nro_lote)
+    CONSTRAINT UQ_LOTE_PALLET_01 UNIQUE (articulo_id, nro_lote)
 );
 
 -- Posición física / ubicación de picking dentro del almacén (pasillo, estante, nivel). Debe crearse antes de vale_mov_det (FK).

@@ -106,7 +106,6 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     titulo: 'Ingreso de Lotes',
     columnas: [
       { key: 'nroLote', header: 'N° Lote', width: '120px' },
-      { key: 'almacenId', header: 'Almacén ID', width: '100px' },
       { key: 'articuloId', header: 'Artículo ID', width: '100px' },
       { key: 'fechaProduccion', header: 'F. producción', width: '120px', format: 'fecha' },
       { key: 'fechaVencimiento', header: 'F. vencimiento', width: '120px', format: 'fecha' },

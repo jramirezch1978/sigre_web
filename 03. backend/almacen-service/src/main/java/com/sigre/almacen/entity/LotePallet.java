@@ -16,15 +16,12 @@ import java.time.LocalDate;
 @Table(
         name = "lote_pallet",
         schema = "almacen",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"almacen_id", "articulo_id", "nro_lote"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"articulo_id", "nro_lote"}))
 public class LotePallet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "almacen_id", nullable = false)
-    private Long almacenId;
 
     @Column(name = "articulo_id", nullable = false)
     private Long articuloId;

@@ -180,7 +180,6 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
     basePath: '/lotes-pallets',
     handler: 'standard',
     campos: [
-      { key: 'almacenId', label: 'Almacén ID', type: 'number', required: true },
       { key: 'articuloId', label: 'Artículo ID', type: 'number', required: true },
       { key: 'nroLote', label: 'N° Lote', type: 'text', required: true, maxLength: 40 },
       { key: 'fechaProduccion', label: 'F. producción', type: 'date' },

@@ -6,7 +6,7 @@ import com.sigre.almacen.entity.LotePallet;
 
 public interface LotePalletService {
 
-    Page<LotePallet> buscar(Long almacenId, Long articuloId, Pageable pageable);
+    Page<LotePallet> buscar(Long articuloId, Pageable pageable);
 
     LotePallet findById(Long id);
 

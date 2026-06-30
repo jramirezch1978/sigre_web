@@ -83,7 +83,8 @@ public class ReporteAlmacenServiceImpl implements ReporteAlmacenService {
     public Page<LoteVencimientoResponse> lotesPorVencer(Long almacenId, Long articuloId, int dias, Pageable pageable) {
         LocalDate hoy = LocalDate.now();
         LocalDate hasta = hoy.plusDays(Math.max(dias, 0));
-        Page<LotePallet> page = lotePalletRepository.buscarPorVencer(almacenId, articuloId, hasta, pageable);
+        // El lote ya no se filtra por almacén (pertenece al artículo); almacenId se ignora aquí.
+        Page<LotePallet> page = lotePalletRepository.buscarPorVencer(articuloId, hasta, pageable);
         Map<Long, ArticuloRef> articulos = cargarArticulos(
                 page.getContent().stream().map(LotePallet::getArticuloId).toList());
         return page.map(l -> toLoteVencimiento(l, articulos.get(l.getArticuloId()), hoy));
