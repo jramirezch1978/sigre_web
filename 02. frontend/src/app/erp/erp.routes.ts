@@ -40,6 +40,11 @@ export const erpRoutes: Routes = [
           import('./modules/almacen/almacen.routes').then(m => m.almacenRoutes),
       },
       {
+        path: 'compras',
+        loadChildren: () =>
+          import('./modules/compras/compras.routes').then(m => m.comprasRoutes),
+      },
+      {
         path: 'seguridad-usuarios',
         loadComponent: () =>
           import('./pages/erp-seguridad-usuarios/erp-seguridad-usuarios.component')
