@@ -20,4 +20,7 @@ public class AlmacenTipoRequest extends FlagEstadoRequest {
     @NotBlank(message = "Nombre es obligatorio")
     @Size(max = 120)
     private String nombre;
+
+    /** Libro contable amarrado (FK -> contabilidad.cntbl_libro.id). */
+    private Long cntblLibroId;
 }

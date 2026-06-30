@@ -52,6 +52,9 @@ CREATE TABLE almacen.almacen_tipo (
     id BIGSERIAL PRIMARY KEY,
     codigo VARCHAR(20) NOT NULL UNIQUE,
     nombre VARCHAR(120) NOT NULL,
+    -- Libro contable amarrado al tipo de almacén (para generar los asientos de almacén).
+    -- FK -> contabilidad.cntbl_libro(id) diferida a 06-contabilidad.sql (cross-schema: esa tabla se crea después).
+    cntbl_libro_id BIGINT,
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1',
     created_by          BIGINT,
     fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),

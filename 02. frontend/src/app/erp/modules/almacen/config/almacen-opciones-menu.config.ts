@@ -36,6 +36,13 @@ export const ALMACEN_TABLAS_OPCIONES: readonly AlmacenOpcionMenuDef[] = [
     orden: 2,
   },
   {
+    codigo: 'ALMACEN_TABLAS_TIPO_ALMACEN',
+    nombre: 'Tipos de almacén',
+    rutaFrontend: '/sigre/almacen/tablas/tipos-almacen',
+    tablaKey: 'tipos-almacen',
+    orden: 3,
+  },
+  {
     codigo: 'ALMACEN_TABLAS_UBICACION',
     nombre: 'Ubicacion de Articulo',
     rutaFrontend: '/sigre/almacen/tablas/ubicaciones',

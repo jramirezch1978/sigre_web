@@ -826,6 +826,7 @@ WITH d AS (
         ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_MAESTRO_DE_ALMACENES', 'Maestro de almacenes', '/sigre/almacen/tablas/almacenes/maestro-de-almacenes', 'almacen/tablas/almacenes', 1),
         ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_ALMACENES_TACITOS', 'Almacenes tacitos', '/sigre/almacen/tablas/almacenes/almacenes-tacitos', NULL, 2),
         ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_TIPOS_DE_MOVIMIENTOS_DE', 'Tipos de movimientos de almacenes', '/sigre/almacen/tablas/almacenes/tipos-de-movimientos-de-almacenes', 'almacen/tablas/tipos-movimiento', 3),
+        ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_TIPOS_DE_ALMACEN', 'Tipos de almacén', '/sigre/almacen/tablas/almacenes/tipos-de-almacen', 'almacen/tablas/tipos-almacen', 8),
         ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_UBICACION_DE_ARTICULO', 'Ubicacion de Articulo', '/sigre/almacen/tablas/almacenes/ubicacion-de-articulo', 'almacen/tablas/ubicaciones', 4),
         ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_MOVIMIENTOS_POR_ALMACEN', 'Movimientos por almacen', '/sigre/almacen/tablas/almacenes/movimientos-por-almacen', 'almacen/tablas/movimientos-almacen', 5),
         ('ALMACEN_TABLAS_ALMACENES', 'ALMACEN_TABLAS_TRANSPORTISTAS_X_ALMACEN', 'Transportistas x Almacén', '/sigre/almacen/tablas/almacenes/transportistas-x-almacen', NULL, 6),

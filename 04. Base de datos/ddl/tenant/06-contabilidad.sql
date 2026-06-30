@@ -173,6 +173,11 @@ CREATE TABLE contabilidad.cntbl_libro (
     CONSTRAINT PK_CNTBL_LIBRO PRIMARY KEY (id)
 );
 
+-- FK diferida cross-schema: cada tipo de almacén amarra un libro contable (asientos de almacén).
+ALTER TABLE almacen.almacen_tipo
+    ADD CONSTRAINT FK_ALMACEN_TIPO_CNTBL_LIBRO
+    FOREIGN KEY (cntbl_libro_id) REFERENCES contabilidad.cntbl_libro(id);
+
 
 CREATE TABLE contabilidad.cntbl_asiento (
     id                      BIGSERIAL       NOT NULL,

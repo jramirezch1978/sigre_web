@@ -7968,6 +7968,18 @@ INSERT INTO contabilidad.cntbl_libro (codigo, nombre) VALUES
     ('PA', 'PRE-ASIENTOS CONTABLES')
 ON CONFLICT (codigo) DO UPDATE SET nombre = EXCLUDED.nombre;
 
+-- Backfill: amarrar cada tipo de almacén a su libro contable de movimientos (asientos de almacén).
+UPDATE almacen.almacen_tipo at
+   SET cntbl_libro_id = cl.id
+  FROM contabilidad.cntbl_libro cl
+ WHERE at.cntbl_libro_id IS NULL
+   AND cl.codigo = CASE at.codigo
+                     WHEN 'MP' THEN '19'  -- MOVIMIENTOS DE ALMACEN DE MATERIA PRIMA
+                     WHEN 'PT' THEN '23'  -- MOVIMIENTOS PRODUCTOS TERMINADOS
+                     WHEN 'SP' THEN '24'  -- MOVIMIENTOS DE SUB PRODUCTOS
+                     ELSE '16'            -- MOVIMIENTOS DE ALMACEN MATERIALES (IN, AF, MT, ...)
+                   END;
+
 -- Backfill cntbl_libro_id en CxP/CxC tras cargar libros contables
 UPDATE finanzas.cntas_pagar cp
    SET cntbl_libro_id = cl.id

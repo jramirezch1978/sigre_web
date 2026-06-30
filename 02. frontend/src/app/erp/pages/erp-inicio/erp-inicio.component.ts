@@ -238,6 +238,50 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Icono Material para una opción HOJA del menú.
+   * - Sin pathUrl => 'construction' (opción en construcción).
+   * - Con pathUrl => icono propio según palabras clave del nombre (con respaldo genérico).
+   */
+  iconoOpcion(opcion: MenuOpcion): string {
+    if (!opcion.pathUrl) return 'construction';
+    const t = `${opcion.nombre ?? ''} ${opcion.codigo ?? ''}`.toLowerCase();
+    const reglas: ReadonlyArray<[RegExp, string]> = [
+      [/tipos?\s+de\s+almac/, 'category'],
+      [/tipos?\s+de\s+mov|tipo\s*mov/, 'swap_horiz'],
+      [/maestro|almac/, 'warehouse'],
+      [/ubicaci/, 'place'],
+      [/posici/, 'grid_view'],
+      [/movimiento/, 'sync_alt'],
+      [/traslado|transferen/, 'local_shipping'],
+      [/transportist/, 'local_shipping'],
+      [/motivo/, 'swap_calls'],
+      [/lote|pallet/, 'inventory_2'],
+      [/unidad|conversi/, 'straighten'],
+      [/vale|numeraci|correlativ|orden\s+de\s+traslado/, 'confirmation_number'],
+      [/par[aá]metro|config/, 'tune'],
+      [/inventario|conteo/, 'fact_check'],
+      [/gu[ií]a|remisi/, 'receipt_long'],
+      [/consignaci/, 'handshake'],
+      [/despacho/, 'outbox'],
+      [/devoluci|pr[eé]stamo/, 'undo'],
+      [/kardex|art[ií]culo/, 'inventory'],
+      [/stock|saldo|existencia/, 'inventory'],
+      [/valoriza|costo|precio/, 'payments'],
+      [/diagn[oó]stico/, 'monitor_heart'],
+      [/recalcul|proceso|actualiza|cuadre/, 'autorenew'],
+      [/consulta|buscar/, 'search'],
+      [/reporte|listado/, 'assessment'],
+      [/factura|comprobante/, 'request_quote'],
+      [/orden\s+de\s+compra|compra/, 'shopping_cart'],
+      [/venta/, 'point_of_sale'],
+    ];
+    for (const [re, icon] of reglas) {
+      if (re.test(t)) return icon;
+    }
+    return 'chevron_right';
+  }
+
   get enDashboard(): boolean {
     return this.router.url.includes('/dashboard') || this.router.url === '/sigre' || this.router.url === '/sigre/';
   }

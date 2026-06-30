@@ -16,6 +16,9 @@ public class AlmacenTipoResponse {
     private Long id;
     private String codigo;
     private String nombre;
+    private Long cntblLibroId;
+    private String libroCodigo;
+    private String libroNombre;
     private String flagEstado;
     private Long createdBy;
     private UsuarioResumenDto createdByUsuario;

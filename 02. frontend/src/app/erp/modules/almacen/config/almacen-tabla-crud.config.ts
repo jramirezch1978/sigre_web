@@ -22,7 +22,7 @@ export interface TablaCrudCampo {
   required?: boolean;
   maxLength?: number;
   readonlyOnEdit?: boolean;
-  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento' | 'centros-costo' | 'proveedores' | 'ubigeos' | 'usuarios-empresa' | 'unidades';
+  optionsFrom?: 'tipos-almacen' | 'sucursales' | 'almacenes' | 'tipos-movimiento' | 'centros-costo' | 'proveedores' | 'ubigeos' | 'usuarios-empresa' | 'unidades' | 'libros-contables';
   /** Etiqueta cuando el switch está encendido (flag_estado = 1). */
   switchOnLabel?: string;
   /** Etiqueta cuando el switch está apagado (flag_estado = 0). */
@@ -91,6 +91,7 @@ export const ALMACEN_TABLA_CRUD: Partial<Record<AlmacenTablaKey, TablaCrudConfig
     campos: [
       { key: 'codigo', label: 'Código', type: 'text', required: true, maxLength: 20, readonlyOnEdit: true },
       { key: 'nombre', label: 'Nombre', type: 'text', required: true, maxLength: 120 },
+      { key: 'cntblLibroId', label: 'Libro contable', type: 'select', optionsFrom: 'libros-contables', required: true },
       CAMPO_FLAG_ESTADO,
     ],
   },

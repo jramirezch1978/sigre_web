@@ -199,10 +199,11 @@ export class AlmacenRegistroDialogComponent implements OnInit {
     const necesitaUbigeos = campos.some(c => c.optionsFrom === 'ubigeos');
     const necesitaUsuarios = campos.some(c => c.optionsFrom === 'usuarios-empresa');
     const necesitaUnidades = campos.some(c => c.optionsFrom === 'unidades');
+    const necesitaLibros = campos.some(c => c.optionsFrom === 'libros-contables');
 
     if (!necesitaTipos && !necesitaSucursales && !necesitaAlmacenes && !necesitaTiposMov
         && !necesitaCentrosCosto && !necesitaProveedores && !necesitaUbigeos && !necesitaUsuarios
-        && !necesitaUnidades) {
+        && !necesitaUnidades && !necesitaLibros) {
       this.cargandoOpciones = false;
       return;
     }
@@ -223,8 +224,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
       ubigeos: necesitaUbigeos ? resiliente('ubigeos', this.almacenApi.listarUbigeos()) : of([]),
       usuarios: necesitaUsuarios ? resiliente('responsables', this.coreApi.listarUsuariosEmpresa()) : of([]),
       unidades: necesitaUnidades ? resiliente('unidades de medida', this.coreApi.listarUnidadesMedida()) : of([]),
+      libros: necesitaLibros ? resiliente('libros contables', this.coreApi.listarLibrosContables()) : of([]),
     }).subscribe({
-      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos, usuarios, unidades }) => {
+      next: ({ tipos, sucursales, almacenes, tiposMov, centrosCosto, proveedores, ubigeos, usuarios, unidades, libros }) => {
         if (necesitaTipos) {
           this.opciones['tipos-almacen'] = this.soloActivos(tipos).map(t => ({
             value: t.id,
@@ -266,6 +268,9 @@ export class AlmacenRegistroDialogComponent implements OnInit {
             value: u.id,
             label: `${u.codigo ?? u.id} — ${u.nombre}`,
           }));
+        }
+        if (necesitaLibros) {
+          this.opciones['libros-contables'] = libros;
         }
         this.cargandoOpciones = false;
         // El formulario queda usable; solo se avisa (modal WARNING) de las listas que no cargaron.

@@ -22,6 +22,8 @@ public interface AlmacenTipoMapper {
 
     @Mapping(target = "createdByUsuario", ignore = true)
     @Mapping(target = "updatedByUsuario", ignore = true)
+    @Mapping(target = "libroCodigo", ignore = true)
+    @Mapping(target = "libroNombre", ignore = true)
     AlmacenTipoResponse toResponse(AlmacenTipo entity);
 
     List<AlmacenTipoResponse> toResponseList(List<AlmacenTipo> entities);

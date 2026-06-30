@@ -114,6 +114,23 @@ export class CoreApiService {
       );
   }
 
+  /** Libros contables activos (contabilidad.cntbl_libro) para el FK del tipo de almacén. */
+  listarLibrosContables(): Observable<SelectOptionDto[]> {
+    const contabilidadBase = `${this.apiBase.getApiBaseUrl()}/contabilidad`;
+    const params = new HttpParams().set('page', '0').set('size', '500').set('flagEstado', '1');
+    return this.http
+      .get<ApiResponse<PageData<{ id: number; codigo?: string; nombre?: string }>>>(
+        `${contabilidadBase}/libros-contables`, { params })
+      .pipe(
+        map(res =>
+          (res.data?.content ?? []).map(item => ({
+            value: Number(item.id),
+            label: `${item.codigo ?? item.id}${item.nombre ? ' — ' + item.nombre : ''}`,
+          }))
+        )
+      );
+  }
+
   /** Usuarios activos asignados a la empresa actual (para el FK Responsable). */
   listarUsuariosEmpresa(): Observable<SelectOptionDto[]> {
     const empresaId = this.leerEmpresaId();

@@ -28,6 +28,10 @@ public class AlmacenTipo {
     @Column(name = "nombre", nullable = false, length = 120)
     private String nombre;
 
+    /** Libro contable amarrado al tipo de almacén (FK -> contabilidad.cntbl_libro.id). */
+    @Column(name = "cntbl_libro_id")
+    private Long cntblLibroId;
+
     @Column(name = "flag_estado", nullable = false, length = 1)
     private String flagEstado = "1";
 

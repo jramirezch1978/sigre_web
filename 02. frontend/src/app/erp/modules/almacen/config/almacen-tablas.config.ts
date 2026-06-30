@@ -51,7 +51,8 @@ export const ALMACEN_TABLAS: Record<AlmacenTablaKey, AlmacenTablaDef> = {
     titulo: 'Tipos de almacén',
     columnas: [
       { key: 'codigo', header: 'Código', width: '90px' },
-      { key: 'nombre', header: 'Nombre', width: '240px' },
+      { key: 'nombre', header: 'Nombre', width: '220px' },
+      { key: 'libroNombre', header: 'Libro contable', width: '220px' },
       { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
     ],
   },
