@@ -6,6 +6,8 @@ import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.ser
 import { AdminProvisioningApiService } from '../../services/admin-provisioning-api.service';
 import { AdminUbigeoApiService } from '../../services/admin-ubigeo-api.service';
 import { EmpresaAdminDto, UbigeoItem, UsuarioAdminDto } from '../../models/admin.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 import { SigreModalService } from '@sigre-common';
 
 @Component({
@@ -14,7 +16,12 @@ import { SigreModalService } from '@sigre-common';
   styleUrls: ['./admin-empresas.component.scss'],
   standalone: false,
 })
-export class AdminEmpresasComponent implements OnInit {
+export class AdminEmpresasComponent extends AdminTablaPageBase<EmpresaAdminDto> implements OnInit {
+  // Tabla propia (muchas acciones por fila); solo se reusa la paginación de la base.
+  columnasTabla: TablaColumna[] = [];
+  protected get registrosTabla(): EmpresaAdminDto[] { return this.empresasFiltradas; }
+  protected aFila(e: EmpresaAdminDto): Record<string, unknown> { return { id: e.id }; }
+
 
   private readonly api = inject(AdminSeguridadApiService);
   private readonly provisioning = inject(AdminProvisioningApiService);

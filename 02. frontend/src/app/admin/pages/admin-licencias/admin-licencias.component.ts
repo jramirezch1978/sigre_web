@@ -6,6 +6,8 @@ import { LoginData } from '../../../auth/services/auth.service';
 import { AdminLicenciasService, LicenciaAdminDto } from '../../services/admin-licencias.service';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { EmpresaAdminDto, EdicionErpDto } from '../../models/admin.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
   selector: 'app-admin-licencias',
@@ -13,7 +15,12 @@ import { EmpresaAdminDto, EdicionErpDto } from '../../models/admin.models';
   styleUrls: ['./admin-licencias.component.scss'],
   standalone: false,
 })
-export class AdminLicenciasComponent implements OnInit {
+export class AdminLicenciasComponent extends AdminTablaPageBase<LicenciaAdminDto> implements OnInit {
+  // Tabla propia (celdas/acciones especiales); solo se reusa la paginación de la base.
+  columnasTabla: TablaColumna[] = [];
+  protected get registrosTabla(): LicenciaAdminDto[] { return this.licenciasFiltradas; }
+  protected aFila(l: LicenciaAdminDto): Record<string, unknown> { return { id: l.id }; }
+
 
   private readonly api = inject(AdminLicenciasService);
   private readonly adminApi = inject(AdminSeguridadApiService);
