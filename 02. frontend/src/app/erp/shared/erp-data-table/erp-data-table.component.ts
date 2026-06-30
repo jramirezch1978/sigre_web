@@ -18,6 +18,10 @@ export class ErpDataTableComponent implements OnChanges {
   @Input() error = '';
   @Input() totalRegistros = 0;
   @Input() mostrarAcciones = false;
+  /** Permite ocultar acciones puntuales (por defecto todas visibles). */
+  @Input() mostrarEditar = true;
+  @Input() mostrarAnular = true;
+  @Input() mostrarEliminar = true;
   @Input() nombreExport = 'sigre-tabla';
   @Input() habilitarExportacion = true;
   @Input() habilitarPaginacion = true;

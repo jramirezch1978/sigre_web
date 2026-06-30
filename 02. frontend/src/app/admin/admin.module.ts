@@ -12,6 +12,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { SigreValidIconDirective } from '@sigre-common';
+import { ErpDataTableComponent } from '../erp/shared/erp-data-table/erp-data-table.component';
 
 import { AdminRoutingModule } from './admin-routing.module';
 import { AdminUiModule } from '../ui/admin-ui.module';
@@ -67,6 +68,7 @@ import { AdminCuentaComponent } from './pages/admin-cuenta/admin-cuenta.componen
     AdminRoutingModule,
     AdminUiModule,
     SigreValidIconDirective,
+    ErpDataTableComponent,
     BaseChartDirective,
     MatButtonModule,
     MatFormFieldModule,

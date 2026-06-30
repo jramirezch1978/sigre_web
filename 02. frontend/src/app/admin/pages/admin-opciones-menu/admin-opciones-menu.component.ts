@@ -4,6 +4,7 @@ import { ModalController } from '@ionic/angular';
 import { ModalConfirmationComponent } from '@sigre-common';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { ModuloDto, OpcionMenuDto } from '../../models/admin.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
 
 @Component({
   selector: 'app-admin-opciones-menu',
@@ -57,6 +58,34 @@ export class AdminOpcionesMenuComponent implements OnInit {
     if (!this.filtro.trim()) return this.opciones;
     const q = this.filtro.toLowerCase();
     return this.opciones.filter(o => (o.codigo ?? '').toLowerCase().includes(q) || o.nombre.toLowerCase().includes(q));
+  }
+
+  // ── Tabla ERP (erp-data-table): columnas + filas mapeadas ──
+  readonly columnasTabla: TablaColumna[] = [
+    { key: 'id', header: 'ID', width: '70px' },
+    { key: 'codigo', header: 'Código', width: '220px' },
+    { key: 'nombre', header: 'Nombre', width: '220px' },
+    { key: 'moduloNombre', header: 'Módulo', width: '120px' },
+    { key: 'rutaFrontend', header: 'Ruta', width: '220px' },
+    { key: 'orden', header: 'Orden', width: '70px', format: 'numero' },
+    { key: 'flagEstado', header: 'Estado', width: '90px', format: 'estado' },
+  ];
+
+  get filasTabla(): Record<string, unknown>[] {
+    return this.opcionesFiltradas.map(o => ({
+      id: o.id,
+      codigo: o.codigo ?? '—',
+      nombre: o.nombre,
+      moduloNombre: this.moduloNombre(o.moduloId),
+      rutaFrontend: o.rutaFrontend ?? '—',
+      orden: o.orden ?? 0,
+      flagEstado: o.activo ? '1' : '0',
+    }));
+  }
+
+  onEditarFila(row: Record<string, unknown>): void {
+    const o = this.opciones.find(x => x.id === row['id']);
+    if (o) this.abrirEditar(o);
   }
 
   moduloNombre(id?: number): string {
