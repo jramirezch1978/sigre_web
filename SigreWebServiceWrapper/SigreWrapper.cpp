@@ -664,6 +664,11 @@ static int TlsRecv(TlsContext* ctx, char* data, int maxLen)
         ctx->recvBufferUsed = 0;
     }
     
+    // Presupuesto total de espera: servidores como Gmail pueden tardar varios
+    // segundos en responder a DATA o al finalizar el mensaje (escaneo de adjuntos),
+    // muy por encima de los 500ms que se esperaban en el primer intento.
+    const ULONGLONG RECV_TIMEOUT_MS = 20000;
+    ULONGLONG startTick = GetTickCount64();
     BOOL firstIteration = TRUE;
     
     while (1) {
@@ -710,7 +715,13 @@ static int TlsRecv(TlsContext* ctx, char* data, int maxLen)
             }
         }
         
-        // Usar select() para esperar datos - timeout mínimo
+        // Se agoto el presupuesto total: recien aqui se declara "sin respuesta"
+        if (GetTickCount64() - startTick >= RECV_TIMEOUT_MS) {
+            return 0;  // Timeout total - el servidor no respondio a tiempo
+        }
+        
+        // Usar select() para esperar datos - se reintenta en intervalos cortos
+        // hasta agotar el presupuesto total (RECV_TIMEOUT_MS)
         fd_set readSet;
         FD_ZERO(&readSet);
         FD_SET(ctx->sock, &readSet);
@@ -722,14 +733,13 @@ static int TlsRecv(TlsContext* ctx, char* data, int maxLen)
             firstIteration = FALSE;
         } else {
             tv.tv_sec = 0;
-            tv.tv_usec = 50000;   // 50ms para datos fragmentados
+            tv.tv_usec = 200000;  // 200ms entre reintentos mientras quede presupuesto
         }
         
         int selectResult = select(0, &readSet, NULL, NULL, &tv);
         if (selectResult <= 0) {
-            // Timeout - si tenemos datos parciales, intentar desencriptar
-            if (ctx->recvBufferUsed > 0) continue;
-            return 0;  // No hay más datos disponibles
+            // Timeout parcial - reintentar mientras no se agote el presupuesto total
+            continue;
         }
         
         // Recibir más datos
