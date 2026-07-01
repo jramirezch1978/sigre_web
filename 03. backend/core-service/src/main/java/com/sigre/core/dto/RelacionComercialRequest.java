@@ -38,6 +38,7 @@ public class RelacionComercialRequest {
 
     private Boolean esProveedor = false;
     private Boolean esCliente = false;
+    private Boolean esEmpleado = false;
     private Long tipoEntidadContribuyenteId;
     private String flagEstado = "1";
 }

@@ -88,10 +88,15 @@ export class AdminRolesComponent extends AdminTablaPageBase<RolDto> implements O
     });
   }
 
+  protected override get todosLosRegistros(): RolDto[] { return this.roles; }
+
   get rolesFiltrados(): RolDto[] {
-    if (!this.filtro.trim()) return this.roles;
-    const q = this.filtro.toLowerCase();
-    return this.roles.filter(r => r.codigo.toLowerCase().includes(q) || r.nombre.toLowerCase().includes(q));
+    let lista = this.roles;
+    if (this.filtro.trim()) {
+      const q = this.filtro.toLowerCase();
+      lista = lista.filter(r => r.codigo.toLowerCase().includes(q) || r.nombre.toLowerCase().includes(q));
+    }
+    return this.filtrarPorEstado(lista);
   }
 
   readonly columnasTabla: TablaColumna[] = [

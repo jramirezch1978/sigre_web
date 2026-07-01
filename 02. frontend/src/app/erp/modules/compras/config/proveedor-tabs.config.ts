@@ -27,6 +27,7 @@ export const PROVEEDOR_DATOS_GENERALES: CatalogoCampo[] = [
   { key: 'email', label: 'Email', type: 'text', maxLength: 150 },
   { key: 'esProveedor', label: 'Es proveedor', type: 'switch' },
   { key: 'esCliente', label: 'Es cliente', type: 'switch' },
+  { key: 'esEmpleado', label: 'Es trabajador', type: 'switch' },
   { key: 'flagEstado', label: 'Estado', type: 'switch' },
 ];
 

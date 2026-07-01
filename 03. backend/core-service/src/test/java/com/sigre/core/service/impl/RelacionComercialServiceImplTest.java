@@ -182,7 +182,7 @@ class RelacionComercialServiceImplTest {
     class Create {
         @Test
         void success() {
-            var request = new RelacionComercialRequest("Nuevo", "Comercial Nuevo", 6L, "20999999999", "Calle 123", null, null, true, false, null, "1");
+            var request = new RelacionComercialRequest("Nuevo", "Comercial Nuevo", 6L, "20999999999", "Calle 123", null, null, true, false, false, null, "1");
             when(repository.existsByNroDocumento("20999999999")).thenReturn(false);
             when(repository.save(any(RelacionComercial.class))).thenReturn(entity);
             RelacionComercialResponse resp = new RelacionComercialResponse();
@@ -198,7 +198,7 @@ class RelacionComercialServiceImplTest {
 
         @Test
         void throwsConflictWhenDuplicateDocument() {
-            var request = new RelacionComercialRequest("Dup", null, 6L, "20123456789", null, null, null, true, false, null, "1");
+            var request = new RelacionComercialRequest("Dup", null, 6L, "20123456789", null, null, null, true, false, false, null, "1");
             when(repository.existsByNroDocumento("20123456789")).thenReturn(true);
 
             assertThatThrownBy(() -> service.create(request))
@@ -208,7 +208,7 @@ class RelacionComercialServiceImplTest {
 
         @Test
         void setsDefaultFlagEstadoWhenNull() {
-            var request = new RelacionComercialRequest("Prov", null, 6L, "20111111111", null, null, null, null, null, null, null);
+            var request = new RelacionComercialRequest("Prov", null, 6L, "20111111111", null, null, null, null, null, null, null, null);
             when(repository.existsByNroDocumento("20111111111")).thenReturn(false);
             when(repository.save(any(RelacionComercial.class))).thenAnswer(i -> i.getArgument(0));
             when(mapper.toRelacionResponse(any())).thenReturn(new RelacionComercialResponse());
@@ -219,7 +219,7 @@ class RelacionComercialServiceImplTest {
 
         @Test
         void setsTipoDocumentoNullWhenIdNull() {
-            var request = new RelacionComercialRequest("Prov", null, null, "20111111111", null, null, null, true, false, null, "1");
+            var request = new RelacionComercialRequest("Prov", null, null, "20111111111", null, null, null, true, false, false, null, "1");
             when(repository.existsByNroDocumento("20111111111")).thenReturn(false);
             when(repository.save(any(RelacionComercial.class))).thenAnswer(i -> i.getArgument(0));
             when(mapper.toRelacionResponse(any())).thenReturn(new RelacionComercialResponse());
@@ -233,7 +233,7 @@ class RelacionComercialServiceImplTest {
     class Update {
         @Test
         void success() {
-            var request = new RelacionComercialRequest("Updated", "Nuevo Comercial", 6L, "20123456789", "Av. Cambio 456", "999", "mail@x.com", true, true, null, "1");
+            var request = new RelacionComercialRequest("Updated", "Nuevo Comercial", 6L, "20123456789", "Av. Cambio 456", "999", "mail@x.com", true, true, false, null, "1");
             when(repository.findById(1L)).thenReturn(Optional.of(entity));
             when(repository.existsByNroDocumentoAndIdNot("20123456789", 1L)).thenReturn(false);
             when(repository.save(any())).thenReturn(entity);
@@ -250,7 +250,7 @@ class RelacionComercialServiceImplTest {
 
         @Test
         void throwsConflictWhenDuplicate() {
-            var request = new RelacionComercialRequest("Dup", null, 6L, "20999999999", null, null, null, true, false, null, "1");
+            var request = new RelacionComercialRequest("Dup", null, 6L, "20999999999", null, null, null, true, false, false, null, "1");
             when(repository.findById(1L)).thenReturn(Optional.of(entity));
             when(repository.existsByNroDocumentoAndIdNot("20999999999", 1L)).thenReturn(true);
 
@@ -267,7 +267,7 @@ class RelacionComercialServiceImplTest {
 
         @Test
         void setsDefaultFlagEstadoWhenNull() {
-            var request = new RelacionComercialRequest("Upd", null, 6L, "20123456789", null, null, null, null, null, null, null);
+            var request = new RelacionComercialRequest("Upd", null, 6L, "20123456789", null, null, null, null, null, null, null, null);
             when(repository.findById(1L)).thenReturn(Optional.of(entity));
             when(repository.existsByNroDocumentoAndIdNot("20123456789", 1L)).thenReturn(false);
             when(repository.save(any())).thenReturn(entity);
@@ -279,7 +279,7 @@ class RelacionComercialServiceImplTest {
 
         @Test
         void setsTipoDocumentoNullWhenIdNull() {
-            var request = new RelacionComercialRequest("Upd", null, null, "20123456789", null, null, null, true, false, null, "1");
+            var request = new RelacionComercialRequest("Upd", null, null, "20123456789", null, null, null, true, false, false, null, "1");
             when(repository.findById(1L)).thenReturn(Optional.of(entity));
             when(repository.existsByNroDocumentoAndIdNot("20123456789", 1L)).thenReturn(false);
             when(repository.save(any())).thenReturn(entity);

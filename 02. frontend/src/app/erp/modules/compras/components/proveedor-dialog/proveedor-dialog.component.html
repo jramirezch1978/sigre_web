@@ -24,8 +24,15 @@
           <a class="nav-link" href="javascript:;"
              [class.active]="tabActiva === tab.key"
              [class.disabled]="!esEdicion"
+             [style.opacity]="esEdicion ? 1 : 0.45"
+             [style.cursor]="esEdicion ? 'pointer' : 'not-allowed'"
              [title]="esEdicion ? '' : 'Guarde primero los datos generales'"
-             (click)="seleccionarTab(tab.key)">{{ tab.label }}</a>
+             (click)="seleccionarTab(tab.key)">
+            @if (!esEdicion) {
+              <i class="material-icons-outlined fs-6 align-middle me-1">lock</i>
+            }
+            {{ tab.label }}
+          </a>
         </li>
       }
     </ul>

@@ -43,10 +43,15 @@ export class AdminAccionesComponent extends AdminTablaPageBase<AccionDto> implem
     });
   }
 
+  protected override get todosLosRegistros(): AccionDto[] { return this.acciones; }
+
   get accionesFiltradas(): AccionDto[] {
-    if (!this.filtro.trim()) return this.acciones;
-    const q = this.filtro.toLowerCase();
-    return this.acciones.filter(a => a.codigo.toLowerCase().includes(q) || a.nombre.toLowerCase().includes(q));
+    let lista = this.acciones;
+    if (this.filtro.trim()) {
+      const q = this.filtro.toLowerCase();
+      lista = lista.filter(a => a.codigo.toLowerCase().includes(q) || a.nombre.toLowerCase().includes(q));
+    }
+    return this.filtrarPorEstado(lista);
   }
 
   readonly columnasTabla: TablaColumna[] = [

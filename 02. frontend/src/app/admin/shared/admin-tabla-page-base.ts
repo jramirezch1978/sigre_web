@@ -94,6 +94,33 @@ export abstract class AdminTablaPageBase<T extends { id: number }> {
     try { localStorage.setItem(clave, valor); } catch { /* preferencia de UI: no bloquear si falla */ }
   }
 
+  // ─── Contadores Todos/Activos/Inactivos (cabecera, igual que el ERP) ───
+  filtroEstado: 'todos' | 'activos' | 'inactivos' = 'todos';
+
+  /** Universo completo (sin filtro de texto) para calcular los contadores. Override si difiere de `registrosTabla`. */
+  protected get todosLosRegistros(): T[] { return this.registrosTabla; }
+
+  /** Determina si un registro está activo; override si el campo no se llama `activo`. */
+  protected activoDe(registro: T): boolean {
+    return (registro as unknown as { activo?: boolean }).activo !== false;
+  }
+
+  get totalTodos(): number { return this.todosLosRegistros.length; }
+  get totalActivosTab(): number { return this.todosLosRegistros.filter(r => this.activoDe(r)).length; }
+  get totalInactivosTab(): number { return this.totalTodos - this.totalActivosTab; }
+
+  seleccionarFiltroEstado(filtro: 'todos' | 'activos' | 'inactivos'): void {
+    this.filtroEstado = filtro;
+    this.paginaActual = 1;
+  }
+
+  /** Aplica el filtro Todos/Activos/Inactivos sobre una lista ya filtrada por texto. */
+  protected filtrarPorEstado(lista: T[]): T[] {
+    if (this.filtroEstado === 'activos') return lista.filter(r => this.activoDe(r));
+    if (this.filtroEstado === 'inactivos') return lista.filter(r => !this.activoDe(r));
+    return lista;
+  }
+
   // ─── Paginación (para páginas con tabla propia: Empresas, Licencias, etc.) ───
   // Las páginas que usan erp-data-table NO necesitan esto (ese componente pagina solo).
   readonly opcionesTamanoPagina = [10, 20, 50, 100];

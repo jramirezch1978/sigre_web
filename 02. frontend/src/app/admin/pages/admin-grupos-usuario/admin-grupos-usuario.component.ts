@@ -68,10 +68,15 @@ export class AdminGruposUsuarioComponent extends AdminTablaPageBase<GrupoUsuario
     });
   }
 
+  protected override get todosLosRegistros(): GrupoUsuarioDto[] { return this.grupos; }
+
   get gruposFiltrados(): GrupoUsuarioDto[] {
-    if (!this.filtro.trim()) return this.grupos;
-    const q = this.filtro.toLowerCase();
-    return this.grupos.filter(g => g.codigo.toLowerCase().includes(q) || g.descripcion.toLowerCase().includes(q));
+    let lista = this.grupos;
+    if (this.filtro.trim()) {
+      const q = this.filtro.toLowerCase();
+      lista = lista.filter(g => g.codigo.toLowerCase().includes(q) || g.descripcion.toLowerCase().includes(q));
+    }
+    return this.filtrarPorEstado(lista);
   }
 
   readonly columnasTabla: TablaColumna[] = [

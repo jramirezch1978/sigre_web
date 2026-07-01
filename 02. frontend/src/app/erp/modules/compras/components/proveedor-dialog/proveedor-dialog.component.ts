@@ -80,7 +80,13 @@ export class ProveedorDialogComponent implements OnInit {
   }
 
   seleccionarTab(key: string): void {
-    if (key !== 'generales' && !this.esEdicion) return; // detalle requiere maestro guardado
+    if (key !== 'generales' && !this.esEdicion) {
+      void this.modal.info(
+        'Primero debe crear la ficha (botón "Crear ficha" en Datos generales) para poder registrar direcciones, cuentas, líneas de crédito, representantes o teléfonos.',
+        'Guarde primero los datos generales',
+      );
+      return;
+    }
     this.tabActiva = key;
   }
 

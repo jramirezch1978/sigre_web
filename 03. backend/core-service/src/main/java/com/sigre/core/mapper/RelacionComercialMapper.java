@@ -27,6 +27,7 @@ public class RelacionComercialMapper {
                 entity.getEmail(),
                 entity.getEsProveedor(),
                 entity.getEsCliente(),
+                entity.getEsEmpleado(),
                 entity.getTipoEntidadContribuyenteId(),
                 entity.getFlagEstado()
         );

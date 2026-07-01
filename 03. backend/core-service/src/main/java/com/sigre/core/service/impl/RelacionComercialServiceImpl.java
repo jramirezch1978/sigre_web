@@ -102,6 +102,7 @@ public class RelacionComercialServiceImpl implements RelacionComercialService {
         response.setEmail(base.getEmail());
         response.setEsProveedor(base.getEsProveedor());
         response.setEsCliente(base.getEsCliente());
+        response.setEsEmpleado(base.getEsEmpleado());
         response.setTipoEntidadContribuyenteId(base.getTipoEntidadContribuyenteId());
         response.setFlagEstado(base.getFlagEstado());
         response.setContactos(listContactos(id));
@@ -142,6 +143,7 @@ public class RelacionComercialServiceImpl implements RelacionComercialService {
         entity.setEmail(request.getEmail());
         entity.setEsProveedor(Boolean.TRUE.equals(request.getEsProveedor()));
         entity.setEsCliente(Boolean.TRUE.equals(request.getEsCliente()));
+        entity.setEsEmpleado(Boolean.TRUE.equals(request.getEsEmpleado()));
         entity.setTipoEntidadContribuyenteId(request.getTipoEntidadContribuyenteId());
         entity.setFlagEstado(request.getFlagEstado() == null ? "1" : request.getFlagEstado());
         entity.setUpdatedBy(TenantContext.getUsuarioId());
@@ -483,6 +485,7 @@ public class RelacionComercialServiceImpl implements RelacionComercialService {
         entity.setEmail(request.getEmail());
         entity.setEsProveedor(Boolean.TRUE.equals(request.getEsProveedor()));
         entity.setEsCliente(Boolean.TRUE.equals(request.getEsCliente()));
+        entity.setEsEmpleado(Boolean.TRUE.equals(request.getEsEmpleado()));
         entity.setTipoEntidadContribuyenteId(request.getTipoEntidadContribuyenteId());
         entity.setFlagEstado(request.getFlagEstado() == null ? "1" : request.getFlagEstado());
         return entity;

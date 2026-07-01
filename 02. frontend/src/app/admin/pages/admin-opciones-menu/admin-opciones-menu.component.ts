@@ -55,10 +55,15 @@ export class AdminOpcionesMenuComponent extends AdminTablaPageBase<OpcionMenuDto
     this.cargar();
   }
 
+  protected override get todosLosRegistros(): OpcionMenuDto[] { return this.opciones; }
+
   get opcionesFiltradas(): OpcionMenuDto[] {
-    if (!this.filtro.trim()) return this.opciones;
-    const q = this.filtro.toLowerCase();
-    return this.opciones.filter(o => (o.codigo ?? '').toLowerCase().includes(q) || o.nombre.toLowerCase().includes(q));
+    let lista = this.opciones;
+    if (this.filtro.trim()) {
+      const q = this.filtro.toLowerCase();
+      lista = lista.filter(o => (o.codigo ?? '').toLowerCase().includes(q) || o.nombre.toLowerCase().includes(q));
+    }
+    return this.filtrarPorEstado(lista);
   }
 
   // ── Tabla ERP (erp-data-table): columnas + filas mapeadas ──

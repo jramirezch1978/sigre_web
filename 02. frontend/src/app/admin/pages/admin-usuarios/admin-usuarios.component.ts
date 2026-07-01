@@ -58,14 +58,19 @@ export class AdminUsuariosComponent extends AdminTablaPageBase<UsuarioAdminDto> 
     });
   }
 
+  protected override get todosLosRegistros(): UsuarioAdminDto[] { return this.usuarios; }
+
   get usuariosFiltrados(): UsuarioAdminDto[] {
-    if (!this.filtro.trim()) return this.usuarios;
-    const q = this.filtro.toLowerCase();
-    return this.usuarios.filter(u =>
-      u.username.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
-      u.nombreCompleto.toLowerCase().includes(q)
-    );
+    let lista = this.usuarios;
+    if (this.filtro.trim()) {
+      const q = this.filtro.toLowerCase();
+      lista = lista.filter(u =>
+        u.username.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.nombreCompleto.toLowerCase().includes(q)
+      );
+    }
+    return this.filtrarPorEstado(lista);
   }
 
   readonly columnasTabla: TablaColumna[] = [

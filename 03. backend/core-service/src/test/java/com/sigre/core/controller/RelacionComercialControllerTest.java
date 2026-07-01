@@ -62,7 +62,7 @@ class RelacionComercialControllerTest {
     // ── create ────────────────────────────────────────────────────────────
 
     @Test void create_returnsCreated() {
-        var request = new RelacionComercialRequest("Prov", "Prov Comercial", 6L, "201", "Dir 123", null, null, true, false, null, "1");
+        var request = new RelacionComercialRequest("Prov", "Prov Comercial", 6L, "201", "Dir 123", null, null, true, false, false, null, "1");
         var response = new RelacionComercialResponse();
         response.setId(1L);
         response.setNombreComercial("Prov Comercial");
@@ -78,7 +78,7 @@ class RelacionComercialControllerTest {
     // ── update ────────────────────────────────────────────────────────────
 
     @Test void update_returnsUpdated() {
-        var request = new RelacionComercialRequest("Prov Upd", "Prov Upd Comercial", 6L, "202", "Dir Upd", null, null, true, false, null, "1");
+        var request = new RelacionComercialRequest("Prov Upd", "Prov Upd Comercial", 6L, "202", "Dir Upd", null, null, true, false, false, null, "1");
         var response = new RelacionComercialResponse();
         response.setId(1L);
         response.setNombreComercial("Prov Upd Comercial");

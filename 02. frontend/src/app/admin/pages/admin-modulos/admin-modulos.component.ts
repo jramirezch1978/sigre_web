@@ -51,12 +51,15 @@ export class AdminModulosComponent extends AdminTablaPageBase<ModuloDto> impleme
     });
   }
 
+  protected override get todosLosRegistros(): ModuloDto[] { return this.modulos; }
+
   get modulosFiltrados(): ModuloDto[] {
-    if (!this.filtro.trim()) return this.modulos;
-    const q = this.filtro.toLowerCase();
-    return this.modulos.filter(m =>
-      m.codigo.toLowerCase().includes(q) || m.nombre.toLowerCase().includes(q)
-    );
+    let lista = this.modulos;
+    if (this.filtro.trim()) {
+      const q = this.filtro.toLowerCase();
+      lista = lista.filter(m => m.codigo.toLowerCase().includes(q) || m.nombre.toLowerCase().includes(q));
+    }
+    return this.filtrarPorEstado(lista);
   }
 
   readonly columnasTabla: TablaColumna[] = [

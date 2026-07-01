@@ -20,6 +20,7 @@ public class RelacionComercialResponse {
     private String email;
     private Boolean esProveedor;
     private Boolean esCliente;
+    private Boolean esEmpleado;
     private Long tipoEntidadContribuyenteId;
     private String flagEstado;
 }
