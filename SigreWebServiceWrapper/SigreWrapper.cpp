@@ -459,8 +459,9 @@ static BOOL StartTLS(TlsContext* ctx, const char* host)
     int received = 0;
     int iteration = 0;
     const int MAX_ITERATIONS = 30;
+    BOOL skipRecv = FALSE; // tras SEC_I_INCOMPLETE_CREDENTIALS no hay que leer del socket
     
-    while (ss == SEC_I_CONTINUE_NEEDED || ss == SEC_E_INCOMPLETE_MESSAGE) {
+    while (ss == SEC_I_CONTINUE_NEEDED || ss == SEC_E_INCOMPLETE_MESSAGE || ss == SEC_I_INCOMPLETE_CREDENTIALS) {
         iteration++;
         if (iteration > MAX_ITERATIONS) {
             LogError(L"TLS: Demasiadas iteraciones en handshake");
@@ -469,27 +470,36 @@ static BOOL StartTLS(TlsContext* ctx, const char* host)
             return FALSE;
         }
         
-        // Recibir datos del servidor
-        int r = recv(ctx->sock, buffer + received, sizeof(buffer) - received - 1, 0);
-        if (r <= 0) {
-            int wsaErr = WSAGetLastError();
-            swprintf_s(logMsg, 512, L"TLS: recv fallo iter=%d, r=%d, WSAError=%d, received=%d", 
-                      iteration, r, wsaErr, received);
-            LogError(logMsg);
-            DeleteSecurityContext(&ctx->hContext);
-            FreeCredentialsHandle(&ctx->hCreds);
-            return FALSE;
+        if (skipRecv) {
+            // El servidor pidio un certificado de cliente (SEC_I_INCOMPLETE_CREDENTIALS,
+            // p.ej. smtp.gmail.com). No tenemos uno que ofrecer: se reintenta sin leer
+            // datos nuevos para que Schannel envie un certificado vacio y el servidor
+            // continue sin autenticacion mutua.
+            LogInfo(L"TLS: Servidor solicito certificado de cliente, continuando con credenciales vacias");
+            skipRecv = FALSE;
+        } else {
+            // Recibir datos del servidor
+            int r = recv(ctx->sock, buffer + received, sizeof(buffer) - received - 1, 0);
+            if (r <= 0) {
+                int wsaErr = WSAGetLastError();
+                swprintf_s(logMsg, 512, L"TLS: recv fallo iter=%d, r=%d, WSAError=%d, received=%d", 
+                          iteration, r, wsaErr, received);
+                LogError(logMsg);
+                DeleteSecurityContext(&ctx->hContext);
+                FreeCredentialsHandle(&ctx->hCreds);
+                return FALSE;
+            }
+            received += r;
+            
+            swprintf_s(logMsg, 512, L"TLS: Iter %d, recibidos %d bytes (total %d)", iteration, r, received);
+            LogInfo(logMsg);
         }
-        received += r;
-        
-        swprintf_s(logMsg, 512, L"TLS: Iter %d, recibidos %d bytes (total %d)", iteration, r, received);
-        LogInfo(logMsg);
         
         // Preparar buffers de entrada
         SecBuffer inBufs[2] = {0};
         inBufs[0].BufferType = SECBUFFER_TOKEN;
         inBufs[0].cbBuffer = received;
-        inBufs[0].pvBuffer = buffer;
+        inBufs[0].pvBuffer = received > 0 ? buffer : NULL;
         inBufs[1].BufferType = SECBUFFER_EMPTY;
         inBufs[1].cbBuffer = 0;
         inBufs[1].pvBuffer = NULL;
@@ -551,6 +561,12 @@ static BOOL StartTLS(TlsContext* ctx, const char* host)
             LogInfo(logMsg);
         } else {
             received = 0;
+        }
+        
+        // El servidor solicito certificado de cliente: reintentar con credenciales vacias
+        if (ss == SEC_I_INCOMPLETE_CREDENTIALS) {
+            skipRecv = TRUE;
+            continue;
         }
         
         // Si hay error (excepto continuar e incompleto), reportar
