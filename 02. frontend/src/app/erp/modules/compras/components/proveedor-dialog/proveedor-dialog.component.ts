@@ -13,6 +13,7 @@ import { ErpDataTableComponent } from '../../../../shared/erp-data-table/erp-dat
 import { noSoloEspaciosValidator } from '../../../../shared/utils/erp-form-validators.util';
 import { ComprasApiService } from '../../services/compras-api.service';
 import { ComprasCatalogoService } from '../../services/compras-catalogo.service';
+import { ErpConsultaRucService } from '../../../../services/erp-consulta-ruc.service';
 import { CatalogoCampo, CatalogoMaestroConfig } from '../../config/catalogo-maestros.config';
 import { PROVEEDOR_DATOS_GENERALES, PROVEEDOR_SUBTABS, ProveedorSubTab } from '../../config/proveedor-tabs.config';
 import {
@@ -46,6 +47,7 @@ export class ProveedorDialogComponent implements OnInit {
   private readonly catalogoSvc = inject(ComprasCatalogoService);
   private readonly dialog = inject(MatDialog);
   private readonly modal = inject(SigreModalService);
+  private readonly consultaRuc = inject(ErpConsultaRucService);
   readonly data = inject<ProveedorDialogData>(MAT_DIALOG_DATA);
 
   readonly camposGenerales = PROVEEDOR_DATOS_GENERALES;
@@ -58,6 +60,7 @@ export class ProveedorDialogComponent implements OnInit {
   relacionId: number | null = null;
   cargando = true;
   guardando = false;
+  buscandoRuc = false;
 
   get esEdicion(): boolean {
     return this.relacionId != null;
@@ -108,6 +111,31 @@ export class ProveedorDialogComponent implements OnInit {
 
   get camposGeneralesSwitch(): CatalogoCampo[] {
     return this.camposGenerales.filter(c => c.type === 'switch');
+  }
+
+  /** Busca el RUC en SUNAT (servicio reactivo, token cacheado en el backend) y llena Datos generales. */
+  buscarRuc(): void {
+    const ruc = String(this.form.get('nroDocumento')?.value ?? '').trim();
+    if (!/^\d{11}$/.test(ruc)) {
+      void this.modal.error('Ingrese un RUC válido de 11 dígitos en "N° documento" para poder buscarlo.');
+      return;
+    }
+    this.buscandoRuc = true;
+    this.consultaRuc.consultarRuc(ruc).subscribe({
+      next: data => {
+        this.buscandoRuc = false;
+        this.form.patchValue({
+          razonSocial: data.razonSocial || this.form.get('razonSocial')?.value,
+          nombreComercial: this.form.get('nombreComercial')?.value || data.nombreComercial || data.razonSocial || '',
+          direccion: data.direccionFiscal || this.form.get('direccion')?.value,
+        });
+      },
+      error: (err: unknown) => {
+        this.buscandoRuc = false;
+        const msg = (err as { error?: { message?: string } })?.error?.message ?? 'No se pudo consultar el RUC en SUNAT.';
+        void this.modal.error(msg);
+      },
+    });
   }
 
   guardarGenerales(): void {
