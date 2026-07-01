@@ -4,6 +4,15 @@
   [cerrarDeshabilitado]="guardando"
   (cerrar)="cerrar()">
 
+  @if (!esEdicion && !cargando) {
+    <button type="button" sigreMetoxiModalHeaderActions
+            class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1"
+            (click)="abrirBuscarRuc()">
+      <i class="material-icons-outlined fs-6">search</i>
+      Buscar RUC
+    </button>
+  }
+
   @if (cargando) {
     <div class="sigre-metoxi-modal__loading">
       <div class="spinner-border text-primary" role="status">
@@ -54,20 +63,6 @@
               [maxLength]="campo.maxLength ?? null"
               [options]="opcionesDe(campo)"
               [layout]="layoutDe(campo)" />
-            @if (campo.key === 'nroDocumento') {
-              <div class="col-md-2 d-flex align-items-end">
-                <button type="button" class="btn btn-outline-primary w-100"
-                        [disabled]="buscandoRuc"
-                        (click)="buscarRuc()">
-                  @if (buscandoRuc) {
-                    <span class="spinner-border spinner-border-sm me-1"></span>
-                  } @else {
-                    <i class="material-icons-outlined fs-6 align-middle me-1">search</i>
-                  }
-                  Buscar RUC
-                </button>
-              </div>
-            }
           }
         </div>
         <div class="row g-3 mt-1">

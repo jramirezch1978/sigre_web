@@ -13,7 +13,8 @@ import { ErpDataTableComponent } from '../../../../shared/erp-data-table/erp-dat
 import { noSoloEspaciosValidator } from '../../../../shared/utils/erp-form-validators.util';
 import { ComprasApiService } from '../../services/compras-api.service';
 import { ComprasCatalogoService } from '../../services/compras-catalogo.service';
-import { ErpConsultaRucService } from '../../../../services/erp-consulta-ruc.service';
+import { ConsultaRucResult } from '../../../../services/erp-consulta-ruc.service';
+import { BuscarRucDialogComponent } from '../../../../shared/buscar-ruc-dialog/buscar-ruc-dialog.component';
 import { CatalogoCampo, CatalogoMaestroConfig } from '../../config/catalogo-maestros.config';
 import { PROVEEDOR_DATOS_GENERALES, PROVEEDOR_SUBTABS, ProveedorSubTab } from '../../config/proveedor-tabs.config';
 import {
@@ -47,7 +48,6 @@ export class ProveedorDialogComponent implements OnInit {
   private readonly catalogoSvc = inject(ComprasCatalogoService);
   private readonly dialog = inject(MatDialog);
   private readonly modal = inject(SigreModalService);
-  private readonly consultaRuc = inject(ErpConsultaRucService);
   readonly data = inject<ProveedorDialogData>(MAT_DIALOG_DATA);
 
   readonly camposGenerales = PROVEEDOR_DATOS_GENERALES;
@@ -60,7 +60,6 @@ export class ProveedorDialogComponent implements OnInit {
   relacionId: number | null = null;
   cargando = true;
   guardando = false;
-  buscandoRuc = false;
 
   get esEdicion(): boolean {
     return this.relacionId != null;
@@ -113,29 +112,29 @@ export class ProveedorDialogComponent implements OnInit {
     return this.camposGenerales.filter(c => c.type === 'switch');
   }
 
-  /** Busca el RUC en SUNAT (servicio reactivo, token cacheado en el backend) y llena Datos generales. */
-  buscarRuc(): void {
-    const ruc = String(this.form.get('nroDocumento')?.value ?? '').trim();
-    if (!/^\d{11}$/.test(ruc)) {
-      void this.modal.error('Ingrese un RUC válido de 11 dígitos en "N° documento" para poder buscarlo.');
-      return;
-    }
-    this.buscandoRuc = true;
-    this.consultaRuc.consultarRuc(ruc).subscribe({
-      next: data => {
-        this.buscandoRuc = false;
+  /** Abre el popup "Buscar RUC" (valida formato + dígito verificador antes de llamar a la API) y llena Datos generales. */
+  abrirBuscarRuc(): void {
+    abrirDialogoMetoxi(this.dialog, BuscarRucDialogComponent, {})
+      .afterClosed()
+      .subscribe((data: ConsultaRucResult | null) => {
+        if (!data) return;
         this.form.patchValue({
+          nroDocumento: data.ruc || this.form.get('nroDocumento')?.value,
           razonSocial: data.razonSocial || this.form.get('razonSocial')?.value,
           nombreComercial: this.form.get('nombreComercial')?.value || data.nombreComercial || data.razonSocial || '',
           direccion: data.direccionFiscal || this.form.get('direccion')?.value,
         });
-      },
-      error: (err: unknown) => {
-        this.buscandoRuc = false;
-        const msg = (err as { error?: { message?: string } })?.error?.message ?? 'No se pudo consultar el RUC en SUNAT.';
-        void this.modal.error(msg);
-      },
-    });
+        this.preseleccionarTipoDocRuc();
+      });
+  }
+
+  /** Si hay una opción "RUC" en Tipo de documento y aún no se eligió ninguna, la preselecciona. */
+  private preseleccionarTipoDocRuc(): void {
+    const control = this.form.get('tipoDocIdentidadId');
+    if (!control || control.value != null) return;
+    const opcionRuc = (this.opciones['tipoDocIdentidadId'] ?? []).find(o =>
+      o.label.toUpperCase().includes('RUC'));
+    if (opcionRuc) control.setValue(opcionRuc.value);
   }
 
   guardarGenerales(): void {
