@@ -1,85 +1,53 @@
 <div class="admin-page ion-padding admin-page--fluid">
   <h1 class="admin-page__title">Sucursales</h1>
-  <p class="admin-page__subtitle">Seleccione una empresa para ver sus sucursales (datos del tenant).</p>
+  <p class="admin-page__subtitle">Expanda una empresa para ver sus sucursales (datos del tenant).</p>
 
-  @if (!empresaSeleccionada) {
-    <ion-searchbar [(ngModel)]="filtroEmpresa" placeholder="Buscar empresa..." animated="true" class="admin-search"></ion-searchbar>
+  <ion-searchbar [(ngModel)]="filtroEmpresa" placeholder="Buscar empresa..." animated="true" class="admin-search"></ion-searchbar>
 
-    @if (loadingEmpresas) {
-      <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
-    }
-
-    @if (!loadingEmpresas) {
-      <div class="admin-table-wrapper">
-        <table class="admin-table admin-table--plain">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>RUC</th>
-              <th>Razón social</th>
-              <th>BD</th>
-              <th class="admin-acciones-col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (e of registrosPagina; track e.id) {
-              <tr (click)="seleccionarEmpresa(e)" (dblclick)="seleccionarEmpresa(e)">
-                <td>{{ e.codigo }}</td>
-                <td>{{ e.ruc }}</td>
-                <td>{{ e.razonSocial }}</td>
-                <td><code>{{ e.dbName }}</code></td>
-                <td class="admin-acciones-col">
-                  <div class="admin-acciones-wrap" (click)="$event.stopPropagation()">
-                    <ion-button fill="clear" size="small" class="admin-acciones-btn" title="Ver sucursales"
-                      (click)="seleccionarEmpresa(e)">
-                      <ion-icon slot="icon-only" name="arrow-forward-circle-outline"></ion-icon>
-                    </ion-button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr><td colspan="5" style="text-align:center;color:#6b7280">No hay empresas registradas.</td></tr>
-            }
-          </tbody>
-        </table>
-        <app-admin-paginacion [base]="this" />
-      </div>
-    }
+  @if (loadingEmpresas) {
+    <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
   }
 
-  @if (empresaSeleccionada) {
-    <div class="empresa-context">
-      <ion-button fill="clear" size="small" (click)="volverAEmpresas()">
-        <ion-icon name="arrow-back-outline" slot="start"></ion-icon> Empresas
-      </ion-button>
-      <div class="empresa-context__info">
-        <ion-icon name="business-outline"></ion-icon>
-        <div>
-          <strong>{{ empresaSeleccionada.razonSocial }}</strong>
-          <span>RUC {{ empresaSeleccionada.ruc }} · <code>{{ empresaSeleccionada.dbName }}</code></span>
+  @if (!loadingEmpresas) {
+    <div class="sigre-acc">
+      @for (e of registrosPagina; track e.id) {
+        <div class="sigre-acc__item">
+          <button type="button" class="sigre-acc__head" (click)="toggle(e)">
+            <i class="material-icons-outlined sigre-acc__chev">
+              {{ estaAbierto(e.id) ? 'expand_more' : 'chevron_right' }}
+            </i>
+            <i class="material-icons-outlined sigre-acc__ico">business</i>
+            <span class="sigre-acc__cod">{{ e.codigo }}</span>
+            <span class="sigre-acc__nom">{{ e.razonSocial }} · RUC {{ e.ruc }} · <code>{{ e.dbName }}</code></span>
+            <span class="sigre-acc__badge">{{ (sucursalesPorEmpresa[e.id] ?? []).length }} sucursal(es)</span>
+          </button>
+
+          @if (estaAbierto(e.id)) {
+            <div class="sigre-acc__body">
+              @if (loadingSucursalesPorEmpresa[e.id]) {
+                <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+              } @else {
+                <app-erp-data-table
+                  [columnas]="columnasSucursales"
+                  [filas]="filasSucursalesDe(e.id)"
+                  nombreExport="sucursales"
+                  [totalRegistros]="filasSucursalesDe(e.id).length"
+                  [mostrarAcciones]="false"
+                  [ordenInicial]="ordenInicial"
+                  [tamanoPaginaPersistido]="tamanoPaginaPersistido"
+                  (ordenCambiado)="onOrdenCambiado($event)"
+                  (tamanoPaginaCambiado)="onTamanoPaginaCambiado($event)" />
+              }
+            </div>
+          }
         </div>
-      </div>
+      } @empty {
+        <div class="sigre-metoxi-table__state">
+          <i class="material-icons-outlined sigre-metoxi-table__state-icon">inbox</i>
+          <span>No hay empresas registradas.</span>
+        </div>
+      }
     </div>
-
-    <ion-searchbar [(ngModel)]="filtroSucursal" placeholder="Buscar sucursal..." animated="true" class="admin-search"></ion-searchbar>
-
-    @if (loadingSucursales) {
-      <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
-    }
-
-    @if (!loadingSucursales) {
-      <div class="admin-table-wrapper" style="padding: 0.75rem 1rem 1rem;">
-        <app-erp-data-table
-          [columnas]="columnasSucursales"
-          [filas]="filasSucursales"
-          nombreExport="sucursales"
-          [totalRegistros]="filasSucursales.length"
-          [mostrarAcciones]="false"
-          [ordenInicial]="ordenInicial"
-          [tamanoPaginaPersistido]="tamanoPaginaPersistido"
-          (ordenCambiado)="onOrdenCambiado($event)"
-          (tamanoPaginaCambiado)="onTamanoPaginaCambiado($event)" />
-      </div>
-    }
+    <app-admin-paginacion [base]="this" />
   }
 </div>

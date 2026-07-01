@@ -14,9 +14,14 @@
   </div>
 
   <div class="admin-card">
-    <div class="admin-card__toolbar">
+    <div class="admin-card__toolbar d-flex align-items-center gap-2">
       <ion-searchbar [(ngModel)]="filtro" placeholder="Buscar por empresa, código o edición..."
-                     animated="true" class="admin-search"></ion-searchbar>
+                     animated="true" class="admin-search flex-grow-1"></ion-searchbar>
+      <button type="button" class="btn btn-primary btn-sm d-inline-flex align-items-center gap-1"
+              title="Exportar" (click)="abrirModalExport()">
+        <i class="material-icons-outlined fs-6">file_download</i>
+        Exportar
+      </button>
     </div>
 
     @if (cargando) {
@@ -28,12 +33,54 @@
         <table class="admin-table">
           <thead>
             <tr>
-              <th>Empresa</th>
-              <th>Licencia</th>
-              <th>Edición</th>
-              <th>Tipo</th>
-              <th>Vence</th>
-              <th class="text-center">Días</th>
+              <th class="sigre-th-sort" (click)="ordenarPor('razon_social')" title="Ordenar por Empresa">
+                Empresa
+                @if (ordenColumna === 'razon_social') {
+                  <i class="material-icons-outlined sigre-th-sort__ico">{{ ordenDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</i>
+                } @else {
+                  <i class="material-icons-outlined sigre-th-sort__ico sigre-th-sort__ico--idle">unfold_more</i>
+                }
+              </th>
+              <th class="sigre-th-sort" (click)="ordenarPor('codigo_licencia')" title="Ordenar por Licencia">
+                Licencia
+                @if (ordenColumna === 'codigo_licencia') {
+                  <i class="material-icons-outlined sigre-th-sort__ico">{{ ordenDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</i>
+                } @else {
+                  <i class="material-icons-outlined sigre-th-sort__ico sigre-th-sort__ico--idle">unfold_more</i>
+                }
+              </th>
+              <th class="sigre-th-sort" (click)="ordenarPor('edicion_codigo')" title="Ordenar por Edición">
+                Edición
+                @if (ordenColumna === 'edicion_codigo') {
+                  <i class="material-icons-outlined sigre-th-sort__ico">{{ ordenDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</i>
+                } @else {
+                  <i class="material-icons-outlined sigre-th-sort__ico sigre-th-sort__ico--idle">unfold_more</i>
+                }
+              </th>
+              <th class="sigre-th-sort" (click)="ordenarPor('tipo')" title="Ordenar por Tipo">
+                Tipo
+                @if (ordenColumna === 'tipo') {
+                  <i class="material-icons-outlined sigre-th-sort__ico">{{ ordenDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</i>
+                } @else {
+                  <i class="material-icons-outlined sigre-th-sort__ico sigre-th-sort__ico--idle">unfold_more</i>
+                }
+              </th>
+              <th class="sigre-th-sort" (click)="ordenarPor('fecha_vencimiento')" title="Ordenar por Vence">
+                Vence
+                @if (ordenColumna === 'fecha_vencimiento') {
+                  <i class="material-icons-outlined sigre-th-sort__ico">{{ ordenDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</i>
+                } @else {
+                  <i class="material-icons-outlined sigre-th-sort__ico sigre-th-sort__ico--idle">unfold_more</i>
+                }
+              </th>
+              <th class="sigre-th-sort text-center" (click)="ordenarPor('dias_restantes')" title="Ordenar por Días">
+                Días
+                @if (ordenColumna === 'dias_restantes') {
+                  <i class="material-icons-outlined sigre-th-sort__ico">{{ ordenDir === 'asc' ? 'arrow_upward' : 'arrow_downward' }}</i>
+                } @else {
+                  <i class="material-icons-outlined sigre-th-sort__ico sigre-th-sort__ico--idle">unfold_more</i>
+                }
+              </th>
               <th class="text-end">Acciones</th>
             </tr>
           </thead>
@@ -267,3 +314,42 @@
     </div>
   </ng-template>
 </ion-modal>
+
+<!-- Modal: Exportar -->
+@if (mostrarModalExport) {
+  <div class="sigre-export-modal__backdrop" (click)="cerrarModalExport()">
+    <div class="sigre-export-modal" (click)="$event.stopPropagation()">
+      <div class="sigre-export-modal__header">
+        <h5 class="mb-0">Exportar</h5>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrarModalExport()"></button>
+      </div>
+      <p class="sigre-export-modal__hint">Elige el formato de exportación:</p>
+      <div class="sigre-export-modal__options">
+        <button type="button" class="sigre-export-opt" (click)="exportarExcel()" [disabled]="exportando">
+          <svg viewBox="0 0 32 32" width="34" height="34" role="img" aria-hidden="true">
+            <rect x="4" y="2" width="24" height="28" rx="2" fill="#1d6f42"/>
+            <path d="M20 2v6h6" fill="#145a32"/>
+            <text x="16" y="22" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Arial,sans-serif">XLS</text>
+          </svg>
+          <span>Excel</span>
+        </button>
+        <button type="button" class="sigre-export-opt" (click)="exportarWord()" [disabled]="exportando">
+          <svg viewBox="0 0 32 32" width="34" height="34" role="img" aria-hidden="true">
+            <rect x="4" y="2" width="24" height="28" rx="2" fill="#2b579a"/>
+            <path d="M20 2v6h6" fill="#1c3d6e"/>
+            <text x="16" y="22" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Arial,sans-serif">DOC</text>
+          </svg>
+          <span>Word</span>
+        </button>
+        <button type="button" class="sigre-export-opt" (click)="exportarPdf()" [disabled]="exportando">
+          <svg viewBox="0 0 32 32" width="34" height="34" role="img" aria-hidden="true">
+            <rect x="4" y="2" width="24" height="28" rx="2" fill="#dc3545"/>
+            <path d="M20 2v6h6" fill="#b02a37"/>
+            <text x="16" y="22" text-anchor="middle" fill="#fff" font-size="8" font-weight="700" font-family="Arial,sans-serif">PDF</text>
+          </svg>
+          <span>PDF</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}

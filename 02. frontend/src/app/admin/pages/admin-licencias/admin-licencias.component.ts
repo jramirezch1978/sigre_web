@@ -7,6 +7,7 @@ import { AdminLicenciasService, LicenciaAdminDto } from '../../services/admin-li
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
 import { EmpresaAdminDto, EdicionErpDto } from '../../models/admin.models';
 import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { ErpExportService, ExportFormato } from '../../../erp/shared/utils/erp-export.service';
 import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
@@ -16,12 +17,27 @@ import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
   standalone: false,
 })
 export class AdminLicenciasComponent extends AdminTablaPageBase<LicenciaAdminDto> implements OnInit {
-  // Tabla propia (celdas/acciones especiales); solo se reusa la paginación de la base.
-  columnasTabla: TablaColumna[] = [];
+  // Tabla propia (celdas/acciones especiales); columnas reales usadas solo para exportar.
+  readonly columnasTabla: TablaColumna[] = [
+    { key: 'empresa', header: 'Empresa' },
+    { key: 'licencia', header: 'Licencia' },
+    { key: 'edicion', header: 'Edición' },
+    { key: 'tipo', header: 'Tipo' },
+    { key: 'vence', header: 'Vence', format: 'fecha' },
+    { key: 'dias', header: 'Días', format: 'numero' },
+  ];
   protected get registrosTabla(): LicenciaAdminDto[] { return this.licenciasFiltradas; }
   protected aFila(l: LicenciaAdminDto): Record<string, unknown> { return { id: l.id }; }
 
+  // ── Orden por columna (persistido, como el resto de admin) ──
+  ordenColumna: string | null = (this.ordenInicial ?? '').split(':')[0] || null;
+  ordenDir: 'asc' | 'desc' = (this.ordenInicial ?? '').split(':')[1] === 'desc' ? 'desc' : 'asc';
 
+  // ── Exportar (xlsx/docx/pdf) ──
+  mostrarModalExport = false;
+  exportando = false;
+
+  private readonly exportSvc = inject(ErpExportService);
   private readonly api = inject(AdminLicenciasService);
   private readonly adminApi = inject(AdminSeguridadApiService);
   private readonly fb = inject(FormBuilder);
@@ -177,11 +193,72 @@ export class AdminLicenciasComponent extends AdminTablaPageBase<LicenciaAdminDto
 
   get licenciasFiltradas(): LicenciaAdminDto[] {
     const q = this.filtro.trim().toLowerCase();
-    if (!q) {
-      return this.licencias;
+    let lista = !q
+      ? this.licencias
+      : this.licencias.filter(l =>
+          `${l.razon_social} ${l.codigo_licencia} ${l.edicion_codigo}`.toLowerCase().includes(q));
+
+    if (this.ordenColumna) {
+      const col = this.ordenColumna;
+      const factor = this.ordenDir === 'desc' ? -1 : 1;
+      lista = [...lista].sort((a, b) => this.compararCampo(a, b, col) * factor);
     }
-    return this.licencias.filter(l =>
-      `${l.razon_social} ${l.codigo_licencia} ${l.edicion_codigo}`.toLowerCase().includes(q));
+    return lista;
+  }
+
+  ordenarPor(columna: string): void {
+    if (this.ordenColumna === columna) {
+      this.ordenDir = this.ordenDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.ordenColumna = columna;
+      this.ordenDir = 'asc';
+    }
+    this.paginaActual = 1;
+    this.onOrdenCambiado(`${this.ordenColumna}:${this.ordenDir}`);
+  }
+
+  private compararCampo(a: LicenciaAdminDto, b: LicenciaAdminDto, key: string): number {
+    const va = (a as unknown as Record<string, unknown>)[key];
+    const vb = (b as unknown as Record<string, unknown>)[key];
+    if (va == null && vb == null) return 0;
+    if (va == null) return -1;
+    if (vb == null) return 1;
+    if (typeof va === 'number' && typeof vb === 'number') return va - vb;
+    return String(va).localeCompare(String(vb), 'es', { numeric: true, sensitivity: 'base' });
+  }
+
+  // ── Exportar ──
+  abrirModalExport(): void {
+    if (this.licenciasFiltradas.length === 0) return;
+    this.mostrarModalExport = true;
+  }
+  cerrarModalExport(): void { this.mostrarModalExport = false; }
+
+  exportarExcel(): void { this.ejecutarExport('xlsx'); }
+  exportarWord(): void { this.ejecutarExport('docx'); }
+  exportarPdf(): void { this.ejecutarExport('pdf'); }
+
+  private ejecutarExport(formato: ExportFormato): void {
+    if (this.exportando) return;
+    this.exportando = true;
+    const filas = this.filasExport();
+    this.exportSvc
+      .exportar(formato, this.columnasTabla, filas, 'licencias', (fila, col) => String(fila[col.key] ?? '—'))
+      .subscribe({
+        next: () => { this.exportando = false; this.cerrarModalExport(); },
+        error: () => { this.exportando = false; this.cerrarModalExport(); },
+      });
+  }
+
+  private filasExport(): Record<string, unknown>[] {
+    return this.licenciasFiltradas.map(l => ({
+      empresa: l.razon_social,
+      licencia: l.codigo_licencia,
+      edicion: l.edicion_codigo,
+      tipo: this.esDemo(l) ? 'Demo' : 'Pago',
+      vence: l.fecha_vencimiento,
+      dias: l.dias_restantes,
+    }));
   }
 
   cargar(): void {

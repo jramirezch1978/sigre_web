@@ -6,6 +6,12 @@ import { SucursalCatalogoDto } from '../../models/admin-core-maestros.models';
 import { TablaColumna } from '../../../erp/shared/models/api-page.model';
 import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
+/**
+ * Sucursales: acordeón agrupado por empresa (mismo patrón que "Movimientos
+ * por almacén" del ERP) — al expandir una empresa se cargan bajo demanda
+ * sus sucursales y se muestran con app-erp-data-table (mismo look que el
+ * resto de admin: orden por columna, exportar, etc).
+ */
 @Component({
   selector: 'app-admin-sucursales',
   templateUrl: './admin-sucursales.component.html',
@@ -13,7 +19,7 @@ import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
   standalone: false,
 })
 export class AdminSucursalesComponent extends AdminTablaPageBase<EmpresaAdminDto> implements OnInit {
-  // Tabla propia (selector de empresa); solo se reusa la paginación de la base.
+  // Tabla propia (acordeón); solo se reusa la paginación de la base.
   columnasTabla: TablaColumna[] = [];
   protected get registrosTabla(): EmpresaAdminDto[] { return this.empresasFiltradas; }
   protected aFila(e: EmpresaAdminDto): Record<string, unknown> { return { id: e.id }; }
@@ -25,10 +31,19 @@ export class AdminSucursalesComponent extends AdminTablaPageBase<EmpresaAdminDto
   loadingEmpresas = true;
   filtroEmpresa = '';
 
-  empresaSeleccionada: EmpresaAdminDto | null = null;
-  sucursales: SucursalCatalogoDto[] = [];
-  loadingSucursales = false;
-  filtroSucursal = '';
+  /** Empresas expandidas y sus sucursales, cargadas bajo demanda al expandir. */
+  abiertos = new Set<number>();
+  sucursalesPorEmpresa: Record<number, SucursalCatalogoDto[]> = {};
+  loadingSucursalesPorEmpresa: Record<number, boolean> = {};
+
+  readonly columnasSucursales: TablaColumna[] = [
+    { key: 'id', header: 'ID', width: '70px' },
+    { key: 'codigo', header: 'Código', width: '110px' },
+    { key: 'nombre', header: 'Nombre', width: '200px' },
+    { key: 'direccion', header: 'Dirección', width: '220px' },
+    { key: 'ciudad', header: 'Ciudad', width: '130px' },
+    { key: 'departamento', header: 'Departamento', width: '140px' },
+  ];
 
   ngOnInit(): void {
     this.cargarEmpresas();
@@ -55,52 +70,34 @@ export class AdminSucursalesComponent extends AdminTablaPageBase<EmpresaAdminDto
     );
   }
 
-  seleccionarEmpresa(e: EmpresaAdminDto): void {
-    this.empresaSeleccionada = e;
-    this.filtroSucursal = '';
-    this.cargarSucursales();
+  toggle(empresa: EmpresaAdminDto): void {
+    if (this.abiertos.has(empresa.id)) {
+      this.abiertos.delete(empresa.id);
+      return;
+    }
+    this.abiertos.add(empresa.id);
+    if (!this.sucursalesPorEmpresa[empresa.id]) {
+      this.cargarSucursales(empresa);
+    }
   }
 
-  volverAEmpresas(): void {
-    this.empresaSeleccionada = null;
-    this.sucursales = [];
-    this.filtroSucursal = '';
-    this.paginaActual = 1;
+  estaAbierto(empresaId: number): boolean {
+    return this.abiertos.has(empresaId);
   }
 
-  cargarSucursales(): void {
-    if (!this.empresaSeleccionada) return;
-    this.loadingSucursales = true;
-    this.apiCore.listarSucursalesEmpresa(this.empresaSeleccionada.id).subscribe({
+  cargarSucursales(empresa: EmpresaAdminDto): void {
+    this.loadingSucursalesPorEmpresa[empresa.id] = true;
+    this.apiCore.listarSucursalesEmpresa(empresa.id).subscribe({
       next: res => {
-        this.loadingSucursales = false;
-        this.sucursales = res.data ?? [];
+        this.loadingSucursalesPorEmpresa[empresa.id] = false;
+        this.sucursalesPorEmpresa[empresa.id] = res.data ?? [];
       },
-      error: () => { this.loadingSucursales = false; },
+      error: () => { this.loadingSucursalesPorEmpresa[empresa.id] = false; },
     });
   }
 
-  get sucursalesFiltradas(): SucursalCatalogoDto[] {
-    if (!this.filtroSucursal.trim()) return this.sucursales;
-    const q = this.filtroSucursal.toLowerCase();
-    return this.sucursales.filter(s =>
-      s.nombre?.toLowerCase().includes(q)
-      || s.codigo?.toLowerCase().includes(q)
-      || s.ciudad?.toLowerCase().includes(q)
-    );
-  }
-
-  readonly columnasSucursales: TablaColumna[] = [
-    { key: 'id', header: 'ID', width: '70px' },
-    { key: 'codigo', header: 'Código', width: '110px' },
-    { key: 'nombre', header: 'Nombre', width: '200px' },
-    { key: 'direccion', header: 'Dirección', width: '220px' },
-    { key: 'ciudad', header: 'Ciudad', width: '130px' },
-    { key: 'departamento', header: 'Departamento', width: '140px' },
-  ];
-
-  get filasSucursales(): Record<string, unknown>[] {
-    return this.sucursalesFiltradas.map(s => ({
+  filasSucursalesDe(empresaId: number): Record<string, unknown>[] {
+    return (this.sucursalesPorEmpresa[empresaId] ?? []).map(s => ({
       id: s.id, codigo: s.codigo || '—', nombre: s.nombre,
       direccion: s.direccion || '—', ciudad: s.ciudad || '—', departamento: s.departamento || '—',
     }));

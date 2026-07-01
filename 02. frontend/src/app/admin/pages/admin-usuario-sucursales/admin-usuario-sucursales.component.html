@@ -1,184 +1,119 @@
 <div class="admin-page ion-padding admin-page--fluid">
   <h1 class="admin-page__title">Usuarios y sucursales</h1>
-  <p class="admin-page__subtitle">Seleccione empresa → usuario → asigne o retire sucursales del tenant.</p>
+  <p class="admin-page__subtitle">Expanda una empresa y luego un usuario para asignar o retirar sucursales del tenant.</p>
 
-  <!-- ── Paso 1: lista de empresas ── -->
-  @if (!empresaSeleccionada) {
-    <ion-searchbar [(ngModel)]="filtroEmpresa" placeholder="Buscar empresa..." animated="true" class="admin-search"></ion-searchbar>
+  <ion-searchbar [(ngModel)]="filtroEmpresa" placeholder="Buscar empresa..." animated="true" class="admin-search"></ion-searchbar>
 
-    @if (loadingEmpresas) {
-      <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
-    }
-
-    @if (!loadingEmpresas) {
-      <div class="admin-table-wrapper">
-        <table class="admin-table admin-table--plain">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>RUC</th>
-              <th>Razón social</th>
-              <th>BD</th>
-              <th class="admin-acciones-col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (e of registrosPagina; track e.id) {
-              <tr (click)="seleccionarEmpresa(e)" (dblclick)="seleccionarEmpresa(e)">
-                <td>{{ e.codigo }}</td>
-                <td>{{ e.ruc }}</td>
-                <td>{{ e.razonSocial }}</td>
-                <td><code>{{ e.dbName }}</code></td>
-                <td class="admin-acciones-col">
-                  <div class="admin-acciones-wrap" (click)="$event.stopPropagation()">
-                    <ion-button fill="clear" size="small" class="admin-acciones-btn" title="Seleccionar empresa"
-                      (click)="seleccionarEmpresa(e)">
-                      <ion-icon slot="icon-only" name="arrow-forward-circle-outline"></ion-icon>
-                    </ion-button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr><td colspan="5" style="text-align:center;color:#6b7280">No hay empresas.</td></tr>
-            }
-          </tbody>
-        </table>
-        <app-admin-paginacion [base]="this" />
-      </div>
-    }
+  @if (loadingEmpresas) {
+    <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
   }
 
-  <!-- ── Paso 2: usuarios de la empresa ── -->
-  @if (empresaSeleccionada && !usuarioSeleccionado) {
-    <div class="empresa-context">
-      <ion-button fill="clear" size="small" (click)="volverAEmpresas()">
-        <ion-icon name="arrow-back-outline" slot="start"></ion-icon> Empresas
-      </ion-button>
-      <div class="empresa-context__info">
-        <ion-icon name="business-outline"></ion-icon>
-        <div>
-          <strong>{{ empresaSeleccionada.razonSocial }}</strong>
-          <span>RUC {{ empresaSeleccionada.ruc }} · <code>{{ empresaSeleccionada.dbName }}</code></span>
-        </div>
-      </div>
-    </div>
+  @if (!loadingEmpresas) {
+    <div class="sigre-acc">
+      @for (e of registrosPagina; track e.id) {
+        <div class="sigre-acc__item">
+          <button type="button" class="sigre-acc__head" (click)="toggleEmpresa(e)">
+            <i class="material-icons-outlined sigre-acc__chev">
+              {{ empresaAbierta(e.id) ? 'expand_more' : 'chevron_right' }}
+            </i>
+            <i class="material-icons-outlined sigre-acc__ico">business</i>
+            <span class="sigre-acc__cod">{{ e.codigo }}</span>
+            <span class="sigre-acc__nom">{{ e.razonSocial }} · RUC {{ e.ruc }} · <code>{{ e.dbName }}</code></span>
+            <span class="sigre-acc__badge">{{ (usuariosPorEmpresa[e.id] ?? []).length }} usuario(s)</span>
+          </button>
 
-    <ion-searchbar [(ngModel)]="filtroUsuario" placeholder="Buscar usuario..." animated="true" class="admin-search"></ion-searchbar>
+          @if (empresaAbierta(e.id)) {
+            <div class="sigre-acc__body">
+              @if (loadingUsuariosPorEmpresa[e.id]) {
+                <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+              } @else {
+                <ion-searchbar [(ngModel)]="filtroUsuarioPorEmpresa[e.id]" placeholder="Buscar usuario..."
+                  animated="true" class="admin-search admin-search--nested"></ion-searchbar>
 
-    @if (loadingUsuarios) {
-      <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
-    }
+                <div class="sigre-acc sigre-acc--nested">
+                  @for (u of usuariosFiltradosDe(e.id); track u.id) {
+                    <div class="sigre-acc__item">
+                      <button type="button" class="sigre-acc__head sigre-acc__head--nested" (click)="toggleUsuario(e, u)">
+                        <i class="material-icons-outlined sigre-acc__chev">
+                          {{ usuarioAbierto(u.id) ? 'expand_more' : 'chevron_right' }}
+                        </i>
+                        <i class="material-icons-outlined sigre-acc__ico">person</i>
+                        <span class="sigre-acc__cod">{{ u.username }}</span>
+                        <span class="sigre-acc__nom">{{ u.nombreCompleto }} · {{ u.email }}</span>
+                        <span class="sigre-acc__badge">{{ asignadasDe(u.id).length }} sucursal(es)</span>
+                      </button>
 
-    @if (!loadingUsuarios) {
-      <div class="admin-table-wrapper">
-        <table class="admin-table admin-table--plain">
-          <thead>
-            <tr>
-              <th>Nombre completo</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th class="admin-acciones-col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (u of registrosPagina; track u.id) {
-              <tr (click)="seleccionarUsuario(u)" (dblclick)="seleccionarUsuario(u)">
-                <td>{{ u.nombreCompleto }}</td>
-                <td>{{ u.username }}</td>
-                <td>{{ u.email }}</td>
-                <td class="admin-acciones-col">
-                  <div class="admin-acciones-wrap" (click)="$event.stopPropagation()">
-                    <ion-button fill="clear" size="small" class="admin-acciones-btn" title="Asignar sucursales"
-                      (click)="seleccionarUsuario(u)">
-                      <ion-icon slot="icon-only" name="arrow-forward-circle-outline"></ion-icon>
-                    </ion-button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr><td colspan="4" style="text-align:center;color:#6b7280">No hay usuarios en esta empresa.</td></tr>
-            }
-          </tbody>
-        </table>
-        <app-admin-paginacion [base]="this" />
-      </div>
-    }
-  }
+                      @if (usuarioAbierto(u.id)) {
+                        <div class="sigre-acc__body">
+                          @if (loadingAsignadasPorUsuario[u.id]) {
+                            <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+                          } @else {
+                            <table class="table table-striped table-bordered align-middle mb-2 sigre-metoxi-table w-100">
+                              <thead>
+                                <tr>
+                                  <th scope="col">Código</th>
+                                  <th scope="col">Nombre</th>
+                                  <th scope="col">Ciudad</th>
+                                  <th scope="col" class="text-end" style="width: 90px">Acción</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @for (s of asignadasDe(u.id); track s.id) {
+                                  <tr>
+                                    <td class="fw-semibold">{{ s.codigo }}</td>
+                                    <td>{{ s.nombre }}</td>
+                                    <td>{{ s.ciudad || s.distrito || '—' }}</td>
+                                    <td class="text-end">
+                                      <button type="button" class="btn btn-sm btn-outline-danger"
+                                              title="Retirar sucursal del usuario" (click)="retirar(e, u, s.id)">
+                                        <i class="material-icons-outlined fs-6">remove_circle_outline</i>
+                                      </button>
+                                    </td>
+                                  </tr>
+                                } @empty {
+                                  <tr><td colspan="4" class="text-center text-muted">Sin sucursales asignadas.</td></tr>
+                                }
+                              </tbody>
+                            </table>
 
-  <!-- ── Paso 3: sucursales del usuario ── -->
-  @if (empresaSeleccionada && usuarioSeleccionado) {
-    <div class="empresa-context">
-      <ion-button fill="clear" size="small" (click)="volverAUsuarios()">
-        <ion-icon name="arrow-back-outline" slot="start"></ion-icon> Usuarios
-      </ion-button>
-      <div class="empresa-context__info">
-        <ion-icon name="person-outline"></ion-icon>
-        <div>
-          <strong>{{ usuarioSeleccionado.nombreCompleto }}</strong>
-          <span>{{ usuarioSeleccionado.username }} · {{ empresaSeleccionada.razonSocial }}</span>
-        </div>
-      </div>
-    </div>
-
-    @if (loadingSucursales) {
-      <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
-    }
-
-    @if (!loadingSucursales) {
-      <h2 class="section-title">Sucursales asignadas</h2>
-      <div class="admin-table-wrapper">
-        <table class="admin-table admin-table--plain">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Ciudad</th>
-              <th class="admin-acciones-col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (s of asignadas; track s.id) {
-              <tr>
-                <td>{{ s.codigo }}</td>
-                <td>{{ s.nombre }}</td>
-                <td>{{ s.ciudad || s.distrito || '—' }}</td>
-                <td class="admin-acciones-col">
-                  <div class="admin-acciones-wrap" (click)="$event.stopPropagation()">
-                    <ion-button fill="clear" size="small" color="danger" class="admin-acciones-btn" title="Retirar sucursal del usuario"
-                      (click)="retirar(s.id)">
-                      <ion-icon slot="icon-only" name="remove-circle-outline"></ion-icon>
-                    </ion-button>
-                  </div>
-                </td>
-              </tr>
-            } @empty {
-              <tr><td colspan="4" style="text-align:center;color:#6b7280">Sin sucursales asignadas.</td></tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <h2 class="section-title">Agregar sucursal</h2>
-      @if (sucursalesDisponibles.length === 0) {
-        <p class="ion-padding-start" style="color:#6b7280">No hay más sucursales del catálogo para asignar.</p>
-      }
-      @if (sucursalesDisponibles.length > 0) {
-        <div class="asignar-row">
-          <ion-item class="asignar-select">
-            <ion-select
-              label="Sucursal"
-              labelPlacement="stacked"
-              placeholder="Seleccione..."
-              [(ngModel)]="sucursalIdAsignar"
-              interface="popover">
-              @for (s of sucursalesDisponibles; track s.id) {
-                <ion-select-option [value]="s.id">{{ s.codigo }} — {{ s.nombre }}</ion-select-option>
+                            @if (sucursalesDisponiblesDe(e.id, u.id).length === 0) {
+                              <p class="text-muted small mb-0">No hay más sucursales del catálogo para asignar.</p>
+                            } @else {
+                              <div class="form-row d-flex align-items-center gap-2 flex-wrap">
+                                <ion-item class="flex-grow-1" style="min-width:260px">
+                                  <ion-select sigreValid [(ngModel)]="sucursalIdAsignarPorUsuario[u.id]" placeholder="Seleccione sucursal">
+                                    @for (s of sucursalesDisponiblesDe(e.id, u.id); track s.id) {
+                                      <ion-select-option [value]="s.id">{{ s.codigo }} — {{ s.nombre }}</ion-select-option>
+                                    }
+                                  </ion-select>
+                                </ion-item>
+                                <ion-button color="primary" [disabled]="!sucursalIdAsignarPorUsuario[u.id]" (click)="asignar(e, u)">
+                                  Asignar
+                                </ion-button>
+                              </div>
+                            }
+                          }
+                        </div>
+                      }
+                    </div>
+                  } @empty {
+                    <div class="sigre-metoxi-table__state">
+                      <i class="material-icons-outlined sigre-metoxi-table__state-icon">inbox</i>
+                      <span>No hay usuarios en esta empresa.</span>
+                    </div>
+                  }
+                </div>
               }
-            </ion-select>
-          </ion-item>
-          <ion-button color="primary" [disabled]="!sucursalIdAsignar" (click)="asignar()">Asignar</ion-button>
+            </div>
+          }
+        </div>
+      } @empty {
+        <div class="sigre-metoxi-table__state">
+          <i class="material-icons-outlined sigre-metoxi-table__state-icon">inbox</i>
+          <span>No hay empresas.</span>
         </div>
       }
-    }
+    </div>
+    <app-admin-paginacion [base]="this" />
   }
 </div>
