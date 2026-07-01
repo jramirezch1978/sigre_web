@@ -15,6 +15,8 @@ import {
   SesionesBloqueoDbItem,
   UsuariosPorEmpresaItem,
 } from '../../models/admin.models';
+import { ADMIN_MENU_ITEMS, AdminMenuItem } from '../../config/admin-menu-items.config';
+import { LoginData } from '../../../auth/services/auth.service';
 
 export interface AdminDashboardKpis {
   usuariosPlataforma: number;
@@ -26,13 +28,6 @@ export interface AdminDashboardKpis {
   accionesGlobales: number;
   empresasEnPerfil: number;
   tieneContextoEmpresa: boolean;
-}
-
-interface QuickAccessItem {
-  label: string;
-  icon: string;
-  route: string;
-  description: string;
 }
 
 const CHART_COLORS = [
@@ -87,24 +82,21 @@ export class AdminDashboardComponent implements OnInit {
     },
   };
 
-  readonly menuItems: QuickAccessItem[] = [
-    { label: 'Empresas', icon: 'business-outline', route: '/admin/empresas', description: 'Gestión y alta de empresas con BD tenant' },
-    { label: 'Usuarios', icon: 'people-outline', route: '/admin/usuarios', description: 'Gestión de usuarios' },
-    { label: 'Roles', icon: 'key-outline', route: '/admin/roles', description: 'Roles de la empresa' },
-    { label: 'Módulos', icon: 'grid-outline', route: '/admin/modulos', description: 'Catálogo global de módulos' },
-    { label: 'Opciones de menú', icon: 'list-outline', route: '/admin/opciones-menu', description: 'Ítems de menú por módulo' },
-    { label: 'Acciones', icon: 'flash-outline', route: '/admin/acciones', description: 'Catálogo de acciones' },
-    { label: 'Roles por usuario', icon: 'person-add-outline', route: '/admin/roles-usuario', description: 'Asignar roles a usuarios' },
-    { label: 'Acciones por rol', icon: 'shield-checkmark-outline', route: '/admin/asignar-acciones-rol', description: 'Permisos por rol' },
-    { label: 'Sucursales', icon: 'storefront-outline', route: '/admin/sucursales', description: 'Sucursales de empresa' },
-    { label: 'Usuarios x Sucursal', icon: 'git-network-outline', route: '/admin/usuarios-sucursales', description: 'Asignar usuarios a sucursales' },
-  ];
+  tipoSales: string | null = null;
+
+  /** Mismas opciones del sidebar (ADMIN_MENU_ITEMS), sin "Inicio" y filtradas por tipoSales. */
+  get menuItems(): AdminMenuItem[] {
+    return ADMIN_MENU_ITEMS.filter(item => item.route !== '/admin/inicio').filter(
+      item => !item.soloTipoSales || (!!this.tipoSales && item.soloTipoSales.includes(this.tipoSales as 'LICENSING' | 'SALES')),
+    );
+  }
 
   /** Pares para layout tipo dashboard ERP (2 botones por fila). */
-  get menuItemPairs(): QuickAccessItem[][] {
-    const pairs: QuickAccessItem[][] = [];
-    for (let i = 0; i < this.menuItems.length; i += 2) {
-      pairs.push(this.menuItems.slice(i, i + 2));
+  get menuItemPairs(): AdminMenuItem[][] {
+    const items = this.menuItems;
+    const pairs: AdminMenuItem[][] = [];
+    for (let i = 0; i < items.length; i += 2) {
+      pairs.push(items.slice(i, i + 2));
     }
     return pairs;
   }
@@ -134,6 +126,7 @@ export class AdminDashboardComponent implements OnInit {
     if (token) {
       this.tokenTemporal = this.claimsReader.isTemporal(token);
     }
+    this.tipoSales = this.storage.getUser<LoginData>()?.tipoSales ?? null;
 
     this.cargarDashboard();
   }

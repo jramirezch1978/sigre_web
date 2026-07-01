@@ -6,12 +6,7 @@ import { AuthService, LoginData } from '../../../auth/services/auth.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { MetoxiInitService } from '../../../erp/services/metoxi-init.service';
 import { ModalConfirmationComponent } from '@sigre-common';
-
-export interface AdminMenuItem {
-  label: string;
-  icon: string;
-  route: string;
-}
+import { ADMIN_MENU_ITEMS, AdminMenuItem } from '../../config/admin-menu-items.config';
 
 @Component({
   selector: 'app-admin-shell',
@@ -34,28 +29,11 @@ export class AdminShellComponent implements OnInit, OnDestroy {
   inicialesUsuario = 'U';
   tipoSales: string | null = null;
 
-  private readonly baseMenuItems: AdminMenuItem[] = [
-    { label: 'Inicio', icon: 'dashboard', route: '/admin/inicio' },
-    { label: 'Empresas', icon: 'business', route: '/admin/empresas' },
-    { label: 'Usuarios', icon: 'group', route: '/admin/usuarios' },
-    { label: 'Roles', icon: 'vpn_key', route: '/admin/roles' },
-    { label: 'Módulos', icon: 'grid_view', route: '/admin/modulos' },
-    { label: 'Ediciones', icon: 'layers', route: '/admin/ediciones' },
-    { label: 'Opciones de menú', icon: 'list', route: '/admin/opciones-menu' },
-    { label: 'Acciones', icon: 'bolt', route: '/admin/acciones' },
-    { label: 'Roles x Usuario', icon: 'person_add', route: '/admin/roles-usuario' },
-    { label: 'Grupos de usuario', icon: 'groups', route: '/admin/grupos-usuario' },
-    { label: 'Sucursales', icon: 'storefront', route: '/admin/sucursales' },
-    { label: 'Usuarios x Sucursal', icon: 'account_tree', route: '/admin/usuarios-sucursales' },
-    { label: 'Versiones', icon: 'info', route: '/admin/versiones' },
-  ];
-
-  /** El menú agrega "Licencias" solo si el usuario tiene perfil LICENSING o SALES. */
+  /** Opciones visibles según el tipoSales del usuario (Licencias es LICENSING/SALES). */
   get menuItems(): AdminMenuItem[] {
-    if (this.tipoSales === 'LICENSING' || this.tipoSales === 'SALES') {
-      return [...this.baseMenuItems, { label: 'Licencias', icon: 'workspace_premium', route: '/admin/licencias' }];
-    }
-    return this.baseMenuItems;
+    return ADMIN_MENU_ITEMS.filter(
+      item => !item.soloTipoSales || (!!this.tipoSales && item.soloTipoSales.includes(this.tipoSales as 'LICENSING' | 'SALES')),
+    );
   }
 
   constructor() {
