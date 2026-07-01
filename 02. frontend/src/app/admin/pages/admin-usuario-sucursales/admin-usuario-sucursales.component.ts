@@ -7,6 +7,8 @@ import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.ser
 import { AdminCoreMaestrosApiService } from '../../services/admin-core-maestros-api.service';
 import { EmpresaAdminDto, UsuarioAdminDto } from '../../models/admin.models';
 import { SucursalCatalogoDto } from '../../models/admin-core-maestros.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
   selector: 'app-admin-usuario-sucursales',
@@ -14,7 +16,13 @@ import { SucursalCatalogoDto } from '../../models/admin-core-maestros.models';
   styleUrls: ['./admin-usuario-sucursales.component.scss'],
   standalone: false,
 })
-export class AdminUsuarioSucursalesComponent implements OnInit {
+export class AdminUsuarioSucursalesComponent extends AdminTablaPageBase<{ id: number }> implements OnInit {
+  // Tabla propia (2 pasos de selector: empresas → usuarios); solo se reusa la paginación.
+  columnasTabla: TablaColumna[] = [];
+  protected get registrosTabla(): { id: number }[] {
+    return this.empresaSeleccionada ? this.usuariosFiltrados : this.empresasFiltradas;
+  }
+  protected aFila(r: { id: number }): Record<string, unknown> { return { id: r.id }; }
 
   private readonly seguridadApi = inject(AdminSeguridadApiService);
   private readonly coreApi = inject(AdminCoreMaestrosApiService);
@@ -67,6 +75,7 @@ export class AdminUsuarioSucursalesComponent implements OnInit {
     this.filtroUsuario = '';
     this.usuarioSeleccionado = null;
     this.asignadas = [];
+    this.paginaActual = 1;
     this.cargarUsuariosYCatalogo();
   }
 
@@ -76,6 +85,7 @@ export class AdminUsuarioSucursalesComponent implements OnInit {
     this.catalogo = [];
     this.usuarioSeleccionado = null;
     this.asignadas = [];
+    this.paginaActual = 1;
   }
 
   // ── Paso 2: usuarios de la empresa ──

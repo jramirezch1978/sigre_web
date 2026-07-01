@@ -6,6 +6,8 @@ import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.ser
 import { StorageService } from '../../../core/services/storage.service';
 import { JwtClaimsReaderService } from '../../services/jwt-claims-reader.service';
 import { RolDto, OpcionMenuDto, AccionDto, RolOpcionMenuDto, RolOpcionAccionDto } from '../../models/admin.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
   selector: 'app-admin-asignar-acciones-rol',
@@ -13,7 +15,11 @@ import { RolDto, OpcionMenuDto, AccionDto, RolOpcionMenuDto, RolOpcionAccionDto 
   styleUrls: ['./admin-asignar-acciones-rol.component.scss'],
   standalone: false,
 })
-export class AdminAsignarAccionesRolComponent implements OnInit {
+export class AdminAsignarAccionesRolComponent extends AdminTablaPageBase<RolDto> implements OnInit {
+  // Tabla propia (selector de rol); solo se reusa la paginación de la base.
+  columnasTabla: TablaColumna[] = [];
+  protected get registrosTabla(): RolDto[] { return this.roles; }
+  protected aFila(r: RolDto): Record<string, unknown> { return { id: r.id }; }
 
   private readonly api = inject(AdminSeguridadApiService);
   private readonly modalCtrl = inject(ModalController);
@@ -135,7 +141,7 @@ export class AdminAsignarAccionesRolComponent implements OnInit {
     return item?.permitido === true;
   }
 
-  volver(): void { this.rolSeleccionado = null; this.opcionesDelRol = []; this.accionesPorOpcion = {}; }
+  volver(): void { this.rolSeleccionado = null; this.opcionesDelRol = []; this.accionesPorOpcion = {}; this.paginaActual = 1; }
 
   private async showError(message: string): Promise<void> {
     const modal = await this.modalCtrl.create({ component: ModalConfirmationComponent, cssClass: 'promo',

@@ -22,7 +22,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (e of empresasFiltradas; track e.id) {
+            @for (e of registrosPagina; track e.id) {
               <tr (click)="seleccionarEmpresa(e)" (dblclick)="seleccionarEmpresa(e)">
                 <td>{{ e.codigo }}</td>
                 <td>{{ e.ruc }}</td>
@@ -42,6 +42,7 @@
             }
           </tbody>
         </table>
+        <app-admin-paginacion [base]="this" />
       </div>
     }
   }
@@ -73,7 +74,11 @@
           [filas]="filasSucursales"
           nombreExport="sucursales"
           [totalRegistros]="filasSucursales.length"
-          [mostrarAcciones]="false" />
+          [mostrarAcciones]="false"
+          [ordenInicial]="ordenInicial"
+          [tamanoPaginaPersistido]="tamanoPaginaPersistido"
+          (ordenCambiado)="onOrdenCambiado($event)"
+          (tamanoPaginaCambiado)="onTamanoPaginaCambiado($event)" />
       </div>
     }
   }

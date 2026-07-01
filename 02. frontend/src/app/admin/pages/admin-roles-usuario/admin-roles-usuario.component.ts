@@ -6,6 +6,8 @@ import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.ser
 import { StorageService } from '../../../core/services/storage.service';
 import { JwtClaimsReaderService } from '../../services/jwt-claims-reader.service';
 import { UsuarioAdminDto, RolDto, RolUsuarioDto } from '../../models/admin.models';
+import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
   selector: 'app-admin-roles-usuario',
@@ -13,7 +15,11 @@ import { UsuarioAdminDto, RolDto, RolUsuarioDto } from '../../models/admin.model
   styleUrls: ['./admin-roles-usuario.component.scss'],
   standalone: false,
 })
-export class AdminRolesUsuarioComponent implements OnInit {
+export class AdminRolesUsuarioComponent extends AdminTablaPageBase<UsuarioAdminDto> implements OnInit {
+  // Tabla propia (selector de usuario); solo se reusa la paginación de la base.
+  columnasTabla: TablaColumna[] = [];
+  protected get registrosTabla(): UsuarioAdminDto[] { return this.usuariosFiltrados; }
+  protected aFila(u: UsuarioAdminDto): Record<string, unknown> { return { id: u.id }; }
 
   private readonly api = inject(AdminSeguridadApiService);
   private readonly modalCtrl = inject(ModalController);
@@ -99,7 +105,7 @@ export class AdminRolesUsuarioComponent implements OnInit {
     });
   }
 
-  volver(): void { this.usuarioSeleccionado = null; this.rolesUsuario = []; }
+  volver(): void { this.usuarioSeleccionado = null; this.rolesUsuario = []; this.paginaActual = 1; }
 
   private async error(message: string): Promise<void> {
     const modal = await this.modalCtrl.create({ component: ModalConfirmationComponent, cssClass: 'promo',

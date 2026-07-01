@@ -4,6 +4,7 @@ import { AdminCoreMaestrosApiService } from '../../services/admin-core-maestros-
 import { EmpresaAdminDto } from '../../models/admin.models';
 import { SucursalCatalogoDto } from '../../models/admin-core-maestros.models';
 import { TablaColumna } from '../../../erp/shared/models/api-page.model';
+import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 
 @Component({
   selector: 'app-admin-sucursales',
@@ -11,7 +12,11 @@ import { TablaColumna } from '../../../erp/shared/models/api-page.model';
   styleUrls: ['./admin-sucursales.component.scss'],
   standalone: false,
 })
-export class AdminSucursalesComponent implements OnInit {
+export class AdminSucursalesComponent extends AdminTablaPageBase<EmpresaAdminDto> implements OnInit {
+  // Tabla propia (selector de empresa); solo se reusa la paginación de la base.
+  columnasTabla: TablaColumna[] = [];
+  protected get registrosTabla(): EmpresaAdminDto[] { return this.empresasFiltradas; }
+  protected aFila(e: EmpresaAdminDto): Record<string, unknown> { return { id: e.id }; }
 
   private readonly apiSeguridad = inject(AdminSeguridadApiService);
   private readonly apiCore = inject(AdminCoreMaestrosApiService);
@@ -60,6 +65,7 @@ export class AdminSucursalesComponent implements OnInit {
     this.empresaSeleccionada = null;
     this.sucursales = [];
     this.filtroSucursal = '';
+    this.paginaActual = 1;
   }
 
   cargarSucursales(): void {
