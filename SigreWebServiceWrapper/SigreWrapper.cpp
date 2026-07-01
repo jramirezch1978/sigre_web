@@ -779,10 +779,11 @@ static BOOL SmtpCommand(TlsContext* ctx, const char* cmd, char* response, size_t
         if (total >= 4) {
             char* lastNewline = strrchr(buf, '\n');
             if (lastNewline) {
-                // Buscar la última línea completa
+                // Buscar la última línea completa. El bucle ya deja lineStart
+                // apuntando justo al primer caracter de esa línea (inmediatamente
+                // despues del '\n' anterior, o al inicio del buffer si es la única).
                 char* lineStart = lastNewline;
                 while (lineStart > buf && *(lineStart - 1) != '\n') lineStart--;
-                if (lineStart > buf) lineStart++; // Saltar el \n anterior
                 
                 // Si la línea tiene formato "XXX " (código + espacio), es la última
                 if (strlen(lineStart) >= 4 && isdigit(lineStart[0]) && 
