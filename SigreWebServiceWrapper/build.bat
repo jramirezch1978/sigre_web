@@ -133,5 +133,5 @@ pause
 exit /b 1
 
 :END
-pause
+REM pause
 endlocal

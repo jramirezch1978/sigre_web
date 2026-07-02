@@ -64,6 +64,10 @@ static int g_logMaxSizeMB = 2;
 static HMODULE g_hModule = NULL;
 static BOOL g_comInitialized = FALSE;
 
+// Forward declaration: LogInfo se define mas abajo (junto a WriteLog), pero
+// LoadConfiguration necesita registrar el proveedor SMTP elegido (fallback a AWS).
+static void LogInfo(const wchar_t* message);
+
 // ============================================================
 // Funciones de configuración
 // ============================================================
@@ -102,11 +106,12 @@ static void LoadConfiguration()
     GetPrivateProfileStringW(L"API", L"ApiTipoCambioPath", L"/SunatWebServices/api/tipo-cambio/consultar",
                              g_apiTipoCambioPath, 256, g_iniPath);
     
-    // [SMTP]
-    GetPrivateProfileStringW(L"SMTP", L"SmtpServer", L"smtp.gmail.com", 
+    // [SMTP] - sin defaults ocultos: si la clave no existe (comentada o ausente),
+    // se detecta como vacia y se evalua el fallback a [AWS] mas abajo.
+    GetPrivateProfileStringW(L"SMTP", L"SmtpServer", L"", 
                              g_smtpServer, 256, g_iniPath);
-    g_smtpPort = GetPrivateProfileIntW(L"SMTP", L"SmtpPort", 587, g_iniPath);
-    GetPrivateProfileStringW(L"SMTP", L"SmtpUser", L"no-reply@npssac.com.pe", 
+    g_smtpPort = GetPrivateProfileIntW(L"SMTP", L"SmtpPort", 0, g_iniPath);
+    GetPrivateProfileStringW(L"SMTP", L"SmtpUser", L"", 
                              g_smtpUser, 256, g_iniPath);
     GetPrivateProfileStringW(L"SMTP", L"SmtpPassword", L"", 
                              g_smtpPass, 256, g_iniPath);
@@ -116,6 +121,26 @@ static void LoadConfiguration()
     wchar_t temp[256];
     GetPrivateProfileStringW(L"SMTP", L"SmtpEnableSSL", L"true", temp, 256, g_iniPath);
     g_smtpEnableSSL = (_wcsicmp(temp, L"true") == 0 || _wcsicmp(temp, L"1") == 0);
+    
+    // Fallback: si [SMTP] no tiene servidor configurado (seccion vacia/comentada),
+    // usar [AWS] (Amazon SES via SMTP) como proveedor alterno. Misma estructura de
+    // claves en ambas secciones para simplificar el cambio de proveedor solo editando el .ini.
+    if (g_smtpServer[0] == L'\0') {
+        GetPrivateProfileStringW(L"AWS", L"SmtpServer", L"", 
+                                 g_smtpServer, 256, g_iniPath);
+        if (g_smtpServer[0] != L'\0') {
+            g_smtpPort = GetPrivateProfileIntW(L"AWS", L"SmtpPort", 465, g_iniPath);
+            GetPrivateProfileStringW(L"AWS", L"SmtpUser", L"", 
+                                     g_smtpUser, 256, g_iniPath);
+            GetPrivateProfileStringW(L"AWS", L"SmtpPassword", L"", 
+                                     g_smtpPass, 256, g_iniPath);
+            GetPrivateProfileStringW(L"AWS", L"SmtpFromName", L"Sistema SIGRE", 
+                                     g_smtpFromName, 256, g_iniPath);
+            GetPrivateProfileStringW(L"AWS", L"SmtpEnableSSL", L"true", temp, 256, g_iniPath);
+            g_smtpEnableSSL = (_wcsicmp(temp, L"true") == 0 || _wcsicmp(temp, L"1") == 0);
+            LogInfo(L"LoadConfiguration: [SMTP] vacio, usando proveedor [AWS] (Amazon SES) como fallback");
+        }
+    }
     
     // [LOG]
     GetPrivateProfileStringW(L"LOG", L"LogEnabled", L"true", temp, 256, g_iniPath);
