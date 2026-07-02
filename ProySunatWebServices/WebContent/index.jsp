@@ -23,8 +23,6 @@
             --accent-2: #f59e0b;
             --active: #22c55e;
             --active-bg: rgba(34, 197, 94, 0.12);
-            --inactive: #64748b;
-            --inactive-bg: rgba(100, 116, 139, 0.14);
             --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
         }
 
@@ -234,12 +232,6 @@
             border: 1px solid rgba(34, 197, 94, 0.25);
         }
 
-        .status-inactive {
-            color: #cbd5e1;
-            background: var(--inactive-bg);
-            border: 1px solid rgba(100, 116, 139, 0.25);
-        }
-
         .status-dot {
             width: 8px;
             height: 8px;
@@ -247,7 +239,6 @@
         }
 
         .status-active .status-dot { background: var(--active); }
-        .status-inactive .status-dot { background: var(--inactive); }
 
         .footer {
             margin-top: 28px;
@@ -337,33 +328,6 @@
                     <code class="service-endpoint"><%= ctx %>/ImplConsultaRUC</code>
                 </div>
                 <span class="status status-active"><span class="status-dot"></span>Activo</span>
-            </article>
-
-            <article class="service-card">
-                <div>
-                    <div class="service-name">Consulta DNI</div>
-                    <div class="service-desc">Consulta de documento de identidad.</div>
-                    <code class="service-endpoint">No publicado</code>
-                </div>
-                <span class="status status-inactive"><span class="status-dot"></span>Inactivo</span>
-            </article>
-
-            <article class="service-card">
-                <div>
-                    <div class="service-name">Validacion de Comprobantes Electronicos</div>
-                    <div class="service-desc">Validacion de CPE y comprobantes tributarios.</div>
-                    <code class="service-endpoint">No publicado</code>
-                </div>
-                <span class="status status-inactive"><span class="status-dot"></span>Inactivo</span>
-            </article>
-
-            <article class="service-card">
-                <div>
-                    <div class="service-name">Consulta RUC en linea SUNAT</div>
-                    <div class="service-desc">Consulta directa contra servicios en linea de SUNAT.</div>
-                    <code class="service-endpoint">No publicado</code>
-                </div>
-                <span class="status status-inactive"><span class="status-dot"></span>Inactivo</span>
             </article>
         </div>
 
