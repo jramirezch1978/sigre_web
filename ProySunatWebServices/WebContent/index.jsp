@@ -50,34 +50,42 @@
             padding: 32px 24px 64px;
         }
 
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 18px 24px;
-            margin-bottom: 28px;
-            background: var(--bg-soft);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        .logo {
-            max-width: 320px;
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
         .hero {
             position: relative;
             overflow: hidden;
             border: 1px solid var(--border);
             border-radius: 24px;
-            padding: 40px 40px 36px;
+            padding: 36px 40px 32px;
             background: linear-gradient(135deg, #ffffff 0%, #f7fcfd 55%, #eef8fb 100%);
             box-shadow: var(--shadow);
             margin-bottom: 28px;
+        }
+
+        .hero-layout {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-logo {
+            flex: 0 0 260px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-logo img {
+            width: 100%;
+            max-width: 260px;
+            height: auto;
+            display: block;
+        }
+
+        .hero-body {
+            flex: 1;
+            min-width: 0;
         }
 
         .hero::after {
@@ -92,7 +100,14 @@
             opacity: 0.55;
         }
 
-        .hero-content { position: relative; z-index: 1; }
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 24px;
+            position: relative;
+            z-index: 1;
+        }
 
         .badge {
             display: inline-flex;
@@ -133,13 +148,7 @@
             max-width: 720px;
             color: var(--muted);
             font-size: 1.02rem;
-            margin-bottom: 26px;
-        }
-
-        .hero-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
+            margin-bottom: 0;
         }
 
         .meta-item {
@@ -273,9 +282,16 @@
 
         @media (max-width: 720px) {
             .page { padding: 20px 16px 48px; }
-            .hero { padding: 28px 22px 26px; }
-            .topbar { padding: 14px 16px; }
-            .logo { max-width: 240px; }
+            .hero { padding: 24px 20px 22px; }
+            .hero-layout {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 20px;
+            }
+            .hero-logo { flex: 0 0 auto; max-width: 220px; }
+            .hero-logo img { max-width: 220px; }
+            .hero-meta { justify-content: center; }
             .service-card { grid-template-columns: 1fr; }
             .status { justify-self: start; }
             .section-title {
@@ -287,38 +303,38 @@
 </head>
 <body>
     <div class="page">
-        <header class="topbar">
-            <img
-                class="logo"
-                src="<%= ctx %>/img/logo-sigre-healthcare.png"
-                alt="SIGRE Healthcare">
-        </header>
-
         <section class="hero">
-            <div class="hero-content">
-                <div class="badge">
-                    <span class="badge-dot"></span>
-                    Plataforma de servicios SIGRE
+            <div class="hero-layout">
+                <div class="hero-logo">
+                    <img
+                        src="<%= ctx %>/img/logo-sigre.png"
+                        alt="SIGRE">
                 </div>
-                <h1><span>SunatWebServices</span></h1>
-                <p>
-                    Portal de servicios web para consultas tributarias y operaciones de apoyo
-                    a los sistemas SIGRE. Expone APIs REST y SOAP para integracion con
-                    aplicaciones de escritorio y servicios internos.
-                </p>
-                <div class="hero-meta">
-                    <div class="meta-item">
-                        <span class="meta-label">Contexto</span>
-                        <span class="meta-value"><%= ctx.isEmpty() ? "/" : ctx %></span>
+                <div class="hero-body">
+                    <div class="badge">
+                        <span class="badge-dot"></span>
+                        Plataforma de servicios SIGRE
                     </div>
-                    <div class="meta-item">
-                        <span class="meta-label">API REST</span>
-                        <span class="meta-value"><%= ctx %>/api</span>
-                    </div>
-                    <div class="meta-item">
-                        <span class="meta-label">SOAP legacy</span>
-                        <span class="meta-value"><%= ctx %>/ImplConsultaRUC</span>
-                    </div>
+                    <h1><span>SunatWebServices</span></h1>
+                    <p>
+                        Portal de servicios web para consultas tributarias y operaciones de apoyo
+                        a los sistemas SIGRE. Expone APIs REST y SOAP para integracion con
+                        aplicaciones de escritorio y servicios internos.
+                    </p>
+                </div>
+            </div>
+            <div class="hero-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Contexto</span>
+                    <span class="meta-value"><%= ctx.isEmpty() ? "/" : ctx %></span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">API REST</span>
+                    <span class="meta-value"><%= ctx %>/api</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">SOAP legacy</span>
+                    <span class="meta-value"><%= ctx %>/ImplConsultaRUC</span>
                 </div>
             </div>
         </section>
