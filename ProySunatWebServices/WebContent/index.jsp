@@ -13,17 +13,22 @@
     <title>SunatWebServices | SIGRE</title>
     <style>
         :root {
-            --bg: #0b1220;
-            --bg-card: #111b2e;
-            --bg-card-hover: #152238;
-            --border: rgba(148, 163, 184, 0.14);
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --accent: #38bdf8;
-            --accent-2: #f59e0b;
-            --active: #22c55e;
-            --active-bg: rgba(34, 197, 94, 0.12);
-            --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+            --bg: #f0f6fa;
+            --bg-soft: #ffffff;
+            --bg-card: #ffffff;
+            --border: #dbe7ef;
+            --text: #1e293b;
+            --muted: #64748b;
+            --sigre-dark: #2b2b2b;
+            --teal: #1aa3b5;
+            --teal-light: #e6f7fa;
+            --teal-dark: #148a99;
+            --blue: #2f80c9;
+            --blue-light: #ebf4fc;
+            --green: #7dc142;
+            --green-light: #edf8e6;
+            --shadow: 0 10px 30px rgba(26, 163, 181, 0.08);
+            --shadow-hover: 0 16px 36px rgba(26, 163, 181, 0.14);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,9 +36,9 @@
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 28%),
-                radial-gradient(circle at top right, rgba(245, 158, 11, 0.10), transparent 24%),
-                var(--bg);
+                radial-gradient(circle at top left, rgba(26, 163, 181, 0.10), transparent 32%),
+                radial-gradient(circle at top right, rgba(47, 128, 201, 0.08), transparent 28%),
+                linear-gradient(180deg, #f8fbfd 0%, var(--bg) 100%);
             color: var(--text);
             min-height: 100vh;
             line-height: 1.5;
@@ -42,7 +47,26 @@
         .page {
             max-width: 1100px;
             margin: 0 auto;
-            padding: 48px 24px 64px;
+            padding: 32px 24px 64px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px 24px;
+            margin-bottom: 28px;
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            max-width: 320px;
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
         .hero {
@@ -50,26 +74,22 @@
             overflow: hidden;
             border: 1px solid var(--border);
             border-radius: 24px;
-            padding: 48px 40px;
-            background: linear-gradient(135deg, rgba(17, 27, 46, 0.96), rgba(11, 18, 32, 0.98));
+            padding: 40px 40px 36px;
+            background: linear-gradient(135deg, #ffffff 0%, #f7fcfd 55%, #eef8fb 100%);
             box-shadow: var(--shadow);
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
 
-        .hero::before {
+        .hero::after {
             content: "";
             position: absolute;
-            inset: 0;
-            background:
-                linear-gradient(120deg, transparent 0%, rgba(56, 189, 248, 0.05) 45%, transparent 70%),
-                repeating-linear-gradient(
-                    90deg,
-                    rgba(255, 255, 255, 0.015) 0,
-                    rgba(255, 255, 255, 0.015) 1px,
-                    transparent 1px,
-                    transparent 48px
-                );
-            pointer-events: none;
+            left: 40px;
+            right: 40px;
+            bottom: 0;
+            height: 3px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, transparent, var(--teal), var(--blue), var(--green), transparent);
+            opacity: 0.55;
         }
 
         .hero-content { position: relative; z-index: 1; }
@@ -80,43 +100,40 @@
             gap: 8px;
             padding: 8px 14px;
             border-radius: 999px;
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            background: rgba(56, 189, 248, 0.08);
-            color: var(--accent);
+            border: 1px solid rgba(26, 163, 181, 0.22);
+            background: var(--teal-light);
+            color: var(--teal-dark);
             font-size: 0.82rem;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.04em;
             text-transform: uppercase;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .badge-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--active);
-            box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
+            background: var(--green);
         }
 
         h1 {
-            font-size: clamp(2rem, 4vw, 3.2rem);
-            line-height: 1.1;
+            font-size: clamp(1.9rem, 4vw, 2.8rem);
+            line-height: 1.15;
             letter-spacing: -0.03em;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
+            color: var(--sigre-dark);
         }
 
         h1 span {
-            background: linear-gradient(90deg, #ffffff, #93c5fd);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            color: var(--teal);
         }
 
         .hero p {
             max-width: 720px;
             color: var(--muted);
-            font-size: 1.05rem;
-            margin-bottom: 28px;
+            font-size: 1.02rem;
+            margin-bottom: 26px;
         }
 
         .hero-meta {
@@ -129,7 +146,7 @@
             padding: 12px 16px;
             border-radius: 14px;
             border: 1px solid var(--border);
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.85);
             min-width: 180px;
         }
 
@@ -138,15 +155,17 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: var(--muted);
+            color: var(--teal-dark);
+            font-weight: 700;
             margin-bottom: 4px;
         }
 
         .meta-value {
-            font-size: 0.98rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            color: #f8fafc;
+            color: var(--text);
             word-break: break-all;
+            font-family: Consolas, "Courier New", monospace;
         }
 
         .section-title {
@@ -155,11 +174,14 @@
             justify-content: space-between;
             gap: 16px;
             margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--teal-light);
         }
 
         .section-title h2 {
             font-size: 1.35rem;
             letter-spacing: -0.02em;
+            color: var(--sigre-dark);
         }
 
         .section-title span {
@@ -181,19 +203,21 @@
             border-radius: 18px;
             border: 1px solid var(--border);
             background: var(--bg-card);
-            transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         .service-card:hover {
-            background: var(--bg-card-hover);
-            transform: translateY(-1px);
-            border-color: rgba(56, 189, 248, 0.22);
+            transform: translateY(-2px);
+            border-color: rgba(26, 163, 181, 0.35);
+            box-shadow: var(--shadow-hover);
         }
 
         .service-name {
             font-size: 1.05rem;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 6px;
+            color: var(--sigre-dark);
         }
 
         .service-desc {
@@ -206,9 +230,9 @@
             display: inline-block;
             font-family: Consolas, "Courier New", monospace;
             font-size: 0.82rem;
-            color: #cbd5e1;
-            background: rgba(15, 23, 42, 0.75);
-            border: 1px solid rgba(148, 163, 184, 0.12);
+            color: var(--blue);
+            background: var(--blue-light);
+            border: 1px solid rgba(47, 128, 201, 0.18);
             border-radius: 8px;
             padding: 6px 10px;
         }
@@ -227,9 +251,9 @@
         }
 
         .status-active {
-            color: #86efac;
-            background: var(--active-bg);
-            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #4d8f24;
+            background: var(--green-light);
+            border: 1px solid rgba(125, 193, 66, 0.35);
         }
 
         .status-dot {
@@ -238,7 +262,7 @@
             border-radius: 50%;
         }
 
-        .status-active .status-dot { background: var(--active); }
+        .status-active .status-dot { background: var(--green); }
 
         .footer {
             margin-top: 28px;
@@ -248,17 +272,28 @@
         }
 
         @media (max-width: 720px) {
-            .page { padding: 28px 16px 48px; }
-            .hero { padding: 32px 24px; }
-            .service-card {
-                grid-template-columns: 1fr;
-            }
+            .page { padding: 20px 16px 48px; }
+            .hero { padding: 28px 22px 26px; }
+            .topbar { padding: 14px 16px; }
+            .logo { max-width: 240px; }
+            .service-card { grid-template-columns: 1fr; }
             .status { justify-self: start; }
+            .section-title {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 <body>
     <div class="page">
+        <header class="topbar">
+            <img
+                class="logo"
+                src="<%= ctx %>/img/logo-sigre-healthcare.png"
+                alt="SIGRE Healthcare">
+        </header>
+
         <section class="hero">
             <div class="hero-content">
                 <div class="badge">
