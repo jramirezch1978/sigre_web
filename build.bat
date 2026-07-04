@@ -47,8 +47,9 @@ if /i "%~1"=="test" goto :testAll
 if /i "%~1"=="package" goto :packageAll
 if /i "%~1"=="help" goto :showHelp
 
-echo %RED%Opcion desconocida: %~1%RESET%
-goto :showHelp
+REM Ningun comando conocido: tratar TODOS los argumentos como nombres de
+REM modulo/servicio a compilar (ej: build.bat sigre-frontend asistencia-service)
+goto :buildMultiple
 
 :showMenu
 echo.
@@ -150,6 +151,63 @@ if "%~2"=="" (
 )
 set "MODULES_TO_BUILD=%~2"
 goto :buildModules
+
+:buildMultiple
+REM Compila varios modulos/servicios pasados directamente como argumentos,
+REM mezclando modulos backend (mvn) y el frontend (npm) en un solo comando.
+REM Ej: build.bat sigre-frontend asistencia-service
+set "BUILD_LOG=!BUILD_LOG_DIR!\build-multiple-!BUILD_LOG_TS!.log"
+set "MODULOS_BACKEND="
+set "INCLUIR_FRONTEND=0"
+for %%m in (%*) do (
+    if /i "%%m"=="sigre-frontend" (
+        set "INCLUIR_FRONTEND=1"
+    ) else if /i "%%m"=="frontend" (
+        set "INCLUIR_FRONTEND=1"
+    ) else (
+        set "MODULOS_BACKEND=!MODULOS_BACKEND! %%m"
+    )
+)
+
+set "BUILD_FAILED=0"
+if not "!MODULOS_BACKEND!"=="" (
+    call :checkJava || set "BUILD_FAILED=1"
+    call :checkMaven || set "BUILD_FAILED=1"
+    if "!BUILD_FAILED!"=="0" (
+        echo [build] Log: !BUILD_LOG!
+        for %%m in (!MODULOS_BACKEND!) do (
+            echo %CYAN%[BUILD]%RESET% %%m
+            if exist "!BACKEND_DIR!\%%m" (
+                pushd "!BACKEND_DIR!"
+                call mvn clean install -DskipTests -pl %%m -am >> "!BUILD_LOG!" 2>&1
+                if errorlevel 1 set "BUILD_FAILED=1"
+                popd
+            ) else (
+                echo %RED%[ERROR]%RESET% No existe modulo backend: %%m
+                set "BUILD_FAILED=1"
+            )
+        )
+    )
+)
+
+if "!INCLUIR_FRONTEND!"=="1" (
+    call :checkNode || set "BUILD_FAILED=1"
+    if "!BUILD_FAILED!"=="0" (
+        echo %CYAN%[BUILD]%RESET% sigre-frontend
+        pushd "!FRONTEND_DIR!"
+        if not exist "node_modules" call npm ci >> "!BUILD_LOG!" 2>&1
+        call npm run build:prod >> "!BUILD_LOG!" 2>&1
+        if errorlevel 1 set "BUILD_FAILED=1"
+        popd
+    )
+)
+
+if "!BUILD_FAILED!"=="1" (
+    echo %RED%[ERROR]%RESET% Fallo compilando uno o mas modulos. Ver: !BUILD_LOG!
+) else (
+    echo %GREEN%[OK]%RESET% Modulos compilados: %*
+)
+goto :endScript
 
 :buildModules
 set "BUILD_LOG=!BUILD_LOG_DIR!\build-modules-!BUILD_LOG_TS!.log"
@@ -322,6 +380,11 @@ echo                         compile ^<modulo^>  un modulo backend
 echo   all                 backend-all + frontend
 echo   clean / test / package
 echo   menu / help
+echo.
+echo   ^<nombre^> [^<nombre2^> ...]  Compilar uno o varios modulos/servicios directamente
+echo                             (mezcla backend + frontend), ej:
+echo                               build.bat asistencia-service
+echo                               build.bat sigre-frontend asistencia-service
 echo.
 goto :endScript
 

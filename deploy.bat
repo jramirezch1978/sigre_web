@@ -95,7 +95,22 @@ for %%a in (%*) do (
     if /i "%%a"=="--registry" set "DEPLOY_DIRECT=0"
 )
 
+REM Si se pasan 2+ nombres de servicio directamente (sin flags), ej:
+REM   deploy.bat sigre-frontend asistencia-service --force
+REM se despliegan TODOS en un solo comando, en vez de solo el primero.
+set "SERVICIOS_MULTI="
+set "SERVICIOS_MULTI_COUNT=0"
+for %%a in (%*) do (
+    set "ARG=%%a"
+    if not "!ARG:~0,2!"=="--" (
+        set "SERVICIOS_MULTI=!SERVICIOS_MULTI! %%a"
+        set /a SERVICIOS_MULTI_COUNT+=1
+    )
+)
+
 call :useRemoteContext >nul 2>&1
+
+if !SERVICIOS_MULTI_COUNT! geq 2 goto :deployMultiple
 
 if "%~1"=="" goto :showMenu
 if /i "%~1"=="menu" goto :showMenu
@@ -529,6 +544,42 @@ call :remoteUp "!SERVICE!" || goto :endScript
 call :cleanupRemoteImages
 goto :endScript
 
+:deployMultiple
+REM Despliega varios servicios pasados directamente como argumentos.
+REM Ej: deploy.bat sigre-frontend asistencia-service --force
+echo %CYAN%[INFO]%RESET% Desplegando servicios: !SERVICIOS_MULTI!
+set "FALLO_MULTI=0"
+for %%s in (!SERVICIOS_MULTI!) do (
+    call :isKnownService "%%s"
+    if errorlevel 1 (
+        echo %RED%[ERROR]%RESET% Servicio desconocido: %%s ^(omitido^)
+        echo   Ejecute: deploy.bat list
+        set "FALLO_MULTI=1"
+    ) else (
+        set "DOCKERFILE_OK=1"
+        if not exist "!BACKEND_DIR!\%%s\Dockerfile" (
+            if /i not "%%s"=="sigre-frontend" set "DOCKERFILE_OK=0"
+        )
+        if "!DOCKERFILE_OK!"=="0" (
+            echo %RED%[ERROR]%RESET% No existe Dockerfile: !BACKEND_DIR!\%%s\Dockerfile ^(omitido^)
+            set "FALLO_MULTI=1"
+        ) else (
+            if "!NO_BUILD!"=="0" (
+                call :buildBackendImage "%%s" || set "FALLO_MULTI=1"
+                call :pushImage "%%s" || set "FALLO_MULTI=1"
+            )
+            call :remoteUp "%%s" || set "FALLO_MULTI=1"
+        )
+    )
+)
+call :cleanupRemoteImages
+if "!FALLO_MULTI!"=="1" (
+    echo %RED%[ERROR]%RESET% Uno o mas servicios fallaron. Revise los mensajes de arriba.
+) else (
+    echo %GREEN%[OK]%RESET% Servicios desplegados en !ENTORNO!: !SERVICIOS_MULTI!
+)
+goto :endScript
+
 :deployBackend
 echo %CYAN%[INFO]%RESET% Desplegando backend...
 for %%s in (%BACKEND_SERVICES%) do (
@@ -655,6 +706,9 @@ echo   flota-service       mantenimiento-service     operaciones-service  presup
 echo   aprovision-service  sig-service       sigre-frontend
 echo.
 echo %YELLOW%En cronos (compose):%RESET% %COMPOSE_APP_SERVICES%
+echo.
+echo %YELLOW%Multiples servicios en un comando:%RESET%
+echo   deploy.bat sigre-frontend asistencia-service --force
 echo.
 echo %YELLOW%Flags:%RESET%
 echo   --force     Sin confirmacion en stack
