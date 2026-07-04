@@ -113,6 +113,24 @@ echo %GREEN%[OK]%RESET% Node:
 node -v
 exit /b 0
 
+REM ============================================================
+REM Sincroniza node_modules con package.json/package-lock.json.
+REM NO usar solo "if not exist node_modules": si alguien agrega una
+REM dependencia nueva (ej. @ionic/angular) y node_modules ya existia
+REM de un build anterior, quedaba desactualizado y el build fallaba
+REM con "Cannot find module" en vez de instalar lo que falta.
+REM Debe invocarse con el directorio actual ya dentro de FRONTEND_DIR.
+REM ============================================================
+:ensureNpmDeps
+if not exist "node_modules" (
+    echo %CYAN%[NPM]%RESET% node_modules no existe, instalando ^(npm ci^)...
+    call npm ci >> "!BUILD_LOG!" 2>&1
+    exit /b !errorlevel!
+)
+echo %CYAN%[NPM]%RESET% Sincronizando dependencias ^(npm install^)...
+call npm install >> "!BUILD_LOG!" 2>&1
+exit /b !errorlevel!
+
 :buildBackendAll
 set "BUILD_LOG=!BUILD_LOG_DIR!\build-backend-all-!BUILD_LOG_TS!.log"
 call :checkJava || goto :endScript
@@ -195,9 +213,11 @@ if "!INCLUIR_FRONTEND!"=="1" (
     if "!BUILD_FAILED!"=="0" (
         echo %CYAN%[BUILD]%RESET% sigre-frontend
         pushd "!FRONTEND_DIR!"
-        if not exist "node_modules" call npm ci >> "!BUILD_LOG!" 2>&1
-        call npm run build:prod >> "!BUILD_LOG!" 2>&1
-        if errorlevel 1 set "BUILD_FAILED=1"
+        call :ensureNpmDeps || set "BUILD_FAILED=1"
+        if "!BUILD_FAILED!"=="0" (
+            call npm run build:prod >> "!BUILD_LOG!" 2>&1
+            if errorlevel 1 set "BUILD_FAILED=1"
+        )
         popd
     )
 )
@@ -239,7 +259,12 @@ set "BUILD_LOG=!BUILD_LOG_DIR!\build-frontend-!BUILD_LOG_TS!.log"
 call :checkNode || goto :endScript
 echo %CYAN%[INFO]%RESET% Compilando frontend Angular...
 pushd "!FRONTEND_DIR!"
-if not exist "node_modules" call npm ci >> "!BUILD_LOG!" 2>&1
+call :ensureNpmDeps
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Fallo instalando dependencias npm. Ver: !BUILD_LOG!
+    popd
+    goto :endScript
+)
 call npm run build:prod >> "!BUILD_LOG!" 2>&1
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Fallo frontend. Ver: !BUILD_LOG!
@@ -284,7 +309,12 @@ call :checkNode || exit /b 1
 echo %CYAN%[INFO]%RESET% Compilando frontend ^(ng build dev^)...
 echo [build] Log: !BUILD_LOG!
 pushd "!FRONTEND_DIR!"
-if not exist "node_modules" call npm ci >> "!BUILD_LOG!" 2>&1
+call :ensureNpmDeps
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Fallo instalando dependencias npm. Ver: !BUILD_LOG!
+    popd
+    exit /b 1
+)
 call npm run build >> "!BUILD_LOG!" 2>&1
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Fallo compilacion frontend. Ver: !BUILD_LOG!
