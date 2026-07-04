@@ -17,6 +17,7 @@ import { PopupRacionesComponent, RacionDisponible } from '../popup-raciones/popu
 import { abrirDialogoMetoxi } from '@sigre-common';
 import { ErrorPopupComponent, ErrorData } from '../error-popup/error-popup.component';
 import { ConfigService } from '../../services/config.service';
+import { IpRoutingService } from '../../services/ip-routing.service';
 import { ClockService } from '../../services/clock.service';
 import { VersionService } from '../../services/version.service';
 import { Observable } from 'rxjs';
@@ -89,8 +90,9 @@ export class AsistenciaComponent implements OnInit {
     private snackBar: MatSnackBar,
     private http: HttpClient,
     private configService: ConfigService,
+    private ipRoutingService: IpRoutingService,
     private dialog: MatDialog,
-    private clockService: ClockService,  // ← Usar servicio centralizado en lugar de TimeService
+    private clockService: ClockService,
     private versionService: VersionService
   ) {}
 
@@ -525,68 +527,20 @@ export class AsistenciaComponent implements OnInit {
   }
   
   /**
-   * Capturar IP del dispositivo marcador (tablet, celular, etc.)
-   * IMPORTANTE: IP del equipo marcador, NO del servidor frontend
+   * IP del equipo marcador. Prioriza la IP que ve el backend en la red local;
+   * WebRTC solo como respaldo. No usa servicios externos (ipify) por CORS.
    */
   async capturarIPDispositivo(): Promise<void> {
-    try {
-      // Método 1: Intentar WebRTC para obtener IP local real
-      const localIP = await this.obtenerIPViaWebRTC();
-      if (localIP && localIP !== '127.0.0.1') {
-        this.deviceIP = localIP;
-        console.log('🌐 IP local del dispositivo via WebRTC:', this.deviceIP);
-        return;
-      }
-    } catch (error) {
-      console.warn('⚠️ WebRTC no disponible:', error);
+    const ip = await this.ipRoutingService.obtenerIpCliente();
+    if (ip) {
+      this.deviceIP = ip;
+      console.log('🌐 IP del dispositivo para marcación:', this.deviceIP);
+      return;
     }
-    
-    try {
-      // Método 2: API externa para IP pública 
-      const response = await this.http.get<any>('https://api.ipify.org?format=json').toPromise();
-      this.deviceIP = response.ip;
-      console.log('🌐 IP pública del dispositivo:', this.deviceIP);
-    } catch (error) {
-      // Método 3: Fallback - usar timestamp único como identificador
-      this.deviceIP = `DEVICE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      console.warn('⚠️ No se pudo obtener IP, usando ID único del dispositivo:', this.deviceIP);
-    }
-  }
-  
-  /**
-   * Obtener IP local usando WebRTC
-   */
-  private obtenerIPViaWebRTC(): Promise<string> {
-    return new Promise((resolve, reject) => {
-      try {
-        const rtc = new RTCPeerConnection({ iceServers: [] });
-        rtc.createDataChannel('');
-        
-        rtc.createOffer().then(offer => rtc.setLocalDescription(offer));
-        
-        rtc.onicecandidate = (ice) => {
-          if (ice && ice.candidate && ice.candidate.candidate) {
-            const candidate = ice.candidate.candidate;
-            const ipMatch = candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
-            if (ipMatch) {
-              rtc.close();
-              resolve(ipMatch[1]);
-            }
-          }
-        };
-        
-        setTimeout(() => {
-          rtc.close();
-          reject('WebRTC timeout');
-        }, 2000);
-        
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-  
 
+    this.deviceIP = '';
+    console.warn('⚠️ No se pudo determinar IP local; el backend registrará la IP de la solicitud HTTP');
+  }
 
   limpiarCamposParaSiguienteTrabajador() {
     // Limpiar campos pero MANTENER el tipo de marcaje

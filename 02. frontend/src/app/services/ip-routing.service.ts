@@ -63,6 +63,30 @@ export class IpRoutingService {
   }
 
   /**
+   * IP con la que el backend identifica al cliente en la red local.
+   * Usa la misma consulta que el enrutamiento automático del menú inicial.
+   */
+  async obtenerIpCliente(): Promise<string | null> {
+    const localIp = await this.capturarIpLocalViaWebRTC();
+
+    try {
+      const apiUrl = this.configService.getApiUrl() + '/api/asistencia/menu/ruta-por-ip';
+      const params = localIp ? { localIp } : undefined;
+      const response = await firstValueFrom(
+        this.http.get<RutaPorIpResponse>(apiUrl, { params })
+      );
+
+      if (response?.ipDetectada) {
+        return response.ipDetectada;
+      }
+      return localIp;
+    } catch (error) {
+      console.warn('⚠️ No se pudo consultar la IP al backend:', error);
+      return localIp;
+    }
+  }
+
+  /**
    * Intenta obtener la IP local del equipo (no la pública) usando WebRTC.
    * Devuelve null si no se logra en el tiempo límite o el navegador lo bloquea.
    */
