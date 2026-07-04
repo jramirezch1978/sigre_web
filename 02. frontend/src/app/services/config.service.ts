@@ -11,6 +11,21 @@ export interface CompanyConfig {
   codOrigen: string;
 }
 
+/**
+ * Perfil de una empresa (assets/empresas/<empresa>.json). Un archivo por
+ * empresa/cliente; agregar una nueva empresa NO requiere tocar código, solo
+ * crear su archivo y apuntar EMPRESA_ACTIVA a su nombre en el docker-compose
+ * del servidor correspondiente.
+ */
+export interface EmpresaPerfil extends CompanyConfig {
+  apiBaseUrl: string;
+}
+
+/** Apuntador assets/empresa-activa.json: qué perfil de empresa cargar. */
+export interface EmpresaActivaPointer {
+  empresa: string;
+}
+
 export interface ApiConfig {
   baseUrl: string;
   endpoints: {
@@ -72,6 +87,16 @@ export class ConfigService {
   private isLoading = false;
   private loadPromise: Promise<AppSettings> | null = null;
 
+  /** Perfil de respaldo si no se puede leer el archivo de la empresa activa (nunca debe dejar la app sin marca). */
+  private static readonly EMPRESA_POR_DEFECTO: EmpresaPerfil = {
+    name: 'SIGRE',
+    logoPath: 'assets/imagenes/auth/logo-sigre.png',
+    sector: 'Gestión Empresarial',
+    sucursal: '',
+    codOrigen: 'SE',
+    apiBaseUrl: 'http://10.100.14.102:9080'
+  };
+
   constructor(private http: HttpClient) {
     this.loadConfig();
   }
@@ -83,18 +108,60 @@ export class ConfigService {
 
     this.isLoading = true;
     this.loadPromise = firstValueFrom(
-      this.http.get<{appSettings: AppSettings}>('assets/appsettings.json')
-    ).then(response => {
-      console.log('Configuración cargada:', response.appSettings);
-      this.configSubject.next(response.appSettings);
+      this.http.get<{ appSettings: AppSettings }>('assets/appsettings.json')
+    ).then(async response => {
+      const appSettings = response.appSettings;
+      const empresa = await this.cargarPerfilEmpresaActiva();
+
+      appSettings.company = {
+        name: empresa.name,
+        logoPath: empresa.logoPath,
+        sector: empresa.sector,
+        sucursal: empresa.sucursal,
+        codOrigen: empresa.codOrigen
+      };
+      appSettings.api.baseUrl = empresa.apiBaseUrl;
+
+      console.log('Configuración cargada:', appSettings);
+      this.configSubject.next(appSettings);
       this.isLoading = false;
-      return response.appSettings;
+      return appSettings;
     }).catch(error => {
       console.error('ERROR CRÍTICO: No se pudo cargar el archivo appsettings.json', error);
       this.isLoading = false;
       this.loadPromise = null;
       throw new Error('Configuración requerida no encontrada: appsettings.json');
     });
+  }
+
+  /**
+   * Lee assets/empresa-activa.json (apuntador, sobrescrito por
+   * docker-entrypoint.sh segun EMPRESA_ACTIVA) y luego carga
+   * assets/empresas/<empresa>.json con los datos exclusivos de esa empresa.
+   * Ante cualquier fallo, devuelve un perfil de respaldo para no romper el arranque.
+   */
+  private async cargarPerfilEmpresaActiva(): Promise<EmpresaPerfil> {
+    let empresa = 'transmarina';
+    try {
+      const pointer = await firstValueFrom(
+        this.http.get<EmpresaActivaPointer>('assets/empresa-activa.json')
+      );
+      if (pointer?.empresa) {
+        empresa = pointer.empresa;
+      }
+    } catch (error) {
+      console.warn('No se pudo leer assets/empresa-activa.json, usando empresa por defecto:', empresa, error);
+    }
+
+    try {
+      const perfil = await firstValueFrom(
+        this.http.get<EmpresaPerfil>(`assets/empresas/${empresa}.json`)
+      );
+      return perfil;
+    } catch (error) {
+      console.error(`No se pudo cargar assets/empresas/${empresa}.json, usando perfil por defecto:`, error);
+      return ConfigService.EMPRESA_POR_DEFECTO;
+    }
   }
 
   async waitForConfig(): Promise<AppSettings> {

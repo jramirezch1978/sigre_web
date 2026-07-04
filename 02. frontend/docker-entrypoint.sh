@@ -1,37 +1,26 @@
 #!/bin/sh
-# Ajusta appsettings.json con la configuración del entorno en tiempo de
-# arranque del contenedor (NO en tiempo de build), para que la misma imagen
-# sirva sin cambios en cualquier servidor (esta VM, cronos, etc.) según las
-# variables de entorno definidas en el docker-compose de cada entorno.
+# Selecciona el perfil de empresa activo en tiempo de arranque del contenedor
+# (NO en tiempo de build), para que la misma imagen sirva sin cambios en
+# cualquier servidor (esta VM, cronos, futuros clientes, etc.).
+#
+# El frontend (ConfigService) lee assets/empresa-activa.json para saber que
+# archivo cargar desde assets/empresas/<empresa>.json (nombre, logo, sector,
+# sucursal, URL del API). Agregar una empresa nueva NO requiere tocar este
+# script ni el codigo: solo crear su archivo en assets/empresas/ y apuntar
+# EMPRESA_ACTIVA a ese nombre en el docker-compose del servidor.
 set -e
 
-APPSETTINGS="/usr/share/nginx/html/assets/appsettings.json"
+EMPRESA_ACTIVA_FILE="/usr/share/nginx/html/assets/empresa-activa.json"
 
-if [ -f "$APPSETTINGS" ]; then
-  # Usamos "variable definida" (aunque sea vacía) en vez de "variable no vacía",
-  # para poder forzar valores vacíos (ej. sucursal="") en entornos multi-tenant
-  # sin heredar el valor por defecto que trae el archivo.
-  if [ "${API_GATEWAY_URL+isset}" = "isset" ]; then
-    echo "[entrypoint] api.baseUrl -> $API_GATEWAY_URL"
-    sed -i "s#\"baseUrl\"[[:space:]]*:[[:space:]]*\"[^\"]*\"#\"baseUrl\": \"$API_GATEWAY_URL\"#" "$APPSETTINGS"
-  fi
-
-  if [ "${COMPANY_NAME+isset}" = "isset" ]; then
-    echo "[entrypoint] company.name -> $COMPANY_NAME"
-    sed -i "s#\"name\"[[:space:]]*:[[:space:]]*\"[^\"]*\"#\"name\": \"$COMPANY_NAME\"#" "$APPSETTINGS"
-  fi
-
-  if [ "${COMPANY_SUCURSAL+isset}" = "isset" ]; then
-    echo "[entrypoint] company.sucursal -> $COMPANY_SUCURSAL"
-    sed -i "s#\"sucursal\"[[:space:]]*:[[:space:]]*\"[^\"]*\"#\"sucursal\": \"$COMPANY_SUCURSAL\"#" "$APPSETTINGS"
-  fi
-
-  if [ "${COMPANY_LOGO_PATH+isset}" = "isset" ]; then
-    echo "[entrypoint] company.logoPath -> $COMPANY_LOGO_PATH"
-    sed -i "s#\"logoPath\"[[:space:]]*:[[:space:]]*\"[^\"]*\"#\"logoPath\": \"$COMPANY_LOGO_PATH\"#" "$APPSETTINGS"
+if [ -n "$EMPRESA_ACTIVA" ]; then
+  if [ -f "/usr/share/nginx/html/assets/empresas/${EMPRESA_ACTIVA}.json" ]; then
+    echo "[entrypoint] empresa activa -> $EMPRESA_ACTIVA"
+    printf '{ "empresa": "%s" }\n' "$EMPRESA_ACTIVA" > "$EMPRESA_ACTIVA_FILE"
+  else
+    echo "[entrypoint] ADVERTENCIA: no existe assets/empresas/${EMPRESA_ACTIVA}.json, se mantiene $(cat "$EMPRESA_ACTIVA_FILE" 2>/dev/null || echo 'sin apuntador')"
   fi
 else
-  echo "[entrypoint] ADVERTENCIA: no se encontró $APPSETTINGS, se omite la configuración por entorno"
+  echo "[entrypoint] EMPRESA_ACTIVA no definida, se usa el valor por defecto de empresa-activa.json"
 fi
 
 exec "$@"
