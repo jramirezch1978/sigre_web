@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { RouterStateSnapshot, TitleStrategy } from '@angular/router';
 import { PageTitleService } from './page-title.service';
-import { PageTitleService } from './page-title.service';
 
 /**
  * Construye el titulo de la pestana del navegador como
