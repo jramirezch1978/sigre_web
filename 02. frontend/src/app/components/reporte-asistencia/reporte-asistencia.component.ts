@@ -162,6 +162,29 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
     'porcAsistencia', 'porcAusentismo'
   ];
 
+  readonly columnasTabla: { key: string; titulo: string[] }[] = [
+    { key: 'nro', titulo: ['N°'] },
+    { key: 'tipoTrabajador', titulo: ['Tipo de', 'Trabajador'] },
+    { key: 'codigoTrabajador', titulo: ['Código', 'Trabajador'] },
+    { key: 'dni', titulo: ['DNI'] },
+    { key: 'apellidosNombres', titulo: ['Apellidos y', 'Nombres'] },
+    { key: 'area', titulo: ['Área'] },
+    { key: 'cargoPuesto', titulo: ['Cargo /', 'Puesto'] },
+    { key: 'turno', titulo: ['Turno'] },
+    { key: 'fecha', titulo: ['Fecha'] },
+    { key: 'horaIngreso', titulo: ['Hora de', 'Ingreso'] },
+    { key: 'horaSalida', titulo: ['Hora de', 'Salida'] },
+    { key: 'horasTrabajadas', titulo: ['Horas', 'Trabajadas'] },
+    { key: 'horasExtras', titulo: ['Horas', 'Extras'] },
+    { key: 'tardanzaMin', titulo: ['Tardanza', '(min)'] },
+    { key: 'totalHorasTrabajadasSemana', titulo: ['Total Horas', 'Trabajadas', '(Semana)'] },
+    { key: 'totalHorasExtrasSemana', titulo: ['Total Horas', 'Extras', '(Semana)'] },
+    { key: 'totalDiasAsistidos', titulo: ['Total Días', 'Asistidos'] },
+    { key: 'totalFaltas', titulo: ['Total', 'Faltas'] },
+    { key: 'porcAsistencia', titulo: ['%', 'Asistencia'] },
+    { key: 'porcAusentismo', titulo: ['%', 'Ausentismo'] }
+  ];
+
   constructor(
     private dashboardService: DashboardService,
     private router: Router,
@@ -278,20 +301,52 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
       this.ordenAscendente = true;
     }
 
-    this.registrosFiltrados.sort((a: any, b: any) => {
-      const valorA = a[columna];
-      const valorB = b[columna];
-      
-      let comparacion = 0;
-      if (valorA == null) comparacion = -1;
-      else if (valorB == null) comparacion = 1;
-      else if (valorA < valorB) comparacion = -1;
-      else if (valorA > valorB) comparacion = 1;
-      
+    this.registrosFiltrados.sort((a: ReporteAsistencia, b: ReporteAsistencia) => {
+      const comparacion = this.compararValoresOrden(
+        (a as unknown as Record<string, unknown>)[columna],
+        (b as unknown as Record<string, unknown>)[columna]
+      );
       return this.ordenAscendente ? comparacion : -comparacion;
     });
 
     console.log('📊 Ordenado por:', columna, this.ordenAscendente ? 'ASC' : 'DESC');
+  }
+
+  iconoOrden(columna: string): string {
+    if (this.columnaOrdenada !== columna) {
+      return 'swap_vert';
+    }
+    return this.ordenAscendente ? 'arrow_upward' : 'arrow_downward';
+  }
+
+  private compararValoresOrden(valorA: unknown, valorB: unknown): number {
+    if (valorA == null && valorB == null) {
+      return 0;
+    }
+    if (valorA == null) {
+      return -1;
+    }
+    if (valorB == null) {
+      return 1;
+    }
+
+    const numeroA = this.aNumeroOrden(valorA);
+    const numeroB = this.aNumeroOrden(valorB);
+    if (numeroA !== null && numeroB !== null) {
+      return numeroA - numeroB;
+    }
+
+    return String(valorA).localeCompare(String(valorB), 'es', { numeric: true, sensitivity: 'base' });
+  }
+
+  private aNumeroOrden(valor: unknown): number | null {
+    if (typeof valor === 'number' && !Number.isNaN(valor)) {
+      return valor;
+    }
+    if (typeof valor === 'string' && valor.trim() !== '' && !Number.isNaN(Number(valor))) {
+      return Number(valor);
+    }
+    return null;
   }
 
   abrirModalExport(): void {
