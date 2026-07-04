@@ -77,8 +77,9 @@ export class AsistenciaComponent implements OnInit {
   ultimoMovimiento: number = 0;
   requiereAutoCierre: boolean = false;
   
-  // IP del dispositivo
-  private deviceIP: string = '';
+  // IP privada del dispositivo (visible en pantalla para verificación)
+  deviceIP: string = '';
+  capturandoIpDispositivo = true;
 
   // Propiedades observables para versión
   appVersion$!: Observable<string>;
@@ -531,15 +532,20 @@ export class AsistenciaComponent implements OnInit {
    * No se obtiene del backend: el servidor no conoce la IP local del dispositivo.
    */
   async capturarIPDispositivo(): Promise<void> {
-    const ip = await this.ipRoutingService.obtenerIpCliente();
-    if (ip) {
-      this.deviceIP = ip;
-      console.log('🌐 IP del dispositivo para marcación:', this.deviceIP);
-      return;
-    }
+    this.capturandoIpDispositivo = true;
+    try {
+      const ip = await this.ipRoutingService.obtenerIpCliente();
+      if (ip) {
+        this.deviceIP = ip;
+        console.log('🌐 IP del dispositivo para marcación:', this.deviceIP);
+        return;
+      }
 
-    this.deviceIP = '';
-    console.warn('⚠️ No se pudo capturar la IP privada del dispositivo en el navegador');
+      this.deviceIP = '';
+      console.warn('⚠️ No se pudo capturar la IP privada del dispositivo en el navegador');
+    } finally {
+      this.capturandoIpDispositivo = false;
+    }
   }
 
   limpiarCamposParaSiguienteTrabajador() {
