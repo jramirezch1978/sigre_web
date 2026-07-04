@@ -542,7 +542,13 @@ services:
       - "8080:80"
     environment:
       TZ: America/Lima
+      # Sobrescriben appsettings.json al arrancar el contenedor (docker-entrypoint.sh).
+      # Mantener SIEMPRE los 4 valores en sync con root docker-compose.yml (otra VM)
+      # para que ningun servidor herede por accidente el branding/URL del otro.
       API_GATEWAY_URL: http://crisaor.serveftp.com:9080
+      COMPANY_NAME: SIGRE
+      COMPANY_SUCURSAL: ""
+      COMPANY_LOGO_PATH: assets/imagenes/auth/logo-sigre.png
     mem_limit: 96m
     networks:
       - stack_default
