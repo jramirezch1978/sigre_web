@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ClockComponent } from './components/clock/clock.component';
 import { AdminUiModule } from './ui/admin-ui.module';
 import { ConfigService } from './services/config.service';
+import { PageTitleService } from './services/page-title.service';
 import { filter, Subscription } from 'rxjs';
 
 @Component({
@@ -36,6 +37,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(
     private configService: ConfigService,
+    private pageTitleService: PageTitleService,
     private router: Router,
   ) {}
 
@@ -43,7 +45,13 @@ export class AppComponent implements OnInit, OnDestroy {
     this.updatePublicScrollClass(this.router.url);
     this.routerSub = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(event => this.updatePublicScrollClass((event as NavigationEnd).urlAfterRedirects));
+      .subscribe(event => {
+        this.updatePublicScrollClass((event as NavigationEnd).urlAfterRedirects);
+        this.pageTitleService.actualizarDesdeRouter();
+      });
+
+    // Refuerzo en carga inicial: TitleStrategy no siempre dispara a tiempo con Ionic.
+    setTimeout(() => this.pageTitleService.actualizarDesdeRouter(), 0);
 
     // Cargar configuración desde appsettings.json
     setTimeout(() => {
@@ -51,6 +59,7 @@ export class AppComponent implements OnInit, OnDestroy {
       this.companyLogo = this.configService.getCompanyLogo();
       this.companySector = this.configService.getCompanySector();
       this.companySucursal = this.configService.getCompanySucursal();
+      this.pageTitleService.actualizarDesdeRouter();
     }, 100);
   }
 

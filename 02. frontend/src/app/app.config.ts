@@ -26,8 +26,8 @@ export function initializeApp(configService: ConfigService): () => Promise<unkno
 export const appConfig: ApplicationConfig = {
   providers: [
     { provide: ErrorHandler, useClass: ChunkLoadErrorHandler },
-    provideRouter(routes),
     { provide: TitleStrategy, useClass: SigrePageTitleStrategy },
+    provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(IonicModule.forRoot()),
