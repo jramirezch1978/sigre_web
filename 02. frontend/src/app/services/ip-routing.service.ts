@@ -37,29 +37,47 @@ export class IpRoutingService {
   ) {}
 
   async resolverRutaAutomatica(): Promise<RutaMarcajePorIp | null> {
-    const localIp = await this.capturarIpLocalViaWebRTC();
-
     try {
       const apiUrl = this.configService.getApiUrl() + '/api/asistencia/menu/ruta-por-ip';
-      const params = localIp ? { localIp } : undefined;
+      const localIpPromise = this.capturarIpLocalViaWebRTC();
 
-      const response = await firstValueFrom(
-        this.http.get<RutaPorIpResponse>(apiUrl, { params })
+      // Primera consulta inmediata: usa la IP HTTP del equipo (nginx reenvía X-Real-IP).
+      const responseHttp = await firstValueFrom(
+        this.http.get<RutaPorIpResponse>(apiUrl)
       );
+      console.log('🧭 Resolución de ruta automática por IP (HTTP):', responseHttp);
 
-      console.log('🧭 Resolución de ruta automática por IP:', response);
-
-      if (response?.tipoMarcaje) {
-        return {
-          tipoMarcaje: response.tipoMarcaje,
-          modoMarcaje: response.modoMarcaje ?? undefined
-        };
+      const rutaHttp = this.mapearRuta(responseHttp);
+      if (rutaHttp) {
+        return rutaHttp;
       }
-      return null;
+
+      // Respaldo: IP local del kiosco vía WebRTC (192.168.30.x en planta).
+      const localIp = await localIpPromise;
+      if (!localIp) {
+        return null;
+      }
+
+      const responseLocal = await firstValueFrom(
+        this.http.get<RutaPorIpResponse>(apiUrl, { params: { localIp } })
+      );
+      console.log('🧭 Resolución de ruta automática por IP (WebRTC):', responseLocal);
+
+      return this.mapearRuta(responseLocal);
     } catch (error) {
       console.warn('⚠️ No se pudo resolver la ruta automática por IP, se mostrará el menú por defecto:', error);
       return null;
     }
+  }
+
+  private mapearRuta(response: RutaPorIpResponse | null | undefined): RutaMarcajePorIp | null {
+    if (!response?.tipoMarcaje) {
+      return null;
+    }
+    return {
+      tipoMarcaje: response.tipoMarcaje,
+      modoMarcaje: response.modoMarcaje ?? undefined
+    };
   }
 
   /**

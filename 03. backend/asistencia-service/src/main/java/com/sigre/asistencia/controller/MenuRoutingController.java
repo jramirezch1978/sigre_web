@@ -41,34 +41,51 @@ public class MenuRoutingController {
             HttpServletRequest httpRequest) {
 
         String ipSolicitud = IpUtils.obtenerIpReal(httpRequest);
+        String ipLocal = localIp != null ? localIp.trim() : null;
 
-        RutaPorIpResponse ruta = resolverRuta(ipSolicitud);
-        if (ruta == null && localIp != null && !localIp.isBlank()) {
-            ruta = resolverRuta(localIp.trim());
+        // Priorizar la IP local del navegador (WebRTC): en kioscos suele ser la IP fija
+        // del equipo (192.168.30.x), aunque el proxy HTTP vea otra IP intermedia.
+        RutaPorIpResponse ruta = null;
+        String ipCoincidente = null;
+
+        if (ipLocal != null && !ipLocal.isBlank()) {
+            ruta = resolverRuta(ipLocal);
+            if (ruta != null) {
+                ipCoincidente = ipLocal;
+            }
+        }
+        if (ruta == null) {
+            ruta = resolverRuta(ipSolicitud);
+            if (ruta != null) {
+                ipCoincidente = ipSolicitud;
+            }
         }
 
         if (ruta == null) {
-            log.info("🧭 Sin ruta automática configurada para IP '{}' (localIp frontend: '{}') - se mostrará el menú por defecto",
-                    ipSolicitud, localIp);
+            log.info(
+                    "🧭 Sin ruta automática para IP HTTP='{}', localIp='{}' (garita={}, produccion={}) - menú manual",
+                    ipSolicitud, ipLocal,
+                    ipRoutingProperties.getPuertaPrincipalSimplificado(),
+                    ipRoutingProperties.getAreaProduccion());
             return ResponseEntity.ok(RutaPorIpResponse.builder().ipDetectada(ipSolicitud).build());
         }
 
-        log.info("🧭 Ruta automática resuelta para IP '{}' -> tipoMarcaje={}, modoMarcaje={}",
-                ipSolicitud, ruta.getTipoMarcaje(), ruta.getModoMarcaje());
-        return ResponseEntity.ok(ruta.toBuilder().ipDetectada(ipSolicitud).build());
+        log.info("🧭 Ruta automática resuelta: IP coincidente='{}' (HTTP='{}', localIp='{}') -> tipoMarcaje={}, modoMarcaje={}",
+                ipCoincidente, ipSolicitud, ipLocal, ruta.getTipoMarcaje(), ruta.getModoMarcaje());
+        return ResponseEntity.ok(ruta.toBuilder().ipDetectada(ipCoincidente).build());
     }
 
     private RutaPorIpResponse resolverRuta(String ip) {
         if (ip == null || ip.isBlank()) {
             return null;
         }
-        if (ipRoutingProperties.getPuertaPrincipalSimplificado().contains(ip)) {
+        if (ipRoutingProperties.esGarita(ip)) {
             return RutaPorIpResponse.builder()
                     .tipoMarcaje("puerta-principal")
                     .modoMarcaje("simplificado")
                     .build();
         }
-        if (ipRoutingProperties.getAreaProduccion().contains(ip)) {
+        if (ipRoutingProperties.esProduccion(ip)) {
             return RutaPorIpResponse.builder()
                     .tipoMarcaje("area-produccion")
                     .build();
