@@ -50,17 +50,27 @@ export class AppComponent implements OnInit, OnDestroy {
         this.pageTitleService.actualizarDesdeRouter();
       });
 
-    // Refuerzo en carga inicial: TitleStrategy no siempre dispara a tiempo con Ionic.
-    setTimeout(() => this.pageTitleService.actualizarDesdeRouter(), 0);
+    // Refuerzo en carga inicial cuando el router ya esta listo.
+    setTimeout(() => {
+      try {
+        this.pageTitleService.actualizarDesdeRouter();
+      } catch {
+        // Evitar ruido en consola si el router aun no esta inicializado.
+      }
+    }, 0);
 
     // Cargar configuración desde appsettings.json
-    setTimeout(() => {
+    void this.configService.waitForConfig().then(() => {
       this.companyName = this.configService.getCompanyName();
       this.companyLogo = this.configService.getCompanyLogo();
       this.companySector = this.configService.getCompanySector();
       this.companySucursal = this.configService.getCompanySucursal();
-      this.pageTitleService.actualizarDesdeRouter();
-    }, 100);
+      try {
+        this.pageTitleService.actualizarDesdeRouter();
+      } catch {
+        // Sin accion: el TitleStrategy ya aplicara el titulo cuando corresponda.
+      }
+    });
   }
 
   ngOnDestroy(): void {
