@@ -1,5 +1,5 @@
 import { ApplicationConfig, importProvidersFrom, APP_INITIALIZER, LOCALE_ID, ErrorHandler } from '@angular/core';
-import { provideRouter, RouteReuseStrategy } from '@angular/router';
+import { provideRouter, RouteReuseStrategy, TitleStrategy } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
@@ -9,6 +9,7 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 import { routes } from './app.routes';
 import { ConfigService } from './services/config.service';
+import { SigrePageTitleStrategy } from './services/sigre-page-title.strategy';
 import { AuthInterceptor } from './auth/interceptors/auth.interceptor';
 import { ApiErrorInterceptor } from './core/interceptors/api-error.interceptor';
 import { ChunkLoadErrorHandler } from './core/handlers/chunk-load-error.handler';
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     { provide: ErrorHandler, useClass: ChunkLoadErrorHandler },
     provideRouter(routes),
+    { provide: TitleStrategy, useClass: SigrePageTitleStrategy },
     provideAnimationsAsync(),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(IonicModule.forRoot()),
