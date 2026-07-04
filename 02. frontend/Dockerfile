@@ -30,8 +30,16 @@ COPY --from=builder /app/dist/sigre-asistencia /usr/share/nginx/html
 # Copiar configuración de nginx
 COPY nginx.conf /etc/nginx/nginx.conf
 
+# Script que ajusta appsettings.json según las variables de entorno del
+# contenedor (API_GATEWAY_URL, COMPANY_NAME, COMPANY_SUCURSAL) al arrancar,
+# para que la misma imagen sirva en cualquier servidor sin recompilar.
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Exponer puerto
 EXPOSE 80
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
 
 # Comando por defecto
 CMD ["nginx", "-g", "daemon off;"]

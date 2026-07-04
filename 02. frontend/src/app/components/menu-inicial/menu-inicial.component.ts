@@ -4,9 +4,11 @@ import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ClockComponent } from '../clock/clock.component';
 import { ConfigService } from '../../services/config.service';
 import { VersionService } from '../../services/version.service';
+import { IpRoutingService } from '../../services/ip-routing.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -17,6 +19,7 @@ import { Observable } from 'rxjs';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     ClockComponent
   ],
   templateUrl: './menu-inicial.component.html',
@@ -28,13 +31,18 @@ export class MenuInicialComponent implements OnInit {
   companySucursal = '';
   mostrarPopupModo = false;
 
+  // Mientras se evalúa la IP del equipo para decidir si se abre una pantalla
+  // de marcaje automáticamente, se oculta el menú para evitar el parpadeo.
+  resolviendoRutaAutomatica = true;
+
   appVersion$!: Observable<string>;
   buildTimestamp$!: Observable<string>;
 
   constructor(
     private router: Router,
     private configService: ConfigService,
-    private versionService: VersionService
+    private versionService: VersionService,
+    private ipRoutingService: IpRoutingService
   ) {}
 
   async ngOnInit() {
@@ -49,6 +57,32 @@ export class MenuInicialComponent implements OnInit {
 
     this.appVersion$ = this.versionService.getAppVersion();
     this.buildTimestamp$ = this.versionService.getBuildTimestamp();
+
+    await this.intentarRedireccionAutomaticaPorIp();
+  }
+
+  /**
+   * Consulta al backend si la IP del equipo tiene asignada una pantalla de
+   * marcaje por defecto (garita -> simplificado, producción -> área de
+   * producción). Si no hay coincidencia o falla la consulta, se muestra el
+   * menú manual de siempre (comportamiento sin cambios).
+   */
+  private async intentarRedireccionAutomaticaPorIp(): Promise<void> {
+    try {
+      const ruta = await this.ipRoutingService.resolverRutaAutomatica();
+      if (ruta) {
+        const queryParams: Record<string, string> = { tipoMarcaje: ruta.tipoMarcaje };
+        if (ruta.modoMarcaje) {
+          queryParams['modoMarcaje'] = ruta.modoMarcaje;
+        }
+        console.log('🧭 IP reconocida - redirigiendo automáticamente a:', queryParams);
+        await this.router.navigate(['/asistencia'], { queryParams, replaceUrl: true });
+        return;
+      }
+    } catch (error) {
+      console.warn('⚠️ Error resolviendo ruta automática por IP, se muestra el menú por defecto:', error);
+    }
+    this.resolviendoRutaAutomatica = false;
   }
 
   seleccionarTipoMarcaje(tipo: string) {
