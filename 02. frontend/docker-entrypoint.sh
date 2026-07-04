@@ -22,6 +22,11 @@ if [ -f "$APPSETTINGS" ]; then
     echo "[entrypoint] company.sucursal -> $COMPANY_SUCURSAL"
     sed -i "s#\"sucursal\"[[:space:]]*:[[:space:]]*\"[^\"]*\"#\"sucursal\": \"$COMPANY_SUCURSAL\"#" "$APPSETTINGS"
   fi
+
+  if [ -n "$COMPANY_LOGO_PATH" ]; then
+    echo "[entrypoint] company.logoPath -> $COMPANY_LOGO_PATH"
+    sed -i "s#\"logoPath\"[[:space:]]*:[[:space:]]*\"[^\"]*\"#\"logoPath\": \"$COMPANY_LOGO_PATH\"#" "$APPSETTINGS"
+  fi
 else
   echo "[entrypoint] ADVERTENCIA: no se encontró $APPSETTINGS, se omite la configuración por entorno"
 fi
