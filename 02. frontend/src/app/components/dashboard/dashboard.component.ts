@@ -17,6 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule, MAT_DATE_LOCALE, MAT_DATE_FORMATS, NativeDateAdapter, DateAdapter } from '@angular/material/core';
 import { HttpClientModule } from '@angular/common/http';
+import { Title } from '@angular/platform-browser';
 import { Subscription, interval } from 'rxjs';
 
 import { 
@@ -30,6 +31,7 @@ import {
 import { FloatingClockComponent } from '../floating-clock/floating-clock.component';
 import { MainLayoutComponent } from '../main-layout/main-layout.component';
 import { NotImplementedService } from '../../services/not-implemented.service';
+import { ConfigService } from '../../services/config.service';
 
 declare var Chart: any; // Para Chart.js
 
@@ -146,12 +148,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private dashboardService: DashboardService,
     private router: Router,
     private snackBar: MatSnackBar,
-    private notImplementedService: NotImplementedService
+    private notImplementedService: NotImplementedService,
+    private titleService: Title,
+    private configService: ConfigService
   ) {}
 
   async ngOnInit() {
     console.log('🚀 Iniciando Dashboard Component');
-    
+
+    this.actualizarTituloPagina();
+
     try {
       // Cargar Chart.js dinámicamente
       console.log('📈 Cargando Chart.js...');
@@ -200,6 +206,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
         chart.destroy();
       }
     });
+  }
+
+  /**
+   * Titulo de la pestaña del navegador: "Dashboard de Asistencia - <Empresa>".
+   * El nombre de empresa viene del perfil activo (assets/empresas/<empresa>.json).
+   */
+  private async actualizarTituloPagina() {
+    try {
+      await this.configService.waitForConfig();
+      const nombreEmpresa = this.configService.getCompanyName();
+      this.titleService.setTitle(`Dashboard de Asistencia - ${nombreEmpresa}`);
+    } catch (error) {
+      console.warn('No se pudo obtener el nombre de la empresa para el titulo, usando valor por defecto:', error);
+      this.titleService.setTitle('Dashboard de Asistencia');
+    }
   }
 
   async cargarDashboard(fecha?: Date) {
