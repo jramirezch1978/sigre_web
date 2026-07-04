@@ -19,8 +19,13 @@ import { MatDividerModule } from '@angular/material/divider';
 import { HttpClientModule } from '@angular/common/http';
 import { DashboardService, Origen } from '../../services/dashboard.service';
 import { MainLayoutComponent } from '../main-layout/main-layout.component';
+import { AsistenciaExportModalComponent, AsistenciaExportFormato } from '../asistencia-export-modal/asistencia-export-modal.component';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import {
+  generarDocumentoWordDesdeTabla,
+  generarNombreArchivoReporte
+} from '../../shared/utils/asistencia-reporte-export.util';
 
 export class CustomDateAdapter extends NativeDateAdapter {
   override parse(value: any): Date | null {
@@ -78,7 +83,8 @@ export interface ReporteProduccion {
     MatProgressSpinnerModule, MatSnackBarModule, MatToolbarModule,
     MatDatepickerModule, MatFormFieldModule, MatInputModule,
     MatSelectModule, MatNativeDateModule, MatMenuModule, MatDividerModule,
-    MainLayoutComponent
+    MainLayoutComponent,
+    AsistenciaExportModalComponent
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es-PE' },
@@ -107,6 +113,14 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
 
   cargando: boolean = false;
   error: string | null = null;
+  mostrarModalExport = false;
+  exportando = false;
+
+  private readonly encabezadosExportacion = [
+    'N°', 'Código', 'DNI', 'Apellidos', 'Nombres', 'Tipo Trabajador',
+    'Fecha', 'Ingreso Planta', 'Ingreso Producción', 'Cambio Ropa (min)',
+    'Salida Producción', 'Salida Planta', 'Hrs Efect. Producción', 'Hrs Total Planta', 'Hrs Muertas'
+  ];
 
   constructor(
     private dashboardService: DashboardService,
@@ -217,98 +231,172 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
     });
   }
 
-  async exportarExcel(): Promise<void> {
-    const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet('Reporte Producción');
+  abrirModalExport(): void {
+    if (this.registros.length === 0) {
+      this.mostrarMensaje('No hay datos para exportar', 'info');
+      return;
+    }
+    this.mostrarModalExport = true;
+  }
 
-    const headers = ['N°', 'Código', 'DNI', 'Apellidos', 'Nombres', 'Tipo Trabajador',
-      'Fecha', 'Ingreso Planta', 'Ingreso Producción', 'Cambio Ropa (min)',
-      'Salida Producción', 'Salida Planta', 'Hrs Efect. Producción', 'Hrs Total Planta', 'Hrs Muertas'];
+  cerrarModalExport(): void {
+    this.mostrarModalExport = false;
+  }
 
-    const headerRow = ws.addRow(headers);
-    headerRow.eachCell(cell => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
-      cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
-      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-      cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
-    });
-    headerRow.height = 30;
+  onExportarSeleccion(formato: AsistenciaExportFormato): void {
+    switch (formato) {
+      case 'excel':
+        void this.exportarExcel();
+        break;
+      case 'word':
+        this.exportarWord();
+        break;
+      case 'pdf':
+        this.exportarPDF();
+        break;
+    }
+  }
 
-    const thinBorder: Partial<ExcelJS.Borders> = {
-      top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }
-    };
+  private formatTime(val: string | null | undefined): string {
+    if (!val) {
+      return '';
+    }
+    try {
+      return new Date(val).toLocaleTimeString('es-PE');
+    } catch {
+      return '';
+    }
+  }
 
-    const formatTime = (val: any): string => {
-      if (!val) return '';
-      try { return new Date(val).toLocaleTimeString('es-PE'); } catch { return ''; }
-    };
-
-    this.registrosFiltrados.forEach((reg, idx) => {
-      const salidaProd = reg.horaSalidaProduccion ? formatTime(reg.horaSalidaProduccion) : 'Pendiente';
-      const salidaPlanta = reg.horaSalidaPlanta ? formatTime(reg.horaSalidaPlanta) : 'Pendiente';
-
-      const row = ws.addRow([
+  private obtenerFilasExportacion(): (string | number)[][] {
+    return this.registrosFiltrados.map(reg => {
+      const salidaProd = reg.horaSalidaProduccion ? this.formatTime(reg.horaSalidaProduccion) : 'Pendiente';
+      const salidaPlanta = reg.horaSalidaPlanta ? this.formatTime(reg.horaSalidaPlanta) : 'Pendiente';
+      return [
         reg.nro, reg.codigoTrabajador, reg.dni, reg.apellidos, reg.nombres, reg.tipoTrabajador,
         reg.fecha ? reg.fecha.toString().substring(0, 10).split('-').reverse().join('/') : '',
-        formatTime(reg.horaIngresoPlanta), formatTime(reg.horaIngresoProduccion),
-        reg.minutosCambioRopa != null ? Number(reg.minutosCambioRopa.toFixed(2)) : '', salidaProd, salidaPlanta,
+        this.formatTime(reg.horaIngresoPlanta), this.formatTime(reg.horaIngresoProduccion),
+        reg.minutosCambioRopa != null ? Number(reg.minutosCambioRopa.toFixed(2)) : '',
+        salidaProd, salidaPlanta,
         reg.horasEfectivasProduccion != null ? Number(reg.horasEfectivasProduccion.toFixed(2)) : '-',
         reg.horasTotalPlanta != null ? Number(reg.horasTotalPlanta.toFixed(2)) : '-',
         reg.horasMuertas != null ? Number(reg.horasMuertas.toFixed(2)) : '-'
-      ]);
+      ];
+    });
+  }
 
-      const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
-      row.eachCell((cell, colNumber) => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-        cell.border = thinBorder;
-        cell.alignment = { vertical: 'middle' };
+  private subtituloExportacion(): string {
+    return `Origen: ${this.codOrigen} | Periodo: ${this.formatearFechaParaApi(this.fechaInicio)} al ${this.formatearFechaParaApi(this.fechaFin)}`;
+  }
 
-        if ([2, 3, 7, 8, 9, 11, 12].includes(colNumber)) {
-          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  async exportarExcel(): Promise<void> {
+    if (this.exportando) {
+      return;
+    }
+
+    this.exportando = true;
+    try {
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet('Reporte Producción');
+
+      const headerRow = ws.addRow(this.encabezadosExportacion);
+      headerRow.eachCell(cell => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF16A34A' } };
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+      });
+      headerRow.height = 30;
+
+      const thinBorder: Partial<ExcelJS.Borders> = {
+        top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }
+      };
+
+      this.obtenerFilasExportacion().forEach((fila, idx) => {
+        const row = ws.addRow(fila);
+        const reg = this.registrosFiltrados[idx];
+        const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
+
+        row.eachCell((cell, colNumber) => {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+          cell.border = thinBorder;
+          cell.alignment = { vertical: 'middle' };
+
+          if ([2, 3, 7, 8, 9, 11, 12].includes(colNumber)) {
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          }
+          if ([10, 13, 14, 15].includes(colNumber)) {
+            cell.alignment = { horizontal: 'right', vertical: 'middle' };
+          }
+        });
+
+        if (!reg.horaSalidaProduccion) {
+          const c = row.getCell(11);
+          c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF9800' } };
+          c.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
+          c.alignment = { horizontal: 'center', vertical: 'middle' };
         }
-        if ([10, 13, 14, 15].includes(colNumber)) {
-          cell.alignment = { horizontal: 'right', vertical: 'middle' };
+        if (!reg.horaSalidaPlanta) {
+          const c = row.getCell(12);
+          c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF9800' } };
+          c.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
+          c.alignment = { horizontal: 'center', vertical: 'middle' };
         }
       });
 
-      if (!reg.horaSalidaProduccion) {
-        const c = row.getCell(11);
-        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF9800' } };
-        c.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
-        c.alignment = { horizontal: 'center', vertical: 'middle' };
-      }
-      if (!reg.horaSalidaPlanta) {
-        const c = row.getCell(12);
-        c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF9800' } };
-        c.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
-        c.alignment = { horizontal: 'center', vertical: 'middle' };
-      }
-    });
-
-    ws.columns.forEach(col => {
-      let maxLen = 10;
-      col.eachCell?.({ includeEmpty: true }, cell => {
-        const len = cell.value ? cell.value.toString().length : 0;
-        if (len > maxLen) maxLen = len;
+      ws.columns.forEach(col => {
+        let maxLen = 10;
+        col.eachCell?.({ includeEmpty: true }, cell => {
+          const len = cell.value ? cell.value.toString().length : 0;
+          if (len > maxLen) maxLen = len;
+        });
+        col.width = Math.min(maxLen + 3, 35);
       });
-      col.width = Math.min(maxLen + 3, 35);
-    });
 
-    const buffer = await wb.xlsx.writeBuffer();
-    const fileName = `reporte-produccion-${this.formatearFechaParaArchivo(this.fechaInicio)}-${this.formatearFechaParaArchivo(this.fechaFin)}.xlsx`;
-    saveAs(new Blob([buffer]), fileName);
-    this.mostrarMensaje('Reporte exportado a Excel', 'success');
+      const buffer = await wb.xlsx.writeBuffer();
+      saveAs(new Blob([buffer]), generarNombreArchivoReporte('reporte-produccion', 'xlsx'));
+      this.mostrarMensaje('Reporte exportado a Excel', 'success');
+      this.cerrarModalExport();
+    } catch (error) {
+      console.error('Error exportando Excel:', error);
+      this.mostrarMensaje('Error al exportar a Excel', 'error');
+    } finally {
+      this.exportando = false;
+    }
+  }
+
+  exportarWord(): void {
+    if (this.exportando) {
+      return;
+    }
+
+    this.exportando = true;
+    const blob = generarDocumentoWordDesdeTabla(
+      'Reporte de Producción',
+      this.subtituloExportacion(),
+      this.encabezadosExportacion,
+      this.obtenerFilasExportacion()
+    );
+    saveAs(blob, generarNombreArchivoReporte('reporte-produccion', 'doc'));
+    this.mostrarMensaje('Reporte exportado a Word', 'success');
+    this.exportando = false;
+    this.cerrarModalExport();
   }
 
   exportarPDF(): void {
+    if (this.exportando) {
+      return;
+    }
+
     if (this.registros.length === 0) {
       this.mostrarMensaje('No hay datos para exportar', 'info');
       return;
     }
 
+    this.exportando = true;
     const fechaInicio = this.formatearFechaParaApi(this.fechaInicio);
     const fechaFin = this.formatearFechaParaApi(this.fechaFin);
-    const nombreArchivo = `Reporte_Produccion_${this.codOrigen}_${this.formatearFechaParaArchivo(this.fechaInicio)}_${this.formatearFechaParaArchivo(this.fechaFin)}.pdf`;
+    const nombreArchivo = generarNombreArchivoReporte('reporte-produccion', 'pdf');
 
     this.dashboardService.descargarReporteProduccionPDF(this.codOrigen, fechaInicio, fechaFin).subscribe({
       next: (blob) => {
@@ -319,19 +407,18 @@ export class ReporteProduccionComponent implements OnInit, OnDestroy {
         link.click();
         window.URL.revokeObjectURL(url);
         this.mostrarMensaje('PDF generado exitosamente', 'success');
+        this.exportando = false;
+        this.cerrarModalExport();
       },
       error: () => {
         this.mostrarMensaje('Error al generar el PDF', 'error');
+        this.exportando = false;
       }
     });
   }
 
   private formatearFechaParaApi(fecha: Date): string {
     return `${fecha.getFullYear()}-${(fecha.getMonth() + 1).toString().padStart(2, '0')}-${fecha.getDate().toString().padStart(2, '0')}`;
-  }
-
-  private formatearFechaParaArchivo(fecha: Date): string {
-    return `${fecha.getFullYear()}${(fecha.getMonth() + 1).toString().padStart(2, '0')}${fecha.getDate().toString().padStart(2, '0')}`;
   }
 
   private mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'info' = 'info'): void {

@@ -19,6 +19,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { HttpClientModule } from '@angular/common/http';
 import { DashboardService, Origen } from '../../services/dashboard.service';
 import { MainLayoutComponent } from '../main-layout/main-layout.component';
+import { AsistenciaExportModalComponent, AsistenciaExportFormato } from '../asistencia-export-modal/asistencia-export-modal.component';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import {
@@ -109,7 +110,8 @@ export interface ReporteAsistencia {
     MatNativeDateModule,
     MatMenuModule,
     MatDividerModule,
-    MainLayoutComponent
+    MainLayoutComponent,
+    AsistenciaExportModalComponent
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es-PE' },
@@ -359,6 +361,20 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
 
   cerrarModalExport(): void {
     this.mostrarModalExport = false;
+  }
+
+  onExportarSeleccion(formato: AsistenciaExportFormato): void {
+    switch (formato) {
+      case 'excel':
+        void this.exportarExcel();
+        break;
+      case 'word':
+        this.exportarWord();
+        break;
+      case 'pdf':
+        this.exportarPDF();
+        break;
+    }
   }
 
   private obtenerFilasExportacion(): (string | number)[][] {
