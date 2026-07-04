@@ -62,10 +62,9 @@ export class MenuInicialComponent implements OnInit {
   }
 
   /**
-   * Consulta al backend si la IP del equipo tiene asignada una pantalla de
-   * marcaje por defecto (garita -> simplificado, producción -> área de
-   * producción). Si no hay coincidencia o falla la consulta, se muestra el
-   * menú manual de siempre (comportamiento sin cambios).
+   * Consulta al backend si la IP privada del dispositivo (capturada en el
+   * navegador vía WebRTC) tiene asignada una pantalla de marcaje por defecto.
+   * Si no hay coincidencia o no se puede capturar la IP, se muestra el menú manual.
    */
   private async intentarRedireccionAutomaticaPorIp(): Promise<void> {
     try {

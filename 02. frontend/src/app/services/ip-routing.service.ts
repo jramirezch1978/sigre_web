@@ -17,19 +17,20 @@ interface RutaPorIpResponse {
 /**
  * Resuelve, al abrir el menú inicial, si el equipo debe entrar directamente a
  * una pantalla de marcaje (garita -> simplificado, producción -> área de
- * producción) según su IP, o si debe mostrarse el menú manual de siempre.
+ * producción) según la IP privada del dispositivo.
  *
- * La fuente de verdad principal es la IP con la que el backend recibe la
- * petición (más confiable en la red local). La IP local capturada vía WebRTC
- * en el navegador se envía únicamente como respaldo, ya que los navegadores
- * modernos pueden ofuscarla (mDNS) y no garantizan devolver la IP real.
+ * La IP se captura SIEMPRE en el frontend (WebRTC): el servidor ve su propia IP
+ * o la del proxy, no la del tablet/móvil/kiosco donde corre el navegador.
  */
 @Injectable({
   providedIn: 'root'
 })
 export class IpRoutingService {
 
-  private static readonly TIMEOUT_WEBRTC_MS = 800;
+  private static readonly TIMEOUT_WEBRTC_MS = 2500;
+  private static readonly CACHE_IP_KEY = 'sigre-dispositivo-ip';
+
+  private ipDispositivoCache: string | null = null;
 
   constructor(
     private http: HttpClient,
@@ -37,37 +38,59 @@ export class IpRoutingService {
   ) {}
 
   async resolverRutaAutomatica(): Promise<RutaMarcajePorIp | null> {
+    const ipDispositivo = await this.capturarIpDispositivo();
+    if (!ipDispositivo) {
+      console.warn('⚠️ No se pudo capturar la IP privada del dispositivo; se mostrará el menú manual');
+      return null;
+    }
+
     try {
       const apiUrl = this.configService.getApiUrl() + '/api/asistencia/menu/ruta-por-ip';
-      const localIpPromise = this.capturarIpLocalViaWebRTC();
-
-      // Primera consulta inmediata: usa la IP HTTP del equipo (nginx reenvía X-Real-IP).
-      const responseHttp = await firstValueFrom(
-        this.http.get<RutaPorIpResponse>(apiUrl)
+      const response = await firstValueFrom(
+        this.http.get<RutaPorIpResponse>(apiUrl, { params: { localIp: ipDispositivo } })
       );
-      console.log('🧭 Resolución de ruta automática por IP (HTTP):', responseHttp);
 
-      const rutaHttp = this.mapearRuta(responseHttp);
-      if (rutaHttp) {
-        return rutaHttp;
-      }
+      console.log('🧭 Resolución de ruta automática por IP del dispositivo:', {
+        ipDispositivo,
+        response
+      });
 
-      // Respaldo: IP local del kiosco vía WebRTC (192.168.30.x en planta).
-      const localIp = await localIpPromise;
-      if (!localIp) {
-        return null;
-      }
-
-      const responseLocal = await firstValueFrom(
-        this.http.get<RutaPorIpResponse>(apiUrl, { params: { localIp } })
-      );
-      console.log('🧭 Resolución de ruta automática por IP (WebRTC):', responseLocal);
-
-      return this.mapearRuta(responseLocal);
+      return this.mapearRuta(response);
     } catch (error) {
       console.warn('⚠️ No se pudo resolver la ruta automática por IP, se mostrará el menú por defecto:', error);
       return null;
     }
+  }
+
+  /**
+   * IP privada del tablet/móvil/kiosco donde corre la aplicación web.
+   * Solo se obtiene en el navegador; no se consulta al backend.
+   */
+  async obtenerIpCliente(): Promise<string | null> {
+    return this.capturarIpDispositivo();
+  }
+
+  /**
+   * Captura la IP privada del dispositivo vía WebRTC (única fuente válida para
+   * identificar el kiosco en la red local del cliente).
+   */
+  async capturarIpDispositivo(): Promise<string | null> {
+    if (this.ipDispositivoCache) {
+      return this.ipDispositivoCache;
+    }
+
+    const ipEnSesion = sessionStorage.getItem(IpRoutingService.CACHE_IP_KEY);
+    if (ipEnSesion) {
+      this.ipDispositivoCache = ipEnSesion;
+      return ipEnSesion;
+    }
+
+    const ip = await this.capturarIpLocalViaWebRTC();
+    if (ip) {
+      this.ipDispositivoCache = ip;
+      sessionStorage.setItem(IpRoutingService.CACHE_IP_KEY, ip);
+    }
+    return ip;
   }
 
   private mapearRuta(response: RutaPorIpResponse | null | undefined): RutaMarcajePorIp | null {
@@ -80,37 +103,11 @@ export class IpRoutingService {
     };
   }
 
-  /**
-   * IP con la que el backend identifica al cliente en la red local.
-   * Usa la misma consulta que el enrutamiento automático del menú inicial.
-   */
-  async obtenerIpCliente(): Promise<string | null> {
-    const localIp = await this.capturarIpLocalViaWebRTC();
-
-    try {
-      const apiUrl = this.configService.getApiUrl() + '/api/asistencia/menu/ruta-por-ip';
-      const params = localIp ? { localIp } : undefined;
-      const response = await firstValueFrom(
-        this.http.get<RutaPorIpResponse>(apiUrl, { params })
-      );
-
-      if (response?.ipDetectada) {
-        return response.ipDetectada;
-      }
-      return localIp;
-    } catch (error) {
-      console.warn('⚠️ No se pudo consultar la IP al backend:', error);
-      return localIp;
-    }
-  }
-
-  /**
-   * Intenta obtener la IP local del equipo (no la pública) usando WebRTC.
-   * Devuelve null si no se logra en el tiempo límite o el navegador lo bloquea.
-   */
   private capturarIpLocalViaWebRTC(): Promise<string | null> {
     return new Promise((resolve) => {
       let resuelto = false;
+      const ipsPrivadas: string[] = [];
+
       const resolverUnaVez = (valor: string | null) => {
         if (resuelto) {
           return;
@@ -119,18 +116,32 @@ export class IpRoutingService {
         resolve(valor);
       };
 
+      let rtc: RTCPeerConnection | null = null;
+
+      const registrarIp = (ip: string) => {
+        if (!this.esIpPrivada(ip) || ip === '127.0.0.1') {
+          return;
+        }
+        if (!ipsPrivadas.includes(ip)) {
+          ipsPrivadas.push(ip);
+        }
+        if (ip.startsWith('192.168.')) {
+          rtc?.close();
+          resolverUnaVez(ip);
+        }
+      };
+
       try {
-        const rtc = new RTCPeerConnection({ iceServers: [] });
+        rtc = new RTCPeerConnection({ iceServers: [] });
         rtc.createDataChannel('');
 
         rtc.onicecandidate = (ice) => {
           if (!ice?.candidate?.candidate) {
             return;
           }
-          const match = ice.candidate.candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/);
-          if (match && match[1] !== '127.0.0.1') {
-            rtc.close();
-            resolverUnaVez(match[1]);
+          const match = ice.candidate.candidate.match(/([0-9]{1,3}(?:\.[0-9]{1,3}){3})/);
+          if (match) {
+            registrarIp(match[1]);
           }
         };
 
@@ -139,12 +150,37 @@ export class IpRoutingService {
           .catch(() => resolverUnaVez(null));
 
         setTimeout(() => {
-          rtc.close();
-          resolverUnaVez(null);
+          rtc?.close();
+          resolverUnaVez(this.seleccionarMejorIpPrivada(ipsPrivadas));
         }, IpRoutingService.TIMEOUT_WEBRTC_MS);
-      } catch (error) {
+      } catch {
         resolverUnaVez(null);
       }
     });
+  }
+
+  private esIpPrivada(ip: string): boolean {
+    if (ip.startsWith('192.168.')) {
+      return true;
+    }
+    if (ip.startsWith('10.')) {
+      return true;
+    }
+    return /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(ip);
+  }
+
+  private seleccionarMejorIpPrivada(ips: string[]): string | null {
+    if (ips.length === 0) {
+      return null;
+    }
+    const ip192 = ips.find(ip => ip.startsWith('192.168.'));
+    if (ip192) {
+      return ip192;
+    }
+    const ip10 = ips.find(ip => ip.startsWith('10.'));
+    if (ip10) {
+      return ip10;
+    }
+    return ips[0];
   }
 }

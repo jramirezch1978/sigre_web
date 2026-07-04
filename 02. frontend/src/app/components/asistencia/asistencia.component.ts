@@ -527,8 +527,8 @@ export class AsistenciaComponent implements OnInit {
   }
   
   /**
-   * IP del equipo marcador. Prioriza la IP que ve el backend en la red local;
-   * WebRTC solo como respaldo. No usa servicios externos (ipify) por CORS.
+   * IP privada del tablet/kiosco capturada en el navegador (WebRTC).
+   * No se obtiene del backend: el servidor no conoce la IP local del dispositivo.
    */
   async capturarIPDispositivo(): Promise<void> {
     const ip = await this.ipRoutingService.obtenerIpCliente();
@@ -539,7 +539,7 @@ export class AsistenciaComponent implements OnInit {
     }
 
     this.deviceIP = '';
-    console.warn('⚠️ No se pudo determinar IP local; el backend registrará la IP de la solicitud HTTP');
+    console.warn('⚠️ No se pudo capturar la IP privada del dispositivo en el navegador');
   }
 
   limpiarCamposParaSiguienteTrabajador() {
