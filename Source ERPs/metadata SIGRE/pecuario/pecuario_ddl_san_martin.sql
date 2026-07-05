@@ -24,10 +24,10 @@
 -- TIPO de opcion (igual regla que el resto del sistema): Tablas 000-299,
 -- Operaciones 300-499, Consultas 500-699, Reportes 700-899, Procesos 900-999.
 -- Bloques asignados a Pecuario (libres de colision con Campo/cana):
---   Tablas      CAM100-CAM106
---   Operaciones CAM440-CAM454
+--   Tablas      CAM202-CAM208
+--   Operaciones CAM435-CAM449
 --   Consultas   CAM500-CAM505
---   Reportes    CAM800-CAM806
+--   Reportes    CAM759-CAM765
 --   Procesos    CAM900-CAM905
 -- Detalle completo: Source ERPs/metadata SIGRE/pecuario/pecuario_modulo_diseno.md
 -- ============================================================================
