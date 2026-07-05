@@ -20,9 +20,16 @@
 -- y PC_ALIMENTACION_CONSUMO referencian CANTABRIA.ARTICULO(cod_art).
 --
 -- NOTA SOBRE VENTANAS: las tablas usan el prefijo PC_* (Pecuario), pero las
--- VENTANAS PowerBuilder usan el prefijo real de Campo (CAM###, rango CAM900-
--- CAM969) porque Pecuario es una extension de Campo, no un modulo aparte.
--- Ver Source ERPs/metadata SIGRE/pecuario/pecuario_modulo_diseno.md
+-- VENTANAS PowerBuilder usan el prefijo real de Campo (CAM###), numeradas por
+-- TIPO de opcion (igual regla que el resto del sistema): Tablas 000-299,
+-- Operaciones 300-499, Consultas 500-699, Reportes 700-899, Procesos 900-999.
+-- Bloques asignados a Pecuario (libres de colision con Campo/cana):
+--   Tablas      CAM100-CAM106
+--   Operaciones CAM440-CAM454
+--   Consultas   CAM500-CAM505
+--   Reportes    CAM800-CAM806
+--   Procesos    CAM900-CAM905
+-- Detalle completo: Source ERPs/metadata SIGRE/pecuario/pecuario_modulo_diseno.md
 -- ============================================================================
 
 
