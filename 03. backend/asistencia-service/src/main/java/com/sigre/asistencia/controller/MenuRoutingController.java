@@ -1,6 +1,8 @@
 package com.sigre.asistencia.controller;
 
 import com.sigre.asistencia.config.IpRoutingProperties;
+import com.sigre.asistencia.util.IpUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,11 +16,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Resuelve qué pantalla de marcaje debe abrirse por defecto según la IP privada
- * del dispositivo (tablet/móvil/kiosco) enviada por el frontend.
+ * Resuelve qué pantalla de marcaje debe abrirse por defecto según la IP del
+ * equipo que solicita el menú inicial (garita → simplificado, producción →
+ * área de producción). Si la IP no coincide con ninguna configuración,
+ * el frontend debe mostrar el menú de selección manual.
  *
- * La IP del request HTTP al servidor NO se usa: el servidor ve su propia IP o
- * la del proxy, no la del equipo donde corre el navegador.
+ * Se combinan dos fuentes de IP:
+ * 1. La IP local capturada por el navegador vía WebRTC (localIp) — util cuando
+ *    el equipo esta detras de un proxy que oculta su IP real al servidor.
+ * 2. La IP con la que el servidor recibe el request HTTP (X-Forwarded-For /
+ *    X-Real-IP reenviados por nginx) — es la fuente mas confiable en la red
+ *    local del cliente, ya que no depende de que el navegador logre exponer
+ *    la IP LAN via WebRTC (que puede fallar por mDNS, permisos o políticas
+ *    de red del equipo).
  */
 @RestController
 @RequestMapping("/menu")
@@ -29,34 +39,48 @@ public class MenuRoutingController {
     private final IpRoutingProperties ipRoutingProperties;
 
     /**
-     * @param localIp IP privada capturada en el navegador del dispositivo (WebRTC).
-     *                Es la única fuente válida para el enrutamiento automático.
+     * @param localIp IP local capturada por el navegador (WebRTC), enviada como
+     *                primera opción. Si no coincide con ninguna configuración
+     *                (o no llegó), se usa la IP real del request HTTP.
      */
     @GetMapping("/ruta-por-ip")
     public ResponseEntity<RutaPorIpResponse> obtenerRutaPorIp(
-            @RequestParam(required = false) String localIp) {
+            @RequestParam(required = false) String localIp,
+            HttpServletRequest httpRequest) {
 
-        String ipDispositivo = localIp != null ? localIp.trim() : null;
+        String ipSolicitud = IpUtils.obtenerIpReal(httpRequest);
+        String ipLocal = localIp != null ? localIp.trim() : null;
 
-        if (ipDispositivo == null || ipDispositivo.isBlank()) {
-            log.info("🧭 Sin IP de dispositivo en la petición - se mostrará el menú manual");
-            return ResponseEntity.ok(RutaPorIpResponse.builder().build());
+        RutaPorIpResponse ruta = null;
+        String ipCoincidente = null;
+
+        if (ipLocal != null && !ipLocal.isBlank()) {
+            ruta = resolverRuta(ipLocal);
+            if (ruta != null) {
+                ipCoincidente = ipLocal;
+            }
+        }
+        if (ruta == null) {
+            ruta = resolverRuta(ipSolicitud);
+            if (ruta != null) {
+                ipCoincidente = ipSolicitud;
+            }
         }
 
-        RutaPorIpResponse ruta = resolverRuta(ipDispositivo);
+        String ipParaMostrar = ipLocal != null && !ipLocal.isBlank() ? ipLocal : ipSolicitud;
 
         if (ruta == null) {
             log.info(
-                    "🧭 Sin ruta automática para IP dispositivo='{}' (garita={}, produccion={}) - menú manual",
-                    ipDispositivo,
+                    "🧭 Sin ruta automática para IP HTTP='{}', localIp='{}' (garita={}, produccion={}) - menú manual",
+                    ipSolicitud, ipLocal,
                     ipRoutingProperties.getPuertaPrincipalSimplificado(),
                     ipRoutingProperties.getAreaProduccion());
-            return ResponseEntity.ok(RutaPorIpResponse.builder().ipDetectada(ipDispositivo).build());
+            return ResponseEntity.ok(RutaPorIpResponse.builder().ipDetectada(ipParaMostrar).build());
         }
 
-        log.info("🧭 Ruta automática resuelta: IP dispositivo='{}' -> tipoMarcaje={}, modoMarcaje={}",
-                ipDispositivo, ruta.getTipoMarcaje(), ruta.getModoMarcaje());
-        return ResponseEntity.ok(ruta.toBuilder().ipDetectada(ipDispositivo).build());
+        log.info("🧭 Ruta automática resuelta: IP coincidente='{}' (HTTP='{}', localIp='{}') -> tipoMarcaje={}, modoMarcaje={}",
+                ipCoincidente, ipSolicitud, ipLocal, ruta.getTipoMarcaje(), ruta.getModoMarcaje());
+        return ResponseEntity.ok(ruta.toBuilder().ipDetectada(ipCoincidente).build());
     }
 
     private RutaPorIpResponse resolverRuta(String ip) {

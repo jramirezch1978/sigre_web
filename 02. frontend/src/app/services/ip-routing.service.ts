@@ -17,10 +17,18 @@ interface RutaPorIpResponse {
 /**
  * Resuelve, al abrir el menú inicial, si el equipo debe entrar directamente a
  * una pantalla de marcaje (garita -> simplificado, producción -> área de
- * producción) según la IP privada del dispositivo.
+ * producción) según la IP del dispositivo.
  *
- * La IP se captura SIEMPRE en el frontend (WebRTC): el servidor ve su propia IP
- * o la del proxy, no la del tablet/móvil/kiosco donde corre el navegador.
+ * Se combinan dos fuentes de IP (igual que valida el backend):
+ * 1. La IP local capturada en el navegador vía WebRTC (mejor opción cuando el
+ *    equipo está detrás de un proxy que oculta su IP real al servidor).
+ * 2. Como respaldo, la IP con la que el servidor recibe el request HTTP
+ *    (X-Forwarded-For / X-Real-IP reenviados por nginx), que es la fuente más
+ *    confiable en la red local ya que no depende de que el navegador logre
+ *    exponer la IP LAN vía WebRTC (puede fallar por mDNS, permisos o
+ *    políticas de red del equipo).
+ *
+ * Por eso SIEMPRE se consulta al backend, incluso si WebRTC no devuelve IP.
  */
 @Injectable({
   providedIn: 'root'
@@ -31,6 +39,7 @@ export class IpRoutingService {
   private static readonly CACHE_IP_KEY = 'sigre-dispositivo-ip';
 
   private ipDispositivoCache: string | null = null;
+  private ipDetectadaBackend: string | null = null;
 
   constructor(
     private http: HttpClient,
@@ -40,20 +49,24 @@ export class IpRoutingService {
   async resolverRutaAutomatica(): Promise<RutaMarcajePorIp | null> {
     const ipDispositivo = await this.capturarIpDispositivo();
     if (!ipDispositivo) {
-      console.warn('⚠️ No se pudo capturar la IP privada del dispositivo; se mostrará el menú manual');
-      return null;
+      console.warn('⚠️ No se pudo capturar la IP privada vía WebRTC; se intentará con la IP del servidor');
     }
 
     try {
       const apiUrl = this.configService.getApiUrl() + '/api/asistencia/menu/ruta-por-ip';
+      const params = ipDispositivo ? { localIp: ipDispositivo } : undefined;
       const response = await firstValueFrom(
-        this.http.get<RutaPorIpResponse>(apiUrl, { params: { localIp: ipDispositivo } })
+        this.http.get<RutaPorIpResponse>(apiUrl, { params })
       );
 
-      console.log('🧭 Resolución de ruta automática por IP del dispositivo:', {
-        ipDispositivo,
+      console.log('🧭 Resolución de ruta automática por IP:', {
+        ipDispositivoWebRTC: ipDispositivo,
         response
       });
+
+      if (response?.ipDetectada) {
+        this.ipDetectadaBackend = response.ipDetectada;
+      }
 
       return this.mapearRuta(response);
     } catch (error) {
@@ -63,16 +76,36 @@ export class IpRoutingService {
   }
 
   /**
-   * IP privada del tablet/móvil/kiosco donde corre la aplicación web.
-   * Solo se obtiene en el navegador; no se consulta al backend.
+   * IP del dispositivo para mostrar en pantalla. Prioriza la capturada por
+   * WebRTC en el navegador; si no está disponible, usa la que detectó el
+   * backend a partir del request HTTP (ya consultada por resolverRutaAutomatica).
    */
   async obtenerIpCliente(): Promise<string | null> {
-    return this.capturarIpDispositivo();
+    const ipWebRtc = await this.capturarIpDispositivo();
+    if (ipWebRtc) {
+      return ipWebRtc;
+    }
+    if (this.ipDetectadaBackend) {
+      return this.ipDetectadaBackend;
+    }
+
+    try {
+      const apiUrl = this.configService.getApiUrl() + '/api/asistencia/menu/ruta-por-ip';
+      const response = await firstValueFrom(
+        this.http.get<RutaPorIpResponse>(apiUrl)
+      );
+      this.ipDetectadaBackend = response?.ipDetectada ?? null;
+      return this.ipDetectadaBackend;
+    } catch (error) {
+      console.warn('⚠️ No se pudo consultar la IP al backend:', error);
+      return null;
+    }
   }
 
   /**
-   * Captura la IP privada del dispositivo vía WebRTC (única fuente válida para
-   * identificar el kiosco en la red local del cliente).
+   * Captura la IP privada del dispositivo vía WebRTC. Puede devolver null si
+   * el navegador la oculta (mDNS) o bloquea WebRTC; en ese caso se usa la IP
+   * detectada por el backend a partir del request HTTP como respaldo.
    */
   async capturarIpDispositivo(): Promise<string | null> {
     if (this.ipDispositivoCache) {
