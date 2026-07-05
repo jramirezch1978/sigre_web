@@ -36,18 +36,19 @@
 --
 -- Orden de creacion respeta dependencias de FK:
 --   0) PC_ESPECIE (nuevo: agrupa razas por especie -- bovino/porcino/etc.)
---   1) Catalogos (PC_RAZA, PC_POTRERO, PC_CATEGORIA, PC_SEMENTAL,
+--   1) Catalogos (PC_RAZA, PC_POTRERO, PC_ESTABLO, PC_CATEGORIA, PC_SEMENTAL,
 --      PC_PRODUCTO_SANITARIO, PC_ENFERMEDAD, PC_DIETA, PC_DIETA_COMPONENTE)
 --   1b) PC_RECETA / PC_RECETA_DET (nuevo: receta de fabricacion de
 --      concentrado -- ver seccion de integracion con Almacen/Produccion)
+--   1c) PC_LOTE (nuevo: cohorte/agrupacion de cabezas, ver seccion 8 del .md)
 --   2) Maestro de animal (PC_ANIMAL, PC_OT_ANIMAL)
 --   3) Reproduccion (PC_CELO, PC_SERVICIO, PC_DIAGNOSTICO_PRENEZ, PC_PARTO)
 --   4) Produccion de leche (PC_LACTANCIA, PC_ORDENO, PC_CONTROL_LECHERO)
 --   5) Nutricion (PC_CONDICION_CORPORAL, PC_ALIMENTACION_CONSUMO)
 --   6) Sanidad (PC_SANIDAD_EVENTO)
 --   7) Resultados de laboratorio (PC_LABORATORIO, PC_LABORATORIO_DET)
---   8) Movimientos / trazabilidad / bajas (PC_MOVIMIENTO_POTRERO, PC_DTA,
---      PC_DTA_DETALLE, PC_BAJA)
+--   8) Movimientos / trazabilidad / bajas (PC_MOVIMIENTO_POTRERO,
+--      PC_MOVIMIENTO_ESTABLO, PC_DTA, PC_DTA_DETALLE, PC_BAJA)
 --
 -- NOTA: ARTICULO, ORDEN_TRABAJO, OPERACIONES, ARTICULO_MOV, VALE_MOV,
 -- ORDEN_SERVICIO, ALMACEN, TIPO_PRODUCTO, OT_TIPO, ORIGEN, NUM_TABLAS y
@@ -252,6 +253,52 @@ for each row
 begin
   if :new.reckey is null then
     select SEQ_PC_POTRERO.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+
+-- ----------------------------------------------------------------------------
+-- PC_ESTABLO -- ubicacion CUBIERTA (sala de ordeno, maternidad, cuarentena,
+-- corral de manejo, engorde bajo techo, etc.), a diferencia de PC_POTRERO
+-- que es pastoreo a cielo abierto (medido en hectareas). Un animal puede
+-- estar en un potrero Y en un establo a la vez (ej. pastando de dia,
+-- establo de ordeno en la manana) -- son dos dimensiones de ubicacion
+-- independientes, no excluyentes.
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_ESTABLO
+(
+  reckey         NUMBER(10)    not null,
+  cod_origen     CHAR(2)       not null,
+  cod_establo    CHAR(6)       not null,
+  nom_establo    VARCHAR2(200) not null,
+  flag_tipo      CHAR(1)       default 'G' not null,
+  capacidad_cab  NUMBER(6),
+  flag_estado    CHAR(1)       default '1' not null
+)
+tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_ESTABLO add constraint PK_PC_ESTABLO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ESTABLO add constraint UQ_PC_ESTABLO unique (cod_origen, cod_establo) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ESTABLO add constraint CK_PC_ESTABLO_TIPO check (flag_tipo in ('O','M','C','G','E'));
+alter table CANTABRIA.PC_ESTABLO add constraint FK_PC_ESTABLO_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+
+comment on table CANTABRIA.PC_ESTABLO is 'Pecuario - Establos/corrales (ubicacion cubierta) por fundo';
+comment on column CANTABRIA.PC_ESTABLO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_ESTABLO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
+comment on column CANTABRIA.PC_ESTABLO.cod_establo is 'codigo de establo (unique junto a cod_origen, no PK)';
+comment on column CANTABRIA.PC_ESTABLO.nom_establo is 'nombre del establo';
+comment on column CANTABRIA.PC_ESTABLO.flag_tipo is 'O=Ordeno, M=Maternidad, C=Cuarentena, G=Corral de manejo (General), E=Engorde';
+comment on column CANTABRIA.PC_ESTABLO.capacidad_cab is 'capacidad de carga en numero de cabezas';
+comment on column CANTABRIA.PC_ESTABLO.flag_estado is 'flag_estado';
+
+create sequence CANTABRIA.SEQ_PC_ESTABLO start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_ESTABLO
+before insert on CANTABRIA.PC_ESTABLO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_ESTABLO.nextval into :new.reckey from dual;
   end if;
 end;
 /
@@ -690,6 +737,7 @@ create table CANTABRIA.PC_ANIMAL
   color               VARCHAR2(40),
   cod_categoria       CHAR(3)       not null,
   cod_potrero         CHAR(6)       not null,
+  cod_establo         CHAR(6),
   cod_lote            CHAR(6),
   flag_estado_repro   CHAR(1)       default '0',
   peso_nacimiento     NUMBER(6,2),
@@ -713,6 +761,7 @@ alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_RAZA foreign key (co
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_CATEG foreign key (cod_categoria) references CANTABRIA.PC_CATEGORIA(cod_categoria);
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_POTRERO foreign key (cod_origen, cod_potrero) references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_LOTE foreign key (cod_origen, cod_lote) references CANTABRIA.PC_LOTE(cod_origen, cod_lote);
+alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_ESTABLO foreign key (cod_origen, cod_establo) references CANTABRIA.PC_ESTABLO(cod_origen, cod_establo);
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_SEMENTAL foreign key (cod_semental_padre) references CANTABRIA.PC_SEMENTAL(cod_semental);
 -- Auto-referencias (genealogia): padre y madre son animales del mismo hato
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_PADRE foreign key (cod_animal_padre) references CANTABRIA.PC_ANIMAL(cod_animal);
@@ -732,6 +781,7 @@ comment on column CANTABRIA.PC_ANIMAL.cod_semental_padre is 'FK a PC_SEMENTAL si
 comment on column CANTABRIA.PC_ANIMAL.color is 'color/marcas distintivas';
 comment on column CANTABRIA.PC_ANIMAL.cod_categoria is 'categoria/etapa actual (se recalcula por edad/estado)';
 comment on column CANTABRIA.PC_ANIMAL.cod_potrero is 'ubicacion actual (potrero)';
+comment on column CANTABRIA.PC_ANIMAL.cod_establo is 'FK opcional a PC_ESTABLO -- ubicacion cubierta actual (sala de ordeno, maternidad, cuarentena, etc.), independiente del potrero; historial completo en PC_MOVIMIENTO_ESTABLO';
 comment on column CANTABRIA.PC_ANIMAL.cod_lote is 'FK opcional a PC_LOTE -- lote/cohorte de manejo al que pertenece esta cabeza (validado contra AGRI: cabezas y lotes son el mismo modelo, no ramas paralelas)';
 comment on column CANTABRIA.PC_ANIMAL.flag_estado_repro is '0=vacia, 1=servida, 2=prenada confirmada, 3=recien parida';
 comment on column CANTABRIA.PC_ANIMAL.peso_nacimiento is 'peso al nacer en kg';
@@ -1542,6 +1592,57 @@ end;
 
 
 -- ----------------------------------------------------------------------------
+-- PC_MOVIMIENTO_ESTABLO -- historial de cambios de establo (mismo patron que
+-- PC_MOVIMIENTO_POTRERO, pero para la ubicacion cubierta). Un animal puede
+-- tener movimientos de potrero y de establo el mismo dia, de forma
+-- independiente (ej. se traslada de Potrero Norte a Sur, y por la tarde
+-- entra al Establo de Ordeno).
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_MOVIMIENTO_ESTABLO
+(
+  reckey               NUMBER(10) not null,
+  cod_origen           CHAR(2)   not null,
+  cod_animal           CHAR(10)  not null,
+  fec_movimiento       DATE      not null,
+  cod_establo_origen   CHAR(6),
+  cod_establo_destino  CHAR(6)   not null,
+  motivo               VARCHAR2(200),
+  cod_usr              CHAR(6),
+  fec_registro         DATE      default sysdate
+)
+tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_MOVIMIENTO_ESTABLO add constraint PK_PC_MOV_ESTABLO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_MOVIMIENTO_ESTABLO add constraint UQ_PC_MOVEST unique (cod_animal, fec_movimiento) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_MOVIMIENTO_ESTABLO add constraint FK_PC_MOVEST_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_MOVIMIENTO_ESTABLO add constraint FK_PC_MOVEST_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_MOVIMIENTO_ESTABLO add constraint FK_PC_MOVEST_EST_ORIG foreign key (cod_origen, cod_establo_origen) references CANTABRIA.PC_ESTABLO(cod_origen, cod_establo);
+alter table CANTABRIA.PC_MOVIMIENTO_ESTABLO add constraint FK_PC_MOVEST_EST_DEST foreign key (cod_origen, cod_establo_destino) references CANTABRIA.PC_ESTABLO(cod_origen, cod_establo);
+
+comment on table CANTABRIA.PC_MOVIMIENTO_ESTABLO is 'Pecuario - Historico de cambios de establo (ubicacion cubierta)';
+comment on column CANTABRIA.PC_MOVIMIENTO_ESTABLO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_MOVIMIENTO_ESTABLO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
+comment on column CANTABRIA.PC_MOVIMIENTO_ESTABLO.cod_animal is 'animal movido';
+comment on column CANTABRIA.PC_MOVIMIENTO_ESTABLO.fec_movimiento is 'fecha del movimiento';
+comment on column CANTABRIA.PC_MOVIMIENTO_ESTABLO.cod_establo_origen is 'establo de origen (nulo si venia de pastoreo/sin establo)';
+comment on column CANTABRIA.PC_MOVIMIENTO_ESTABLO.cod_establo_destino is 'establo de destino';
+comment on column CANTABRIA.PC_MOVIMIENTO_ESTABLO.motivo is 'motivo del movimiento (ej. ordeno, parto, cuarentena por enfermedad)';
+comment on column CANTABRIA.PC_MOVIMIENTO_ESTABLO.cod_usr is 'usuario que registro';
+comment on column CANTABRIA.PC_MOVIMIENTO_ESTABLO.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_MOVEST start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_MOVEST
+before insert on CANTABRIA.PC_MOVIMIENTO_ESTABLO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_MOVEST.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+
+-- ----------------------------------------------------------------------------
 -- PC_DTA (Documento de Transito Animal -- DOCUMENTO EXTERNO: lo emite SENASA,
 -- no lo genera nuestro sistema, por eso PK=reckey y nro_dta es texto libre)
 -- ----------------------------------------------------------------------------
@@ -1746,6 +1847,11 @@ insert into CANTABRIA.PC_POTRERO (cod_origen, cod_potrero, nom_potrero, area_has
 insert into CANTABRIA.PC_POTRERO (cod_origen, cod_potrero, nom_potrero, area_has, tipo_pasto, capacidad_cab) values ('SU','POT002','Potrero Sur',8,'Brachiaria brizantha',30);
 commit;
 
+-- Establos (ubicacion cubierta, independiente del potrero)
+insert into CANTABRIA.PC_ESTABLO (cod_origen, cod_establo, nom_establo, flag_tipo, capacidad_cab) values ('SU','EST001','Sala de ordeno','O',20);
+insert into CANTABRIA.PC_ESTABLO (cod_origen, cod_establo, nom_establo, flag_tipo, capacidad_cab) values ('SU','EST002','Corral de cuarentena','C',10);
+commit;
+
 -- Semental
 insert into CANTABRIA.PC_SEMENTAL (cod_semental, nom_semental, cod_raza, proveedor, registro_genet) values ('SEM0000001','Toro IA Holstein 245','HOLS','Central Genetica Peru','US-12345');
 commit;
@@ -1827,8 +1933,8 @@ insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal
   values ('SU00000003','SU','ARE-4001','Bravo','HOLS','M',TO_DATE('20/01/2019','DD/MM/YYYY'),'TOR','POT002',42,780,'P','DEMO01');
 insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_animal_padre, cod_animal_madre, cod_categoria, cod_potrero, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
   values ('SU00000004','SU','ARE-4890','Cria de Paloma','HOLS','H',TO_DATE('15/06/2026','DD/MM/YYYY'),'SU00000003','SU00000001','TER','POT001',35,35,'P','DEMO01');
-insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
-  values ('SU00000005','SU','ARE-3980','Estrella','HOLS','H',TO_DATE('02/02/2019','DD/MM/YYYY'),'VDE','POT002','0',37,520,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, cod_establo, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('SU00000005','SU','ARE-3980','Estrella','HOLS','H',TO_DATE('02/02/2019','DD/MM/YYYY'),'VDE','POT002','EST002','0',37,520,'P','DEMO01');
 commit;
 
 -- Vinculo OT <-> animales
@@ -1925,6 +2031,12 @@ commit;
 -- Movimiento de potrero (Estrella aislada por mastitis)
 insert into CANTABRIA.PC_MOVIMIENTO_POTRERO (cod_origen, cod_animal, fec_movimiento, cod_potrero_origen, cod_potrero_destino, motivo, cod_usr)
   values ('SU','SU00000005',TO_DATE('10/05/2026','DD/MM/YYYY'),'POT001','POT002','Aislamiento por mastitis','DEMO01');
+commit;
+
+-- Movimiento de establo (Estrella entra al corral de cuarentena por la misma mastitis;
+-- ilustra el historial de establos, independiente del historial de potreros)
+insert into CANTABRIA.PC_MOVIMIENTO_ESTABLO (cod_origen, cod_animal, fec_movimiento, cod_establo_origen, cod_establo_destino, motivo, cod_usr)
+  values ('SU','SU00000005',TO_DATE('20/05/2026','DD/MM/YYYY'),null,'EST002','Cuarentena por mastitis clinica','DEMO01');
 commit;
 
 -- Ciclo de vida completo: DTA + baja por venta de Estrella (mastitis cronica
