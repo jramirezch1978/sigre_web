@@ -1,28 +1,30 @@
-# Módulo Pecuario — Diseño funcional
+# Módulo Agropecuario (Campo + Pecuario) — Diseño funcional
 
-Ubicado dentro del módulo **Campo** (mismo bucket de menú que el módulo agrícola de caña), como un sub-módulo independiente en tablas y ventanas, pero compartiendo menú/parametrización general de fundo (`cod_origen`). Sigue la convención de codificación de ventanas usada en Almacén (`AL001`, `AL002`...) con el prefijo **`PC###`** (Pecuario).
+Pecuario **no es un módulo aparte**: es una extensión de **Campo**, así que las ventanas usan el mismo prefijo PowerBuilder que ya existe para Campo (`w_cam###`, confirmado en `ws_objects/Campo`) en vez de un prefijo propio. Las tablas sí mantienen su propio prefijo `PC_*` (Pecuario) para distinguirlas claramente de las tablas agrícolas (`CAMPO_*`) dentro del mismo esquema — solo cambia la numeración de ventanas, no las tablas.
+
+Rango de numeración asignado: **`CAM900`–`CAM969`** (el módulo Campo existente llega hasta `w_cam758`; se deja un bloque nuevo y libre de colisiones para Pecuario, con espacio de sobra para crecer).
 
 ## 1. Objetivo y alcance
 
 Llevar el control operativo, sanitario, reproductivo y productivo del hato ganadero de Agro Industrial San Martín (vacas y toros), y dejar la trazabilidad necesaria para SENASA (DTA) y una base de datos lista para integrarse a Contabilidad como activo biológico (NIC 41).
 
-No reemplaza ni modifica el módulo Campo existente (caña): es un árbol de tablas y ventanas nuevo (`PC_*`), que solo comparte el concepto de `cod_origen` (fundo/sucursal) con el resto del sistema.
+No reemplaza ni modifica el módulo Campo existente (caña): es un árbol de tablas nuevo (`PC_*`) y un bloque nuevo de ventanas (`CAM900+`) que solo comparte el concepto de `cod_origen` (fundo/sucursal) y el mismo prefijo de ventana con el resto de Campo.
 
 ## 2. Catálogos maestros (previos a operar)
 
 | Ventana (borrador) | Tabla | Contenido |
 |---|---|---|
-| PC001 | `PC_RAZA` | Razas bovinas (Holstein, Brown Swiss, Gyr, etc.) |
-| PC002 | `PC_CATEGORIA` | Etapas del animal (ternero, vaquillona, novilla, vaca en producción/seca/descarte, toro) — viene precargada |
-| PC003 | `PC_POTRERO` | Potreros de pastoreo por fundo, con capacidad de carga |
-| PC004 | `PC_SEMENTAL` | Catálogo de sementales/pajillas para inseminación artificial |
-| PC005 | `PC_PRODUCTO_SANITARIO` | Vacunas, desparasitantes, medicamentos, con período de retiro |
-| PC006 | `PC_ENFERMEDAD` | Enfermedades/diagnósticos |
-| PC007 | `PC_DIETA` + `PC_DIETA_COMPONENTE` | Raciones por categoría, con insumos referenciados a `ARTICULO` (Almacén) |
+| CAM900 | `PC_RAZA` | Razas bovinas (Holstein, Brown Swiss, Gyr, etc.) |
+| CAM901 | `PC_CATEGORIA` | Etapas del animal (ternero, vaquillona, novilla, vaca en producción/seca/descarte, toro) — viene precargada |
+| CAM902 | `PC_POTRERO` | Potreros de pastoreo por fundo, con capacidad de carga |
+| CAM903 | `PC_SEMENTAL` | Catálogo de sementales/pajillas para inseminación artificial |
+| CAM904 | `PC_PRODUCTO_SANITARIO` | Vacunas, desparasitantes, medicamentos, con período de retiro |
+| CAM905 | `PC_ENFERMEDAD` | Enfermedades/diagnósticos |
+| CAM906 | `PC_DIETA` + `PC_DIETA_COMPONENTE` | Raciones por categoría, con insumos referenciados a `ARTICULO` (Almacén) |
 
 Estas tablas se configuran una sola vez (o rara vez) antes de operar.
 
-## 3. Maestro de animal — PC010 (`PC_ANIMAL`)
+## 3. Maestro de animal — CAM910 (`PC_ANIMAL`)
 
 Ventana tabular tipo maestro (similar a un maestro de artículo). Cada fila es un animal individual identificado por su arete/chapa (`cod_animal`). Captura: raza, sexo, fecha de nacimiento, genealogía (padre/madre, propios o por IA), categoría actual, potrero actual, procedencia (nacido en el predio vs. comprado), peso de nacimiento y peso actual.
 
@@ -30,7 +32,7 @@ El campo `flag_estado_repro` (vacía / servida / preñada / recién parida) se m
 
 La recategorización (ternero → vaquillona → novilla → vaca) puede ser un proceso batch mensual que evalúa edad y estado reproductivo contra `PC_CATEGORIA.edad_min_meses/edad_max_meses`, en vez de que el usuario la cambie manualmente.
 
-## 4. Reproducción (PC020–PC023)
+## 4. Reproducción (CAM920–CAM923)
 
 Flujo secuencial: **celo → servicio → diagnóstico de preñez → parto**.
 
@@ -41,7 +43,7 @@ Flujo secuencial: **celo → servicio → diagnóstico de preñez → parto**.
 
 Indicadores que se pueden sacar de aquí sin tablas adicionales: intervalo entre partos, días abiertos, tasa de preñez por servicio, distocias %.
 
-## 5. Producción de leche (PC030–PC032)
+## 5. Producción de leche (CAM930–CAM932)
 
 - `PC_LACTANCIA`: se abre automáticamente al registrar un parto de una hembra (un registro por lactancia, no por vaca). Se cierra (`fec_secado`) cuando el usuario marca el secado, generalmente ~60 días antes del próximo parto esperado.
 - `PC_ORDENO`: el detalle diario, hasta 3 turnos (mañana/tarde/noche). Es la tabla de mayor volumen del módulo — pensar en un proceso de carga rápida (grilla por potrero/establo con foco en litros, no formulario campo por campo).
@@ -49,27 +51,37 @@ Indicadores que se pueden sacar de aquí sin tablas adicionales: intervalo entre
 
 `PC_LACTANCIA.litros_totales` se recalcula sumando `PC_ORDENO` (columna denormalizada por performance de reporte, igual criterio que `flag_estado_repro`).
 
-## 6. Alimentación (PC040)
+## 6. Nutrición y alimentación (CAM940–CAM942)
 
-`PC_ALIMENTACION_CONSUMO` registra consumo diario **por potrero/lote**, no por animal individual (no es práctico pesar la comida de cada vaca) — se carga `cabezas_lote` (cuántos animales comieron esa dieta ese día) y el sistema puede sacar un costo por cabeza dividiendo. La dieta (`PC_DIETA`) y sus componentes (`PC_DIETA_COMPONENTE`) están parametrizados contra `ARTICULO`, así que este consumo puede generar una salida de almacén (egreso de forraje/concentrado) igual que cualquier otro consumo interno — este es el punto de integración natural con Almacén.
+- `PC_CONDICION_CORPORAL` (CAM941): historial de evaluaciones de condición corporal (BCS, escala 1-5) por animal — indicador rápido de si la dieta está funcionando, sin depender de pesajes.
+- `PC_ALIMENTACION_CONSUMO` (CAM942): registra consumo diario **por potrero/lote**, no por animal individual (no es práctico pesar la comida de cada vaca) — se carga `cabezas_lote` (cuántos animales comieron esa dieta ese día) y el sistema puede sacar un costo por cabeza dividiendo. La dieta (`PC_DIETA`) y sus componentes (`PC_DIETA_COMPONENTE`) están parametrizados contra `ARTICULO`, así que este consumo puede generar una salida de almacén (egreso de forraje/concentrado) igual que cualquier otro consumo interno — este es el punto de integración natural con Almacén.
 
-## 7. Sanidad (PC050)
+## 7. Sanidad (CAM950)
 
 `PC_SANIDAD_EVENTO` es una tabla única para vacunas, desparasitaciones, tratamientos y diagnósticos (discriminada por `flag_tipo_evento`), en vez de 4 tablas separadas — simplifica el calendario sanitario (una sola consulta "próximos eventos" ordenada por `fec_prox_refuerzo`) y el control de período de retiro (`fec_fin_retiro`), que debe cruzarse contra `PC_ORDENO.flag_descarte` para no vender leche de un animal en tratamiento.
 
-## 8. Movimientos, trazabilidad y bajas (PC060–PC063)
+## 8. Resultados de laboratorio (CAM955–CAM956)
+
+Parte que faltaba en el primer diseño: los eventos sanitarios (`PC_SANIDAD_EVENTO`) registran que "se hizo" un diagnóstico o análisis, pero no el **detalle del resultado del laboratorio** (valores, unidades, rango de referencia, interpretación) — necesario tanto para exámenes veterinarios (serología de brucelosis/IBR-BVD, coprológico/huevos por gramo, perfil metabólico) como para control de calidad de semen de los sementales propios.
+
+- `PC_LABORATORIO` (CAM955): cabecera de la muestra — animal (opcional, nullable: una muestra de semen de `PC_SEMENTAL` o de forraje/agua no siempre es de un animal puntual), tipo de muestra (`flag_tipo_muestra`: Sangre/Leche/Fecal/Semen/Tejido/Otro), laboratorio externo, veterinario que tomó la muestra, fecha de toma y de resultado, estado (pendiente/con resultado). Enlace opcional a `PC_SANIDAD_EVENTO` cuando el examen es parte de un evento sanitario ya registrado.
+- `PC_LABORATORIO_DET` (CAM956): detalle — un examen de laboratorio suele traer varios parámetros en un solo resultado (ej. un perfil metabólico trae calcio, magnesio, glucosa), así que es una tabla de líneas: parámetro/analito, valor (texto, para poder guardar tanto "Positivo/Negativo" como valores numéricos), unidad de medida, rango de referencia mínimo/máximo, e interpretación (Normal/Alterado).
+
+Este resultado es el que finalmente confirma o descarta lo que `PC_DIAGNOSTICO_PRENEZ` o `PC_SANIDAD_EVENTO` ya adelantaron de forma operativa (ej. tacto rectal vs. confirmación por laboratorio de progesterona).
+
+## 9. Movimientos, trazabilidad y bajas (CAM960–CAM963)
 
 - `PC_MOVIMIENTO_POTRERO`: histórico de rotación de potreros (pastoreo rotativo).
 - `PC_DTA` + `PC_DTA_DETALLE`: Documento de Tránsito Animal exigido por SENASA para vender o trasladar animales fuera del predio. Un DTA agrupa uno o varios animales (`PC_DTA_DETALLE`).
 - `PC_BAJA`: cierre del ciclo de vida del animal (venta, muerte, descarte). Un trigger (`TRG_PC_BAJA_AI`) desactiva automáticamente el animal en `PC_ANIMAL` al insertar la baja. Si la baja es por venta, referencia el DTA correspondiente.
 
-## 9. Integración con otros módulos
+## 10. Integración con otros módulos
 
 - **Almacén** (`ARTICULO`): insumos de dieta (`PC_DIETA_COMPONENTE`) y su consumo (`PC_ALIMENTACION_CONSUMO`); también productos sanitarios podrían modelarse como artículos de almacén en vez de un catálogo aparte, a decidir según si Sanidad ya maneja stock de vacunas en Almacén.
-- **RRHH**: `cod_veterinario`/`cod_tecnico` en `PC_SANIDAD_EVENTO`, `PC_PARTO`, `PC_SERVICIO` podrían ser FK a la tabla de empleados en vez de `CHAR(6)` libre, si el veterinario/inseminador es personal de planilla.
+- **RRHH**: `cod_veterinario`/`cod_tecnico` en `PC_SANIDAD_EVENTO`, `PC_PARTO`, `PC_SERVICIO`, `PC_LABORATORIO` podrían ser FK a la tabla de empleados en vez de `CHAR(6)` libre, si el veterinario/inseminador es personal de planilla.
 - **Contabilidad**: ver sección siguiente — activo biológico bajo NIC 41.
 
-## 10. Contabilización — Activo biológico (NIC 41)
+## 11. Contabilización — Activo biológico (NIC 41)
 
 *(Sección preliminar; se ampliará con el detalle exacto de matriz contable / centros de costo / pre-asientos que ya existe en Activo Fijo — ver `README_ACTIVO_FIJO.md` y `README_CONTABILIDAD.md`.)*
 
@@ -84,9 +96,9 @@ Puntos clave ya confirmados en el sistema actual:
   4. **Baja por muerte/descarte** — retiro del activo con pérdida.
   5. (Opcional) **Costeo de leche producida** — la leche es inventario (NIC 2), no activo biológico; en la cosecha (ordeño) se reconoce como producto agrícola a valor razonable en el punto de cosecha.
 
-## 11. Próximos pasos
+## 12. Próximos pasos
 
-1. Diseñar las ventanas PowerBuilder PC001...PC0XX (código + nombre, igual convención que AL###).
+1. Diseñar las ventanas PowerBuilder CAM900...CAM96X (código + nombre, igual convención que Almacén con AL### pero usando el prefijo real de Campo).
 2. Validar el diseño de tablas con el gerente de San Martín.
 3. Confirmar con el contador el tratamiento contable exacto (cuentas, periodicidad de revaluación, si se activa auto-post o se deja manual como Activo Fijo).
 4. Definir si se necesita un catálogo de **establos/corrales** además de `PC_POTRERO`, y si `PC_ANIMAL` lleva `cod_centro_costo` directo (ver preguntas abiertas más abajo).

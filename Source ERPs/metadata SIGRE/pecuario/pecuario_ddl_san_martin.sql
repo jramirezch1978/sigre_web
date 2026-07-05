@@ -12,11 +12,17 @@
 --   4) Produccion de leche (PC_LACTANCIA, PC_ORDENO, PC_CONTROL_LECHERO)
 --   5) Nutricion (PC_CONDICION_CORPORAL, PC_ALIMENTACION_CONSUMO)
 --   6) Sanidad (PC_SANIDAD_EVENTO)
---   7) Movimientos / trazabilidad / bajas (PC_MOVIMIENTO_POTRERO, PC_DTA,
+--   7) Resultados de laboratorio (PC_LABORATORIO, PC_LABORATORIO_DET)
+--   8) Movimientos / trazabilidad / bajas (PC_MOVIMIENTO_POTRERO, PC_DTA,
 --      PC_DTA_DETALLE, PC_BAJA)
 --
 -- NOTA: ARTICULO se asume ya existente (modulo Almacen). PC_DIETA_COMPONENTE
 -- y PC_ALIMENTACION_CONSUMO referencian CANTABRIA.ARTICULO(cod_art).
+--
+-- NOTA SOBRE VENTANAS: las tablas usan el prefijo PC_* (Pecuario), pero las
+-- VENTANAS PowerBuilder usan el prefijo real de Campo (CAM###, rango CAM900-
+-- CAM969) porque Pecuario es una extension de Campo, no un modulo aparte.
+-- Ver Source ERPs/metadata SIGRE/pecuario/pecuario_modulo_diseno.md
 -- ============================================================================
 
 
@@ -1018,7 +1024,130 @@ comment on column CANTABRIA.PC_SANIDAD_EVENTO.fec_registro is 'fecha de registro
 
 
 -- ============================================================================
--- 7) MOVIMIENTOS, TRAZABILIDAD Y BAJAS
+-- 7) RESULTADOS DE LABORATORIO
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- PC_LABORATORIO
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_LABORATORIO
+(
+  nro_muestra       CHAR(12)   not null,
+  cod_origen        CHAR(2)    not null,
+  cod_animal        CHAR(12),
+  cod_semental      CHAR(10),
+  fec_muestra       DATE       not null,
+  flag_tipo_muestra CHAR(1)    not null,
+  laboratorio       VARCHAR2(100),
+  cod_veterinario   CHAR(6),
+  nro_evento        NUMBER(5),
+  fec_resultado     DATE,
+  flag_estado       CHAR(1)    default '1' not null,
+  observaciones     VARCHAR2(500),
+  cod_usr           CHAR(6),
+  fec_registro      DATE       default sysdate
+)
+tablespace CANTABRIA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 128K
+    next 128K
+    minextents 1
+    maxextents unlimited
+  );
+
+alter table CANTABRIA.PC_LABORATORIO
+  add constraint PK_PC_LABORATORIO primary key (nro_muestra)
+  using index tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_LABORATORIO
+  add constraint CK_PC_LAB_TIPO_MUESTRA check (flag_tipo_muestra in ('S','L','F','M','T','O'));
+
+alter table CANTABRIA.PC_LABORATORIO
+  add constraint CK_PC_LAB_ESTADO check (flag_estado in ('0','1','2'));
+
+alter table CANTABRIA.PC_LABORATORIO
+  add constraint FK_PC_LAB_ANIMAL foreign key (cod_origen, cod_animal)
+  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
+
+alter table CANTABRIA.PC_LABORATORIO
+  add constraint FK_PC_LAB_SEMENTAL foreign key (cod_semental)
+  references CANTABRIA.PC_SEMENTAL(cod_semental);
+
+alter table CANTABRIA.PC_LABORATORIO
+  add constraint FK_PC_LAB_SANIDAD foreign key (cod_origen, cod_animal, nro_evento)
+  references CANTABRIA.PC_SANIDAD_EVENTO(cod_origen, cod_animal, nro_evento);
+
+comment on table CANTABRIA.PC_LABORATORIO is 'Pecuario - Cabecera de muestras enviadas a laboratorio (sangre, leche, fecal, semen, tejido)';
+comment on column CANTABRIA.PC_LABORATORIO.nro_muestra is 'numero de muestra (correlativo/codigo de laboratorio)';
+comment on column CANTABRIA.PC_LABORATORIO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_LABORATORIO.cod_animal is 'animal muestreado (nulo si la muestra no es de un animal puntual, ej. forraje/agua)';
+comment on column CANTABRIA.PC_LABORATORIO.cod_semental is 'semental analizado, si la muestra es de control de calidad de semen';
+comment on column CANTABRIA.PC_LABORATORIO.fec_muestra is 'fecha de toma de la muestra';
+comment on column CANTABRIA.PC_LABORATORIO.flag_tipo_muestra is 'S=Sangre, L=Leche, F=Fecal, M=Semen, T=Tejido/necropsia, O=Otro';
+comment on column CANTABRIA.PC_LABORATORIO.laboratorio is 'laboratorio externo que proceso la muestra';
+comment on column CANTABRIA.PC_LABORATORIO.cod_veterinario is 'veterinario que tomo la muestra';
+comment on column CANTABRIA.PC_LABORATORIO.nro_evento is 'FK opcional a PC_SANIDAD_EVENTO, si la muestra es parte de un evento sanitario ya registrado';
+comment on column CANTABRIA.PC_LABORATORIO.fec_resultado is 'fecha en que el laboratorio entrego el resultado';
+comment on column CANTABRIA.PC_LABORATORIO.flag_estado is '0=Anulada, 1=Pendiente de resultado, 2=Con resultado';
+comment on column CANTABRIA.PC_LABORATORIO.observaciones is 'observaciones de la muestra';
+comment on column CANTABRIA.PC_LABORATORIO.cod_usr is 'usuario que registro';
+comment on column CANTABRIA.PC_LABORATORIO.fec_registro is 'fecha de registro en el sistema';
+
+
+-- ----------------------------------------------------------------------------
+-- PC_LABORATORIO_DET
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_LABORATORIO_DET
+(
+  nro_muestra        CHAR(12)      not null,
+  item               NUMBER(3)     not null,
+  parametro          VARCHAR2(100) not null,
+  valor_resultado    VARCHAR2(60),
+  unidad_medida      VARCHAR2(20),
+  valor_ref_min      NUMBER(12,4),
+  valor_ref_max      NUMBER(12,4),
+  flag_interpretacion CHAR(1)
+)
+tablespace CANTABRIA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 64K
+    next 64K
+    minextents 1
+    maxextents unlimited
+  );
+
+alter table CANTABRIA.PC_LABORATORIO_DET
+  add constraint PK_PC_LABORATORIO_DET primary key (nro_muestra, item)
+  using index tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_LABORATORIO_DET
+  add constraint CK_PC_LABDET_INTERP check (flag_interpretacion in ('N','A') or flag_interpretacion is null);
+
+alter table CANTABRIA.PC_LABORATORIO_DET
+  add constraint FK_PC_LABDET_MUESTRA foreign key (nro_muestra)
+  references CANTABRIA.PC_LABORATORIO(nro_muestra);
+
+comment on table CANTABRIA.PC_LABORATORIO_DET is 'Pecuario - Detalle de parametros/analitos resultantes de una muestra de laboratorio';
+comment on column CANTABRIA.PC_LABORATORIO_DET.nro_muestra is 'muestra a la que pertenece';
+comment on column CANTABRIA.PC_LABORATORIO_DET.item is 'item correlativo';
+comment on column CANTABRIA.PC_LABORATORIO_DET.parametro is 'nombre del parametro/analito (ej. Brucelosis - ELISA, Motilidad espermatica, Huevos por gramo)';
+comment on column CANTABRIA.PC_LABORATORIO_DET.valor_resultado is 'valor del resultado (texto, admite cualitativo Positivo/Negativo o numerico)';
+comment on column CANTABRIA.PC_LABORATORIO_DET.unidad_medida is 'unidad de medida del resultado, si es numerico';
+comment on column CANTABRIA.PC_LABORATORIO_DET.valor_ref_min is 'limite inferior del rango de referencia, si aplica';
+comment on column CANTABRIA.PC_LABORATORIO_DET.valor_ref_max is 'limite superior del rango de referencia, si aplica';
+comment on column CANTABRIA.PC_LABORATORIO_DET.flag_interpretacion is 'N=Normal, A=Alterado';
+
+
+-- ============================================================================
+-- 8) MOVIMIENTOS, TRAZABILIDAD Y BAJAS
 -- ============================================================================
 
 -- ----------------------------------------------------------------------------
