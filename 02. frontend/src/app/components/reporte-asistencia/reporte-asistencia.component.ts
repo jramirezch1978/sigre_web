@@ -19,8 +19,13 @@ import { MatDividerModule } from '@angular/material/divider';
 import { HttpClientModule } from '@angular/common/http';
 import { DashboardService, Origen } from '../../services/dashboard.service';
 import { MainLayoutComponent } from '../main-layout/main-layout.component';
+import { AsistenciaExportModalComponent, AsistenciaExportFormato } from '../asistencia-export-modal/asistencia-export-modal.component';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import {
+  generarDocumentoWordDesdeTabla,
+  generarNombreArchivoReporte
+} from '../../shared/utils/asistencia-reporte-export.util';
 
 // Adaptador personalizado para formato dd/MM/yyyy
 export class CustomDateAdapter extends NativeDateAdapter {
@@ -105,7 +110,8 @@ export interface ReporteAsistencia {
     MatNativeDateModule,
     MatMenuModule,
     MatDividerModule,
-    MainLayoutComponent
+    MainLayoutComponent,
+    AsistenciaExportModalComponent
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es-PE' },
@@ -139,6 +145,15 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
   // Estados
   cargando: boolean = false;
   error: string | null = null;
+  mostrarModalExport = false;
+  exportando = false;
+
+  private readonly encabezadosExportacion = [
+    'N°', 'Tipo', 'Código', 'DNI', 'Apellidos y Nombres', 'Área',
+    'Cargo', 'Turno', 'Fecha', 'Hora Ingreso', 'Hora Salida', 'Hrs Trabajadas',
+    'Hrs Extras', 'Tardanza (min)', 'Total Hrs Semana', 'Total Extras Semana',
+    'Días Asistidos', 'Faltas', '% Asistencia', '% Ausentismo'
+  ];
   
   // Columnas de la tabla
   columnasVisibles: string[] = [
@@ -147,6 +162,29 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
     'horasTrabajadas', 'horasExtras', 'tardanzaMin', 'totalHorasTrabajadasSemana',
     'totalHorasExtrasSemana', 'totalDiasAsistidos', 'totalFaltas',
     'porcAsistencia', 'porcAusentismo'
+  ];
+
+  readonly columnasTabla: { key: string; titulo: string[] }[] = [
+    { key: 'nro', titulo: ['N°'] },
+    { key: 'tipoTrabajador', titulo: ['Tipo de', 'Trabajador'] },
+    { key: 'codigoTrabajador', titulo: ['Código', 'Trabajador'] },
+    { key: 'dni', titulo: ['DNI'] },
+    { key: 'apellidosNombres', titulo: ['Apellidos y', 'Nombres'] },
+    { key: 'area', titulo: ['Área'] },
+    { key: 'cargoPuesto', titulo: ['Cargo /', 'Puesto'] },
+    { key: 'turno', titulo: ['Turno'] },
+    { key: 'fecha', titulo: ['Fecha'] },
+    { key: 'horaIngreso', titulo: ['Hora de', 'Ingreso'] },
+    { key: 'horaSalida', titulo: ['Hora de', 'Salida'] },
+    { key: 'horasTrabajadas', titulo: ['Horas', 'Trabajadas'] },
+    { key: 'horasExtras', titulo: ['Horas', 'Extras'] },
+    { key: 'tardanzaMin', titulo: ['Tardanza', '(min)'] },
+    { key: 'totalHorasTrabajadasSemana', titulo: ['Total Horas', 'Trabajadas', '(Semana)'] },
+    { key: 'totalHorasExtrasSemana', titulo: ['Total Horas', 'Extras', '(Semana)'] },
+    { key: 'totalDiasAsistidos', titulo: ['Total Días', 'Asistidos'] },
+    { key: 'totalFaltas', titulo: ['Total', 'Faltas'] },
+    { key: 'porcAsistencia', titulo: ['%', 'Asistencia'] },
+    { key: 'porcAusentismo', titulo: ['%', 'Ausentismo'] }
   ];
 
   constructor(
@@ -265,47 +303,84 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
       this.ordenAscendente = true;
     }
 
-    this.registrosFiltrados.sort((a: any, b: any) => {
-      const valorA = a[columna];
-      const valorB = b[columna];
-      
-      let comparacion = 0;
-      if (valorA == null) comparacion = -1;
-      else if (valorB == null) comparacion = 1;
-      else if (valorA < valorB) comparacion = -1;
-      else if (valorA > valorB) comparacion = 1;
-      
+    this.registrosFiltrados.sort((a: ReporteAsistencia, b: ReporteAsistencia) => {
+      const comparacion = this.compararValoresOrden(
+        (a as unknown as Record<string, unknown>)[columna],
+        (b as unknown as Record<string, unknown>)[columna]
+      );
       return this.ordenAscendente ? comparacion : -comparacion;
     });
 
     console.log('📊 Ordenado por:', columna, this.ordenAscendente ? 'ASC' : 'DESC');
   }
 
-  async exportarExcel(): Promise<void> {
-    const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet('Reporte Asistencia');
+  iconoOrden(columna: string): string {
+    if (this.columnaOrdenada !== columna) {
+      return 'swap_vert';
+    }
+    return this.ordenAscendente ? 'arrow_upward' : 'arrow_downward';
+  }
 
-    const headers = ['N°', 'Tipo', 'Código', 'DNI', 'Apellidos y Nombres', 'Área',
-      'Cargo', 'Turno', 'Fecha', 'Hora Ingreso', 'Hora Salida', 'Hrs Trabajadas',
-      'Hrs Extras', 'Tardanza (min)', 'Total Hrs Semana', 'Total Extras Semana',
-      'Días Asistidos', 'Faltas', '% Asistencia', '% Ausentismo'];
+  private compararValoresOrden(valorA: unknown, valorB: unknown): number {
+    if (valorA == null && valorB == null) {
+      return 0;
+    }
+    if (valorA == null) {
+      return -1;
+    }
+    if (valorB == null) {
+      return 1;
+    }
 
-    const headerRow = ws.addRow(headers);
-    headerRow.eachCell(cell => {
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF667EEA' } };
-      cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
-      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-      cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
-    });
-    headerRow.height = 30;
+    const numeroA = this.aNumeroOrden(valorA);
+    const numeroB = this.aNumeroOrden(valorB);
+    if (numeroA !== null && numeroB !== null) {
+      return numeroA - numeroB;
+    }
 
-    const thinBorder: Partial<ExcelJS.Borders> = {
-      top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }
-    };
+    return String(valorA).localeCompare(String(valorB), 'es', { numeric: true, sensitivity: 'base' });
+  }
 
-    this.registrosFiltrados.forEach((reg, idx) => {
+  private aNumeroOrden(valor: unknown): number | null {
+    if (typeof valor === 'number' && !Number.isNaN(valor)) {
+      return valor;
+    }
+    if (typeof valor === 'string' && valor.trim() !== '' && !Number.isNaN(Number(valor))) {
+      return Number(valor);
+    }
+    return null;
+  }
+
+  abrirModalExport(): void {
+    if (this.registros.length === 0) {
+      this.mostrarMensaje('No hay datos para exportar', 'info');
+      return;
+    }
+    this.mostrarModalExport = true;
+  }
+
+  cerrarModalExport(): void {
+    this.mostrarModalExport = false;
+  }
+
+  onExportarSeleccion(formato: AsistenciaExportFormato): void {
+    switch (formato) {
+      case 'excel':
+        void this.exportarExcel();
+        break;
+      case 'word':
+        this.exportarWord();
+        break;
+      case 'pdf':
+        this.exportarPDF();
+        break;
+    }
+  }
+
+  private obtenerFilasExportacion(): (string | number)[][] {
+    return this.registrosFiltrados.map(reg => {
       const horaSalida = reg.horaSalida ? new Date(reg.horaSalida).toLocaleTimeString('es-PE') : 'Pendiente';
-      const row = ws.addRow([
+      return [
         reg.nro, reg.tipoTrabajador, reg.codigoTrabajador, reg.dni, reg.apellidosNombres,
         reg.area, reg.cargoPuesto, reg.turno,
         reg.fecha ? reg.fecha.toString().substring(0, 10).split('-').reverse().join('/') : '',
@@ -314,79 +389,144 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
         reg.horasTrabajadas, reg.horasExtras, reg.tardanzaMin,
         reg.totalHorasTrabajadasSemana, reg.totalHorasExtrasSemana,
         reg.totalDiasAsistidos, reg.totalFaltas, reg.porcAsistencia, reg.porcAusentismo
-      ]);
+      ];
+    });
+  }
 
-      const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
-      row.eachCell((cell, colNumber) => {
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
-        cell.border = thinBorder;
-        cell.alignment = { vertical: 'middle' };
+  private subtituloExportacion(): string {
+    return `Origen: ${this.codOrigen} | Periodo: ${this.formatearFechaParaApi(this.fechaInicio)} al ${this.formatearFechaParaApi(this.fechaFin)}`;
+  }
 
-        if ([3, 4, 9, 10, 11].includes(colNumber)) {
-          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+  async exportarExcel(): Promise<void> {
+    if (this.exportando) {
+      return;
+    }
+
+    this.exportando = true;
+    try {
+      const wb = new ExcelJS.Workbook();
+      const ws = wb.addWorksheet('Reporte Asistencia');
+
+      const headerRow = ws.addRow(this.encabezadosExportacion);
+      headerRow.eachCell(cell => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF667EEA' } };
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } };
+      });
+      headerRow.height = 30;
+
+      const thinBorder: Partial<ExcelJS.Borders> = {
+        top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' }
+      };
+
+      this.obtenerFilasExportacion().forEach((fila, idx) => {
+        const row = ws.addRow(fila);
+        const reg = this.registrosFiltrados[idx];
+
+        const bgColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF9FAFB';
+        row.eachCell((cell, colNumber) => {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bgColor } };
+          cell.border = thinBorder;
+          cell.alignment = { vertical: 'middle' };
+
+          if ([3, 4, 9, 10, 11].includes(colNumber)) {
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          }
+          if (colNumber >= 12 && colNumber <= 20) {
+            cell.alignment = { horizontal: 'right', vertical: 'middle' };
+          }
+        });
+
+        if (!reg.horaSalida) {
+          const salidaCell = row.getCell(11);
+          salidaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF9800' } };
+          salidaCell.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
+          salidaCell.alignment = { horizontal: 'center', vertical: 'middle' };
         }
-        if (colNumber >= 12 && colNumber <= 20) {
-          cell.alignment = { horizontal: 'right', vertical: 'middle' };
+
+        if (reg.tardanzaMin > 15) {
+          const tardanzaCell = row.getCell(14);
+          tardanzaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEBEE' } };
+          tardanzaCell.font = { color: { argb: 'FFDC2626' }, bold: true };
         }
       });
 
-      if (!reg.horaSalida) {
-        const salidaCell = row.getCell(11);
-        salidaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF9800' } };
-        salidaCell.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 10 };
-        salidaCell.alignment = { horizontal: 'center', vertical: 'middle' };
-      }
-
-      if (reg.tardanzaMin > 15) {
-        const tardanzaCell = row.getCell(14);
-        tardanzaCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFEBEE' } };
-        tardanzaCell.font = { color: { argb: 'FFDC2626' }, bold: true };
-      }
-    });
-
-    ws.columns.forEach(col => {
-      let maxLen = 10;
-      col.eachCell?.({ includeEmpty: true }, cell => {
-        const len = cell.value ? cell.value.toString().length : 0;
-        if (len > maxLen) maxLen = len;
+      ws.columns.forEach(col => {
+        let maxLen = 10;
+        col.eachCell?.({ includeEmpty: true }, cell => {
+          const len = cell.value ? cell.value.toString().length : 0;
+          if (len > maxLen) maxLen = len;
+        });
+        col.width = Math.min(maxLen + 3, 35);
       });
-      col.width = Math.min(maxLen + 3, 35);
-    });
 
-    const buffer = await wb.xlsx.writeBuffer();
-    const fileName = `reporte-asistencia-${this.formatearFechaParaArchivo(this.fechaInicio)}-${this.formatearFechaParaArchivo(this.fechaFin)}.xlsx`;
-    saveAs(new Blob([buffer]), fileName);
-    this.mostrarMensaje('Reporte exportado a Excel', 'success');
+      const buffer = await wb.xlsx.writeBuffer();
+      const fileName = generarNombreArchivoReporte('reporte-asistencia', 'xlsx');
+      saveAs(new Blob([buffer]), fileName);
+      this.mostrarMensaje('Reporte exportado a Excel', 'success');
+      this.cerrarModalExport();
+    } catch (error) {
+      console.error('Error exportando Excel:', error);
+      this.mostrarMensaje('Error al exportar a Excel', 'error');
+    } finally {
+      this.exportando = false;
+    }
+  }
+
+  exportarWord(): void {
+    if (this.exportando) {
+      return;
+    }
+
+    this.exportando = true;
+    const blob = generarDocumentoWordDesdeTabla(
+      'Reporte de Asistencia',
+      this.subtituloExportacion(),
+      this.encabezadosExportacion,
+      this.obtenerFilasExportacion()
+    );
+    saveAs(blob, generarNombreArchivoReporte('reporte-asistencia', 'doc'));
+    this.mostrarMensaje('Reporte exportado a Word', 'success');
+    this.exportando = false;
+    this.cerrarModalExport();
   }
 
   exportarPDF(): void {
+    if (this.exportando) {
+      return;
+    }
+
     console.log('📄 Solicitando PDF al backend...');
-    
+
     if (this.registros.length === 0) {
       this.mostrarMensaje('No hay datos para exportar', 'info');
       return;
     }
 
+    this.exportando = true;
     const fechaInicio = this.formatearFechaParaApi(this.fechaInicio);
     const fechaFin = this.formatearFechaParaApi(this.fechaFin);
-    const nombreArchivo = `Reporte_Asistencia_${this.codOrigen}_${this.formatearFechaParaArchivo(this.fechaInicio)}_${this.formatearFechaParaArchivo(this.fechaFin)}.pdf`;
-    
+    const nombreArchivo = generarNombreArchivoReporte('reporte-asistencia', 'pdf');
+
     this.dashboardService.descargarReportePDF(this.codOrigen, fechaInicio, fechaFin).subscribe({
       next: (blob) => {
-        // Crear URL temporal para el blob
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = nombreArchivo;
         link.click();
         window.URL.revokeObjectURL(url);
-        
+
         this.mostrarMensaje('PDF generado exitosamente', 'success');
         console.log('✅ PDF descargado:', nombreArchivo);
+        this.exportando = false;
+        this.cerrarModalExport();
       },
       error: (error) => {
         console.error('❌ Error descargando PDF:', error);
         this.mostrarMensaje('Error al generar el PDF', 'error');
+        this.exportando = false;
       }
     });
   }
@@ -396,13 +536,6 @@ export class ReporteAsistenciaComponent implements OnInit, OnDestroy {
     const month = (fecha.getMonth() + 1).toString().padStart(2, '0');
     const day = fecha.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
-  }
-
-  private formatearFechaParaArchivo(fecha: Date): string {
-    const year = fecha.getFullYear();
-    const month = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    const day = fecha.getDate().toString().padStart(2, '0');
-    return `${year}${month}${day}`;
   }
 
   private mostrarMensaje(mensaje: string, tipo: 'success' | 'error' | 'info' = 'info'): void {

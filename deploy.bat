@@ -50,6 +50,32 @@ set "FRONTEND_SERVICE=sigre-frontend"
 set "COMPOSE_APP_SERVICES=discovery-server api-gateway seguridad-service core-service asistencia-service worker-service almacen-service compras-service contabilidad-service finanzas-service rrhh-service produccion-service comercializacion-service sigre-frontend"
 set "ALL_APP_SERVICES=%INFRA_SERVICES% %CORE_SERVICES% %COMMERCE_SERVICES% %DOMAIN_SERVICES% %FRONTEND_SERVICE%"
 
+REM ============================================================
+REM Entorno activo (linux-vm o cronos) - configurar con set-entorno.bat
+REM Se aplica AL FINAL de las definiciones de arriba para poder sobreescribirlas.
+REM ============================================================
+set "ENTORNO_FILE=%REPO_ROOT%\deploy\entorno-activo.txt"
+set "ENTORNO=cronos"
+if exist "!ENTORNO_FILE!" (
+    for /f "usebackq delims=" %%e in ("!ENTORNO_FILE!") do set "ENTORNO=%%e"
+)
+
+set ENV_FILE_ARG=--env-file "!ENV_FILE!"
+
+set "PUBLIC_HOST=%SSH_HOST%"
+
+if /i "!ENTORNO!"=="linux-vm" (
+    set "DOCKER_CTX=linux-vm"
+    set "DOCKER_CTX_BUILD=linux-vm"
+    set "COMPOSE_APP=%REPO_ROOT%\docker-compose.yml"
+    set "ASISTENCIA_SERVICES=asistencia-service"
+    set "BACKEND_SERVICES=asistencia-service"
+    set "COMPOSE_APP_SERVICES=asistencia-service sigre-frontend"
+    set "ALL_APP_SERVICES=asistencia-service sigre-frontend"
+    set "ENV_FILE_ARG="
+    set "PUBLIC_HOST=10.100.14.102"
+)
+
 for /f %%a in ('echo prompt $E ^| cmd') do set "ESC=%%a"
 set "GREEN=%ESC%[92m"
 set "RED=%ESC%[91m"
@@ -61,15 +87,32 @@ set "FORCE=0"
 set "NO_PUSH=0"
 set "NO_BUILD=0"
 set "DEPLOY_DIRECT=1"
+set "DOCKER_NO_CACHE=0"
 for %%a in (%*) do (
     if /i "%%a"=="--force" set "FORCE=1"
     if /i "%%a"=="--no-push" set "NO_PUSH=1"
     if /i "%%a"=="--no-build" set "NO_BUILD=1"
     if /i "%%a"=="--direct" set "DEPLOY_DIRECT=1"
     if /i "%%a"=="--registry" set "DEPLOY_DIRECT=0"
+    if /i "%%a"=="--no-cache" set "DOCKER_NO_CACHE=1"
+)
+
+REM Si se pasan 2+ nombres de servicio directamente (sin flags), ej:
+REM   deploy.bat sigre-frontend asistencia-service --force
+REM se despliegan TODOS en un solo comando, en vez de solo el primero.
+set "SERVICIOS_MULTI="
+set "SERVICIOS_MULTI_COUNT=0"
+for %%a in (%*) do (
+    set "ARG=%%a"
+    if not "!ARG:~0,2!"=="--" (
+        set "SERVICIOS_MULTI=!SERVICIOS_MULTI! %%a"
+        set /a SERVICIOS_MULTI_COUNT+=1
+    )
 )
 
 call :useRemoteContext >nul 2>&1
+
+if !SERVICIOS_MULTI_COUNT! geq 2 goto :deployMultiple
 
 if "%~1"=="" goto :showMenu
 if /i "%~1"=="menu" goto :showMenu
@@ -102,7 +145,7 @@ goto :validateService
 :showMenu
 echo.
 echo %CYAN%============================================================%RESET%
-echo %CYAN%  SIGRE ERP - Deploy cronos (Docker context: %DOCKER_CTX%)%RESET%
+echo %CYAN%  SIGRE ERP - Deploy [entorno: !ENTORNO! ^| Docker context: %DOCKER_CTX%]%RESET%
 echo %CYAN%  Registry: %IMAGE_REGISTRY%:%IMAGE_TAG%%RESET%
 if "!DEPLOY_DIRECT!"=="1" (
     echo %CYAN%  Modo: directo a cronos ^(save/load, sin registry remoto^)%RESET%
@@ -265,9 +308,9 @@ set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-security-!DEPLOY_LOG_TS!.log"
 call :composeUpServices "%SECURITY_SERVICES%" || goto :endScript
 call :cleanupRemoteImages
 echo %GREEN%[OK]%RESET% Modulo seguridad desplegado.
-echo   Discovery: http://%SSH_HOST%:8761
-echo   Auth:      http://%SSH_HOST%:9080/api/auth/
-echo   Gateway:   http://%SSH_HOST%:9080
+echo   Discovery: http://!PUBLIC_HOST!:8761
+echo   Auth:      http://!PUBLIC_HOST!:9080/api/auth/
+echo   Gateway:   http://!PUBLIC_HOST!:9080
 goto :endScript
 
 :pruneRemote
@@ -283,6 +326,7 @@ echo %GREEN%[OK]%RESET% Retag completado. Ejecute deploy.bat security --force pa
 goto :endScript
 
 :ensureEnv
+if /i "!ENTORNO!"=="linux-vm" exit /b 0
 if not exist "!ENV_FILE!" (
     if exist "!CRONOS_DIR!\.env.example" (
         echo %YELLOW%[WARN]%RESET% Copie .env.example a .env en deploy/cronos
@@ -307,7 +351,11 @@ exit /b 0
 docker context use %DOCKER_CTX% >nul 2>&1
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Contexto '%DOCKER_CTX%' no existe.
-    echo   docker context create cronos --docker "host=ssh://%SSH_USER%@%SSH_HOST%"
+    if /i "!ENTORNO!"=="linux-vm" (
+        echo   docker context create linux-vm --docker "host=tcp://10.100.14.102:2375"
+    ) else (
+        echo   docker context create cronos --docker "host=ssh://%SSH_USER%@%SSH_HOST%"
+    )
     exit /b 1
 )
 exit /b 0
@@ -316,10 +364,25 @@ exit /b 0
 set "SVC=%~1"
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-build-!SVC!-!DEPLOY_LOG_TS!.log"
 set "IMAGE=!IMAGE_REGISTRY!/!SVC!:!IMAGE_TAG!"
+set "BUILD_NO_CACHE="
+if /i "!SVC!"=="sigre-frontend" set "BUILD_NO_CACHE=--no-cache"
+if "!DOCKER_NO_CACHE!"=="1" set "BUILD_NO_CACHE=--no-cache"
+if /i "!ENTORNO!"=="linux-vm" (
+    REM linux-vm es un daemon Docker remoto ya accesible por TCP: se construye
+    REM directamente con docker compose sobre ese contexto, sin build+save+load.
+    echo %CYAN%[BUILD]%RESET% !SVC! en !DOCKER_CTX! ^(docker compose build !BUILD_NO_CACHE!^)
+    docker --context !DOCKER_CTX! compose -f "!COMPOSE_APP!" build !BUILD_NO_CACHE! !SVC! >> "!DEPLOY_LOG!" 2>&1
+    if errorlevel 1 (
+        echo %RED%[ERROR]%RESET% Build fallo. Ver: !DEPLOY_LOG!
+        exit /b 1
+    )
+    echo %GREEN%[OK]%RESET% Build completado: !SVC!
+    exit /b 0
+)
 echo %CYAN%[BUILD LOCAL]%RESET% !SVC! -^> !IMAGE! (contexto build: %DOCKER_CTX_BUILD%)
 if /i "!SVC!"=="sigre-frontend" (
     pushd "!FRONTEND_DIR!"
-    docker --context %DOCKER_CTX_BUILD% build -t !IMAGE! . >> "!DEPLOY_LOG!" 2>&1
+    docker --context %DOCKER_CTX_BUILD% build !BUILD_NO_CACHE! -t !IMAGE! . >> "!DEPLOY_LOG!" 2>&1
     set "BUILD_ERR=!errorlevel!"
     popd
 ) else (
@@ -338,6 +401,10 @@ exit /b 0
 :pushImage
 set "SVC=%~1"
 set "IMAGE=!IMAGE_REGISTRY!/!SVC!:!IMAGE_TAG!"
+if /i "!ENTORNO!"=="linux-vm" (
+    echo %GREEN%[OK]%RESET% Imagen construida directamente en !DOCKER_CTX!, no requiere transferencia.
+    exit /b 0
+)
 if "!NO_PUSH!"=="1" (
     echo %YELLOW%[SKIP]%RESET% Transfer/push omitido: flag --no-push.
     exit /b 0
@@ -386,6 +453,9 @@ echo %GREEN%[OK]%RESET% Docker local limpio para !SVC!
 exit /b 0
 
 :cleanupRemoteImages
+REM linux-vm es un host compartido con otros microservicios (inventory, orders,
+REM products, sync, etc.) fuera del alcance de este script: no se hace prune ahi.
+if /i "!ENTORNO!"=="linux-vm" exit /b 0
 REM Elimina TODAS las imagenes no usadas por ningun contenedor en cronos + build cache
 call :useRemoteContext >nul 2>&1
 if errorlevel 1 exit /b 0
@@ -400,6 +470,7 @@ for /f "tokens=1,2 delims=	" %%a in ('docker --context %DOCKER_CTX% builder prun
 exit /b 0
 
 :retagLegacyImagesOnCronos
+if /i "!ENTORNO!"=="linux-vm" exit /b 0
 REM Migra tags ghcr.io -> sigre en cronos sin rebuild (contenedores ya desplegados)
 set "LEGACY_REG=ghcr.io/jramirezch1978/sigre"
 call :useRemoteContext >nul 2>&1
@@ -422,12 +493,12 @@ call :ensureEnv || exit /b 1
 call :useRemoteContext || exit /b 1
 call :retagLegacyImagesOnCronos
 if "!DEPLOY_DIRECT!"=="1" (
-    echo %CYAN%[CRONOS]%RESET% up --pull never !COMPOSE_SVCS!...
-    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d --pull never !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
+    echo %CYAN%[!ENTORNO!]%RESET% up --pull never !COMPOSE_SVCS!...
+    docker compose -f "!COMPOSE_APP!" !ENV_FILE_ARG! up -d --pull never !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
 ) else (
-    echo %CYAN%[CRONOS]%RESET% pull + up !COMPOSE_SVCS!...
-    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" pull !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
-    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
+    echo %CYAN%[!ENTORNO!]%RESET% pull + up !COMPOSE_SVCS!...
+    docker compose -f "!COMPOSE_APP!" !ENV_FILE_ARG! pull !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
+    docker compose -f "!COMPOSE_APP!" !ENV_FILE_ARG! up -d !COMPOSE_SVCS! >> "!DEPLOY_LOG!" 2>&1
 )
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Deploy remoto fallo. Ver: !DEPLOY_LOG!
@@ -451,21 +522,21 @@ set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-up-!SVC!-!DEPLOY_LOG_TS!.log"
 call :useRemoteContext || exit /b 1
 call :retagLegacyImagesOnCronos
 if "!DEPLOY_DIRECT!"=="1" (
-    echo %CYAN%[CRONOS]%RESET% up --no-deps --pull never !SVC!...
-    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d --no-deps --pull never !SVC! >> "!DEPLOY_LOG!" 2>&1
+    echo %CYAN%[!ENTORNO!]%RESET% up --no-deps --pull never !SVC!...
+    docker compose -f "!COMPOSE_APP!" !ENV_FILE_ARG! up -d --no-deps --pull never !SVC! >> "!DEPLOY_LOG!" 2>&1
 ) else (
-    echo %CYAN%[CRONOS]%RESET% pull + up --no-deps !SVC!...
-    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" pull !SVC! >> "!DEPLOY_LOG!" 2>&1
-    docker compose -f "!COMPOSE_APP!" --env-file "!ENV_FILE!" up -d --no-deps !SVC! >> "!DEPLOY_LOG!" 2>&1
+    echo %CYAN%[!ENTORNO!]%RESET% pull + up --no-deps !SVC!...
+    docker compose -f "!COMPOSE_APP!" !ENV_FILE_ARG! pull !SVC! >> "!DEPLOY_LOG!" 2>&1
+    docker compose -f "!COMPOSE_APP!" !ENV_FILE_ARG! up -d --no-deps !SVC! >> "!DEPLOY_LOG!" 2>&1
 )
 if errorlevel 1 (
-    echo %RED%[ERROR]%RESET% Deploy remoto fallo. Ver: !DEPLOY_LOG!
+    echo %RED%[ERROR]%RESET% Deploy fallo. Ver: !DEPLOY_LOG!
     powershell -NoProfile -Command "Get-Content -LiteralPath '!DEPLOY_LOG!' -Tail 6 -ErrorAction SilentlyContinue"
-    echo %YELLOW%[TIP]%RESET% Revisar logs: docker --context cronos logs ^<servicio^> --tail 80
+    echo %YELLOW%[TIP]%RESET% Revisar logs: docker --context !DOCKER_CTX! logs ^<servicio^> --tail 80
     echo %YELLOW%[TIP]%RESET% Si falta infra base: deploy.bat security --force
     exit /b 1
 )
-echo %GREEN%[OK]%RESET% !SVC! activo en cronos.
+echo %GREEN%[OK]%RESET% !SVC! activo en !ENTORNO!.
 exit /b 0
 
 :deployOneService
@@ -476,6 +547,42 @@ if "!NO_BUILD!"=="0" (
 )
 call :remoteUp "!SERVICE!" || goto :endScript
 call :cleanupRemoteImages
+goto :endScript
+
+:deployMultiple
+REM Despliega varios servicios pasados directamente como argumentos.
+REM Ej: deploy.bat sigre-frontend asistencia-service --force
+echo %CYAN%[INFO]%RESET% Desplegando servicios: !SERVICIOS_MULTI!
+set "FALLO_MULTI=0"
+for %%s in (!SERVICIOS_MULTI!) do (
+    call :isKnownService "%%s"
+    if errorlevel 1 (
+        echo %RED%[ERROR]%RESET% Servicio desconocido: %%s ^(omitido^)
+        echo   Ejecute: deploy.bat list
+        set "FALLO_MULTI=1"
+    ) else (
+        set "DOCKERFILE_OK=1"
+        if not exist "!BACKEND_DIR!\%%s\Dockerfile" (
+            if /i not "%%s"=="sigre-frontend" set "DOCKERFILE_OK=0"
+        )
+        if "!DOCKERFILE_OK!"=="0" (
+            echo %RED%[ERROR]%RESET% No existe Dockerfile: !BACKEND_DIR!\%%s\Dockerfile ^(omitido^)
+            set "FALLO_MULTI=1"
+        ) else (
+            if "!NO_BUILD!"=="0" (
+                call :buildBackendImage "%%s" || set "FALLO_MULTI=1"
+                call :pushImage "%%s" || set "FALLO_MULTI=1"
+            )
+            call :remoteUp "%%s" || set "FALLO_MULTI=1"
+        )
+    )
+)
+call :cleanupRemoteImages
+if "!FALLO_MULTI!"=="1" (
+    echo %RED%[ERROR]%RESET% Uno o mas servicios fallaron. Revise los mensajes de arriba.
+) else (
+    echo %GREEN%[OK]%RESET% Servicios desplegados en !ENTORNO!: !SERVICIOS_MULTI!
+)
 goto :endScript
 
 :deployBackend
@@ -491,7 +598,7 @@ set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-backend-!DEPLOY_LOG_TS!.log"
 call :composeUpServices "%BACKEND_SERVICES%" || goto :endScript
 call :cleanupRemoteImages
 echo %GREEN%[OK]%RESET% Backend desplegado.
-echo   API Gateway: http://%SSH_HOST%:9080
+echo   API Gateway: http://!PUBLIC_HOST!:9080
 goto :endScript
 
 :deployAll
@@ -507,8 +614,8 @@ set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-all-!DEPLOY_LOG_TS!.log"
 call :composeUpServices "%BACKEND_SERVICES% %FRONTEND_SERVICE%" || goto :endScript
 call :cleanupRemoteImages
 echo %GREEN%[OK]%RESET% Backend + frontend desplegados.
-echo   Frontend: http://%SSH_HOST%:8080
-echo   API Gateway: http://%SSH_HOST%:9080
+echo   Frontend: http://!PUBLIC_HOST!:8080
+echo   API Gateway: http://!PUBLIC_HOST!:9080
 goto :endScript
 
 :deployFrontend
@@ -560,7 +667,7 @@ goto :endScript
 
 :remoteStatus
 call :useRemoteContext || goto :endScript
-echo %CYAN%Contenedores en cronos:%RESET%
+echo %CYAN%Contenedores en !ENTORNO!:%RESET%
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 goto :endScript
 
@@ -605,12 +712,16 @@ echo   aprovision-service  sig-service       sigre-frontend
 echo.
 echo %YELLOW%En cronos (compose):%RESET% %COMPOSE_APP_SERVICES%
 echo.
+echo %YELLOW%Multiples servicios en un comando:%RESET%
+echo   deploy.bat sigre-frontend asistencia-service --force
+echo.
 echo %YELLOW%Flags:%RESET%
 echo   --force     Sin confirmacion en stack
 echo   --direct    Build + transfer a cronos y limpiar imagen local ^(default^)
 echo   --registry  Push/pull via registry remoto ^(requiere docker login^)
 echo   --no-push   Build local sin transferir ni push
 echo   --no-build  Solo up remoto ^(requiere imagen ya en cronos^)
+echo   --no-cache  Build Docker sin cache ^(sigre-frontend siempre; otros con este flag^)
 echo.
 echo %YELLOW%Postman:%RESET% 01. documentacion\SIGRE Web ERP.postman_collection.json
 echo.

@@ -6,15 +6,17 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { CentrosCostoDashboardComponent } from './components/centros-costo-dashboard/centros-costo-dashboard.component';
 import { ReporteAsistenciaComponent } from './components/reporte-asistencia/reporte-asistencia.component';
 import { ReporteProduccionComponent } from './components/reporte-produccion/reporte-produccion.component';
+import { OpcionNoDesarrolladaComponent } from './components/opcion-no-desarrollada/opcion-no-desarrollada.component';
 
 export const routes: Routes = [
-  { path: '', component: MenuInicialComponent },
-  { path: 'asistencia', component: AsistenciaComponent },
-  { path: 'racion-selection', component: RacionSelectionComponent },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'centros-costo-dashboard', component: CentrosCostoDashboardComponent },
-  { path: 'reporte-asistencia', component: ReporteAsistenciaComponent },
-  { path: 'reporte-produccion', component: ReporteProduccionComponent },
+  { path: '', component: MenuInicialComponent, title: 'Asistencia' },
+  { path: 'asistencia', component: AsistenciaComponent, title: 'Asistencia' },
+  { path: 'racion-selection', component: RacionSelectionComponent, title: 'Selección de Ración' },
+  { path: 'dashboard', component: DashboardComponent, title: 'Dashboard de Asistencia' },
+  { path: 'centros-costo-dashboard', component: CentrosCostoDashboardComponent, title: 'Centros de Costo' },
+  { path: 'reporte-asistencia', component: ReporteAsistenciaComponent, title: 'Reporte de Asistencia' },
+  { path: 'reporte-produccion', component: ReporteProduccionComponent, title: 'Reporte de Producción' },
+  { path: 'en-construccion', component: OpcionNoDesarrolladaComponent, title: 'En Construcción' },
   {
     path: 'sigre',
     loadChildren: () => import('./erp/erp.routes').then(m => m.erpRoutes)

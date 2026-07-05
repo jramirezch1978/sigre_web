@@ -130,6 +130,9 @@ services:
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://discovery-server:8761/eureka
       - TZ=America/Lima
       - JAVA_OPTS=-Xmx512m -Xms256m -Duser.timezone=America/Lima
+      # Enrutamiento automático por IP de kiosco (separadas por coma; opcional)
+      - ASISTENCIA_IPS_GARITA=192.168.30.61,192.168.30.62
+      - ASISTENCIA_IPS_PRODUCCION=192.168.30.63,192.168.30.64
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
@@ -326,7 +329,8 @@ services:
     environment:
       - NODE_ENV=production
       - TZ=America/Lima
-      - API_URL=http://10.100.14.102:8084
+      # Selecciona assets/empresas/transmarina.json al arrancar el contenedor (docker-entrypoint.sh)
+      - EMPRESA_ACTIVA=transmarina
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro

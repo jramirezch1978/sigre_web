@@ -47,8 +47,9 @@ if /i "%~1"=="test" goto :testAll
 if /i "%~1"=="package" goto :packageAll
 if /i "%~1"=="help" goto :showHelp
 
-echo %RED%Opcion desconocida: %~1%RESET%
-goto :showHelp
+REM Ningun comando conocido: tratar TODOS los argumentos como nombres de
+REM modulo/servicio a compilar (ej: build.bat sigre-frontend asistencia-service)
+goto :buildMultiple
 
 :showMenu
 echo.
@@ -112,6 +113,24 @@ echo %GREEN%[OK]%RESET% Node:
 node -v
 exit /b 0
 
+REM ============================================================
+REM Sincroniza node_modules con package.json/package-lock.json.
+REM NO usar solo "if not exist node_modules": si alguien agrega una
+REM dependencia nueva (ej. @ionic/angular) y node_modules ya existia
+REM de un build anterior, quedaba desactualizado y el build fallaba
+REM con "Cannot find module" en vez de instalar lo que falta.
+REM Debe invocarse con el directorio actual ya dentro de FRONTEND_DIR.
+REM ============================================================
+:ensureNpmDeps
+if not exist "node_modules" (
+    echo %CYAN%[NPM]%RESET% node_modules no existe, instalando ^(npm ci^)...
+    call npm ci >> "!BUILD_LOG!" 2>&1
+    exit /b !errorlevel!
+)
+echo %CYAN%[NPM]%RESET% Sincronizando dependencias ^(npm install^)...
+call npm install >> "!BUILD_LOG!" 2>&1
+exit /b !errorlevel!
+
 :buildBackendAll
 set "BUILD_LOG=!BUILD_LOG_DIR!\build-backend-all-!BUILD_LOG_TS!.log"
 call :checkJava || goto :endScript
@@ -151,6 +170,66 @@ if "%~2"=="" (
 set "MODULES_TO_BUILD=%~2"
 goto :buildModules
 
+:buildMultiple
+REM Compila varios modulos/servicios pasados directamente como argumentos,
+REM mezclando modulos backend (mvn) y el frontend (npm) en un solo comando.
+REM Ej: build.bat sigre-frontend asistencia-service
+set "BUILD_LOG=!BUILD_LOG_DIR!\build-multiple-!BUILD_LOG_TS!.log"
+set "MODULOS_BACKEND="
+set "INCLUIR_FRONTEND=0"
+for %%m in (%*) do (
+    if /i "%%m"=="sigre-frontend" (
+        set "INCLUIR_FRONTEND=1"
+    ) else if /i "%%m"=="frontend" (
+        set "INCLUIR_FRONTEND=1"
+    ) else (
+        set "MODULOS_BACKEND=!MODULOS_BACKEND! %%m"
+    )
+)
+
+set "BUILD_FAILED=0"
+if not "!MODULOS_BACKEND!"=="" (
+    call :checkJava || set "BUILD_FAILED=1"
+    call :checkMaven || set "BUILD_FAILED=1"
+    if "!BUILD_FAILED!"=="0" (
+        echo [build] Log: !BUILD_LOG!
+        for %%m in (!MODULOS_BACKEND!) do (
+            echo %CYAN%[BUILD]%RESET% %%m
+            if exist "!BACKEND_DIR!\%%m" (
+                pushd "!BACKEND_DIR!"
+                call mvn clean install -DskipTests -pl %%m -am >> "!BUILD_LOG!" 2>&1
+                if errorlevel 1 set "BUILD_FAILED=1"
+                popd
+            ) else (
+                echo %RED%[ERROR]%RESET% No existe modulo backend: %%m
+                set "BUILD_FAILED=1"
+            )
+        )
+    )
+)
+
+if "!INCLUIR_FRONTEND!"=="1" (
+    call :checkNode || set "BUILD_FAILED=1"
+    if "!BUILD_FAILED!"=="0" (
+        echo %CYAN%[BUILD]%RESET% sigre-frontend
+        pushd "!FRONTEND_DIR!"
+        call :ensureNpmDeps || set "BUILD_FAILED=1"
+        if "!BUILD_FAILED!"=="0" (
+            call :cleanFrontendBuildCache
+            call npm run build:prod >> "!BUILD_LOG!" 2>&1
+            if errorlevel 1 set "BUILD_FAILED=1"
+        )
+        popd
+    )
+)
+
+if "!BUILD_FAILED!"=="1" (
+    echo %RED%[ERROR]%RESET% Fallo compilando uno o mas modulos. Ver: !BUILD_LOG!
+) else (
+    echo %GREEN%[OK]%RESET% Modulos compilados: %*
+)
+goto :endScript
+
 :buildModules
 set "BUILD_LOG=!BUILD_LOG_DIR!\build-modules-!BUILD_LOG_TS!.log"
 call :checkJava || goto :endScript
@@ -176,12 +255,34 @@ if "!BUILD_FAILED!"=="1" (
 )
 goto :endScript
 
+REM ============================================================
+REM Limpia cache de Angular antes de compilar frontend (equivalente
+REM local a docker build --no-cache: evita bundles obsoletos).
+REM Debe invocarse con el directorio actual dentro de FRONTEND_DIR.
+REM ============================================================
+:cleanFrontendBuildCache
+if exist ".angular\cache" (
+    echo %CYAN%[CLEAN]%RESET% Eliminando cache de Angular ^(.angular\cache^)...
+    rmdir /s /q ".angular\cache" >> "!BUILD_LOG!" 2>&1
+)
+if exist "dist\sigre-asistencia" (
+    echo %CYAN%[CLEAN]%RESET% Eliminando dist anterior ^(dist\sigre-asistencia^)...
+    rmdir /s /q "dist\sigre-asistencia" >> "!BUILD_LOG!" 2>&1
+)
+exit /b 0
+
 :buildFrontend
 set "BUILD_LOG=!BUILD_LOG_DIR!\build-frontend-!BUILD_LOG_TS!.log"
 call :checkNode || goto :endScript
 echo %CYAN%[INFO]%RESET% Compilando frontend Angular...
 pushd "!FRONTEND_DIR!"
-if not exist "node_modules" call npm ci >> "!BUILD_LOG!" 2>&1
+call :ensureNpmDeps
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Fallo instalando dependencias npm. Ver: !BUILD_LOG!
+    popd
+    goto :endScript
+)
+call :cleanFrontendBuildCache
 call npm run build:prod >> "!BUILD_LOG!" 2>&1
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Fallo frontend. Ver: !BUILD_LOG!
@@ -226,7 +327,13 @@ call :checkNode || exit /b 1
 echo %CYAN%[INFO]%RESET% Compilando frontend ^(ng build dev^)...
 echo [build] Log: !BUILD_LOG!
 pushd "!FRONTEND_DIR!"
-if not exist "node_modules" call npm ci >> "!BUILD_LOG!" 2>&1
+call :ensureNpmDeps
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% Fallo instalando dependencias npm. Ver: !BUILD_LOG!
+    popd
+    exit /b 1
+)
+call :cleanFrontendBuildCache
 call npm run build >> "!BUILD_LOG!" 2>&1
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Fallo compilacion frontend. Ver: !BUILD_LOG!
@@ -322,6 +429,11 @@ echo                         compile ^<modulo^>  un modulo backend
 echo   all                 backend-all + frontend
 echo   clean / test / package
 echo   menu / help
+echo.
+echo   ^<nombre^> [^<nombre2^> ...]  Compilar uno o varios modulos/servicios directamente
+echo                             (mezcla backend + frontend), ej:
+echo                               build.bat asistencia-service
+echo                               build.bat sigre-frontend asistencia-service
 echo.
 goto :endScript
 

@@ -56,6 +56,7 @@ docker logs sigre-frontend > '.\01. documentacion\logs\log-sigre-frontend.txt';
 
 # 1. Verificar que el frontend esté funcionando
 Invoke-WebRequest -Uri "http://10.100.14.102:8080" -UseBasicParsing
+Invoke-WebRequest -Uri "http://10.100.14.102:8080" -UseBasicParsing
 
 # 2. Ver logs del frontend para errores
 docker logs sigre-frontend
@@ -143,6 +144,14 @@ docker compose restart discovery-server
 =========================================================
 
 =========================================================
+ASISTENCIA, SYNC-SERVICES, CONFIG-SERVER Y SIGRE_WEB
+=========================================================
+docker compose down config-server asistencia-service sync-service sigre-frontend
+docker compose up --build -d config-server asistencia-service sync-service sigre-frontend
+docker compose restart discovery-server
+=========================================================
+
+=========================================================
 ASISTENCIA Y SYNC_SERVICE
 =========================================================
 docker compose down asistencia-service sync-service
@@ -164,212 +173,16 @@ COFIG-SERVER Y SYNC-SERVICE
 docker compose down config-server sync-service
 docker compose up --build -d config-server sync-service
 docker compose restart discovery-server
-=========================================================
+=========================================================   
 
 docker compose restart asistencia-service
 docker compose restart sync-service
+
+./set-context.bat linux-vm
+./build.bat sigre-frontend asistencia-service
+./deploy.bat sigre-frontend asistencia-service --force
 
 
 
 Dni de prueba
 22300596
-
-Encender bajo demanda
-
-
-Encender: docker compose --profile tools up -d sonarqube
-Apagar: docker compose --profile tools stop sonarqube
-Ver logs: docker logs sonarqube -f
-
-=========================================================
-CRONOS — SIGRE ERP (contexto.txt / Oracle Linux 9 + Docker)
-=========================================================
-Servidor: crisaor.serveftp.com (192.168.0.163) | Red: stack_default
-Stack infra (Terraform): postgres17 + SonarQube — recreable idéntico a cronos
-JDBC app: jdbc:postgresql://postgres:5432/... (hostname postgres, red interna)
-Secretos: deploy\cronos\.env (POSTGRES_PASSWORD, ERP_APP_PASSWORD, SONAR_DB_PASSWORD)
-
-Puertos app: 8080 frontend, 9080 gateway
-Stack: 5432 PG, 9001 SonarQube (perfil tools, restart no)
-
---- Recrear stack completo con Terraform (PG + SonarQube + init SQL) ---
-cd "e:\Work\sigre_web\05. Terraform"
-terraform init
-terraform apply -var-file=environments/cronos.tfvars -var-file=secrets.tfvars
-cd e:\Work\sigre_web
-.\server-manage.bat sync-compose
-.\deploy.bat stack --force
-.\database-deploy.bat create-security --force
-.\database-deploy.bat create-template --force
-.\database-deploy.bat clone cantabria --force
-REM SonarQube bajo demanda:
-.\server-manage.bat sonarqube
-
---- Base de datos (psql via NAT 5432; sin SSH — credenciales deploy\cronos\.env) ---
-cd e:\Work\sigre_web
-copy deploy\cronos\.env.example deploy\cronos\.env
-REM Editar deploy\cronos\.env con las mismas contraseñas que secrets.tfvars
-.\database-deploy.bat create-security --force
-.\database-deploy.bat create-template --force
-.\database-deploy.bat clone cantabria --force
-
---- Contexto Docker cronos (solo deploy.bat / server-manage.bat; requiere clave SSH) ---
-docker context create cronos --docker "host=ssh://jramirez@crisaor.serveftp.com"
-REM Clave SSH (una vez): ssh-keygen -t ed25519  ^&  type %USERPROFILE%\.ssh\id_ed25519.pub ^| ssh jramirez@crisaor.serveftp.com "mkdir -p ~/.ssh ^&^& cat >> ~/.ssh/authorized_keys"
-
---- Build local (NO compilar en cronos) ---
-.\build.bat backend
-.\build.bat frontend
-
---- Despliegue en cronos (build local + transfer directo + limpieza local) ---
-.\deploy.bat list
-.\deploy.bat backend
-.\deploy.bat seguridad-service --force
-.\deploy.bat asistencia-service --force
-.\deploy.bat api-gateway --force
-.\deploy.bat frontend
-.\deploy.bat all
-REM Opcional registry remoto: deploy.bat ^<servicio^> --force --registry  ^(requiere docker login^)
-
---- Despliegue por modulo ---
-.\deploy.bat asistencia --force
-.\deploy.bat logistica --force
-.\deploy.bat finanzas --force
-.\deploy.bat erp --force
-.\deploy.bat security --force
-REM logistica: discovery api-gateway seguridad almacen compras
-REM finanzas: discovery api-gateway seguridad contabilidad finanzas
-REM sync-service incluye ms-worker (schema sync, jobs activos)
-.\deploy.bat sync-service --force
-
---- Despliegue por grupo ---
-.\deploy.bat infra
-.\deploy.bat core
-.\deploy.bat commerce
-.\deploy.bat domain
-.\deploy.bat ms-all
-
---- Postman ---
-Importar coleccion: 01. documentacion\SIGRE Web ERP.postman_collection.json
-Importar entorno:  01. documentacion\SIGRE Web ERP - cronos.postman_environment.json
-Activar entorno "SIGRE Web ERP - cronos" en Postman.
-Variables cronos:
-  base_url      = http://crisaor.serveftp.com:9080   (API Gateway)
-  frontend_url  = http://crisaor.serveftp.com:8080   (nginx / Angular)
-  postgres        crisaor.serveftp.com:5432
-  asistencia BD   crisaor.serveftp.com:5433
-Regenerar coleccion desde controllers Java:
-  powershell -NoProfile -File scripts\generate-sigre-postman-endpoints.ps1
-Flujo auth: POST /api/auth/login -> POST /api/auth/seleccionar-empresa (guarda jwt_definitive_token) -> resto de APIs
-Health rapido: GET {{base_url}}/actuator/health
-
---- Gestion servidor ---
-.\server-manage.bat status
-.\server-manage.bat app-up
-.\server-manage.bat sonarqube
-REM SonarQube: http://crisaor.serveftp.com:9001
-
---- Logs ---
-.\download-log.bat all
-.\download-log.bat compose
-.\download-log.bat core all
-.\download-log.bat backend core-service seguridad-service
-.\download-log.bat frontend
-
---- Pools HikariCP (PG max_connections=100) ---
-Backend desplegado: asistencia-service pool=5
-Regla: (N servicios x 5) + 15 reserva <= 85 conexiones app
-
---- Checklist post-despliegue ---
-curl http://crisaor.serveftp.com:9080/actuator/health
-curl http://crisaor.serveftp.com:8080
-docker exec postgres17 pg_isready -U postgres
-=========================================================
-
-
-cd e:\Work\sigre_web
-.\deploy.bat seguridad-service --force
-.\deploy.bat api-gateway --force
-.\deploy.bat backend --force
-
-.\database-deploy.bat create-security
-.\build.bat frontend
-
-
-
-.\download-log.bat all          REM todos los del repo
-.\download-log.bat compose      REM solo los desplegados en cronos (docker-compose.app.yml)
-.\download-log.bat core all     REM seguridad + core + asistencia
-.\download-log.bat infra all
-.\download-log.bat commerce all
-.\download-log.bat domain all
-.\download-log.bat backend core-service seguridad-service
-.\download-log.bat stack all    REM postgres17, sonarqube
-
-.\download-log.bat backend asistencia-service contabilidad-service almacen-service
-
-
-cd e:\Work\sigre_web
-.\download-log.bat asistencia-service
-.\download-log.bat core asistencia-service seguridad-service
-.\download-log.bat backend seguridad-service sigre-frontend api-gateway core-service almacen-service contabilidad-service
-
-
-docker builder prune -af
-docker image prune -f
-./deploy.bat frontend --force
-
-
-Aquí tienes los enlaces para ingresar a SIGRE en cronos:
-
-ERP (usuarios operativos)
-http://crisaor.serveftp.com:8080/sigre/inicio
-
-IMPORTANTE — enlaces por WhatsApp / celular:
-El mensaje puede mostrar bien http://crisaor.serveftp.com:8080/sigre/inicio,
-pero al hacer clic WhatsApp/Safari abre https://... (upgrade a HTTPS).
-Solución: HTTPS con certificado válido en puerto publicado 9043:
-  https://crisaor.serveftp.com:9043/sigre/inicio
-Router: externo 9043 → interno 192.168.0.163:8043 (Nginx TLS → Docker :8080).
-Ver configuracion_ssh.txt
-
-Consola de administración
-http://crisaor.serveftp.com:8080/admin/login
-
-Raíz (redirige al flujo principal)
-http://crisaor.serveftp.com:8080
-
-API Gateway (solo para pruebas técnicas):
-http://crisaor.serveftp.com:9080/actuator/health
-
-https://dash.cloudflare.com/ab897d4ca6b412252fa4c024b17b7f14/turnstile/add
-----------------------------------------------------------
-Turnstile SIGRE ERP Login
-Site key (frontend appsettings.json): 0x4AAAAAADmqJ_gIgKXbSCC6
-Secret key: ver deploy/cronos/.env → TURNSTILE_SECRET_KEY (no commitear)
-
-
-
-{
-  "sigla": "BLUECOAST",
-  "razonSocial": "BLUE COAST S.A.C.",
-  "ruc": "20609837340",
-  "nombreComercial": "BLUE COAST",
-  "personeria": "J",
-  "dirCalle": "AV. RIVERA NAVARRETE NRO. 2801 DPTO. 1606",
-  "direccion": "AV. RIVERA NAVARRETE NRO. 2801 DPTO. 1606",
-  "dirDistrito": "SAN ISIDRO",
-  "dirProvincia": "LIMA",
-  "dirDepartamento": "LIMA",
-  "dirPais": "PERU",
-  "dirUbigeo": "150131",
-  "ciuCodPais": "PE",
-  "correoContacto": "javier.camino@bluecoastsac.com",
-  "celular": "+51 994 076 286",
-  "represLegal": "Francisco Camino Rivera",
-  "dniRepresLegal": "",
-  "flagReplicacion": "1",
-  "flagCntrlCd": "0"
-}
-
-

@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
-import { NotImplementedService } from '../../services/not-implemented.service';
 
 /**
  * Layout principal con menú lateral que se reutiliza en todas las páginas del dashboard
@@ -36,9 +35,16 @@ export class MainLayoutComponent {
   };
 
   constructor(
-    private router: Router,
-    private notImplementedService: NotImplementedService
+    private router: Router
   ) {}
+
+  /**
+   * Navega a la pagina de "opcion en construccion" (mismo patron que el ERP)
+   * en vez de mostrar un modal, para las opciones del menu aun no desarrolladas.
+   */
+  private irANoDesarrollado(nombreOpcion: string): void {
+    void this.router.navigate(['/en-construccion'], { queryParams: { op: nombreOpcion } });
+  }
 
   toggleMenu() {
     this.menuCollapsed = !this.menuCollapsed;
@@ -55,31 +61,31 @@ export class MainLayoutComponent {
   volverMenuPrincipal() { this.router.navigate(['/']); }
 
   // Métodos del menú lateral - No implementados
-  onMetricasTiempoReal() { this.notImplementedService.menuNotImplemented('Métricas Tiempo Real'); }
-  onRegistrosDiarios() { this.notImplementedService.menuNotImplemented('Registros Diarios'); }
-  onReportesPorEmpleado() { this.notImplementedService.menuNotImplemented('Reportes por Empleado'); }
-  onHorariosYTurnos() { this.notImplementedService.menuNotImplemented('Horarios y Turnos'); }
-  onAusenciasPermisos() { this.notImplementedService.menuNotImplemented('Ausencias y Permisos'); }
-  onControlRaciones() { this.notImplementedService.menuNotImplemented('Control de Raciones'); }
-  onMenusDiarios() { this.notImplementedService.menuNotImplemented('Menús Diarios'); }
-  onReportesAlimentarios() { this.notImplementedService.menuNotImplemented('Reportes Alimentarios'); }
-  onReportesSemanales() { this.notImplementedService.reportNotImplemented('Reportes Semanales'); }
-  onReportesMensuales() { this.notImplementedService.reportNotImplemented('Reportes Mensuales'); }
-  onAnalisisTendencias() { this.notImplementedService.menuNotImplemented('Análisis de Tendencias'); }
-  onExportarDatos() { this.notImplementedService.menuNotImplemented('Exportar Datos'); }
-  onResumenPorArea() { this.notImplementedService.menuNotImplemented('Resumen por Área'); }
-  onProductividad() { this.notImplementedService.menuNotImplemented('Productividad'); }
-  onCostosOperativos() { this.notImplementedService.menuNotImplemented('Costos Operativos'); }
-  onParametrosGenerales() { this.notImplementedService.menuNotImplemented('Parámetros Generales'); }
-  onDispositivos() { this.notImplementedService.menuNotImplemented('Dispositivos'); }
-  onSincronizacion() { this.notImplementedService.menuNotImplemented('Sincronización'); }
-  onUsuariosSistema() { this.notImplementedService.menuNotImplemented('Usuarios del Sistema'); }
-  onPermisosRoles() { this.notImplementedService.menuNotImplemented('Permisos y Roles'); }
-  onLogsSistema() { this.notImplementedService.menuNotImplemented('Logs del Sistema'); }
-  onConfiguracion() { this.notImplementedService.actionNotImplemented('Configuración'); }
-  onPantallaCompleta() { this.notImplementedService.actionNotImplemented('Pantalla Completa'); }
-  onAyuda() { this.notImplementedService.actionNotImplemented('Ayuda'); }
-  onMiPerfil() { this.notImplementedService.actionNotImplemented('Mi Perfil'); }
-  onConfiguracionUsuario() { this.notImplementedService.actionNotImplemented('Configuración de Usuario'); }
+  onMetricasTiempoReal() { this.irANoDesarrollado('Métricas Tiempo Real'); }
+  onRegistrosDiarios() { this.irANoDesarrollado('Registros Diarios'); }
+  onReportesPorEmpleado() { this.irANoDesarrollado('Reportes por Empleado'); }
+  onHorariosYTurnos() { this.irANoDesarrollado('Horarios y Turnos'); }
+  onAusenciasPermisos() { this.irANoDesarrollado('Ausencias y Permisos'); }
+  onControlRaciones() { this.irANoDesarrollado('Control de Raciones'); }
+  onMenusDiarios() { this.irANoDesarrollado('Menús Diarios'); }
+  onReportesAlimentarios() { this.irANoDesarrollado('Reportes Alimentarios'); }
+  onReportesSemanales() { this.irANoDesarrollado('Reportes Semanales'); }
+  onReportesMensuales() { this.irANoDesarrollado('Reportes Mensuales'); }
+  onAnalisisTendencias() { this.irANoDesarrollado('Análisis de Tendencias'); }
+  onExportarDatos() { this.irANoDesarrollado('Exportar Datos'); }
+  onResumenPorArea() { this.irANoDesarrollado('Resumen por Área'); }
+  onProductividad() { this.irANoDesarrollado('Productividad'); }
+  onCostosOperativos() { this.irANoDesarrollado('Costos Operativos'); }
+  onParametrosGenerales() { this.irANoDesarrollado('Parámetros Generales'); }
+  onDispositivos() { this.irANoDesarrollado('Dispositivos'); }
+  onSincronizacion() { this.irANoDesarrollado('Sincronización'); }
+  onUsuariosSistema() { this.irANoDesarrollado('Usuarios del Sistema'); }
+  onPermisosRoles() { this.irANoDesarrollado('Permisos y Roles'); }
+  onLogsSistema() { this.irANoDesarrollado('Logs del Sistema'); }
+  onConfiguracion() { this.irANoDesarrollado('Configuración'); }
+  onPantallaCompleta() { this.irANoDesarrollado('Pantalla Completa'); }
+  onAyuda() { this.irANoDesarrollado('Ayuda'); }
+  onMiPerfil() { this.irANoDesarrollado('Mi Perfil'); }
+  onConfiguracionUsuario() { this.irANoDesarrollado('Configuración de Usuario'); }
 }
 

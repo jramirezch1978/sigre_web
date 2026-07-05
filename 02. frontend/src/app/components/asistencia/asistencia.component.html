@@ -29,7 +29,6 @@
               #codigoInputRef
               matInput 
               [(ngModel)]="codigoInput" 
-              placeholder="Ej: 12345678, EMP001, o 123456789"
               (keyup.enter)="validarCodigo()"
               maxlength="20"
               autofocus
@@ -86,6 +85,17 @@
           Volver al Menú Principal
         </button>
       </mat-card-actions>
+
+      <div
+        class="device-ip-indicator"
+        [class.sin-ip]="!capturandoIpDispositivo && !deviceIP"
+        title="IP privada capturada en este dispositivo (WebRTC)"
+      >
+        <mat-icon>lan</mat-icon>
+        <span *ngIf="capturandoIpDispositivo">Detectando IP...</span>
+        <span *ngIf="!capturandoIpDispositivo && deviceIP">IP: {{ deviceIP }}</span>
+        <span *ngIf="!capturandoIpDispositivo && !deviceIP">IP no detectada</span>
+      </div>
     </mat-card>
   </div>
 

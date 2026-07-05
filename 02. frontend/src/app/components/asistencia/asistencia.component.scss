@@ -2830,49 +2830,43 @@
 }
 }
 
-// =====================================================================================
-// 🔍 INDICADOR DE VERSIÓN PARA VERIFICAR CACHE EN TABLETS/CELULARES
-// =====================================================================================
-
-.version-indicator {
-  position: fixed;
-  bottom: 10px;
-  left: 10px;
-  background: rgba(52, 73, 94, 0.9);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-family: 'Courier New', monospace;
-  z-index: 9999;
-  backdrop-filter: blur(5px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  
-  // Animación sutil para que sea visible pero no moleste
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-  
-  &:hover {
-    opacity: 1;
-  }
-  
-  // En tablets/celulares, hacer más visible
-  @media (max-width: 768px) {
-    opacity: 0.8;
-    font-size: 12px;
-    padding: 8px 14px;
-  }
-  
-  // Modo debug - más visible durante desarrollo
-  &.debug-mode {
-    background: rgba(231, 76, 60, 0.9);
-    opacity: 1;
-    animation: pulse 2s infinite;
-  }
+// IP privada del dispositivo — esquina inferior derecha dentro del marco
+.welcome-card {
+  position: relative;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+.device-ip-indicator {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: #475569;
+  background: rgba(248, 250, 252, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  z-index: 2;
+  pointer-events: none;
+  line-height: 1.2;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #0ea5e9;
+  }
+
+  &.sin-ip mat-icon {
+    color: #ef4444;
+  }
+
+  &.sin-ip {
+    color: #b91c1c;
+    border-color: rgba(239, 68, 68, 0.35);
+    background: rgba(254, 242, 242, 0.95);
+  }
 }

@@ -52,21 +52,16 @@
                   Actualizar
                 </button>
 
-                <button mat-raised-button color="accent" (click)="exportarExcel()" [disabled]="cargando || registros.length === 0">
+                <button mat-raised-button color="accent" (click)="abrirModalExport()" [disabled]="cargando || registros.length === 0">
                   <mat-icon>file_download</mat-icon>
-                  Excel
-                </button>
-
-                <button mat-raised-button (click)="exportarPDF()" [disabled]="cargando || registros.length === 0">
-                  <mat-icon>picture_as_pdf</mat-icon>
-                  PDF
+                  Exportar
                 </button>
               </div>
 
               <div class="filter-row" style="margin-top: 15px;">
                 <mat-form-field appearance="outline" class="filter-field-search">
                   <mat-label>Buscar por Nombre, Código o DNI</mat-label>
-                  <input matInput [(ngModel)]="busquedaNombre" (ngModelChange)="onFiltroBusqueda()" placeholder="Búsqueda contextual...">
+                  <input matInput [(ngModel)]="busquedaNombre" (ngModelChange)="onFiltroBusqueda()">
                   <mat-icon matPrefix>search</mat-icon>
                 </mat-form-field>
 
@@ -199,5 +194,12 @@
       </div>
     </div>
   </div>
+
+  <app-asistencia-export-modal
+    [visible]="mostrarModalExport"
+    [exportando]="exportando"
+    (cerrar)="cerrarModalExport()"
+    (exportar)="onExportarSeleccion($event)">
+  </app-asistencia-export-modal>
 
 </app-main-layout>

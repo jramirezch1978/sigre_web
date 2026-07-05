@@ -4,11 +4,16 @@ $(function () {
   "use strict";
 
 
-  /* scrollar */
+  /* scrollar — solo en pantallas ERP/Metoxi que tengan estos contenedores */
+  function initPerfectScrollbar(selector) {
+    var el = document.querySelector(selector);
+    if (el) {
+      new PerfectScrollbar(el);
+    }
+  }
 
-  new PerfectScrollbar(".notify-list")
-
-  new PerfectScrollbar(".search-content")
+  initPerfectScrollbar(".notify-list");
+  initPerfectScrollbar(".search-content");
 
   // new PerfectScrollbar(".mega-menu-widgets")
 
@@ -30,7 +35,10 @@ $(function () {
   /* menu */
 
   $(function () {
-    $('#sidenav').metisMenu();
+    var sidenav = $('#sidenav');
+    if (sidenav.length) {
+      sidenav.metisMenu();
+    }
   });
 
   $(".sidebar-close").on("click", function () {

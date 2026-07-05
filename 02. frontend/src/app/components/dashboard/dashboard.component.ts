@@ -29,7 +29,6 @@ import {
 } from '../../services/dashboard.service';
 import { FloatingClockComponent } from '../floating-clock/floating-clock.component';
 import { MainLayoutComponent } from '../main-layout/main-layout.component';
-import { NotImplementedService } from '../../services/not-implemented.service';
 
 declare var Chart: any; // Para Chart.js
 
@@ -145,13 +144,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(
     private dashboardService: DashboardService,
     private router: Router,
-    private snackBar: MatSnackBar,
-    private notImplementedService: NotImplementedService
+    private snackBar: MatSnackBar
   ) {}
+
+  /**
+   * Navega a la pagina de "opcion en construccion" (mismo patron que el ERP)
+   * en vez de mostrar un modal, para las opciones del menu aun no desarrolladas.
+   */
+  private irANoDesarrollado(nombreOpcion: string): void {
+    void this.router.navigate(['/en-construccion'], { queryParams: { op: nombreOpcion } });
+  }
 
   async ngOnInit() {
     console.log('🚀 Iniciando Dashboard Component');
-    
+
     try {
       // Cargar Chart.js dinámicamente
       console.log('📈 Cargando Chart.js...');
@@ -717,45 +723,45 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
   
   // 📋 MENU LATERAL - Opciones no implementadas
-  onMetricasTiempoReal() { this.notImplementedService.menuNotImplemented('Métricas Tiempo Real'); }
-  onRegistrosDiarios() { this.notImplementedService.menuNotImplemented('Registros Diarios'); }
-  onReportesPorEmpleado() { this.notImplementedService.menuNotImplemented('Reportes por Empleado'); }
-  onHorariosYTurnos() { this.notImplementedService.menuNotImplemented('Horarios y Turnos'); }
-  onAusenciasPermisos() { this.notImplementedService.menuNotImplemented('Ausencias y Permisos'); }
-  onControlRaciones() { this.notImplementedService.menuNotImplemented('Control de Raciones'); }
-  onMenusDiarios() { this.notImplementedService.menuNotImplemented('Menús Diarios'); }
-  onReportesAlimentarios() { this.notImplementedService.menuNotImplemented('Reportes Alimentarios'); }
-  onReportesSemanales() { this.notImplementedService.reportNotImplemented('Reportes Semanales'); }
-  onReportesMensuales() { this.notImplementedService.reportNotImplemented('Reportes Mensuales'); }
-  onAnalisisTendencias() { this.notImplementedService.reportNotImplemented('Análisis de Tendencias'); }
-  onExportarDatos() { this.notImplementedService.reportNotImplemented('Exportar Datos'); }
-  onResumenPorArea() { this.notImplementedService.menuNotImplemented('Resumen por Área'); }
-  onProductividad() { this.notImplementedService.menuNotImplemented('Productividad'); }
-  onCostosOperativos() { this.notImplementedService.menuNotImplemented('Costos Operativos'); }
-  onParametrosGenerales() { this.notImplementedService.menuNotImplemented('Parámetros Generales'); }
-  onDispositivos() { this.notImplementedService.menuNotImplemented('Dispositivos'); }
-  onSincronizacion() { this.notImplementedService.menuNotImplemented('Sincronización'); }
-  onUsuariosSistema() { this.notImplementedService.menuNotImplemented('Usuarios del Sistema'); }
-  onPermisosRoles() { this.notImplementedService.menuNotImplemented('Permisos y Roles'); }
-  onLogsSistema() { this.notImplementedService.menuNotImplemented('Logs del Sistema'); }
+  onMetricasTiempoReal() { this.irANoDesarrollado('Métricas Tiempo Real'); }
+  onRegistrosDiarios() { this.irANoDesarrollado('Registros Diarios'); }
+  onReportesPorEmpleado() { this.irANoDesarrollado('Reportes por Empleado'); }
+  onHorariosYTurnos() { this.irANoDesarrollado('Horarios y Turnos'); }
+  onAusenciasPermisos() { this.irANoDesarrollado('Ausencias y Permisos'); }
+  onControlRaciones() { this.irANoDesarrollado('Control de Raciones'); }
+  onMenusDiarios() { this.irANoDesarrollado('Menús Diarios'); }
+  onReportesAlimentarios() { this.irANoDesarrollado('Reportes Alimentarios'); }
+  onReportesSemanales() { this.irANoDesarrollado('Reportes Semanales'); }
+  onReportesMensuales() { this.irANoDesarrollado('Reportes Mensuales'); }
+  onAnalisisTendencias() { this.irANoDesarrollado('Análisis de Tendencias'); }
+  onExportarDatos() { this.irANoDesarrollado('Exportar Datos'); }
+  onResumenPorArea() { this.irANoDesarrollado('Resumen por Área'); }
+  onProductividad() { this.irANoDesarrollado('Productividad'); }
+  onCostosOperativos() { this.irANoDesarrollado('Costos Operativos'); }
+  onParametrosGenerales() { this.irANoDesarrollado('Parámetros Generales'); }
+  onDispositivos() { this.irANoDesarrollado('Dispositivos'); }
+  onSincronizacion() { this.irANoDesarrollado('Sincronización'); }
+  onUsuariosSistema() { this.irANoDesarrollado('Usuarios del Sistema'); }
+  onPermisosRoles() { this.irANoDesarrollado('Permisos y Roles'); }
+  onLogsSistema() { this.irANoDesarrollado('Logs del Sistema'); }
 
   // 🔘 BOTONES FOOTER SIDEBAR - Opciones no implementadas
-  onConfiguracion() { this.notImplementedService.actionNotImplemented('Configuración del Sistema'); }
-  onPantallaCompleta() { this.notImplementedService.actionNotImplemented('Modo Pantalla Completa'); }
-  onAyuda() { this.notImplementedService.actionNotImplemented('Centro de Ayuda'); }
+  onConfiguracion() { this.irANoDesarrollado('Configuración del Sistema'); }
+  onPantallaCompleta() { this.irANoDesarrollado('Modo Pantalla Completa'); }
+  onAyuda() { this.irANoDesarrollado('Centro de Ayuda'); }
 
   // 👤 MENU USUARIO - Opciones no implementadas
-  onMiPerfil() { this.notImplementedService.actionNotImplemented('Mi Perfil'); }
-  onConfiguracionUsuario() { this.notImplementedService.actionNotImplemented('Configuración de Usuario'); }
+  onMiPerfil() { this.irANoDesarrollado('Mi Perfil'); }
+  onConfiguracionUsuario() { this.irANoDesarrollado('Configuración de Usuario'); }
 
   // 📊 BOTONES MAIN CONTENT - Opciones no implementadas
-  onFiltrarFechas() { this.notImplementedService.actionNotImplemented('Filtrar por Fechas'); }
-  onExportar() { this.notImplementedService.actionNotImplemented('Exportar Datos'); }
+  onFiltrarFechas() { this.irANoDesarrollado('Filtrar por Fechas'); }
+  onExportar() { this.irANoDesarrollado('Exportar Datos'); }
   onVerTodosRegistros() {
     console.log('📊 Navegando a Reporte de Asistencia');
     this.router.navigate(['/reporte-asistencia']);
   }
-  onVerAnalisisDetallado() { this.notImplementedService.actionNotImplemented('Análisis Detallado'); }
-  onPanelActions() { this.notImplementedService.actionNotImplemented('Opciones del Panel'); }
+  onVerAnalisisDetallado() { this.irANoDesarrollado('Análisis Detallado'); }
+  onPanelActions() { this.irANoDesarrollado('Opciones del Panel'); }
 
 }
