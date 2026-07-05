@@ -7,7 +7,7 @@
 -- Orden de creacion respeta dependencias de FK:
 --   1) Catalogos (PC_RAZA, PC_POTRERO, PC_CATEGORIA, PC_SEMENTAL,
 --      PC_PRODUCTO_SANITARIO, PC_ENFERMEDAD, PC_DIETA, PC_DIETA_COMPONENTE)
---   2) Maestro de animal (PC_ANIMAL)
+--   2) Maestro de animal (PC_ANIMAL, PC_OT_ANIMAL)
 --   3) Reproduccion (PC_CELO, PC_SERVICIO, PC_DIAGNOSTICO_PRENEZ, PC_PARTO)
 --   4) Produccion de leche (PC_LACTANCIA, PC_ORDENO, PC_CONTROL_LECHERO)
 --   5) Nutricion (PC_CONDICION_CORPORAL, PC_ALIMENTACION_CONSUMO)
@@ -16,8 +16,25 @@
 --   8) Movimientos / trazabilidad / bajas (PC_MOVIMIENTO_POTRERO, PC_DTA,
 --      PC_DTA_DETALLE, PC_BAJA)
 --
--- NOTA: ARTICULO se asume ya existente (modulo Almacen). PC_DIETA_COMPONENTE
--- y PC_ALIMENTACION_CONSUMO referencian CANTABRIA.ARTICULO(cod_art).
+-- NOTA: ARTICULO, ORDEN_TRABAJO, OPERACIONES, ARTICULO_MOV, VALE_MOV,
+-- ORDEN_SERVICIO, ALMACEN, TIPO_PRODUCTO y OT_TIPO se asumen YA EXISTENTES
+-- (son tablas genericas y compartidas del ERP, no exclusivas de Pecuario).
+--
+-- INTEGRACION CON ORDEN DE TRABAJO (OT) -- "OT Pecuaria":
+-- Ninguna tabla de Pecuario duplica cantidades/costos que ya vive en Almacen.
+-- El consumo REAL de insumos (alimento, vacunas, medicinas) se registra
+-- siempre contra una Orden de Trabajo ya existente en el sistema
+-- (ORDEN_TRABAJO, con ot_adm='PECU', igual patron que Campo con ot_adm=
+-- 'CAMPO'): ORDEN_TRABAJO -> OPERACIONES -> ARTICULO_MOV (FK real oper_sec,
+-- confirmado en el schema), con ARTICULO_MOV.nro_vale -> VALE_MOV para el
+-- numero de vale. PC_OT_ANIMAL vincula esa OT con el/los animal(es) que
+-- cubre, permitiendo reconstruir el historial de consumo de cada animal sin
+-- duplicar datos. Los tratamientos/servicios con costo externo (veterinario,
+-- laboratorio de terceros) se registran como ORDEN_SERVICIO (ya vinculada a
+-- ORDEN_TRABAJO via ORDEN_SERVICIO.nro_orden). La produccion de leche genera
+-- un ingreso real tipo I09 (INGRESOS POR PRODUCCION en ARTICULO_MOV_TIPO)
+-- contra el mismo ALMACEN/TIPO_PRODUCTO/OT del dia. Detalle completo en
+-- Source ERPs/metadata SIGRE/pecuario/pecuario_modulo_diseno.md.
 --
 -- NOTA SOBRE VENTANAS: las tablas usan el prefijo PC_* (Pecuario), pero las
 -- VENTANAS PowerBuilder usan el prefijo real de Campo (CAM###), numeradas por
@@ -224,6 +241,7 @@ create table CANTABRIA.PC_PRODUCTO_SANITARIO
   cod_prod_san    CHAR(10)       not null,
   nom_producto    VARCHAR2(100)  not null,
   flag_tipo       CHAR(1)        not null,
+  cod_art         CHAR(12),
   dias_refuerzo   NUMBER(4),
   periodo_retiro  NUMBER(3),
   unidad_medida   CHAR(3),
@@ -248,10 +266,15 @@ alter table CANTABRIA.PC_PRODUCTO_SANITARIO
 alter table CANTABRIA.PC_PRODUCTO_SANITARIO
   add constraint CK_PC_PRODSAN_TIPO check (flag_tipo in ('V','D','M','S'));
 
+alter table CANTABRIA.PC_PRODUCTO_SANITARIO
+  add constraint FK_PC_PRODSAN_ART foreign key (cod_art)
+  references CANTABRIA.ARTICULO(cod_art);
+
 comment on table CANTABRIA.PC_PRODUCTO_SANITARIO is 'Pecuario - Catalogo de vacunas, medicamentos e insumos veterinarios';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.cod_prod_san is 'codigo de producto sanitario';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.nom_producto is 'nombre del producto';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.flag_tipo is 'V=Vacuna, D=Desparasitante, M=Medicamento, S=Suplemento';
+comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.cod_art is 'FK a ARTICULO (Almacen) -- el articulo real de stock que se descuenta al consumir este producto via una OT';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.dias_refuerzo is 'dias hasta la proxima dosis de refuerzo (si aplica)';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.periodo_retiro is 'dias de retiro de leche/carne tras aplicar';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.unidad_medida is 'unidad de medida de la dosis';
@@ -506,6 +529,56 @@ comment on column CANTABRIA.PC_ANIMAL.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_ANIMAL.fec_registro is 'fecha de registro en el sistema';
 
 
+-- ----------------------------------------------------------------------------
+-- PC_OT_ANIMAL -- vincula una Orden de Trabajo (ORDEN_TRABAJO, tabla generica
+-- ya existente y compartida por todo el sistema) con el/los animal(es) que
+-- cubre. Es la pieza que permite que TODO el historial de consumibles
+-- (alimentacion, medicinas) de un animal se pueda reconstruir uniendo esta
+-- tabla -> ORDEN_TRABAJO -> OPERACIONES -> ARTICULO_MOV (movimiento real de
+-- Almacen), en vez de duplicar cantidades en tablas propias de Pecuario.
+-- Una "OT Pecuaria" es, simplemente, una fila de ORDEN_TRABAJO con
+-- ot_adm = 'PECU' (mismo patron que usa Campo con ot_adm = 'CAMPO').
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_OT_ANIMAL
+(
+  nro_orden     CHAR(10)  not null,
+  cod_origen    CHAR(2)   not null,
+  cod_animal    CHAR(12)  not null,
+  cod_usr       CHAR(6),
+  fec_registro  DATE      default sysdate
+)
+tablespace CANTABRIA
+  pctfree 10
+  initrans 1
+  maxtrans 255
+  storage
+  (
+    initial 128K
+    next 128K
+    minextents 1
+    maxextents unlimited
+  );
+
+alter table CANTABRIA.PC_OT_ANIMAL
+  add constraint PK_PC_OT_ANIMAL primary key (nro_orden, cod_origen, cod_animal)
+  using index tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_OT_ANIMAL
+  add constraint FK_PC_OTANIMAL_OT foreign key (nro_orden)
+  references CANTABRIA.ORDEN_TRABAJO(nro_orden);
+
+alter table CANTABRIA.PC_OT_ANIMAL
+  add constraint FK_PC_OTANIMAL_ANIMAL foreign key (cod_origen, cod_animal)
+  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
+
+comment on table CANTABRIA.PC_OT_ANIMAL is 'Pecuario - Vinculo entre una Orden de Trabajo (OT Pecuaria, ot_adm=PECU en ORDEN_TRABAJO) y los animales que cubre; base para reconstruir el historial de consumibles de un animal desde los movimientos reales de Almacen';
+comment on column CANTABRIA.PC_OT_ANIMAL.nro_orden is 'FK a ORDEN_TRABAJO';
+comment on column CANTABRIA.PC_OT_ANIMAL.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_OT_ANIMAL.cod_animal is 'FK a PC_ANIMAL, animal cubierto por esta OT';
+comment on column CANTABRIA.PC_OT_ANIMAL.cod_usr is 'usuario que registro';
+comment on column CANTABRIA.PC_OT_ANIMAL.fec_registro is 'fecha de registro en el sistema';
+
+
 -- ============================================================================
 -- 3) REPRODUCCION
 -- ============================================================================
@@ -564,8 +637,8 @@ comment on column CANTABRIA.PC_CELO.fec_registro is 'fecha de registro en el sis
 create table CANTABRIA.PC_SERVICIO
 (
   cod_origen          CHAR(2)   not null,
+  nro_servicio        CHAR(10)  not null,
   cod_animal          CHAR(12)  not null,
-  nro_servicio        NUMBER(3) not null,
   fec_servicio        DATE      not null,
   flag_tipo_servicio  CHAR(1)   not null,
   cod_animal_toro     CHAR(12),
@@ -589,7 +662,7 @@ tablespace CANTABRIA
   );
 
 alter table CANTABRIA.PC_SERVICIO
-  add constraint PK_PC_SERVICIO primary key (cod_origen, cod_animal, nro_servicio)
+  add constraint PK_PC_SERVICIO primary key (cod_origen, nro_servicio)
   using index tablespace CANTABRIA;
 
 alter table CANTABRIA.PC_SERVICIO
@@ -609,8 +682,8 @@ alter table CANTABRIA.PC_SERVICIO
 
 comment on table CANTABRIA.PC_SERVICIO is 'Pecuario - Registro de servicio (monta natural o inseminacion artificial)';
 comment on column CANTABRIA.PC_SERVICIO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_SERVICIO.nro_servicio is 'numero de documento del servicio (numerador estandar: cod_origen + correlativo de 8 digitos, igual patron que nro_orden/nro_os/nro_dta) -- NO es un correlativo por animal: cod_animal puede repetirse en muchas filas (historial), nro_servicio identifica UNA fila';
 comment on column CANTABRIA.PC_SERVICIO.cod_animal is 'hembra servida';
-comment on column CANTABRIA.PC_SERVICIO.nro_servicio is 'correlativo de servicios de este animal';
 comment on column CANTABRIA.PC_SERVICIO.fec_servicio is 'fecha del servicio';
 comment on column CANTABRIA.PC_SERVICIO.flag_tipo_servicio is 'N=Monta natural, I=Inseminacion artificial';
 comment on column CANTABRIA.PC_SERVICIO.cod_animal_toro is 'toro del propio hato (si monta natural)';
@@ -628,8 +701,8 @@ comment on column CANTABRIA.PC_SERVICIO.fec_registro is 'fecha de registro en el
 create table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
 (
   cod_origen        CHAR(2)   not null,
+  nro_servicio      CHAR(10)  not null,
   cod_animal        CHAR(12)  not null,
-  nro_servicio      NUMBER(3) not null,
   fec_diagnostico   DATE      not null,
   metodo            CHAR(1)   default 'T',
   resultado         CHAR(1)   not null,
@@ -651,7 +724,7 @@ tablespace CANTABRIA
   );
 
 alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
-  add constraint PK_PC_DIAGNOSTICO_PRENEZ primary key (cod_origen, cod_animal, nro_servicio, fec_diagnostico)
+  add constraint PK_PC_DIAGNOSTICO_PRENEZ primary key (cod_origen, nro_servicio, fec_diagnostico)
   using index tablespace CANTABRIA;
 
 alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
@@ -661,13 +734,17 @@ alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
   add constraint CK_PC_DXPRE_RESULT check (resultado in ('P','V'));
 
 alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
-  add constraint FK_PC_DXPRE_SERVICIO foreign key (cod_origen, cod_animal, nro_servicio)
-  references CANTABRIA.PC_SERVICIO(cod_origen, cod_animal, nro_servicio);
+  add constraint FK_PC_DXPRE_SERVICIO foreign key (cod_origen, nro_servicio)
+  references CANTABRIA.PC_SERVICIO(cod_origen, nro_servicio);
+
+alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
+  add constraint FK_PC_DXPRE_ANIMAL foreign key (cod_origen, cod_animal)
+  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
 
 comment on table CANTABRIA.PC_DIAGNOSTICO_PRENEZ is 'Pecuario - Diagnostico de prenez posterior al servicio';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_origen is 'fundo/sucursal';
-comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_animal is 'animal diagnosticado';
-comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.nro_servicio is 'FK al servicio que se esta confirmando';
+comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.nro_servicio is 'FK al servicio (PC_SERVICIO) que se esta confirmando';
+comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_animal is 'animal diagnosticado (denormalizado desde PC_SERVICIO para consulta directa)';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.fec_diagnostico is 'fecha del diagnostico';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.metodo is 'T=Tacto rectal, E=Ecografia';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.resultado is 'P=Prenada, V=Vacia';
@@ -685,7 +762,7 @@ create table CANTABRIA.PC_PARTO
   cod_origen               CHAR(2)   not null,
   cod_animal               CHAR(12)  not null,
   fec_parto                DATE      not null,
-  nro_servicio             NUMBER(3),
+  nro_servicio             CHAR(10),
   flag_tipo_parto          CHAR(1)   default 'E',
   flag_asistido            CHAR(1)   default '0',
   cod_animal_cria          CHAR(12),
@@ -722,8 +799,8 @@ alter table CANTABRIA.PC_PARTO
   references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
 
 alter table CANTABRIA.PC_PARTO
-  add constraint FK_PC_PARTO_SERVICIO foreign key (cod_origen, cod_animal, nro_servicio)
-  references CANTABRIA.PC_SERVICIO(cod_origen, cod_animal, nro_servicio);
+  add constraint FK_PC_PARTO_SERVICIO foreign key (cod_origen, nro_servicio)
+  references CANTABRIA.PC_SERVICIO(cod_origen, nro_servicio);
 
 alter table CANTABRIA.PC_PARTO
   add constraint FK_PC_PARTO_CRIA foreign key (cod_origen, cod_animal_cria)
@@ -811,6 +888,9 @@ create table CANTABRIA.PC_ORDENO
   nro_turno       NUMBER(1) not null,
   litros          NUMBER(6,2) not null,
   flag_descarte   CHAR(1)   default '0',
+  nro_orden       CHAR(10)  not null,
+  cod_almacen     CHAR(6)   not null,
+  cod_producto    CHAR(12)  not null,
   cod_usr         CHAR(6),
   fec_registro    DATE      default sysdate
 )
@@ -837,6 +917,18 @@ alter table CANTABRIA.PC_ORDENO
   add constraint FK_PC_ORDENO_ANIMAL foreign key (cod_origen, cod_animal)
   references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
 
+alter table CANTABRIA.PC_ORDENO
+  add constraint FK_PC_ORDENO_OT foreign key (nro_orden)
+  references CANTABRIA.ORDEN_TRABAJO(nro_orden);
+
+alter table CANTABRIA.PC_ORDENO
+  add constraint FK_PC_ORDENO_ALMACEN foreign key (cod_almacen)
+  references CANTABRIA.ALMACEN(almacen);
+
+alter table CANTABRIA.PC_ORDENO
+  add constraint FK_PC_ORDENO_PRODUCTO foreign key (cod_producto)
+  references CANTABRIA.TIPO_PRODUCTO(cod_prod);
+
 comment on table CANTABRIA.PC_ORDENO is 'Pecuario - Detalle diario de ordeno';
 comment on column CANTABRIA.PC_ORDENO.cod_origen is 'fundo/sucursal';
 comment on column CANTABRIA.PC_ORDENO.cod_animal is 'vaca ordenada';
@@ -844,6 +936,9 @@ comment on column CANTABRIA.PC_ORDENO.fec_ordeno is 'fecha del ordeno';
 comment on column CANTABRIA.PC_ORDENO.nro_turno is '1=manana, 2=tarde, 3=noche';
 comment on column CANTABRIA.PC_ORDENO.litros is 'litros obtenidos en este ordeno';
 comment on column CANTABRIA.PC_ORDENO.flag_descarte is '1 si la leche no se vende (periodo de retiro por medicamento)';
+comment on column CANTABRIA.PC_ORDENO.nro_orden is 'FK a ORDEN_TRABAJO -- la misma OT usada para el consumo de alimento de ese potrero/dia; el cierre diario de la OT genera el ingreso real I09 en ARTICULO_MOV';
+comment on column CANTABRIA.PC_ORDENO.cod_almacen is 'FK a ALMACEN -- almacen de destino (produccion) donde ingresa la leche';
+comment on column CANTABRIA.PC_ORDENO.cod_producto is 'FK a TIPO_PRODUCTO -- producto terminado (ej. Leche cruda)';
 comment on column CANTABRIA.PC_ORDENO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_ORDENO.fec_registro is 'fecha de registro en el sistema';
 
@@ -944,7 +1039,8 @@ comment on column CANTABRIA.PC_CONDICION_CORPORAL.fec_registro is 'fecha de regi
 
 
 -- ----------------------------------------------------------------------------
--- PC_ALIMENTACION_CONSUMO (referencia ARTICULO del modulo Almacen)
+-- PC_ALIMENTACION_CONSUMO (planificacion; el consumo REAL de insumos vive en
+-- ARTICULO_MOV via la OT -- ver ORDEN_TRABAJO / OPERACIONES / ARTICULO_MOV_PROY)
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_ALIMENTACION_CONSUMO
 (
@@ -953,9 +1049,7 @@ create table CANTABRIA.PC_ALIMENTACION_CONSUMO
   fec_consumo     DATE         not null,
   cod_dieta       CHAR(6)      not null,
   cabezas_lote    NUMBER(5)    not null,
-  cod_art         CHAR(12)     not null,
-  cantidad_kg     NUMBER(10,3) not null,
-  costo_total     NUMBER(12,2),
+  nro_orden       CHAR(10)     not null,
   cod_usr         CHAR(6),
   fec_registro    DATE         default sysdate
 )
@@ -972,7 +1066,7 @@ tablespace CANTABRIA
   );
 
 alter table CANTABRIA.PC_ALIMENTACION_CONSUMO
-  add constraint PK_PC_ALIM_CONSUMO primary key (cod_origen, cod_potrero, fec_consumo, cod_dieta, cod_art)
+  add constraint PK_PC_ALIM_CONSUMO primary key (cod_origen, cod_potrero, fec_consumo, cod_dieta)
   using index tablespace CANTABRIA;
 
 alter table CANTABRIA.PC_ALIMENTACION_CONSUMO
@@ -984,18 +1078,16 @@ alter table CANTABRIA.PC_ALIMENTACION_CONSUMO
   references CANTABRIA.PC_DIETA(cod_dieta);
 
 alter table CANTABRIA.PC_ALIMENTACION_CONSUMO
-  add constraint FK_PC_ALIMCONS_ART foreign key (cod_art)
-  references CANTABRIA.ARTICULO(cod_art);
+  add constraint FK_PC_ALIMCONS_OT foreign key (nro_orden)
+  references CANTABRIA.ORDEN_TRABAJO(nro_orden);
 
-comment on table CANTABRIA.PC_ALIMENTACION_CONSUMO is 'Pecuario - Consumo diario de alimento por potrero/lote';
+comment on table CANTABRIA.PC_ALIMENTACION_CONSUMO is 'Pecuario - Planificacion de alimentacion diaria por potrero/lote (dieta + cabezas); el consumo real de insumos (cod_art, cantidad) queda registrado en ARTICULO_MOV contra la OT de esta fila';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_origen is 'fundo/sucursal';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_potrero is 'potrero/lote donde se dio el alimento';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.fec_consumo is 'fecha del consumo';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_dieta is 'dieta aplicada';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cabezas_lote is 'cantidad de animales que comieron esta dieta ese dia';
-comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_art is 'insumo consumido (FK a ARTICULO)';
-comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cantidad_kg is 'cantidad total consumida en kg';
-comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.costo_total is 'costo total del consumo, para costeo de produccion';
+comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.nro_orden is 'FK a ORDEN_TRABAJO -- OT (ot_adm=PECU) que agrupa el consumo real de insumos en ARTICULO_MOV para este potrero/dia; ver PC_OT_ANIMAL para saber que animales cubre';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.fec_registro is 'fecha de registro en el sistema';
 
@@ -1016,6 +1108,8 @@ create table CANTABRIA.PC_SANIDAD_EVENTO
   cod_enfermedad     CHAR(6),
   cod_veterinario    CHAR(6),
   costo              NUMBER(10,2),
+  nro_orden          CHAR(10),
+  nro_os             CHAR(10),
   fec_prox_refuerzo  DATE,
   fec_fin_retiro     DATE,
   observaciones      VARCHAR2(500),
@@ -1053,6 +1147,14 @@ alter table CANTABRIA.PC_SANIDAD_EVENTO
   add constraint FK_PC_SANIDAD_ENFERM foreign key (cod_enfermedad)
   references CANTABRIA.PC_ENFERMEDAD(cod_enfermedad);
 
+alter table CANTABRIA.PC_SANIDAD_EVENTO
+  add constraint FK_PC_SANIDAD_OT foreign key (nro_orden)
+  references CANTABRIA.ORDEN_TRABAJO(nro_orden);
+
+alter table CANTABRIA.PC_SANIDAD_EVENTO
+  add constraint FK_PC_SANIDAD_OS foreign key (cod_origen, nro_os)
+  references CANTABRIA.ORDEN_SERVICIO(cod_origen, nro_os);
+
 comment on table CANTABRIA.PC_SANIDAD_EVENTO is 'Pecuario - Eventos veterinarios (vacunas, desparasitaciones, tratamientos, diagnosticos)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_origen is 'fundo/sucursal';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_animal is 'animal atendido';
@@ -1063,7 +1165,9 @@ comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_prod_san is 'producto aplicado
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.dosis is 'dosis aplicada';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_enfermedad is 'enfermedad diagnosticada/tratada, si aplica';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_veterinario is 'veterinario responsable';
-comment on column CANTABRIA.PC_SANIDAD_EVENTO.costo is 'costo del evento';
+comment on column CANTABRIA.PC_SANIDAD_EVENTO.costo is 'costo de referencia rapida (el costo real y autorizado vive en ORDEN_SERVICIO.monto_total cuando nro_os esta presente)';
+comment on column CANTABRIA.PC_SANIDAD_EVENTO.nro_orden is 'FK opcional a ORDEN_TRABAJO -- OT (ot_adm=PECU) que registra en ARTICULO_MOV el consumo real del producto sanitario (vacuna/desparasitante propio)';
+comment on column CANTABRIA.PC_SANIDAD_EVENTO.nro_os is 'FK opcional a ORDEN_SERVICIO -- cuando el evento implica un servicio/costo externo (veterinario, laboratorio de terceros)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.fec_prox_refuerzo is 'fecha calculada de proximo refuerzo (segun producto)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.fec_fin_retiro is 'fecha calculada de fin de periodo de retiro (leche/venta)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.observaciones is 'observaciones del evento';
@@ -1091,6 +1195,10 @@ create table CANTABRIA.PC_LABORATORIO
   nro_evento        NUMBER(5),
   fec_resultado     DATE,
   flag_estado       CHAR(1)    default '1' not null,
+  flag_origen       CHAR(1)    default 'P' not null,
+  cliente           VARCHAR2(100),
+  costo_analisis    NUMBER(10,2),
+  flag_facturado    CHAR(1)    default '0',
   observaciones     VARCHAR2(500),
   cod_usr           CHAR(6),
   fec_registro      DATE       default sysdate
@@ -1118,6 +1226,9 @@ alter table CANTABRIA.PC_LABORATORIO
   add constraint CK_PC_LAB_ESTADO check (flag_estado in ('0','1','2'));
 
 alter table CANTABRIA.PC_LABORATORIO
+  add constraint CK_PC_LAB_ORIGEN check (flag_origen in ('P','C'));
+
+alter table CANTABRIA.PC_LABORATORIO
   add constraint FK_PC_LAB_ANIMAL foreign key (cod_origen, cod_animal)
   references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
 
@@ -1139,6 +1250,10 @@ comment on column CANTABRIA.PC_LABORATORIO.flag_tipo_muestra is 'S=Sangre, L=Lec
 comment on column CANTABRIA.PC_LABORATORIO.laboratorio is 'laboratorio externo que proceso la muestra';
 comment on column CANTABRIA.PC_LABORATORIO.cod_veterinario is 'veterinario que tomo la muestra';
 comment on column CANTABRIA.PC_LABORATORIO.nro_evento is 'FK opcional a PC_SANIDAD_EVENTO, si la muestra es parte de un evento sanitario ya registrado';
+comment on column CANTABRIA.PC_LABORATORIO.flag_origen is 'P=Propio (laboratorio/veterinario nuestro), C=Cliente (lo realiza el comprador de la leche, ej. Laive, y descuenta el costo de la factura)';
+comment on column CANTABRIA.PC_LABORATORIO.cliente is 'nombre del cliente que realizo/solicito el analisis, si flag_origen=C (ej. Laive S.A.)';
+comment on column CANTABRIA.PC_LABORATORIO.costo_analisis is 'costo del analisis; si flag_origen=C, es el monto que el cliente descuenta de la factura de venta de leche';
+comment on column CANTABRIA.PC_LABORATORIO.flag_facturado is '1 si el costo del analisis ya fue descontado/facturado';
 comment on column CANTABRIA.PC_LABORATORIO.fec_resultado is 'fecha en que el laboratorio entrego el resultado';
 comment on column CANTABRIA.PC_LABORATORIO.flag_estado is '0=Anulada, 1=Pendiente de resultado, 2=Con resultado';
 comment on column CANTABRIA.PC_LABORATORIO.observaciones is 'observaciones de la muestra';
@@ -1416,17 +1531,27 @@ commit;
 -- ============================================================================
 -- Escenario encadenado con cod_origen = '01' (ajustar al codigo real del fundo
 -- San Martin en CONFIGURACION/ORIGEN antes de usar). Incluye: 2 potreros, 1
--- semental, 1 dieta con su componente, 5 animales (2 vacas, 1 toro, 1 cria,
--- 1 vaca de descarte), un ciclo reproductivo completo (celo->servicio->
--- diagnostico->parto), lactancia con ordenos y control lechero, condicion
--- corporal, consumo de alimento, eventos sanitarios, resultados de
--- laboratorio (mastitis + calidad de semen), movimiento de potrero, y el
--- ciclo de vida completo de una baja por venta con su DTA.
+-- semental, 1 dieta con su componente, 2 Ordenes de Trabajo Pecuarias (OT
+-- Pecuaria = ORDEN_TRABAJO con ot_adm='PECU'), 5 animales (2 vacas, 1 toro,
+-- 1 cria, 1 vaca de descarte), un ciclo reproductivo completo (celo->
+-- servicio->diagnostico->parto), lactancia con ordenos amarrados a la OT y
+-- con ingreso de produccion (almacen+producto terminado), condicion
+-- corporal, consumo de alimento amarrado a la OT, eventos sanitarios (con OT
+-- para el consumo propio, con Orden de Servicio para el costo externo),
+-- resultados de laboratorio (mastitis propio + calidad de semen propio +
+-- analisis de calidad de leche hecho por el cliente Laive), movimiento de
+-- potrero, y el ciclo de vida completo de una baja por venta con su DTA.
 --
--- ADVERTENCIA: PC_DIETA_COMPONENTE y PC_ALIMENTACION_CONSUMO referencian
--- CANTABRIA.ARTICULO(cod_art) -- el codigo 'ART00000001' usado abajo es un
--- PLACEHOLDER: reemplazarlo por un cod_art real existente en ARTICULO antes
--- de ejecutar esas dos secciones, o comentarlas si aun no aplica.
+-- ADVERTENCIA -- placeholders que deben ajustarse antes de ejecutar en un
+-- esquema real (o comentar esas lineas si aun no aplican):
+--   - 'ART00000001' (PC_DIETA_COMPONENTE) y 'ART00000002' (TIPO_PRODUCTO):
+--     deben ser codigos reales existentes en ARTICULO.
+--   - '0100000099' (PC_SANIDAD_EVENTO.nro_os): debe ser una ORDEN_SERVICIO
+--     real (modulo Compras, pantalla w_cm314) por el costo de la visita
+--     veterinaria de Estrella.
+--   - Las filas de ORDEN_TRABAJO/OT_TIPO/ALMACEN/TIPO_PRODUCTO de este
+--     bloque son minimas para poder correr el demo end-to-end; en
+--     produccion se crean desde sus pantallas estandar, no a mano.
 -- ============================================================================
 
 -- Potreros
@@ -1444,6 +1569,40 @@ commit;
 insert into CANTABRIA.PC_DIETA_COMPONENTE (cod_dieta, item, cod_art, cantidad_kg) values ('DIE001',1,'ART00000001',15.000);
 commit;
 
+-- ----------------------------------------------------------------------------
+-- Integracion con OT / Almacen (tablas GENERICAS y ya existentes del ERP,
+-- NO exclusivas de Pecuario). Se inserta lo minimo indispensable para que el
+-- resto del escenario de prueba (alimentacion, sanidad, produccion de leche)
+-- pueda referenciar una OT real. En produccion estas filas se crean desde
+-- sus pantallas estandar (OPE302 Ordenes de Trabajo, mantenimiento de
+-- Almacenes, Tipos de Producto), NO se insertan a mano como aqui.
+-- ----------------------------------------------------------------------------
+insert into CANTABRIA.OT_TIPO (ot_tipo, descripcion) values ('PECU','Orden de Trabajo Pecuaria');
+commit;
+insert into CANTABRIA.ALMACEN (almacen, desc_almacen, cod_origen, flag_tipo_almacen) values ('ALM001','Almacen Produccion Pecuaria','01','P');
+commit;
+-- AJUSTAR cod_art: debe ser un articulo real de tipo "producto terminado" en ARTICULO
+insert into CANTABRIA.TIPO_PRODUCTO (cod_prod, desc_prod, cod_art, und) values ('LECHE000001','Leche cruda','ART00000002','LT');
+commit;
+
+-- OT Pecuaria 1: alimentacion del potrero Norte (02-04 jul 2026) -- Paloma y Luna
+insert into CANTABRIA.ORDEN_TRABAJO (cod_origen, nro_orden, titulo, ot_tipo, ot_adm, fec_solicitud, fec_inicio, flag_estado, cod_usr)
+  values ('01','0100000001','Alimentacion potrero Norte 02-04 jul','PECU','PECU',TO_DATE('02/07/2026','DD/MM/YYYY'),TO_DATE('02/07/2026','DD/MM/YYYY'),'1','DEMO01');
+insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('0100000001','01','ANI000000001','DEMO01');
+insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('0100000001','01','ANI000000002','DEMO01');
+
+-- OT Pecuaria 2: vacunacion/desparasitacion de febrero 2026 -- Paloma y Luna
+insert into CANTABRIA.ORDEN_TRABAJO (cod_origen, nro_orden, titulo, ot_tipo, ot_adm, fec_solicitud, fec_inicio, flag_estado, cod_usr)
+  values ('01','0100000002','Sanidad - vacunacion y desparasitacion feb','PECU','PECU',TO_DATE('01/02/2026','DD/MM/YYYY'),TO_DATE('01/02/2026','DD/MM/YYYY'),'1','DEMO01');
+insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('0100000002','01','ANI000000001','DEMO01');
+insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('0100000002','01','ANI000000002','DEMO01');
+commit;
+
+-- NOTA: el consumo real de insumos (cod_art, cantidad, nro_vale) de estas dos
+-- OT queda en ARTICULO_MOV (via ORDEN_TRABAJO -> OPERACIONES -> ARTICULO_MOV),
+-- que se genera desde las pantallas estandar de Almacen/OPE302, no en este
+-- script -- Pecuario solo necesita el nro_orden para reconstruir el historial.
+
 -- Animales (orden importa: la madre antes que la cria)
 insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
   values ('01','ANI000000001','Paloma','HOLS','H',TO_DATE('15/03/2021','DD/MM/YYYY'),'VPR','POT001','3',38,550,'P','DEMO01');
@@ -1458,32 +1617,34 @@ insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, f
 commit;
 
 -- Ciclo reproductivo de Paloma (servicio natural con Bravo -> diagnostico -> parto -> cria)
-insert into CANTABRIA.PC_SERVICIO (cod_origen, cod_animal, nro_servicio, fec_servicio, flag_tipo_servicio, cod_animal_toro, fec_prob_parto, cod_usr)
-  values ('01','ANI000000001',1,TO_DATE('05/09/2025','DD/MM/YYYY'),'N','ANI000000003',TO_DATE('15/06/2026','DD/MM/YYYY'),'DEMO01');
-insert into CANTABRIA.PC_DIAGNOSTICO_PRENEZ (cod_origen, cod_animal, nro_servicio, fec_diagnostico, metodo, resultado, dias_gestacion, cod_veterinario, cod_usr)
-  values ('01','ANI000000001',1,TO_DATE('05/12/2025','DD/MM/YYYY'),'T','P',91,'VET001','DEMO01');
+-- nro_servicio ya NO es un correlativo por animal: es un numero de documento
+-- (cod_origen + correlativo de 8 digitos), igual patron que nro_orden/nro_os/nro_dta.
+insert into CANTABRIA.PC_SERVICIO (cod_origen, nro_servicio, cod_animal, fec_servicio, flag_tipo_servicio, cod_animal_toro, fec_prob_parto, cod_usr)
+  values ('01','0100000001','ANI000000001',TO_DATE('05/09/2025','DD/MM/YYYY'),'N','ANI000000003',TO_DATE('15/06/2026','DD/MM/YYYY'),'DEMO01');
+insert into CANTABRIA.PC_DIAGNOSTICO_PRENEZ (cod_origen, nro_servicio, cod_animal, fec_diagnostico, metodo, resultado, dias_gestacion, cod_veterinario, cod_usr)
+  values ('01','0100000001','ANI000000001',TO_DATE('05/12/2025','DD/MM/YYYY'),'T','P',91,'VET001','DEMO01');
 insert into CANTABRIA.PC_PARTO (cod_origen, cod_animal, fec_parto, nro_servicio, flag_tipo_parto, flag_asistido, cod_animal_cria, sexo_cria, peso_cria, flag_cria_viva, flag_retencion_placenta, cod_veterinario, cod_usr)
-  values ('01','ANI000000001',TO_DATE('15/06/2026','DD/MM/YYYY'),1,'E','0','ANI000000004','H',35,'1','0','VET001','DEMO01');
+  values ('01','ANI000000001',TO_DATE('15/06/2026','DD/MM/YYYY'),'0100000001','E','0','ANI000000004','H',35,'1','0','VET001','DEMO01');
 commit;
 
 -- Ciclo reproductivo de Luna, en curso (celo -> servicio por IA -> diagnostico positivo, sin parto todavia)
 insert into CANTABRIA.PC_CELO (cod_origen, cod_animal, fec_celo, metodo_deteccion, flag_servido, cod_usr)
   values ('01','ANI000000002',TO_DATE('01/03/2026','DD/MM/YYYY'),'V','1','DEMO01');
-insert into CANTABRIA.PC_SERVICIO (cod_origen, cod_animal, nro_servicio, fec_servicio, flag_tipo_servicio, cod_semental, cod_tecnico, fec_prob_parto, cod_usr)
-  values ('01','ANI000000002',1,TO_DATE('01/03/2026','DD/MM/YYYY'),'I','SEM0000001','VET001',TO_DATE('09/12/2026','DD/MM/YYYY'),'DEMO01');
-insert into CANTABRIA.PC_DIAGNOSTICO_PRENEZ (cod_origen, cod_animal, nro_servicio, fec_diagnostico, metodo, resultado, dias_gestacion, cod_veterinario, cod_usr)
-  values ('01','ANI000000002',1,TO_DATE('15/04/2026','DD/MM/YYYY'),'E','P',45,'VET001','DEMO01');
+insert into CANTABRIA.PC_SERVICIO (cod_origen, nro_servicio, cod_animal, fec_servicio, flag_tipo_servicio, cod_semental, cod_tecnico, fec_prob_parto, cod_usr)
+  values ('01','0100000002','ANI000000002',TO_DATE('01/03/2026','DD/MM/YYYY'),'I','SEM0000001','VET001',TO_DATE('09/12/2026','DD/MM/YYYY'),'DEMO01');
+insert into CANTABRIA.PC_DIAGNOSTICO_PRENEZ (cod_origen, nro_servicio, cod_animal, fec_diagnostico, metodo, resultado, dias_gestacion, cod_veterinario, cod_usr)
+  values ('01','0100000002','ANI000000002',TO_DATE('15/04/2026','DD/MM/YYYY'),'E','P',45,'VET001','DEMO01');
 commit;
 
 -- Lactancia de Paloma (2da lactancia, abierta por el parto de arriba) + ordenos + control lechero
 insert into CANTABRIA.PC_LACTANCIA (cod_origen, cod_animal, nro_lactancia, fec_parto, flag_estado, cod_usr)
   values ('01','ANI000000001',2,TO_DATE('15/06/2026','DD/MM/YYYY'),'1','DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('02/07/2026','DD/MM/YYYY'),1,12.5,'DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('02/07/2026','DD/MM/YYYY'),2,10.2,'DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('03/07/2026','DD/MM/YYYY'),1,13.0,'DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('03/07/2026','DD/MM/YYYY'),2,10.5,'DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('04/07/2026','DD/MM/YYYY'),1,12.8,'DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('04/07/2026','DD/MM/YYYY'),2,10.0,'DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('02/07/2026','DD/MM/YYYY'),1,12.5,'0100000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('02/07/2026','DD/MM/YYYY'),2,10.2,'0100000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('03/07/2026','DD/MM/YYYY'),1,13.0,'0100000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('03/07/2026','DD/MM/YYYY'),2,10.5,'0100000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('04/07/2026','DD/MM/YYYY'),1,12.8,'0100000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('04/07/2026','DD/MM/YYYY'),2,10.0,'0100000001','ALM001','LECHE000001','DEMO01');
 update CANTABRIA.PC_LACTANCIA set litros_totales = 69.0 where cod_origen='01' and cod_animal='ANI000000001' and nro_lactancia=2;
 insert into CANTABRIA.PC_CONTROL_LECHERO (cod_origen, cod_animal, fec_control, porc_grasa, porc_proteina, celulas_somaticas, litros_dia_proy, cod_usr)
   values ('01','ANI000000001',TO_DATE('01/07/2026','DD/MM/YYYY'),3.8,3.2,180000,23.0,'DEMO01');
@@ -1494,30 +1655,43 @@ insert into CANTABRIA.PC_CONDICION_CORPORAL (cod_origen, cod_animal, fec_evaluac
 insert into CANTABRIA.PC_CONDICION_CORPORAL (cod_origen, cod_animal, fec_evaluacion, puntaje_bcs, cod_usr) values ('01','ANI000000002',TO_DATE('01/07/2026','DD/MM/YYYY'),3.5,'DEMO01');
 commit;
 
--- Consumo de alimento (AJUSTAR cod_art antes de ejecutar si ARTICULO no tiene 'ART00000001')
-insert into CANTABRIA.PC_ALIMENTACION_CONSUMO (cod_origen, cod_potrero, fec_consumo, cod_dieta, cabezas_lote, cod_art, cantidad_kg, costo_total, cod_usr)
-  values ('01','POT001',TO_DATE('03/07/2026','DD/MM/YYYY'),'DIE001',2,'ART00000001',30.000,36.00,'DEMO01');
+-- Consumo de alimento: registro zootecnico de planificacion (potrero/dieta/
+-- cabezas) amarrado a la OT 0100000001 -- el consumo REAL de insumos vive en
+-- ARTICULO_MOV contra esa misma OT (ver nota de integracion mas arriba)
+insert into CANTABRIA.PC_ALIMENTACION_CONSUMO (cod_origen, cod_potrero, fec_consumo, cod_dieta, cabezas_lote, nro_orden, cod_usr)
+  values ('01','POT001',TO_DATE('03/07/2026','DD/MM/YYYY'),'DIE001',2,'0100000001','DEMO01');
 commit;
 
--- Eventos sanitarios
-insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_prod_san, dosis, cod_veterinario, costo, fec_prox_refuerzo, fec_fin_retiro, cod_usr)
-  values ('01','ANI000000001',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'V','VAC001',2,'VET001',15.00,TO_DATE('01/08/2026','DD/MM/YYYY'),TO_DATE('22/02/2026','DD/MM/YYYY'),'DEMO01');
-insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_prod_san, dosis, cod_veterinario, costo, fec_prox_refuerzo, fec_fin_retiro, cod_usr)
-  values ('01','ANI000000002',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'D','DES001',20,'VET001',8.00,TO_DATE('01/05/2026','DD/MM/YYYY'),TO_DATE('05/03/2026','DD/MM/YYYY'),'DEMO01');
-insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_enfermedad, cod_veterinario, costo, observaciones, cod_usr)
-  values ('01','ANI000000005',1,TO_DATE('20/05/2026','DD/MM/YYYY'),'X','MASTI1','VET001',25.00,'Mastitis clinica, cuartil posterior derecho','DEMO01');
+-- Eventos sanitarios: vacuna y desparasitante amarrados a la OT 0100000002
+-- (el consumo real del producto sanitario vive en ARTICULO_MOV contra esa OT)
+insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_prod_san, dosis, cod_veterinario, costo, nro_orden, fec_prox_refuerzo, fec_fin_retiro, cod_usr)
+  values ('01','ANI000000001',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'V','VAC001',2,'VET001',15.00,'0100000002',TO_DATE('01/08/2026','DD/MM/YYYY'),TO_DATE('22/02/2026','DD/MM/YYYY'),'DEMO01');
+insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_prod_san, dosis, cod_veterinario, costo, nro_orden, fec_prox_refuerzo, fec_fin_retiro, cod_usr)
+  values ('01','ANI000000002',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'D','DES001',20,'VET001',8.00,'0100000002',TO_DATE('01/05/2026','DD/MM/YYYY'),TO_DATE('05/03/2026','DD/MM/YYYY'),'DEMO01');
+-- Diagnostico de mastitis de Estrella: sin OT (no hay consumible propio), con
+-- Orden de Servicio (nro_os) porque implica el costo de la visita veterinaria
+-- externa -- AJUSTAR nro_os a una ORDEN_SERVICIO real (modulo Compras, w_cm314)
+insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_enfermedad, cod_veterinario, costo, nro_os, observaciones, cod_usr)
+  values ('01','ANI000000005',1,TO_DATE('20/05/2026','DD/MM/YYYY'),'X','MASTI1','VET001',25.00,'0100000099','Mastitis clinica, cuartil posterior derecho','DEMO01');
 commit;
 
--- Resultados de laboratorio: cultivo de mastitis de Estrella + calidad de semen del semental
-insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, cod_animal, fec_muestra, flag_tipo_muestra, laboratorio, cod_veterinario, nro_evento, fec_resultado, flag_estado, cod_usr)
-  values ('MU0000000001','01','ANI000000005',TO_DATE('20/05/2026','DD/MM/YYYY'),'L','Laboratorio Veterinario San Martin','VET001',1,TO_DATE('22/05/2026','DD/MM/YYYY'),'2','DEMO01');
+-- Resultados de laboratorio: cultivo de mastitis de Estrella (propio) +
+-- calidad de semen del semental (propio) + analisis de calidad de leche
+-- hecho por el CLIENTE (Laive), que descuenta el costo de la factura de venta
+insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, cod_animal, fec_muestra, flag_tipo_muestra, laboratorio, cod_veterinario, nro_evento, fec_resultado, flag_estado, flag_origen, cod_usr)
+  values ('MU0000000001','01','ANI000000005',TO_DATE('20/05/2026','DD/MM/YYYY'),'L','Laboratorio Veterinario San Martin','VET001',1,TO_DATE('22/05/2026','DD/MM/YYYY'),'2','P','DEMO01');
 insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, flag_interpretacion) values ('MU0000000001',1,'Cultivo microbiologico','Staphylococcus aureus','A');
 insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, valor_ref_max, flag_interpretacion) values ('MU0000000001',2,'Celulas somaticas','850000','cel/ml',200000,'A');
 
-insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, cod_semental, fec_muestra, flag_tipo_muestra, laboratorio, fec_resultado, flag_estado, cod_usr)
-  values ('MU0000000002','01','SEM0000001',TO_DATE('10/01/2026','DD/MM/YYYY'),'M','Central Genetica Peru',TO_DATE('12/01/2026','DD/MM/YYYY'),'2','DEMO01');
+insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, cod_semental, fec_muestra, flag_tipo_muestra, laboratorio, fec_resultado, flag_estado, flag_origen, cod_usr)
+  values ('MU0000000002','01','SEM0000001',TO_DATE('10/01/2026','DD/MM/YYYY'),'M','Central Genetica Peru',TO_DATE('12/01/2026','DD/MM/YYYY'),'2','P','DEMO01');
 insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, valor_ref_min, flag_interpretacion) values ('MU0000000002',1,'Motilidad espermatica','78','%',60,'N');
 insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, valor_ref_min, flag_interpretacion) values ('MU0000000002',2,'Concentracion','1200','millones/ml',800,'N');
+
+insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, fec_muestra, flag_tipo_muestra, laboratorio, fec_resultado, flag_estado, flag_origen, cliente, costo_analisis, flag_facturado, observaciones, cod_usr)
+  values ('MU0000000003','01',TO_DATE('03/07/2026','DD/MM/YYYY'),'L','Laive S.A.',TO_DATE('04/07/2026','DD/MM/YYYY'),'2','C','Laive S.A.',45.00,'1','Analisis de calidad de leche del lote entregado 03/07/2026, descontado de la factura de venta','DEMO01');
+insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, flag_interpretacion) values ('MU0000000003',1,'Grasa','3.7','%','N');
+insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, flag_interpretacion) values ('MU0000000003',2,'Antibioticos (inhibidores)','Negativo',null,'N');
 commit;
 
 -- Movimiento de potrero (Estrella aislada por mastitis)
