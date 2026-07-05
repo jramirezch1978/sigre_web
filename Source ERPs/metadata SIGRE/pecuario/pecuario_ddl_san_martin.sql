@@ -41,6 +41,9 @@
 --   1b) PC_RECETA / PC_RECETA_DET (nuevo: receta de fabricacion de
 --      concentrado -- ver seccion de integracion con Almacen/Produccion)
 --   1c) PC_LOTE (nuevo: cohorte/agrupacion de cabezas, ver seccion 8 del .md)
+--   1d) Extension avicola (nuevo: PC_POSTURA, PC_INCUBACION,
+--      PC_LOTE_MORTALIDAD -- ciclo reproductoras -> incubacion -> eclosion ->
+--      lote de engorde, para especies oviparas -- ver seccion 8b del .md)
 --   2) Maestro de animal (PC_ANIMAL, PC_OT_ANIMAL)
 --   3) Reproduccion (PC_CELO, PC_SERVICIO, PC_DIAGNOSTICO_PRENEZ, PC_PARTO)
 --   4) Produccion de leche (PC_LACTANCIA, PC_ORDENO, PC_CONTROL_LECHERO)
@@ -70,8 +73,8 @@
 -- Operaciones 300-499, Consultas 500-699, Reportes 700-899, Procesos 900-999.
 -- Bloques asignados a Pecuario (primer hueco contiguo libre en cada rango,
 -- NO continuacion tras el ultimo codigo de Campo/cana):
---   Tablas      CAM061-CAM069 (hueco libre real: 061-199)
---   Operaciones CAM391-CAM406 (hueco libre real: 391-411)
+--   Tablas      CAM061-CAM070 (hueco libre real: 061-199)
+--   Operaciones CAM391-CAM411 (hueco libre real: 391-411 -- AGOTADO, ver .md)
 --   Consultas   CAM500-CAM506 (rango completo sin uso previo)
 --   Reportes    CAM716-CAM722 (hueco libre real: 716-751)
 --   Procesos    CAM900-CAM905 (rango completo sin uso previo)
@@ -160,6 +163,7 @@ insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('PORC','Porc
 insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('CAPR','Caprino');
 insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('OVIN','Ovino');
 insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('EQUI','Equino');
+insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('AVES','Avicola');
 commit;
 
 
@@ -213,6 +217,8 @@ insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) value
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','BRAH','Brahman','C');
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','ANGU','Angus','C');
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','CRUC','Cruzado / mestizo','M');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('AVES','ROSS','Ross 308 (pollo de engorde)','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('AVES','HYLN','Hy-Line Brown (ponedora)','L');
 commit;
 
 
@@ -280,7 +286,7 @@ tablespace CANTABRIA;
 
 alter table CANTABRIA.PC_ESTABLO add constraint PK_PC_ESTABLO primary key (reckey) using index tablespace CANTABRIA;
 alter table CANTABRIA.PC_ESTABLO add constraint UQ_PC_ESTABLO unique (cod_origen, cod_establo) using index tablespace CANTABRIA;
-alter table CANTABRIA.PC_ESTABLO add constraint CK_PC_ESTABLO_TIPO check (flag_tipo in ('O','M','C','G','E'));
+alter table CANTABRIA.PC_ESTABLO add constraint CK_PC_ESTABLO_TIPO check (flag_tipo in ('O','M','C','G','E','I'));
 alter table CANTABRIA.PC_ESTABLO add constraint FK_PC_ESTABLO_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
 
 comment on table CANTABRIA.PC_ESTABLO is 'Pecuario - Establos/corrales (ubicacion cubierta) por fundo';
@@ -288,7 +294,7 @@ comment on column CANTABRIA.PC_ESTABLO.reckey is 'PK autonumerica';
 comment on column CANTABRIA.PC_ESTABLO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_ESTABLO.cod_establo is 'codigo de establo (unique junto a cod_origen, no PK)';
 comment on column CANTABRIA.PC_ESTABLO.nom_establo is 'nombre del establo';
-comment on column CANTABRIA.PC_ESTABLO.flag_tipo is 'O=Ordeno, M=Maternidad, C=Cuarentena, G=Corral de manejo (General), E=Engorde';
+comment on column CANTABRIA.PC_ESTABLO.flag_tipo is 'O=Ordeno, M=Maternidad, C=Cuarentena, G=Corral de manejo (General), E=Engorde, I=Incubadora (avicola)';
 comment on column CANTABRIA.PC_ESTABLO.capacidad_cab is 'capacidad de carga en numero de cabezas';
 comment on column CANTABRIA.PC_ESTABLO.flag_estado is 'flag_estado';
 
@@ -352,6 +358,8 @@ insert into CANTABRIA.PC_CATEGORIA (cod_categoria, nom_categoria, flag_sexo) val
 insert into CANTABRIA.PC_CATEGORIA (cod_categoria, nom_categoria, flag_sexo) values ('VDE','Vaca de descarte','H');
 insert into CANTABRIA.PC_CATEGORIA (cod_categoria, nom_categoria, flag_sexo) values ('TOR','Toro reproductor','M');
 insert into CANTABRIA.PC_CATEGORIA (cod_categoria, nom_categoria, flag_sexo) values ('TDE','Toro de descarte','M');
+insert into CANTABRIA.PC_CATEGORIA (cod_categoria, nom_categoria, flag_sexo) values ('REP','Reproductora (aves)','H');
+insert into CANTABRIA.PC_CATEGORIA (cod_categoria, nom_categoria, flag_sexo) values ('ENG','Pollo de engorde (aves)', null);
 commit;
 
 
@@ -715,6 +723,178 @@ begin
   if :new.reckey is null then
     select SEQ_PC_LOTE.nextval into :new.reckey from dual;
   end if;
+end;
+/
+
+
+-- ============================================================================
+-- 1d) EXTENSION AVICOLA (nuevo) -- ciclo reproductivo de especies oviparas
+-- (reproductoras -> incubacion -> eclosion -> engorde), investigado contra
+-- Nisira ERP (modulo Avicola, unico precedente real en el mercado peruano
+-- para produccion animal -- ver seccion 18 del .md). Reutiliza PC_LOTE como
+-- unidad de manejo (una "reproductora" o una "parvada de engorde" es un
+-- PC_LOTE), y agrega solo lo que el ciclo por huevo necesita y que PC_LOTE
+-- por si solo no cubre: postura, incubacion/eclosion y mortalidad agregada.
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- PC_POSTURA -- registro diario de produccion de huevos de un lote de
+-- reproductoras (mismo patron que PC_ORDENO para leche, pero por lote)
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_POSTURA
+(
+  reckey            NUMBER(10) not null,
+  cod_origen        CHAR(2)    not null,
+  cod_lote          CHAR(6)    not null,
+  fec_postura       DATE       not null,
+  cantidad_huevos   NUMBER(8)  not null,
+  cantidad_descarte NUMBER(8)  default 0,
+  cod_usr           CHAR(6),
+  fec_registro      DATE       default sysdate
+)
+tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_POSTURA add constraint PK_PC_POSTURA primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_POSTURA add constraint UQ_PC_POSTURA unique (cod_origen, cod_lote, fec_postura) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_POSTURA add constraint FK_PC_POSTURA_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_POSTURA add constraint FK_PC_POSTURA_LOTE foreign key (cod_origen, cod_lote) references CANTABRIA.PC_LOTE(cod_origen, cod_lote);
+
+comment on table CANTABRIA.PC_POSTURA is 'Pecuario (avicola) - Produccion diaria de huevos de un lote de reproductoras';
+comment on column CANTABRIA.PC_POSTURA.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_POSTURA.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
+comment on column CANTABRIA.PC_POSTURA.cod_lote is 'FK a PC_LOTE -- lote de reproductoras que postura';
+comment on column CANTABRIA.PC_POSTURA.fec_postura is 'fecha de la postura';
+comment on column CANTABRIA.PC_POSTURA.cantidad_huevos is 'huevos recolectados ese dia';
+comment on column CANTABRIA.PC_POSTURA.cantidad_descarte is 'huevos descartados (rotos, sucios, deformes) no aptos para incubar';
+comment on column CANTABRIA.PC_POSTURA.cod_usr is 'usuario que registro';
+comment on column CANTABRIA.PC_POSTURA.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_POSTURA start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_POSTURA
+before insert on CANTABRIA.PC_POSTURA
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_POSTURA.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+
+-- ----------------------------------------------------------------------------
+-- PC_INCUBACION -- carga de huevos a la incubadora y su resultado de
+-- eclosion. Trazabilidad completa: de que lote de reproductoras vinieron
+-- los huevos (cod_lote_origen) y que lote de engorde se formo con los
+-- pollitos nacidos (cod_lote_destino, se completa al eclosionar).
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_INCUBACION
+(
+  reckey                  NUMBER(10) not null,
+  cod_origen              CHAR(2)    not null,
+  cod_lote_origen         CHAR(6)    not null,
+  cod_establo             CHAR(6),
+  fec_carga               DATE       not null,
+  cantidad_huevos_cargados NUMBER(8) not null,
+  fec_eclosion_prevista   DATE,
+  fec_eclosion_real       DATE,
+  cantidad_nacidos        NUMBER(8),
+  cantidad_mermas         NUMBER(8),
+  cod_lote_destino        CHAR(6),
+  flag_estado             CHAR(1)    default '1' not null,
+  cod_usr                 CHAR(6),
+  fec_registro            DATE       default sysdate
+)
+tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_INCUBACION add constraint PK_PC_INCUBACION primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_INCUBACION add constraint CK_PC_INCUBACION_ESTADO check (flag_estado in ('0','1','2'));
+alter table CANTABRIA.PC_INCUBACION add constraint FK_PC_INCUBACION_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_INCUBACION add constraint FK_PC_INCUBACION_LOTE_ORIG foreign key (cod_origen, cod_lote_origen) references CANTABRIA.PC_LOTE(cod_origen, cod_lote);
+alter table CANTABRIA.PC_INCUBACION add constraint FK_PC_INCUBACION_LOTE_DEST foreign key (cod_origen, cod_lote_destino) references CANTABRIA.PC_LOTE(cod_origen, cod_lote);
+alter table CANTABRIA.PC_INCUBACION add constraint FK_PC_INCUBACION_ESTABLO foreign key (cod_origen, cod_establo) references CANTABRIA.PC_ESTABLO(cod_origen, cod_establo);
+
+comment on table CANTABRIA.PC_INCUBACION is 'Pecuario (avicola) - Carga de incubadora y resultado de eclosion, con trazabilidad lote-reproductoras -> lote-engorde';
+comment on column CANTABRIA.PC_INCUBACION.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_INCUBACION.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
+comment on column CANTABRIA.PC_INCUBACION.cod_lote_origen is 'FK a PC_LOTE -- lote de reproductoras del que vinieron los huevos (trazabilidad)';
+comment on column CANTABRIA.PC_INCUBACION.cod_establo is 'FK a PC_ESTABLO -- sala/nave de incubacion (flag_tipo=I)';
+comment on column CANTABRIA.PC_INCUBACION.fec_carga is 'fecha de carga de la incubadora';
+comment on column CANTABRIA.PC_INCUBACION.cantidad_huevos_cargados is 'huevos aptos cargados a la incubadora';
+comment on column CANTABRIA.PC_INCUBACION.fec_eclosion_prevista is 'fecha esperada de nacimiento (segun periodo de incubacion de la especie)';
+comment on column CANTABRIA.PC_INCUBACION.fec_eclosion_real is 'fecha real de nacimiento';
+comment on column CANTABRIA.PC_INCUBACION.cantidad_nacidos is 'pollitos/crias nacidas -- junto a cantidad_huevos_cargados da el % de eclosion';
+comment on column CANTABRIA.PC_INCUBACION.cantidad_mermas is 'huevos no eclosionados (infertiles, muerte embrionaria)';
+comment on column CANTABRIA.PC_INCUBACION.cod_lote_destino is 'FK a PC_LOTE -- lote de engorde formado con los nacidos (se completa al registrar la eclosion)';
+comment on column CANTABRIA.PC_INCUBACION.flag_estado is '0=Anulada, 1=En incubacion, 2=Eclosionada';
+comment on column CANTABRIA.PC_INCUBACION.cod_usr is 'usuario que registro';
+comment on column CANTABRIA.PC_INCUBACION.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_INCUBACION start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_INCUBACION
+before insert on CANTABRIA.PC_INCUBACION
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_INCUBACION.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+
+-- ----------------------------------------------------------------------------
+-- PC_LOTE_MORTALIDAD -- mortalidad agregada de un lote (aves, engorde
+-- masivo). Analogo a PC_BAJA pero a nivel de lote, no de animal individual
+-- (no existen filas PC_ANIMAL para cada ave). Un trigger descuenta
+-- automaticamente PC_LOTE.cantidad_cabezas_actual.
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_LOTE_MORTALIDAD
+(
+  reckey            NUMBER(10) not null,
+  cod_origen        CHAR(2)    not null,
+  cod_lote          CHAR(6)    not null,
+  fec_evento        DATE       not null,
+  cantidad_muertes  NUMBER(6)  not null,
+  motivo            VARCHAR2(200),
+  cod_usr           CHAR(6),
+  fec_registro      DATE       default sysdate
+)
+tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_LOTE_MORTALIDAD add constraint PK_PC_LOTE_MORTALIDAD primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_LOTE_MORTALIDAD add constraint FK_PC_LOTEMORT_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_LOTE_MORTALIDAD add constraint FK_PC_LOTEMORT_LOTE foreign key (cod_origen, cod_lote) references CANTABRIA.PC_LOTE(cod_origen, cod_lote);
+
+comment on table CANTABRIA.PC_LOTE_MORTALIDAD is 'Pecuario (avicola/engorde masivo) - Mortalidad agregada de un lote, sin registro individual por cabeza';
+comment on column CANTABRIA.PC_LOTE_MORTALIDAD.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_LOTE_MORTALIDAD.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
+comment on column CANTABRIA.PC_LOTE_MORTALIDAD.cod_lote is 'FK a PC_LOTE';
+comment on column CANTABRIA.PC_LOTE_MORTALIDAD.fec_evento is 'fecha del registro de mortalidad';
+comment on column CANTABRIA.PC_LOTE_MORTALIDAD.cantidad_muertes is 'cantidad de cabezas muertas en el periodo';
+comment on column CANTABRIA.PC_LOTE_MORTALIDAD.motivo is 'causa de la mortalidad, si se conoce';
+comment on column CANTABRIA.PC_LOTE_MORTALIDAD.cod_usr is 'usuario que registro';
+comment on column CANTABRIA.PC_LOTE_MORTALIDAD.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_LOTEMORT start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_LOTEMORT
+before insert on CANTABRIA.PC_LOTE_MORTALIDAD
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_LOTEMORT.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+-- Trigger: al registrar mortalidad, descontar automaticamente las cabezas
+-- vivas actuales del lote (mismo patron que TRG_PC_BAJA_AI para PC_ANIMAL)
+create or replace trigger CANTABRIA.TRG_PC_LOTEMORT_AI
+after insert on CANTABRIA.PC_LOTE_MORTALIDAD
+for each row
+begin
+  update CANTABRIA.PC_LOTE
+     set cantidad_cabezas_actual = nvl(cantidad_cabezas_actual,0) - :new.cantidad_muertes
+   where cod_origen = :new.cod_origen
+     and cod_lote = :new.cod_lote;
 end;
 /
 
@@ -1850,6 +2030,7 @@ commit;
 -- Establos (ubicacion cubierta, independiente del potrero)
 insert into CANTABRIA.PC_ESTABLO (cod_origen, cod_establo, nom_establo, flag_tipo, capacidad_cab) values ('SU','EST001','Sala de ordeno','O',20);
 insert into CANTABRIA.PC_ESTABLO (cod_origen, cod_establo, nom_establo, flag_tipo, capacidad_cab) values ('SU','EST002','Corral de cuarentena','C',10);
+insert into CANTABRIA.PC_ESTABLO (cod_origen, cod_establo, nom_establo, flag_tipo, capacidad_cab) values ('SU','EST003','Nave de incubacion','I',10000);
 commit;
 
 -- Semental
@@ -2054,6 +2235,51 @@ insert into CANTABRIA.PC_BAJA (cod_origen, cod_animal, fec_baja, flag_motivo, pr
   select 'SU', 'SU00000005', TO_DATE('01/07/2026','DD/MM/YYYY'), 'V', 2800.00, 'OV00000001', reckey, 'Vendida por descarte, mastitis cronica recidivante', 'DEMO01'
     from CANTABRIA.PC_DTA where nro_dta = 'DTA-2026-001';
 commit;
+
+-- ----------------------------------------------------------------------------
+-- Escenario avicola (reproductoras -> postura -> incubacion -> lote de
+-- engorde -> mortalidad), independiente del escenario bovino de arriba.
+-- Ilustra que PC_LOTE es la unidad de manejo en avicola (no se registra
+-- cada ave individualmente en PC_ANIMAL).
+-- ----------------------------------------------------------------------------
+
+-- Lote de reproductoras (Hy-Line Brown), sin potrero (galpon = establo)
+insert into CANTABRIA.PC_LOTE (cod_origen, cod_lote, nom_lote, cod_categoria, fec_formacion, cantidad_cabezas_inicial, cantidad_cabezas_actual, cod_usr)
+  values ('SU','LOT002','Reproductoras Hy-Line - Galpon 1','REP',TO_DATE('01/01/2026','DD/MM/YYYY'),500,500,'DEMO01');
+commit;
+
+-- Postura diaria del lote de reproductoras
+insert into CANTABRIA.PC_POSTURA (cod_origen, cod_lote, fec_postura, cantidad_huevos, cantidad_descarte, cod_usr)
+  values ('SU','LOT002',TO_DATE('01/06/2026','DD/MM/YYYY'),420,8,'DEMO01');
+insert into CANTABRIA.PC_POSTURA (cod_origen, cod_lote, fec_postura, cantidad_huevos, cantidad_descarte, cod_usr)
+  values ('SU','LOT002',TO_DATE('02/06/2026','DD/MM/YYYY'),435,5,'DEMO01');
+commit;
+
+-- Lote de engorde que se formara con los pollitos nacidos (se cierra el
+-- vinculo de trazabilidad reproductoras -> incubacion -> engorde via
+-- PC_INCUBACION.cod_lote_origen / cod_lote_destino)
+insert into CANTABRIA.PC_LOTE (cod_origen, cod_lote, nom_lote, cod_categoria, fec_formacion, cantidad_cabezas_inicial, cantidad_cabezas_actual, cod_usr)
+  values ('SU','LOT003','Pollos de engorde - Galpon 2','ENG',TO_DATE('22/06/2026','DD/MM/YYYY'),0,0,'DEMO01');
+commit;
+
+-- Carga de incubadora con los huevos aptos del 01-02/06 (847 = 420+435-8-5+5
+-- ajustado a un numero redondo para el demo) y resultado de eclosion 21 dias despues
+insert into CANTABRIA.PC_INCUBACION (cod_origen, cod_lote_origen, cod_establo, fec_carga, cantidad_huevos_cargados, fec_eclosion_prevista, fec_eclosion_real, cantidad_nacidos, cantidad_mermas, cod_lote_destino, flag_estado, cod_usr)
+  values ('SU','LOT002','EST003',TO_DATE('02/06/2026','DD/MM/YYYY'),840,TO_DATE('23/06/2026','DD/MM/YYYY'),TO_DATE('23/06/2026','DD/MM/YYYY'),790,50,'LOT003','2','DEMO01');
+commit;
+
+-- La eclosion forma el lote de engorde: actualizar cantidad_cabezas del LOT003
+-- (en produccion esto lo haria un trigger/proceso al cerrar la incubacion;
+-- aqui se deja explicito para el demo)
+update CANTABRIA.PC_LOTE set cantidad_cabezas_inicial = 790, cantidad_cabezas_actual = 790
+ where cod_origen = 'SU' and cod_lote = 'LOT003';
+commit;
+
+-- Mortalidad registrada durante el engorde (primera semana, la mas critica)
+insert into CANTABRIA.PC_LOTE_MORTALIDAD (cod_origen, cod_lote, fec_evento, cantidad_muertes, motivo, cod_usr)
+  values ('SU','LOT003',TO_DATE('30/06/2026','DD/MM/YYYY'),12,'Estres termico primera semana','DEMO01');
+commit;
+-- TRG_PC_LOTEMORT_AI descuenta automaticamente: LOT003 queda en 778 cabezas.
 
 -- ============================================================================
 -- FIN DEL SCRIPT
