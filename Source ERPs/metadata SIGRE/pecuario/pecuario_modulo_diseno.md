@@ -965,7 +965,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 **Catálogos de referencia** (datos reales, para producción — se insertan siempre):
 - `TG_ESPECIES` (`flag_tipo_especie='P'`): 6 especies pecuarias (Bovino, Porcino, Caprino, Ovino, Equino, Avícola), con su período de gestación/incubación.
 - `PC_CATEGORIA`: las 8 categorías del ciclo de vida bovino (TER, VAQ, NOV, VPR, VSC, VDE, TOR, TDE) más 2 avícolas (`REP` Reproductora, `ENG` Pollo de engorde).
-- `PC_RAZA`: 7 razas bovinas comunes en Perú (todas con `cod_especie='BOVI'`) más 2 razas avícolas (`ROSS` Ross 308 pollo de engorde, `HYLN` Hy-Line Brown ponedora) — agregar razas de otras especies según necesidad.
+- `PC_RAZA`: 29 razas de ejemplo, al menos 5 por cada una de las 6 especies sembradas en `TG_ESPECIES` — Bovino (7: Holstein, Jersey, Brown Swiss, Gyr, Brahman, Angus, Cruzado), Porcino (5: Yorkshire, Landrace, Duroc, Hampshire, Pietrain), Caprino (5: Saanen, Alpina, Boer, Angora, Criollo), Ovino (5: Merino, Corriedale, Suffolk, Dorper, Pelibuey), Equino (5: Peruano de Paso, Criollo, Percherón, Paso Fino, Pura Sangre de Carrera), Avícola (2: Ross 308, Hy-Line Brown) — agregar más razas o especies según necesidad real del cliente.
 - `PC_PRODUCTO_SANITARIO`: calendario sanitario base (aftosa, brucelosis, carbunco/clostridiales, rabia, IBR-BVD, leptospirosis, desparasitantes, antibiótico, antiinflamatorio, sales minerales).
 - `PC_ENFERMEDAD`: 12 enfermedades comunes.
 

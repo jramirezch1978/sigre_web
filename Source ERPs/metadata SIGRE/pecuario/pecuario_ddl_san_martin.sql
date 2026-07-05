@@ -239,7 +239,9 @@ begin
 end;
 /
 
--- Datos iniciales sugeridos (bovinos; agregar razas de otras especies segun necesidad)
+-- Datos iniciales sugeridos: al menos algunas razas de ejemplo por cada
+-- especie sembrada en TG_ESPECIES (BOVI, PORC, CAPR, OVIN, EQUI, AVES) --
+-- agregar mas razas o especies segun necesidad real del cliente.
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','HOLS','Holstein','L');
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','JERS','Jersey','L');
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','BRSW','Brown Swiss','M');
@@ -247,6 +249,31 @@ insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) value
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','BRAH','Brahman','C');
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','ANGU','Angus','C');
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','CRUC','Cruzado / mestizo','M');
+-- Porcino
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','YORK','Yorkshire (Large White)','R');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','LAND','Landrace','R');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','DURO','Duroc','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','HAMP','Hampshire','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','PIET','Pietrain','C');
+-- Caprino
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','SAAN','Saanen','L');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','ALPI','Alpina','L');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','BOER','Boer','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','ANGO','Angora','F');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','CRIC','Criollo','M');
+-- Ovino
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','MERI','Merino','F');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','CORR','Corriedale','M');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','SUFF','Suffolk','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','DORP','Dorper','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','PELI','Pelibuey','C');
+-- Equino
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','PERU','Peruano de Paso','T');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','CRIE','Criollo','T');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','PERC','Percheron','T');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','PASO','Paso Fino','T');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','PSCR','Pura Sangre de Carrera','R');
+-- Avicola
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('AVES','ROSS','Ross 308 (pollo de engorde)','C');
 insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('AVES','HYLN','Hy-Line Brown (ponedora)','L');
 commit;
