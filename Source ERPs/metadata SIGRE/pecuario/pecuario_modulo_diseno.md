@@ -772,9 +772,62 @@ También incluye: 2 potreros, 1 semental, 1 dieta con su componente, **1 receta 
 
 **Placeholders que hay que ajustar antes de ejecutar** (ver advertencia completa al inicio de la sección 9 del script): `cod_art` en `PC_DIETA_COMPONENTE`/`TIPO_PRODUCTO`/`PC_RECETA_DET` (deben ser artículos reales de `ARTICULO`), `nro_os` en el evento de mastitis de Estrella (debe ser una `ORDEN_SERVICIO` real), `nro_ov` en la baja de Estrella (debe ser una `ORDEN_VENTA` real), y `cod_origen='SU'` (debe ser el código real del fundo en `ORIGEN`).
 
-## 18. Próximos pasos
+## 18. Investigación de mercado — SAP y Nisira (validación externa del diseño)
+
+Investigación en internet (julio 2026) sobre si los ERP de referencia SAP y Nisira tienen módulo de producción pecuaria, para validar/ajustar este diseño contra lo que ya existe en el mercado. Se documenta aquí completa para no repetirla.
+
+### 18.1 SAP — sí tiene módulo de ganadería (vía SAP Business One + partner "AGRI")
+
+SAP no trae un módulo de ganadería nativo en el núcleo de SAP Business One; lo ofrece a través de un **add-on especializado de partner llamado "AGRI"** (agri.so / agri.pe / agrit.us), integrado a SAP Business One, específico para agroindustria. También existen soluciones equivalentes de otros partners (ej. BXTi con "Beef-PRO"/"Poultry-PRO" para bovino/porcino/avícola).
+
+**Funcionalidad confirmada del módulo "Ganadería" de AGRI:**
+- **Manejo del animal**: integra registros de origen, nutrición, sanidad y manejo del animal a lo largo de toda su vida — igual enfoque de "historial completo por animal" que `PC_ANIMAL` + sus tablas relacionadas.
+- **Control de existencias en cabezas y kilos**: inventario del hato tanto por número de cabezas como por peso — en nuestro diseño esto es `PC_ANIMAL.peso_actual` + reportes (CAM716 Resumen del hato); AGRI lo llama específicamente **"planillas de hacienda"**, con informes de evolución en cabezas y kilos, balance de movimientos y de producción de carne — **candidato a reporte adicional** (ver sección 18.3).
+- **Manejo por categorías agrupadas en rebaños ("lotes")**: igual concepto que `PC_CATEGORIA` + `PC_POTRERO`, permitiendo monitorear la evolución de cada grupo.
+- **Control reproductivo**: medir y comparar datos productivos y reproductivos en cualquier momento — igual que nuestras consultas CAM501 (historial reproductivo) y reporte CAM717 (indicadores reproductivos).
+- **Leche**: controla volumen de leche que entra y sale del tanque, temperaturas del proceso, curva de enfriamiento y ciclo de lavado — **más detallado que nuestro diseño actual**: `PC_ORDENO` registra litros por ordeño, pero no temperatura de tanque ni ciclo de lavado del equipo de frío. Queda como posible campo adicional si el negocio realmente enfría/almacena en tanque propio (no aplica si se entrega la leche cruda directamente, como en el caso Laive de este documento).
+- **Sanidad**: historial por animal o por rebaño de tratamientos, curaciones y vacunaciones, con descripción de enfermedades, medicamentos y dosis — **coincide casi exactamente** con `PC_SANIDAD_EVENTO`.
+- **Trazabilidad**: información cronológica y georreferenciada desde el origen hasta el destino final de la producción, siguiendo estándares de certificación de origen y calidad — cubierto por `PC_DTA`/`PC_MOVIMIENTO_POTRERO`, aunque **sin georreferenciación** (coordenadas GPS del potrero/movimiento) — posible campo adicional (`latitud`/`longitud` en `PC_POTRERO` y/o `PC_MOVIMIENTO_POTRERO`) si se requiere certificación de origen más estricta (ej. exportación).
+
+**Conclusión SAP**: nuestro diseño ya cubre la mayoría de lo que ofrece el módulo de ganadería líder del mercado (vía AGRI). Los tres gaps identificados (temperatura/ciclo de tanque de leche, georreferenciación, "planillas de hacienda" como reporte específico) son mejoras incrementales, no huecos estructurales.
+
+### 18.2 Nisira — no tiene módulo de ganadería/pecuario genérico, pero sí un módulo Avícola (aves) muy relevante
+
+Nisira (ERP peruano, mismo mercado que SIGRE) **no ofrece un módulo de "ganadería"/"pecuario" genérico** — sus módulos de producción animal están específicamente dirigidos a **Avícola** (aves de corral: reproductoras, incubación, engorde). Confirmado explícitamente: no hay mención de bovino/porcino/caprino como módulo propio, solo avícola.
+
+**Funcionalidad del módulo Avícola de Nisira** (el precedente más cercano en el mercado peruano, aunque para otra especie):
+
+- **Granjas de reproductoras**: controla las etapas de recría y postura de las aves reproductoras, registra consumo de alimento balanceado y productos de campo, registra movimiento de aves por muerte, traslado o venta, y registra la producción de huevos.
+- **Plantas de incubación**: selección de huevos aptos para incubar, control de cargas de incubadora y traslado a nacedoras, trazabilidad por lote de origen de las reproductoras, despacho de pollitos a las granjas de engorde, con reportes de control de mermas por etapa del proceso y % de nacimiento (eclosión) por lote de reproductoras.
+- **Granjas de engorde**: registra recepción de pollitos desde la incubadora, registro de mortalidad, consumo de alimento y productos de campo, clasificación para venta y despacho por zonas, con reportes de inventario de aves, consumo de alimento, y resumen de cierre de lote mostrando % de mortalidad y **conversión alimenticia** (kg de alimento por kg de carne producida).
+- **Alimento balanceado**: registro de formulación del producto, planificación de producción según requerimiento de las granjas, **generación de órdenes de producción (por lote)**, y despacho a las granjas.
+- El control en cada etapa se hace **por lote de producción** (no por ave individual), permitiendo un costeo y presupuesto más preciso por lote.
+
+**Comparación con nuestro diseño — gap estructural real identificado:**
+
+Nuestro diseño (`PC_ANIMAL`) asume **identidad individual por animal** (un `cod_animal` por res, con su propia genealogía, peso, historial) — correcto para bovino/equino, donde cada animal tiene valor e identidad individual. El modelo de Nisira para avícola (y aplicable también a porcino de engorde a gran escala) es **por LOTE/COHORTE** (cientos o miles de aves introducidas juntas, sin identidad individual, con métricas agregadas: cabezas vivas, mortalidad %, consumo total, conversión alimenticia). Son dos paradigmas de datos genuinamente distintos:
+
+| | Bovino/Equino (individual) | Avícola/Porcino de engorde (lote) |
+|---|---|---|
+| Identidad | Por animal (`cod_animal`) | Por lote/cohorte |
+| Reproducción | Celo → servicio → parto (por animal) | Reproductoras → incubación → eclosión (por lote de huevos) |
+| Métricas clave | Peso, producción de leche, genealogía individual | % mortalidad, conversión alimenticia, cabezas vivas del lote |
+| Sanidad | Evento por animal | Tratamiento aplicado a todo el lote |
+
+**Esto es un gap real de este diseño**, no cubierto por `PC_ANIMAL` tal como está. Si San Martín (o cualquier cliente futuro) tiene o planea avicultura/porcicultura de engorde a escala, se necesitaría una rama de tablas paralela **por lote** (`PC_LOTE_PRODUCCION`, análoga a `PC_ANIMAL` pero con cabezas/mortalidad/conversión agregada en vez de identidad individual), reutilizando el mismo mecanismo de OT Pecuaria para alimentación y sanidad. **No se implementa en este script todavía** — queda como ítem de decisión en la sección 19 (Próximos pasos), ya que es una ampliación de alcance genuina, no un ajuste del diseño actual.
+
+### 18.3 Ajustes/adiciones que esta investigación sugiere (para decidir con el usuario)
+
+1. Reporte "planillas de hacienda" (AGRI): evolución de cabezas y kilos por período, balance de movimientos — se puede armar sobre `PC_ANIMAL`/`PC_MOVIMIENTO_POTRERO`/`PC_BAJA` sin tablas nuevas; candidato a nuevo reporte (`CAM723`, siguiente hueco libre en el rango de Reportes).
+2. Campos de georreferenciación (`latitud`/`longitud`) en `PC_POTRERO` y/o `PC_MOVIMIENTO_POTRERO`, si se requiere trazabilidad de exportación.
+3. Detalle de tanque de leche (temperatura, ciclo de lavado) en `PC_ORDENO` o una tabla nueva `PC_TANQUE_LECHE`, si el negocio enfría/almacena en tanque propio.
+4. Reporte de "conversión alimenticia" (kg alimento / kg producido) y "% mortalidad", tomados del patrón de Nisira Avícola — aplicable también a bovino de engorde, no solo aves.
+5. **Decisión mayor**: si se necesita soporte para producción **por lote** (avícola, porcino de engorde) en paralelo al modelo por animal individual ya construido (sección 18.2) — esto sí es una ampliación de alcance real, a validar con el usuario antes de diseñar.
+
+## 19. Próximos pasos
 
 1. Validar el diseño de tablas y la numeración de ventanas con el usuario/gerencia.
 2. Confirmar con el contador el tratamiento contable exacto (cuentas, periodicidad de revaluación, si se activa auto-post o se deja manual como Activo Fijo).
 3. Definir si se necesita un catálogo de **establos/corrales** además de `PC_POTRERO`, y si `PC_ANIMAL` lleva `cod_centro_costo` directo (pendiente de confirmación).
 4. Diseñar las ventanas PowerBuilder (CAM061...CAM905) siguiendo esta especificación.
+5. Decidir si se necesita el modelo **por lote** (avícola/porcino de engorde) descrito en la sección 18.2, y si aplica alguno de los ajustes de la sección 18.3.
