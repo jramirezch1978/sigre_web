@@ -85,7 +85,7 @@ create table CANTABRIA.PC_ESPECIE
 (
   reckey        NUMBER(10)    not null,
   cod_especie   CHAR(4)       not null,
-  nom_especie   VARCHAR2(60)  not null,
+  nom_especie   VARCHAR2(200)  not null,
   flag_estado   CHAR(1)       default '1' not null
 )
 tablespace CANTABRIA;
@@ -131,7 +131,7 @@ create table CANTABRIA.PC_RAZA
   reckey        NUMBER(10)    not null,
   cod_especie   CHAR(4)       not null,
   cod_raza      CHAR(4)       not null,
-  nom_raza      VARCHAR2(60)  not null,
+  nom_raza      VARCHAR2(200)  not null,
   flag_tipo     CHAR(1)       default 'L' not null,
   flag_estado   CHAR(1)       default '1' not null
 )
@@ -180,9 +180,9 @@ create table CANTABRIA.PC_POTRERO
   reckey         NUMBER(10)    not null,
   cod_origen     CHAR(2)       not null,
   cod_potrero    CHAR(6)       not null,
-  nom_potrero    VARCHAR2(80)  not null,
+  nom_potrero    VARCHAR2(200)  not null,
   area_has       NUMBER(8,2),
-  tipo_pasto     VARCHAR2(60),
+  tipo_pasto     VARCHAR2(200),
   capacidad_cab  NUMBER(6),
   flag_estado    CHAR(1)       default '1' not null
 )
@@ -221,7 +221,7 @@ create table CANTABRIA.PC_CATEGORIA
 (
   reckey          NUMBER(10)    not null,
   cod_categoria   CHAR(3)       not null,
-  nom_categoria   VARCHAR2(60)  not null,
+  nom_categoria   VARCHAR2(200)  not null,
   flag_sexo       CHAR(1),
   edad_min_meses  NUMBER(4),
   edad_max_meses  NUMBER(4),
@@ -272,9 +272,9 @@ create table CANTABRIA.PC_SEMENTAL
 (
   reckey          NUMBER(10)    not null,
   cod_semental    CHAR(10)      not null,
-  nom_semental    VARCHAR2(80)  not null,
+  nom_semental    VARCHAR2(200)  not null,
   cod_raza        CHAR(4)       not null,
-  proveedor       VARCHAR2(100),
+  proveedor       VARCHAR2(200),
   registro_genet  VARCHAR2(40),
   flag_estado     CHAR(1)       default '1' not null
 )
@@ -312,7 +312,7 @@ create table CANTABRIA.PC_PRODUCTO_SANITARIO
 (
   reckey          NUMBER(10)     not null,
   cod_prod_san    CHAR(10)       not null,
-  nom_producto    VARCHAR2(100)  not null,
+  nom_producto    VARCHAR2(200)  not null,
   flag_tipo       CHAR(1)        not null,
   cod_art         CHAR(12),
   dias_refuerzo   NUMBER(4),
@@ -369,7 +369,7 @@ create table CANTABRIA.PC_ENFERMEDAD
 (
   reckey             NUMBER(10)     not null,
   cod_enfermedad     CHAR(6)        not null,
-  nom_enfermedad     VARCHAR2(100)  not null,
+  nom_enfermedad     VARCHAR2(200)  not null,
   flag_reproductiva  CHAR(1)        default '0',
   flag_estado        CHAR(1)        default '1' not null
 )
@@ -419,7 +419,7 @@ create table CANTABRIA.PC_DIETA
 (
   reckey          NUMBER(10)    not null,
   cod_dieta       CHAR(6)       not null,
-  nom_dieta       VARCHAR2(80)  not null,
+  nom_dieta       VARCHAR2(200)  not null,
   cod_categoria   CHAR(3)       not null,
   costo_kg_prom   NUMBER(10,4),
   flag_estado     CHAR(1)       default '1' not null
@@ -503,7 +503,7 @@ create table CANTABRIA.PC_RECETA
 (
   reckey          NUMBER(10)     not null,
   cod_receta      CHAR(6)        not null,
-  nom_receta      VARCHAR2(80)   not null,
+  nom_receta      VARCHAR2(200)   not null,
   cod_producto    CHAR(12)       not null,
   rendimiento_kg  NUMBER(10,3)   not null,
   flag_estado     CHAR(1)        default '1' not null
@@ -578,7 +578,7 @@ create table CANTABRIA.PC_ANIMAL
   cod_animal          CHAR(10)      not null,
   cod_origen          CHAR(2)       not null,
   cod_interno         VARCHAR2(20),
-  nom_animal          VARCHAR2(60),
+  nom_animal          VARCHAR2(200),
   cod_raza            CHAR(4)       not null,
   flag_sexo           CHAR(1)       not null,
   fec_nacimiento      DATE          not null,
@@ -1282,13 +1282,13 @@ create table CANTABRIA.PC_LABORATORIO
   cod_semental      CHAR(10),
   fec_muestra       DATE       not null,
   flag_tipo_muestra CHAR(1)    not null,
-  laboratorio       VARCHAR2(100),
+  laboratorio       VARCHAR2(200),
   cod_veterinario   CHAR(8),
   nro_evento        NUMBER(5),
   fec_resultado     DATE,
   flag_estado       CHAR(1)    default '1' not null,
   flag_origen       CHAR(1)    default 'P' not null,
-  cliente           VARCHAR2(100),
+  cliente           VARCHAR2(200),
   costo_analisis    NUMBER(10,2),
   flag_facturado    CHAR(1)    default '0',
   observaciones     VARCHAR2(500),
@@ -1348,7 +1348,7 @@ create table CANTABRIA.PC_LABORATORIO_DET
   reckey              NUMBER(10)    not null,
   lab_reckey          NUMBER(10)    not null,
   item                NUMBER(3)     not null,
-  parametro           VARCHAR2(100) not null,
+  parametro           VARCHAR2(200) not null,
   valor_resultado     VARCHAR2(60),
   unidad_medida       VARCHAR2(20),
   valor_ref_min       NUMBER(12,4),
@@ -1447,7 +1447,7 @@ create table CANTABRIA.PC_DTA
   fec_emision           DATE          not null,
   cod_origen_fundo      CHAR(2)       not null,
   cod_destino_fundo     CHAR(2),
-  razon_social_destino  VARCHAR2(150),
+  razon_social_destino  VARCHAR2(200),
   motivo                CHAR(1)       not null,
   flag_estado           CHAR(1)       default '1' not null,
   cod_usr               CHAR(6),

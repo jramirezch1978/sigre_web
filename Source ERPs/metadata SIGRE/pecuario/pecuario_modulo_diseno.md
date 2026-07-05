@@ -385,7 +385,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 |---|---|---|---|
 | `reckey` | NUMBER(10) | PK | Autonumérica (`SEQ_PC_ESPECIE` + `TIB_PC_ESPECIE`) |
 | `cod_especie` | CHAR(4) | UNIQUE | Código de especie |
-| `nom_especie` | VARCHAR2(60) | No | Nombre (Bovino, Porcino, Caprino, Ovino, Equino...) |
+| `nom_especie` | VARCHAR2(200) | No | Nombre (Bovino, Porcino, Caprino, Ovino, Equino...) |
 | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
 
 #### `PC_RAZA` — Razas (PK reckey)
@@ -394,7 +394,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 | `reckey` | NUMBER(10) | PK | Autonumérica |
 | `cod_especie` | CHAR(4) | No | FK → `PC_ESPECIE` |
 | `cod_raza` | CHAR(4) | UNIQUE | Código de raza (de cualquier especie, no solo bovina) |
-| `nom_raza` | VARCHAR2(60) | No | Nombre de la raza |
+| `nom_raza` | VARCHAR2(200) | No | Nombre de la raza |
 | `flag_tipo` | CHAR(1) | No | L=Lechera, C=Carne, M=Doble propósito, F=Fibra/lana, T=Trabajo/tracción, R=Reproducción/genética |
 | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
 
@@ -404,9 +404,9 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 | `reckey` | NUMBER(10) | PK | Autonumérica |
 | `cod_origen` | CHAR(2) | No | FK → `ORIGEN` |
 | `cod_potrero` | CHAR(6) | UNIQUE (con `cod_origen`) | Código de potrero |
-| `nom_potrero` | VARCHAR2(80) | No | Nombre |
+| `nom_potrero` | VARCHAR2(200) | No | Nombre |
 | `area_has` | NUMBER(8,2) | Sí | Área en hectáreas |
-| `tipo_pasto` | VARCHAR2(60) | Sí | Tipo de pasto |
+| `tipo_pasto` | VARCHAR2(200) | Sí | Tipo de pasto |
 | `capacidad_cab` | NUMBER(6) | Sí | Capacidad de carga (cabezas) |
 | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
 
@@ -415,7 +415,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 |---|---|---|---|
 | `reckey` | NUMBER(10) | PK | Autonumérica |
 | `cod_categoria` | CHAR(3) | UNIQUE | TER, VAQ, NOV, VPR, VSC, VDE, TOR, TDE |
-| `nom_categoria` | VARCHAR2(60) | No | Nombre |
+| `nom_categoria` | VARCHAR2(200) | No | Nombre |
 | `flag_sexo` | CHAR(1) | Sí | M/H, null=ambos |
 | `edad_min_meses` / `edad_max_meses` | NUMBER(4) | Sí | Rango de edad |
 | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
@@ -425,9 +425,9 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 |---|---|---|---|
 | `reckey` | NUMBER(10) | PK | Autonumérica |
 | `cod_semental` | CHAR(10) | UNIQUE | Código |
-| `nom_semental` | VARCHAR2(80) | No | Nombre |
+| `nom_semental` | VARCHAR2(200) | No | Nombre |
 | `cod_raza` | CHAR(4) | No | FK → `PC_RAZA` |
-| `proveedor` | VARCHAR2(100) | Sí | Central de inseminación |
+| `proveedor` | VARCHAR2(200) | Sí | Central de inseminación |
 | `registro_genet` | VARCHAR2(40) | Sí | Registro genealógico |
 | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
 
@@ -436,7 +436,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 |---|---|---|---|
 | `reckey` | NUMBER(10) | PK | Autonumérica |
 | `cod_prod_san` | CHAR(10) | UNIQUE | Código |
-| `nom_producto` | VARCHAR2(100) | No | Nombre |
+| `nom_producto` | VARCHAR2(200) | No | Nombre |
 | `flag_tipo` | CHAR(1) | No | V=Vacuna, D=Desparasitante, M=Medicamento, S=Suplemento |
 | `cod_art` | CHAR(12) | Sí | FK → `ARTICULO` — artículo real de stock (la unidad de medida se lee de ahí, no se repite en esta tabla) |
 | `dias_refuerzo` | NUMBER(4) | Sí | Días al refuerzo |
@@ -448,7 +448,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 |---|---|---|---|
 | `reckey` | NUMBER(10) | PK | Autonumérica |
 | `cod_enfermedad` | CHAR(6) | UNIQUE | Código |
-| `nom_enfermedad` | VARCHAR2(100) | No | Nombre |
+| `nom_enfermedad` | VARCHAR2(200) | No | Nombre |
 | `flag_reproductiva` | CHAR(1) | Sí | 1=afecta ciclo reproductivo |
 | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
 
@@ -457,7 +457,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 |---|---|---|---|
 | `reckey` | NUMBER(10) | PK | Autonumérica |
 | `cod_dieta` | CHAR(6) | UNIQUE | Código |
-| `nom_dieta` | VARCHAR2(80) | No | Nombre |
+| `nom_dieta` | VARCHAR2(200) | No | Nombre |
 | `cod_categoria` | CHAR(3) | No | FK → `PC_CATEGORIA` |
 | `costo_kg_prom` | NUMBER(10,4) | Sí | Costo promedio/kg |
 | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
@@ -477,7 +477,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 |---|---|---|---|
 | `reckey` | NUMBER(10) | PK | Autonumérica |
 | `cod_receta` | CHAR(6) | UNIQUE | Código |
-| `nom_receta` | VARCHAR2(80) | No | Nombre |
+| `nom_receta` | VARCHAR2(200) | No | Nombre |
 | `cod_producto` | CHAR(12) | No | FK → `TIPO_PRODUCTO` (el concentrado que se fabrica) |
 | `rendimiento_kg` | NUMBER(10,3) | No | Kg de producto que rinde un lote |
 | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
@@ -499,7 +499,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 | `cod_animal` | CHAR(10) | **PK (documento)** | `cod_origen(2)+correlativo(8)`, generado por `TIB_PC_ANIMAL` vía `NUM_TABLAS` (ej. `SU00000001`) |
 | `cod_origen` | CHAR(2) | No | FK → `ORIGEN` (también embebido en `cod_animal`) |
 | `cod_interno` | VARCHAR2(20) | Sí | Código interno/arete físico de la empresa (libre, distinto del documento) |
-| `nom_animal` | VARCHAR2(60) | Sí | Apodo |
+| `nom_animal` | VARCHAR2(200) | Sí | Apodo |
 | `cod_raza` | CHAR(4) | No | FK → `PC_RAZA` |
 | `flag_sexo` | CHAR(1) | No | M=Macho, H=Hembra |
 | `fec_nacimiento` | DATE | No | Fecha de nacimiento |
@@ -676,13 +676,13 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 | `cod_semental` | CHAR(10) | Sí | FK → `PC_SEMENTAL` |
 | `fec_muestra` | DATE | No | Toma |
 | `flag_tipo_muestra` | CHAR(1) | No | S/L/F/M/T/O |
-| `laboratorio` | VARCHAR2(100) | Sí | Externo |
+| `laboratorio` | VARCHAR2(200) | Sí | Externo |
 | `cod_veterinario` | CHAR(8) | Sí | FK → `PROVEEDOR` — quien tomó la muestra (generalmente externo) |
 | `nro_evento` | NUMBER(5) | Sí | FK opcional (con `cod_animal`) → `PC_SANIDAD_EVENTO` |
 | `fec_resultado` | DATE | Sí | Entrega |
 | `flag_estado` | CHAR(1) | No | 0/1/2 |
 | `flag_origen` | CHAR(1) | No | P=Propio, C=Cliente |
-| `cliente` | VARCHAR2(100) | Sí | Si `flag_origen`=C |
+| `cliente` | VARCHAR2(200) | Sí | Si `flag_origen`=C |
 | `costo_analisis` | NUMBER(10,2) | Sí | Costo/descuento |
 | `flag_facturado` | CHAR(1) | Sí | 1=Ya descontado |
 | `observaciones` | VARCHAR2(500) | Sí | — |
@@ -694,7 +694,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 | `reckey` | NUMBER(10) | PK | Autonumérica |
 | `lab_reckey` | NUMBER(10) | UNIQUE (con `item`) | FK → `PC_LABORATORIO.reckey` |
 | `item` | NUMBER(3) | No | Correlativo |
-| `parametro` | VARCHAR2(100) | No | Analito |
+| `parametro` | VARCHAR2(200) | No | Analito |
 | `valor_resultado` | VARCHAR2(60) | Sí | Texto/numérico |
 | `unidad_medida` | VARCHAR2(20) | Sí | Unidad |
 | `valor_ref_min` / `valor_ref_max` | NUMBER(12,4) | Sí | Rango |
@@ -719,7 +719,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 | `nro_dta` | VARCHAR2(20) | UNIQUE | Número asignado por SENASA — **no autogenerado** |
 | `fec_emision` | DATE | No | Fecha |
 | `cod_origen_fundo` / `cod_destino_fundo` | CHAR(2) | No/Sí | FK → `ORIGEN` |
-| `razon_social_destino` | VARCHAR2(150) | Sí | Si venta |
+| `razon_social_destino` | VARCHAR2(200) | Sí | Si venta |
 | `motivo` | CHAR(1) | No | V/T/F |
 | `flag_estado` | CHAR(1) | No | — |
 | `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
