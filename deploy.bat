@@ -87,12 +87,14 @@ set "FORCE=0"
 set "NO_PUSH=0"
 set "NO_BUILD=0"
 set "DEPLOY_DIRECT=1"
+set "DOCKER_NO_CACHE=0"
 for %%a in (%*) do (
     if /i "%%a"=="--force" set "FORCE=1"
     if /i "%%a"=="--no-push" set "NO_PUSH=1"
     if /i "%%a"=="--no-build" set "NO_BUILD=1"
     if /i "%%a"=="--direct" set "DEPLOY_DIRECT=1"
     if /i "%%a"=="--registry" set "DEPLOY_DIRECT=0"
+    if /i "%%a"=="--no-cache" set "DOCKER_NO_CACHE=1"
 )
 
 REM Si se pasan 2+ nombres de servicio directamente (sin flags), ej:
@@ -362,11 +364,14 @@ exit /b 0
 set "SVC=%~1"
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-build-!SVC!-!DEPLOY_LOG_TS!.log"
 set "IMAGE=!IMAGE_REGISTRY!/!SVC!:!IMAGE_TAG!"
+set "BUILD_NO_CACHE="
+if /i "!SVC!"=="sigre-frontend" set "BUILD_NO_CACHE=--no-cache"
+if "!DOCKER_NO_CACHE!"=="1" set "BUILD_NO_CACHE=--no-cache"
 if /i "!ENTORNO!"=="linux-vm" (
     REM linux-vm es un daemon Docker remoto ya accesible por TCP: se construye
     REM directamente con docker compose sobre ese contexto, sin build+save+load.
-    echo %CYAN%[BUILD]%RESET% !SVC! en !DOCKER_CTX! ^(docker compose build^)
-    docker --context !DOCKER_CTX! compose -f "!COMPOSE_APP!" build !SVC! >> "!DEPLOY_LOG!" 2>&1
+    echo %CYAN%[BUILD]%RESET% !SVC! en !DOCKER_CTX! ^(docker compose build !BUILD_NO_CACHE!^)
+    docker --context !DOCKER_CTX! compose -f "!COMPOSE_APP!" build !BUILD_NO_CACHE! !SVC! >> "!DEPLOY_LOG!" 2>&1
     if errorlevel 1 (
         echo %RED%[ERROR]%RESET% Build fallo. Ver: !DEPLOY_LOG!
         exit /b 1
@@ -377,7 +382,7 @@ if /i "!ENTORNO!"=="linux-vm" (
 echo %CYAN%[BUILD LOCAL]%RESET% !SVC! -^> !IMAGE! (contexto build: %DOCKER_CTX_BUILD%)
 if /i "!SVC!"=="sigre-frontend" (
     pushd "!FRONTEND_DIR!"
-    docker --context %DOCKER_CTX_BUILD% build -t !IMAGE! . >> "!DEPLOY_LOG!" 2>&1
+    docker --context %DOCKER_CTX_BUILD% build !BUILD_NO_CACHE! -t !IMAGE! . >> "!DEPLOY_LOG!" 2>&1
     set "BUILD_ERR=!errorlevel!"
     popd
 ) else (
@@ -716,6 +721,7 @@ echo   --direct    Build + transfer a cronos y limpiar imagen local ^(default^)
 echo   --registry  Push/pull via registry remoto ^(requiere docker login^)
 echo   --no-push   Build local sin transferir ni push
 echo   --no-build  Solo up remoto ^(requiere imagen ya en cronos^)
+echo   --no-cache  Build Docker sin cache ^(sigre-frontend siempre; otros con este flag^)
 echo.
 echo %YELLOW%Postman:%RESET% 01. documentacion\SIGRE Web ERP.postman_collection.json
 echo.

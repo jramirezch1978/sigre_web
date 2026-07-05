@@ -215,6 +215,7 @@ if "!INCLUIR_FRONTEND!"=="1" (
         pushd "!FRONTEND_DIR!"
         call :ensureNpmDeps || set "BUILD_FAILED=1"
         if "!BUILD_FAILED!"=="0" (
+            call :cleanFrontendBuildCache
             call npm run build:prod >> "!BUILD_LOG!" 2>&1
             if errorlevel 1 set "BUILD_FAILED=1"
         )
@@ -254,6 +255,22 @@ if "!BUILD_FAILED!"=="1" (
 )
 goto :endScript
 
+REM ============================================================
+REM Limpia cache de Angular antes de compilar frontend (equivalente
+REM local a docker build --no-cache: evita bundles obsoletos).
+REM Debe invocarse con el directorio actual dentro de FRONTEND_DIR.
+REM ============================================================
+:cleanFrontendBuildCache
+if exist ".angular\cache" (
+    echo %CYAN%[CLEAN]%RESET% Eliminando cache de Angular ^(.angular\cache^)...
+    rmdir /s /q ".angular\cache" >> "!BUILD_LOG!" 2>&1
+)
+if exist "dist\sigre-asistencia" (
+    echo %CYAN%[CLEAN]%RESET% Eliminando dist anterior ^(dist\sigre-asistencia^)...
+    rmdir /s /q "dist\sigre-asistencia" >> "!BUILD_LOG!" 2>&1
+)
+exit /b 0
+
 :buildFrontend
 set "BUILD_LOG=!BUILD_LOG_DIR!\build-frontend-!BUILD_LOG_TS!.log"
 call :checkNode || goto :endScript
@@ -265,6 +282,7 @@ if errorlevel 1 (
     popd
     goto :endScript
 )
+call :cleanFrontendBuildCache
 call npm run build:prod >> "!BUILD_LOG!" 2>&1
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Fallo frontend. Ver: !BUILD_LOG!
@@ -315,6 +333,7 @@ if errorlevel 1 (
     popd
     exit /b 1
 )
+call :cleanFrontendBuildCache
 call npm run build >> "!BUILD_LOG!" 2>&1
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% Fallo compilacion frontend. Ver: !BUILD_LOG!
