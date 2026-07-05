@@ -69,5 +69,5 @@ echo.
 
 set "JAVA_HOME=%ORIGINAL_JAVA_HOME%"
 set "PATH=%ORIGINAL_PATH%"
-pause
+rem pause
 endlocal
