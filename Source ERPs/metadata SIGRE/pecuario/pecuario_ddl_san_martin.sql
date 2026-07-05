@@ -23,12 +23,14 @@
 -- VENTANAS PowerBuilder usan el prefijo real de Campo (CAM###), numeradas por
 -- TIPO de opcion (igual regla que el resto del sistema): Tablas 000-299,
 -- Operaciones 300-499, Consultas 500-699, Reportes 700-899, Procesos 900-999.
--- Bloques asignados a Pecuario (libres de colision con Campo/cana):
---   Tablas      CAM202-CAM208
---   Operaciones CAM435-CAM449
---   Consultas   CAM500-CAM505
---   Reportes    CAM759-CAM765
---   Procesos    CAM900-CAM905
+-- Bloques asignados a Pecuario: se relleno el primer hueco contiguo
+-- suficientemente grande dentro de cada rango (no se continuo tras el
+-- ultimo codigo usado por Campo/cana):
+--   Tablas      CAM061-CAM067 (hueco libre real: 061-199)
+--   Operaciones CAM391-CAM405 (hueco libre real: 391-411)
+--   Consultas   CAM500-CAM505 (rango completo sin uso previo)
+--   Reportes    CAM716-CAM722 (hueco libre real: 716-751)
+--   Procesos    CAM900-CAM905 (rango completo sin uso previo)
 -- Detalle completo: Source ERPs/metadata SIGRE/pecuario/pecuario_modulo_diseno.md
 -- ============================================================================
 
