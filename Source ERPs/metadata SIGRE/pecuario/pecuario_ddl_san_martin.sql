@@ -139,7 +139,7 @@ tablespace CANTABRIA;
 
 alter table CANTABRIA.PC_RAZA add constraint PK_PC_RAZA primary key (reckey) using index tablespace CANTABRIA;
 alter table CANTABRIA.PC_RAZA add constraint UQ_PC_RAZA_COD unique (cod_raza) using index tablespace CANTABRIA;
-alter table CANTABRIA.PC_RAZA add constraint CK_PC_RAZA_TIPO check (flag_tipo in ('L','C','M'));
+alter table CANTABRIA.PC_RAZA add constraint CK_PC_RAZA_TIPO check (flag_tipo in ('L','C','M','F','T','R'));
 alter table CANTABRIA.PC_RAZA add constraint FK_PC_RAZA_ESPECIE foreign key (cod_especie) references CANTABRIA.PC_ESPECIE(cod_especie);
 
 comment on table CANTABRIA.PC_RAZA is 'Pecuario - Catalogo de razas (de cualquier especie)';
@@ -147,7 +147,7 @@ comment on column CANTABRIA.PC_RAZA.reckey is 'PK autonumerica';
 comment on column CANTABRIA.PC_RAZA.cod_especie is 'FK a PC_ESPECIE (bovino, porcino, etc.)';
 comment on column CANTABRIA.PC_RAZA.cod_raza is 'codigo de raza (unique, no PK)';
 comment on column CANTABRIA.PC_RAZA.nom_raza is 'nombre de la raza';
-comment on column CANTABRIA.PC_RAZA.flag_tipo is 'L=Lechera, C=Carne, M=Doble proposito';
+comment on column CANTABRIA.PC_RAZA.flag_tipo is 'L=Lechera, C=Carne, M=Doble proposito, F=Fibra/lana, T=Trabajo/traccion, R=Reproduccion/genetica (aplica a cualquier especie, no solo bovinos)';
 comment on column CANTABRIA.PC_RAZA.flag_estado is 'flag_estado';
 
 create sequence CANTABRIA.SEQ_PC_RAZA start with 1 increment by 1 nocache;
@@ -317,7 +317,6 @@ create table CANTABRIA.PC_PRODUCTO_SANITARIO
   cod_art         CHAR(12),
   dias_refuerzo   NUMBER(4),
   periodo_retiro  NUMBER(3),
-  unidad_medida   CHAR(3),
   flag_estado     CHAR(1)        default '1' not null
 )
 tablespace CANTABRIA;
@@ -335,7 +334,6 @@ comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.flag_tipo is 'V=Vacuna, D=Desp
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.cod_art is 'FK a ARTICULO (Almacen) -- articulo real de stock que se descuenta al consumir este producto via una OT';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.dias_refuerzo is 'dias hasta la proxima dosis de refuerzo (si aplica)';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.periodo_retiro is 'dias de retiro de leche/carne tras aplicar';
-comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.unidad_medida is 'unidad de medida de la dosis';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.flag_estado is 'flag_estado';
 
 create sequence CANTABRIA.SEQ_PC_PRODUCTO_SANIT start with 1 increment by 1 nocache;
@@ -350,17 +348,17 @@ end;
 /
 
 -- Datos iniciales sugeridos (calendario sanitario base para bovinos en Peru, referencia SENASA)
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC001','Vacuna Aftosa','V',180,21,'DOS');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC002','Vacuna Brucelosis (Cepa 19)','V',null,0,'DOS');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC003','Vacuna Carbunco sintomatico / Clostridiales','V',365,21,'DOS');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC004','Vacuna Rabia bovina','V',365,21,'DOS');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC005','Vacuna IBR-BVD','V',180,0,'DOS');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC006','Vacuna Leptospirosis','V',180,0,'DOS');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('DES001','Desparasitante interno (Ivermectina)','D',90,35,'ML');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('DES002','Desparasitante externo (bano garrapaticida)','D',30,0,'LT');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, periodo_retiro, unidad_medida) values ('MED001','Antibiotico intramamario (mastitis)','M',5,'TUB');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, periodo_retiro, unidad_medida) values ('MED002','Antiinflamatorio','M',3,'ML');
-insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, periodo_retiro, unidad_medida) values ('SUP001','Sales minerales','S',0,'KG');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro) values ('VAC001','Vacuna Aftosa','V',180,21);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro) values ('VAC002','Vacuna Brucelosis (Cepa 19)','V',null,0);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro) values ('VAC003','Vacuna Carbunco sintomatico / Clostridiales','V',365,21);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro) values ('VAC004','Vacuna Rabia bovina','V',365,21);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro) values ('VAC005','Vacuna IBR-BVD','V',180,0);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro) values ('VAC006','Vacuna Leptospirosis','V',180,0);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro) values ('DES001','Desparasitante interno (Ivermectina)','D',90,35);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro) values ('DES002','Desparasitante externo (bano garrapaticida)','D',30,0);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, periodo_retiro) values ('MED001','Antibiotico intramamario (mastitis)','M',5);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, periodo_retiro) values ('MED002','Antiinflamatorio','M',3);
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, periodo_retiro) values ('SUP001','Sales minerales','S',0);
 commit;
 
 
@@ -781,7 +779,7 @@ create table CANTABRIA.PC_SERVICIO
   flag_tipo_servicio  CHAR(1)   not null,
   cod_animal_toro     CHAR(10),
   cod_semental        CHAR(10),
-  cod_tecnico         CHAR(6),
+  cod_tecnico         CHAR(8),
   fec_prob_parto      DATE,
   flag_estado         CHAR(1)   default '1' not null,
   cod_usr             CHAR(6),
@@ -795,6 +793,7 @@ alter table CANTABRIA.PC_SERVICIO add constraint FK_PC_SERVICIO_ORIGEN foreign k
 alter table CANTABRIA.PC_SERVICIO add constraint FK_PC_SERVICIO_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
 alter table CANTABRIA.PC_SERVICIO add constraint FK_PC_SERVICIO_TORO foreign key (cod_animal_toro) references CANTABRIA.PC_ANIMAL(cod_animal);
 alter table CANTABRIA.PC_SERVICIO add constraint FK_PC_SERVICIO_SEMENTAL foreign key (cod_semental) references CANTABRIA.PC_SEMENTAL(cod_semental);
+alter table CANTABRIA.PC_SERVICIO add constraint FK_PC_SERVICIO_TECNICO foreign key (cod_tecnico) references CANTABRIA.PROVEEDOR(proveedor);
 
 comment on table CANTABRIA.PC_SERVICIO is 'Pecuario - Registro de servicio (monta natural o inseminacion artificial). Es un HISTORIAL: un mismo animal tiene tantas filas como servicios reciba en su vida';
 comment on column CANTABRIA.PC_SERVICIO.nro_servicio is 'PK -- numero de documento del servicio: cod_origen(2) + correlativo(8), generado por trigger via NUM_TABLAS (ej. SU00000001). UNA SOLA COLUMNA, el origen ya va embebido';
@@ -804,7 +803,7 @@ comment on column CANTABRIA.PC_SERVICIO.fec_servicio is 'fecha del servicio';
 comment on column CANTABRIA.PC_SERVICIO.flag_tipo_servicio is 'N=Monta natural, I=Inseminacion artificial';
 comment on column CANTABRIA.PC_SERVICIO.cod_animal_toro is 'toro del propio hato (si monta natural)';
 comment on column CANTABRIA.PC_SERVICIO.cod_semental is 'semental/pajilla (si inseminacion artificial)';
-comment on column CANTABRIA.PC_SERVICIO.cod_tecnico is 'responsable de la inseminacion';
+comment on column CANTABRIA.PC_SERVICIO.cod_tecnico is 'FK a PROVEEDOR -- responsable de la inseminacion (generalmente externo, no personal de planilla)';
 comment on column CANTABRIA.PC_SERVICIO.fec_prob_parto is 'fecha probable de parto (fec_servicio + 283 dias)';
 comment on column CANTABRIA.PC_SERVICIO.flag_estado is '1=vigente/en curso, 0=anulado (repitio celo, no prendio)';
 comment on column CANTABRIA.PC_SERVICIO.cod_usr is 'usuario que registro';
@@ -846,7 +845,7 @@ create table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
   metodo            CHAR(1)   default 'T',
   resultado         CHAR(1)   not null,
   dias_gestacion    NUMBER(3),
-  cod_veterinario   CHAR(6),
+  cod_veterinario   CHAR(8),
   cod_usr           CHAR(6),
   fec_registro      DATE      default sysdate
 )
@@ -859,6 +858,7 @@ alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint CK_PC_DXPRE_RESULT ch
 alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint FK_PC_DXPRE_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
 alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint FK_PC_DXPRE_SERVICIO foreign key (nro_servicio) references CANTABRIA.PC_SERVICIO(nro_servicio);
 alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint FK_PC_DXPRE_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint FK_PC_DXPRE_VET foreign key (cod_veterinario) references CANTABRIA.PROVEEDOR(proveedor);
 
 comment on table CANTABRIA.PC_DIAGNOSTICO_PRENEZ is 'Pecuario - Diagnostico de prenez posterior al servicio';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.reckey is 'PK autonumerica';
@@ -869,7 +869,7 @@ comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.fec_diagnostico is 'fecha del 
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.metodo is 'T=Tacto rectal, E=Ecografia';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.resultado is 'P=Prenada, V=Vacia';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.dias_gestacion is 'dias de gestacion calculados';
-comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_veterinario is 'veterinario responsable';
+comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_veterinario is 'FK a PROVEEDOR -- veterinario responsable (generalmente externo, no personal de planilla)';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.fec_registro is 'fecha de registro en el sistema';
 
@@ -903,7 +903,7 @@ create table CANTABRIA.PC_PARTO
   flag_cria_viva           CHAR(1)   default '1',
   flag_retencion_placenta  CHAR(1)   default '0',
   observaciones            VARCHAR2(500),
-  cod_veterinario          CHAR(6),
+  cod_veterinario          CHAR(8),
   cod_usr                  CHAR(6),
   fec_registro             DATE      default sysdate
 )
@@ -916,6 +916,7 @@ alter table CANTABRIA.PC_PARTO add constraint FK_PC_PARTO_ORIGEN foreign key (co
 alter table CANTABRIA.PC_PARTO add constraint FK_PC_PARTO_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
 alter table CANTABRIA.PC_PARTO add constraint FK_PC_PARTO_SERVICIO foreign key (nro_servicio) references CANTABRIA.PC_SERVICIO(nro_servicio);
 alter table CANTABRIA.PC_PARTO add constraint FK_PC_PARTO_CRIA foreign key (cod_animal_cria) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_PARTO add constraint FK_PC_PARTO_VET foreign key (cod_veterinario) references CANTABRIA.PROVEEDOR(proveedor);
 
 comment on table CANTABRIA.PC_PARTO is 'Pecuario - Registro de parto';
 comment on column CANTABRIA.PC_PARTO.reckey is 'PK autonumerica';
@@ -931,7 +932,7 @@ comment on column CANTABRIA.PC_PARTO.peso_cria is 'peso de la cria al nacer en k
 comment on column CANTABRIA.PC_PARTO.flag_cria_viva is '1=viva, 0=nacio muerta';
 comment on column CANTABRIA.PC_PARTO.flag_retencion_placenta is '1=hubo retencion de placenta';
 comment on column CANTABRIA.PC_PARTO.observaciones is 'observaciones del parto';
-comment on column CANTABRIA.PC_PARTO.cod_veterinario is 'veterinario responsable';
+comment on column CANTABRIA.PC_PARTO.cod_veterinario is 'FK a PROVEEDOR -- veterinario responsable (generalmente externo, no personal de planilla)';
 comment on column CANTABRIA.PC_PARTO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_PARTO.fec_registro is 'fecha de registro en el sistema';
 
@@ -1210,7 +1211,7 @@ create table CANTABRIA.PC_SANIDAD_EVENTO
   cod_prod_san       CHAR(10),
   dosis              NUMBER(8,3),
   cod_enfermedad     CHAR(6),
-  cod_veterinario    CHAR(6),
+  cod_veterinario    CHAR(8),
   costo              NUMBER(10,2),
   nro_orden          CHAR(10),
   nro_os             CHAR(10),
@@ -1231,6 +1232,7 @@ alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_PROD foreig
 alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_ENFERM foreign key (cod_enfermedad) references CANTABRIA.PC_ENFERMEDAD(cod_enfermedad);
 alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_OT foreign key (nro_orden) references CANTABRIA.ORDEN_TRABAJO(nro_orden);
 alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_OS foreign key (cod_origen, nro_os) references CANTABRIA.ORDEN_SERVICIO(cod_origen, nro_os);
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_VET foreign key (cod_veterinario) references CANTABRIA.PROVEEDOR(proveedor);
 
 comment on table CANTABRIA.PC_SANIDAD_EVENTO is 'Pecuario - Eventos veterinarios (vacunas, desparasitaciones, tratamientos, diagnosticos)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.reckey is 'PK autonumerica';
@@ -1242,7 +1244,7 @@ comment on column CANTABRIA.PC_SANIDAD_EVENTO.flag_tipo_evento is 'V=Vacuna, D=D
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_prod_san is 'producto aplicado (vacuna/medicamento)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.dosis is 'dosis aplicada';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_enfermedad is 'enfermedad diagnosticada/tratada, si aplica';
-comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_veterinario is 'veterinario responsable';
+comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_veterinario is 'FK a PROVEEDOR -- veterinario responsable (generalmente externo, no personal de planilla)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.costo is 'costo de referencia rapida (el costo real y autorizado vive en ORDEN_SERVICIO.monto_total cuando nro_os esta presente)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.nro_orden is 'FK opcional a ORDEN_TRABAJO -- OT (ot_adm=PECU) que registra en ARTICULO_MOV el consumo real del producto sanitario (vacuna/desparasitante propio)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.nro_os is 'FK opcional a ORDEN_SERVICIO -- cuando el evento implica un servicio/costo externo (veterinario, laboratorio de terceros)';
@@ -1281,7 +1283,7 @@ create table CANTABRIA.PC_LABORATORIO
   fec_muestra       DATE       not null,
   flag_tipo_muestra CHAR(1)    not null,
   laboratorio       VARCHAR2(100),
-  cod_veterinario   CHAR(6),
+  cod_veterinario   CHAR(8),
   nro_evento        NUMBER(5),
   fec_resultado     DATE,
   flag_estado       CHAR(1)    default '1' not null,
@@ -1303,6 +1305,7 @@ alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_ORIGEN foreign key
 alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
 alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_SEMENTAL foreign key (cod_semental) references CANTABRIA.PC_SEMENTAL(cod_semental);
 alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_SANIDAD foreign key (cod_animal, nro_evento) references CANTABRIA.PC_SANIDAD_EVENTO(cod_animal, nro_evento);
+alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_VET foreign key (cod_veterinario) references CANTABRIA.PROVEEDOR(proveedor);
 
 comment on table CANTABRIA.PC_LABORATORIO is 'Pecuario - Cabecera de muestras enviadas a laboratorio (sangre, leche, fecal, semen, tejido)';
 comment on column CANTABRIA.PC_LABORATORIO.reckey is 'PK autonumerica';
@@ -1313,7 +1316,7 @@ comment on column CANTABRIA.PC_LABORATORIO.cod_semental is 'semental analizado, 
 comment on column CANTABRIA.PC_LABORATORIO.fec_muestra is 'fecha de toma de la muestra';
 comment on column CANTABRIA.PC_LABORATORIO.flag_tipo_muestra is 'S=Sangre, L=Leche, F=Fecal, M=Semen, T=Tejido/necropsia, O=Otro';
 comment on column CANTABRIA.PC_LABORATORIO.laboratorio is 'laboratorio externo que proceso la muestra';
-comment on column CANTABRIA.PC_LABORATORIO.cod_veterinario is 'veterinario que tomo la muestra';
+comment on column CANTABRIA.PC_LABORATORIO.cod_veterinario is 'FK a PROVEEDOR -- veterinario que tomo la muestra (generalmente externo, no personal de planilla)';
 comment on column CANTABRIA.PC_LABORATORIO.nro_evento is 'FK opcional (junto a cod_animal) a PC_SANIDAD_EVENTO, si la muestra es parte de un evento sanitario ya registrado';
 comment on column CANTABRIA.PC_LABORATORIO.fec_resultado is 'fecha en que el laboratorio entrego el resultado';
 comment on column CANTABRIA.PC_LABORATORIO.flag_estado is '0=Anulada, 1=Pendiente de resultado, 2=Con resultado';
