@@ -553,6 +553,59 @@ Al cierre del período, tanto la cuenta 76 como la 66 se saldan contra la cuenta
 
 Fuentes consultadas: [Registro de Activos Biológicos según la NIC 41](https://www.elcontadorprofesional.com/contabilidad-financiera/registro-de-activos-biologicos-segun-la-nic-41/), [NIC 41 — MEF Perú](https://www.mef.gob.pe/contenidos/conta_publ/con_nor_co/niif/NIC_41_BV2024_IRACH.pdf), [Contabilidad Ganadera — Perú Contable](https://www.perucontable.com/sector-economico/ganadera/), [Cuenta 76 — Plan General Contable](https://www.plangeneralcontable.com/pe/tit=76-ganancia-por-medicion-de-activos-no-financieros-al-valor-razonable&name=GeTia&contentId=pgcp_76), [Cuenta 66 — Pacioli](https://pacioli.pe/cuenta-66-perdida-por-medicion-de-activos-no-financieros-al-valor-razonable/).
 
+### 15.8 Asientos de ejemplo (estructura real `CNTBL_PRE_ASIENTO` / `CNTBL_PRE_ASIENTO_DET`, sección 15.4)
+
+Ejemplos completos, con los mismos nombres de campo de las tablas reales, usando animales del escenario de prueba (sección 17) cuando aplica. **Códigos de cuenta propuestos** (`35110101`, `76201101`, `66201101`) — no son códigos reales existentes (ver 15.7, hay que crearlos); se numeran siguiendo el mismo patrón de 8 dígitos que ya usa `CNTBL_CNTA` (ej. `75101101`), pero el código definitivo lo asigna el contador al dar de alta las cuentas.
+
+**Ejemplo 1 — Alta por nacimiento** (`SU00000004` "Cría de Paloma", nace 15/06/2026, valor razonable estimado S/ 1,500 según peso de nacimiento y precio de mercado del ternero):
+
+`CNTBL_PRE_ASIENTO` (cabecera):
+| Campo | Valor |
+|---|---|
+| `origen` | SU |
+| `nro_libro` | 06 |
+| `nro_provisional` | 0000001 |
+| `cod_moneda` | S/. |
+| `tasa_cambio` | 1.000 |
+| `desc_glosa` | Alta activo biológico — nacimiento SU00000004 (Cría de Paloma) |
+| `fec_cntbl` | 15/06/2026 |
+| `cod_usr` | DEMO01 |
+| `flag_estado` | 1 |
+| `flag_mayoriz` | 0 (pendiente de mayorización, ver sección 15.4) |
+| `tot_soldeb` / `tot_solhab` | 1,500.00 / 1,500.00 |
+
+`CNTBL_PRE_ASIENTO_DET` (detalle):
+| `item` | `cnta_ctbl` | `flag_debhab` | `det_glosa` | `tipo_docref` / `nro_docref1` | `imp_movsol` |
+|---|---|---|---|---|---|
+| 1 | `35110101` (Act. biológicos — Producción — Origen animal) | D | Alta cría SU00000004 a valor razonable | `PC_ANIMAL` / `SU00000004` | 1,500.00 |
+| 2 | `76201101` (Ganancia por medición a valor razonable) | H | Ganancia por reconocimiento inicial | `PC_ANIMAL` / `SU00000004` | 1,500.00 |
+
+**Ejemplo 2 — Alta por compra** (ilustrativo; el escenario de prueba de la sección 17 no incluye compras, todos los animales tienen `cod_procedencia='P'`; ejemplo de una vaquillona comprada en S/ 30,000):
+
+`CNTBL_PRE_ASIENTO` (cabecera): `origen=SU`, `nro_libro=06`, `nro_provisional=0000002`, `desc_glosa='Alta activo biológico — compra vaquillona (ejemplo ilustrativo)'`, `fec_cntbl=10/01/2026`, `tot_soldeb`/`tot_solhab=30,000.00`.
+
+`CNTBL_PRE_ASIENTO_DET`:
+| `item` | `cnta_ctbl` | `flag_debhab` | `det_glosa` | `imp_movsol` |
+|---|---|---|---|---|
+| 1 | `35110101` | D | Compra vaquillona a valor razonable (=precio pagado) | 30,000.00 |
+| 2 | 46 Cuentas por pagar diversas | H | Factura de compra pendiente de pago | 30,000.00 |
+
+**Ejemplo 3 — Revaluación de cierre** (proceso CAM904, 31/12/2026, categoría `VPR` "Vaca en producción", fundo SU — Paloma y Luna suben de valor, un tercer animal hipotético de otra categoría baja, para ilustrar ambos signos en el mismo asiento de cierre):
+
+`CNTBL_PRE_ASIENTO` (cabecera): `origen=SU`, `nro_libro=06`, `nro_provisional=0000015`, `desc_glosa='Revaluación NIC 41 — cierre diciembre 2026'`, `fec_cntbl=31/12/2026`, `tot_soldeb=4,200.00`, `tot_solhab=4,200.00` (neto: ambos lados cuadran porque ganancias y pérdidas se registran cada una con su propia contrapartida, no se compensan entre sí).
+
+`CNTBL_PRE_ASIENTO_DET`:
+| `item` | `cnta_ctbl` | `flag_debhab` | `det_glosa` | `tipo_docref` / `nro_docref1` | `imp_movsol` |
+|---|---|---|---|---|---|
+| 1 | `35110101` | D | Paloma (SU00000001): sube de 2,800 a 3,300 | `PC_ANIMAL` / `SU00000001` | 500.00 |
+| 2 | `76201101` | H | Ganancia por revaluación — Paloma | `PC_ANIMAL` / `SU00000001` | 500.00 |
+| 3 | `35110101` | D | Luna (SU00000002): sube de 2,700 a 3,200 | `PC_ANIMAL` / `SU00000002` | 500.00 |
+| 4 | `76201101` | H | Ganancia por revaluación — Luna | `PC_ANIMAL` / `SU00000002` | 500.00 |
+| 5 | `66201101` (Pérdida por medición a valor razonable — subcuenta NUEVA, propuesta bajo `66.2`; `661` ya está tomada por otro concepto, sección 15.7) | D | Ejemplo: animal categoría TOR baja de 3,700 a 400 (descarte por vejez) | `PC_ANIMAL` / (ejemplo) | 3,200.00 |
+| 6 | `35110101` | H | Baja de valor razonable — ejemplo | `PC_ANIMAL` / (ejemplo) | 3,200.00 |
+
+Al mayorizar (`flag_mayoriz='1'`), estas mismas filas migran a `CNTBL_ASIENTO`/`CNTBL_ASIENTO_DET` (sección 15.4) con la trazabilidad `org_am`/`nro_am` hacia el asiento de origen.
+
 ## 16. Diccionario de datos
 
 Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la convención de la sección 3.
