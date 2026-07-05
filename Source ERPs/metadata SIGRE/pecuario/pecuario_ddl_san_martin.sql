@@ -35,7 +35,11 @@
 -- ============================================================================
 --
 -- Orden de creacion respeta dependencias de FK:
---   0) PC_ESPECIE (nuevo: agrupa razas por especie -- bovino/porcino/etc.)
+--   0) Especie: NO se crea tabla PC_ESPECIE -- se reutiliza CANTABRIA.TG_ESPECIES
+--      (catalogo real y ya existente del modulo de pesca), agregandole el valor
+--      'P' (Pecuario) a su columna flag_tipo_especie y dos columnas nuevas
+--      opcionales (periodo_gestacion_dias, periodo_incubacion_dias). TG_ESPECIES
+--      NO es una tabla PC_*, por lo tanto nunca se dropea con este script.
 --   1) Catalogos (PC_RAZA, PC_POTRERO, PC_ESTABLO, PC_CATEGORIA, PC_SEMENTAL,
 --      PC_PRODUCTO_SANITARIO, PC_ENFERMEDAD, PC_DIETA, PC_DIETA_COMPONENTE)
 --   1b) PC_RECETA / PC_RECETA_DET (nuevo: receta de fabricacion de
@@ -88,8 +92,12 @@
 -- se esta borrando -- por eso NO importa el orden (una tabla maestra con
 -- tablas detalle que la referencian se puede eliminar sin error). Los datos
 -- que el script inserta en tablas COMPARTIDAS (ORIGEN, OT_TIPO, ALMACEN,
--- TIPO_PRODUCTO, ORDEN_TRABAJO, ORDEN_VENTA) usan "insertar solo si no
--- existe" en vez de tocar esas tablas de forma destructiva.
+-- TIPO_PRODUCTO, ORDEN_TRABAJO, ORDEN_VENTA, TG_ESPECIES) usan "insertar solo
+-- si no existe" en vez de tocar esas tablas de forma destructiva. La unica
+-- excepcion son dos columnas nuevas y opcionales que se agregan a
+-- TG_ESPECIES (periodo_gestacion_dias, periodo_incubacion_dias) mediante
+-- ALTER TABLE ADD guardado (se ignora el error si la columna ya existe) --
+-- nunca se elimina ni se modifica ninguna columna existente de esa tabla.
 -- ============================================================================
 
 
@@ -126,44 +134,66 @@ end;
 
 
 -- ============================================================================
--- 0) ESPECIE (nuevo -- agrupa razas por tipo de animal)
+-- 0) ESPECIE -- REUTILIZA CANTABRIA.TG_ESPECIES (catalogo real y ya existente
+-- del modulo de pesca/acopio, PK especie CHAR(8), 15 FK reales en produccion
+-- desde tablas de flota/pesca -- NO es una tabla PC_*, por eso NUNCA se dropea
+-- ni se toca con las sentencias destructivas de este script).
+--
+-- Decision del usuario: en vez de crear una tabla PC_ESPECIE nueva (que solo
+-- necesitaria 3-4 columnas: codigo, nombre, estado, periodo de gestacion),
+-- se reutiliza TG_ESPECIES agregando el valor 'P' (Pecuario) a su columna
+-- flag_tipo_especie (que ya distingue 'H'=Hidrobiologico y 'V'=Vegetal). Los
+-- procesos existentes de pesca filtran explicitamente flag_tipo_especie='H',
+-- asi que las filas 'P' no interfieren con ellos.
+--
+-- Columnas de TG_ESPECIES que Pecuario usa: especie (PK), descr_especie,
+-- nombre_cientifico (ya existia, gratis), flag_tipo_especie='P', flag_estado,
+-- y dos columnas NUEVAS y OPCIONALES (nullable, agregadas de forma aditiva
+-- y solo si no existen -- jamas se elimina ni se altera ninguna columna
+-- existente de esta tabla ajena):
+--   periodo_gestacion_dias  NUMBER(4) -- mamiferos: dias de fec_servicio a fec_prob_parto
+--   periodo_incubacion_dias NUMBER(4) -- oviparos: dias de fec_carga a fec_eclosion_prevista
 -- ============================================================================
-create table CANTABRIA.PC_ESPECIE
-(
-  reckey        NUMBER(10)    not null,
-  cod_especie   CHAR(4)       not null,
-  nom_especie   VARCHAR2(200)  not null,
-  flag_estado   CHAR(1)       default '1' not null
-)
-tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_ESPECIE add constraint PK_PC_ESPECIE primary key (reckey) using index tablespace CANTABRIA;
-alter table CANTABRIA.PC_ESPECIE add constraint UQ_PC_ESPECIE_COD unique (cod_especie) using index tablespace CANTABRIA;
-
-comment on table CANTABRIA.PC_ESPECIE is 'Pecuario - Catalogo de especies animales (bovino, porcino, caprino, ovino, equino, etc.)';
-comment on column CANTABRIA.PC_ESPECIE.reckey is 'PK autonumerica';
-comment on column CANTABRIA.PC_ESPECIE.cod_especie is 'codigo de especie (unique, no PK)';
-comment on column CANTABRIA.PC_ESPECIE.nom_especie is 'nombre de la especie';
-comment on column CANTABRIA.PC_ESPECIE.flag_estado is '1=Activo, 0=Inactivo';
-
-create sequence CANTABRIA.SEQ_PC_ESPECIE start with 1 increment by 1 nocache;
-create or replace trigger CANTABRIA.TIB_PC_ESPECIE
-before insert on CANTABRIA.PC_ESPECIE
-for each row
 begin
-  if :new.reckey is null then
-    select SEQ_PC_ESPECIE.nextval into :new.reckey from dual;
-  end if;
+  execute immediate 'alter table CANTABRIA.TG_ESPECIES add periodo_gestacion_dias NUMBER(4)';
+exception when others then
+  if sqlcode != -1430 then raise; end if; -- ORA-01430: columna ya existe, se ignora
 end;
 /
 
--- Datos iniciales sugeridos
-insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('BOVI','Bovino');
-insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('PORC','Porcino');
-insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('CAPR','Caprino');
-insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('OVIN','Ovino');
-insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('EQUI','Equino');
-insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('AVES','Avicola');
+begin
+  execute immediate 'alter table CANTABRIA.TG_ESPECIES add periodo_incubacion_dias NUMBER(4)';
+exception when others then
+  if sqlcode != -1430 then raise; end if;
+end;
+/
+
+comment on column CANTABRIA.TG_ESPECIES.periodo_gestacion_dias is 'Pecuario (flag_tipo_especie=P) - dias de gestacion (mamiferos): fec_prob_parto = fec_servicio + este valor';
+comment on column CANTABRIA.TG_ESPECIES.periodo_incubacion_dias is 'Pecuario (flag_tipo_especie=P) - dias de incubacion (oviparos): fec_eclosion_prevista = fec_carga + este valor';
+
+-- Datos iniciales sugeridos (insertar solo si no existe -- TG_ESPECIES es
+-- una tabla compartida, nunca se trunca ni se borra desde este script).
+-- AJUSTAR/VERIFICAR antes de ejecutar en un esquema con data real de pesca:
+-- confirmar que estos codigos de 4 letras no colisionen con codigos de
+-- especies hidrobiologicas/vegetales ya existentes.
+insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
+  select 'BOVI','Bovino','Bos taurus','P','1',283 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'BOVI');
+insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
+  select 'PORC','Porcino','Sus scrofa domesticus','P','1',114 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'PORC');
+insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
+  select 'CAPR','Caprino','Capra aegagrus hircus','P','1',150 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'CAPR');
+insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
+  select 'OVIN','Ovino','Ovis aries','P','1',150 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'OVIN');
+insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
+  select 'EQUI','Equino','Equus ferus caballus','P','1',340 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'EQUI');
+insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_incubacion_dias)
+  select 'AVES','Avicola','Gallus gallus domesticus','P','1',21 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'AVES');
 commit;
 
 
@@ -177,7 +207,7 @@ commit;
 create table CANTABRIA.PC_RAZA
 (
   reckey        NUMBER(10)    not null,
-  cod_especie   CHAR(4)       not null,
+  cod_especie   CHAR(8)       not null,
   cod_raza      CHAR(4)       not null,
   nom_raza      VARCHAR2(200)  not null,
   flag_tipo     CHAR(1)       default 'L' not null,
@@ -188,11 +218,11 @@ tablespace CANTABRIA;
 alter table CANTABRIA.PC_RAZA add constraint PK_PC_RAZA primary key (reckey) using index tablespace CANTABRIA;
 alter table CANTABRIA.PC_RAZA add constraint UQ_PC_RAZA_COD unique (cod_raza) using index tablespace CANTABRIA;
 alter table CANTABRIA.PC_RAZA add constraint CK_PC_RAZA_TIPO check (flag_tipo in ('L','C','M','F','T','R'));
-alter table CANTABRIA.PC_RAZA add constraint FK_PC_RAZA_ESPECIE foreign key (cod_especie) references CANTABRIA.PC_ESPECIE(cod_especie);
+alter table CANTABRIA.PC_RAZA add constraint FK_PC_RAZA_ESPECIE foreign key (cod_especie) references CANTABRIA.TG_ESPECIES(especie);
 
 comment on table CANTABRIA.PC_RAZA is 'Pecuario - Catalogo de razas (de cualquier especie)';
 comment on column CANTABRIA.PC_RAZA.reckey is 'PK autonumerica';
-comment on column CANTABRIA.PC_RAZA.cod_especie is 'FK a PC_ESPECIE (bovino, porcino, etc.)';
+comment on column CANTABRIA.PC_RAZA.cod_especie is 'FK a TG_ESPECIES.especie (catalogo compartido de especies del modulo de pesca; Pecuario usa las filas con flag_tipo_especie=P)';
 comment on column CANTABRIA.PC_RAZA.cod_raza is 'codigo de raza (unique, no PK)';
 comment on column CANTABRIA.PC_RAZA.nom_raza is 'nombre de la raza';
 comment on column CANTABRIA.PC_RAZA.flag_tipo is 'L=Lechera, C=Carne, M=Doble proposito, F=Fibra/lana, T=Trabajo/traccion, R=Reproduccion/genetica (aplica a cualquier especie, no solo bovinos)';
@@ -820,7 +850,7 @@ comment on column CANTABRIA.PC_INCUBACION.cod_lote_origen is 'FK a PC_LOTE -- lo
 comment on column CANTABRIA.PC_INCUBACION.cod_establo is 'FK a PC_ESTABLO -- sala/nave de incubacion (flag_tipo=I)';
 comment on column CANTABRIA.PC_INCUBACION.fec_carga is 'fecha de carga de la incubadora';
 comment on column CANTABRIA.PC_INCUBACION.cantidad_huevos_cargados is 'huevos aptos cargados a la incubadora';
-comment on column CANTABRIA.PC_INCUBACION.fec_eclosion_prevista is 'fecha esperada de nacimiento (segun periodo de incubacion de la especie)';
+comment on column CANTABRIA.PC_INCUBACION.fec_eclosion_prevista is 'fecha esperada de nacimiento = fec_carga + TG_ESPECIES.periodo_incubacion_dias de la especie del lote (via PC_LOTE.cod_categoria/PC_ANIMAL o directamente conocido por la especie del lote, ej. 21 dias en aves)';
 comment on column CANTABRIA.PC_INCUBACION.fec_eclosion_real is 'fecha real de nacimiento';
 comment on column CANTABRIA.PC_INCUBACION.cantidad_nacidos is 'pollitos/crias nacidas -- junto a cantidad_huevos_cargados da el % de eclosion';
 comment on column CANTABRIA.PC_INCUBACION.cantidad_mermas is 'huevos no eclosionados (infertiles, muerte embrionaria)';
@@ -1139,7 +1169,7 @@ comment on column CANTABRIA.PC_SERVICIO.flag_tipo_servicio is 'N=Monta natural, 
 comment on column CANTABRIA.PC_SERVICIO.cod_animal_toro is 'toro del propio hato (si monta natural)';
 comment on column CANTABRIA.PC_SERVICIO.cod_semental is 'semental/pajilla (si inseminacion artificial)';
 comment on column CANTABRIA.PC_SERVICIO.cod_tecnico is 'FK a PROVEEDOR -- responsable de la inseminacion (generalmente externo, no personal de planilla)';
-comment on column CANTABRIA.PC_SERVICIO.fec_prob_parto is 'fecha probable de parto (fec_servicio + 283 dias)';
+comment on column CANTABRIA.PC_SERVICIO.fec_prob_parto is 'fecha probable de parto = fec_servicio + TG_ESPECIES.periodo_gestacion_dias de la especie del animal (via PC_ANIMAL.cod_raza -> PC_RAZA.cod_especie -> TG_ESPECIES); NO hardcodear 283 dias, ese valor es solo el default bovino';
 comment on column CANTABRIA.PC_SERVICIO.flag_estado is '1=vigente/en curso, 0=anulado (repitio celo, no prendio)';
 comment on column CANTABRIA.PC_SERVICIO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_SERVICIO.fec_registro is 'fecha de registro en el sistema';
@@ -1623,7 +1653,7 @@ create table CANTABRIA.PC_LABORATORIO
   fec_resultado     DATE,
   flag_estado       CHAR(1)    default '1' not null,
   flag_origen       CHAR(1)    default 'P' not null,
-  cliente           VARCHAR2(200),
+  cod_cliente       CHAR(8),
   costo_analisis    NUMBER(10,2),
   flag_facturado    CHAR(1)    default '0',
   observaciones     VARCHAR2(500),
@@ -1641,6 +1671,7 @@ alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_ANIMAL foreign key
 alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_SEMENTAL foreign key (cod_semental) references CANTABRIA.PC_SEMENTAL(cod_semental);
 alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_SANIDAD foreign key (cod_animal, nro_evento) references CANTABRIA.PC_SANIDAD_EVENTO(cod_animal, nro_evento);
 alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_VET foreign key (cod_veterinario) references CANTABRIA.PROVEEDOR(proveedor);
+alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_CLIENTE foreign key (cod_cliente) references CANTABRIA.PROVEEDOR(proveedor);
 
 comment on table CANTABRIA.PC_LABORATORIO is 'Pecuario - Cabecera de muestras enviadas a laboratorio (sangre, leche, fecal, semen, tejido)';
 comment on column CANTABRIA.PC_LABORATORIO.reckey is 'PK autonumerica';
@@ -1656,7 +1687,7 @@ comment on column CANTABRIA.PC_LABORATORIO.nro_evento is 'FK opcional (junto a c
 comment on column CANTABRIA.PC_LABORATORIO.fec_resultado is 'fecha en que el laboratorio entrego el resultado';
 comment on column CANTABRIA.PC_LABORATORIO.flag_estado is '0=Anulada, 1=Pendiente de resultado, 2=Con resultado';
 comment on column CANTABRIA.PC_LABORATORIO.flag_origen is 'P=Propio (laboratorio/veterinario nuestro), C=Cliente (lo realiza el comprador de la leche, ej. Laive, y descuenta el costo de la factura)';
-comment on column CANTABRIA.PC_LABORATORIO.cliente is 'nombre del cliente que realizo/solicito el analisis, si flag_origen=C';
+comment on column CANTABRIA.PC_LABORATORIO.cod_cliente is 'FK a PROVEEDOR (unifica proveedor/cliente via flag_clie_prov) -- cliente que realizo/solicito el analisis, si flag_origen=C';
 comment on column CANTABRIA.PC_LABORATORIO.costo_analisis is 'costo del analisis; si flag_origen=C, es el monto que el cliente descuenta de la factura de venta';
 comment on column CANTABRIA.PC_LABORATORIO.flag_facturado is '1 si el costo del analisis ya fue descontado/facturado';
 comment on column CANTABRIA.PC_LABORATORIO.observaciones is 'observaciones de la muestra';
@@ -2184,6 +2215,15 @@ insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec
   values ('SU','SU00000005',1,TO_DATE('20/05/2026','DD/MM/YYYY'),'X','MASTI1','VET001',25.00,'0100000099','Mastitis clinica, cuartil posterior derecho','DEMO01');
 commit;
 
+-- Cliente que solicita/realiza su propio analisis de calidad de leche (Laive)
+-- -- PROVEEDOR es tabla compartida (unifica proveedor/cliente/trabajador via
+-- flag_clie_prov), se inserta solo si no existe. AJUSTAR flag_clie_prov segun
+-- la convencion real del modulo de Compras/Proveedores antes de ejecutar.
+insert into CANTABRIA.PROVEEDOR (proveedor, nom_proveedor, flag_clie_prov, flag_estado)
+  select 'CLI00001','Laive S.A.','2','1' from dual
+   where not exists (select 1 from CANTABRIA.PROVEEDOR where proveedor = 'CLI00001');
+commit;
+
 -- Resultados de laboratorio: cultivo de mastitis de Estrella (propio) +
 -- calidad de semen del semental (propio) + analisis de calidad de leche
 -- hecho por el CLIENTE (Laive), que descuenta el costo de la factura de venta
@@ -2201,8 +2241,8 @@ insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_res
 insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_resultado, unidad_medida, valor_ref_min, flag_interpretacion)
   select reckey, 2, 'Concentracion', '1200', 'millones/ml', 800, 'N' from CANTABRIA.PC_LABORATORIO where nro_muestra = 'MU-00002';
 
-insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, fec_muestra, flag_tipo_muestra, laboratorio, fec_resultado, flag_estado, flag_origen, cliente, costo_analisis, flag_facturado, observaciones, cod_usr)
-  values ('MU-00003','SU',TO_DATE('03/07/2026','DD/MM/YYYY'),'L','Laive S.A.',TO_DATE('04/07/2026','DD/MM/YYYY'),'2','C','Laive S.A.',45.00,'1','Analisis de calidad de leche del lote entregado 03/07/2026, descontado de la factura de venta','DEMO01');
+insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, fec_muestra, flag_tipo_muestra, laboratorio, fec_resultado, flag_estado, flag_origen, cod_cliente, costo_analisis, flag_facturado, observaciones, cod_usr)
+  values ('MU-00003','SU',TO_DATE('03/07/2026','DD/MM/YYYY'),'L','Laive S.A.',TO_DATE('04/07/2026','DD/MM/YYYY'),'2','C','CLI00001',45.00,'1','Analisis de calidad de leche del lote entregado 03/07/2026, descontado de la factura de venta','DEMO01');
 insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_resultado, unidad_medida, flag_interpretacion)
   select reckey, 1, 'Grasa', '3.7', '%', 'N' from CANTABRIA.PC_LABORATORIO where nro_muestra = 'MU-00003';
 insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_resultado, unidad_medida, flag_interpretacion)
