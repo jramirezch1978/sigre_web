@@ -614,6 +614,65 @@ end;
 
 
 -- ============================================================================
+-- 1c) LOTE (nuevo -- agrupacion/cohorte de cabezas, validado contra el
+-- ERP AGRI: "Control de cabezas" + "Control de lotes" son dos vistas del
+-- MISMO modelo, no dos ramas paralelas. Cada PC_ANIMAL puede pertenecer a
+-- un PC_LOTE (nullable); PC_LOTE lleva ademas cantidad agregada de cabezas,
+-- para especies/operaciones donde no se registra cada cabeza individual
+-- (ej. engorde masivo, aves) -- ver seccion 18 del .md.
+-- ============================================================================
+create table CANTABRIA.PC_LOTE
+(
+  reckey                  NUMBER(10)    not null,
+  cod_origen              CHAR(2)       not null,
+  cod_lote                CHAR(6)       not null,
+  nom_lote                VARCHAR2(200) not null,
+  cod_potrero             CHAR(6),
+  cod_categoria           CHAR(3),
+  fec_formacion           DATE          not null,
+  fec_cierre              DATE,
+  cantidad_cabezas_inicial  NUMBER(6),
+  cantidad_cabezas_actual   NUMBER(6),
+  flag_estado             CHAR(1)       default '1' not null,
+  cod_usr                 CHAR(6),
+  fec_registro            DATE          default sysdate
+)
+tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_LOTE add constraint PK_PC_LOTE primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_LOTE add constraint UQ_PC_LOTE unique (cod_origen, cod_lote) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_LOTE add constraint FK_PC_LOTE_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_LOTE add constraint FK_PC_LOTE_POTRERO foreign key (cod_origen, cod_potrero) references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
+alter table CANTABRIA.PC_LOTE add constraint FK_PC_LOTE_CATEG foreign key (cod_categoria) references CANTABRIA.PC_CATEGORIA(cod_categoria);
+
+comment on table CANTABRIA.PC_LOTE is 'Pecuario - Lote/cohorte de animales (agrupacion de manejo). Sirve tanto para agrupar cabezas individuales (PC_ANIMAL.cod_lote) como, en especies/operaciones sin registro individual, para llevar el conteo agregado directamente aqui';
+comment on column CANTABRIA.PC_LOTE.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_LOTE.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
+comment on column CANTABRIA.PC_LOTE.cod_lote is 'codigo de lote (unique junto a cod_origen, no PK)';
+comment on column CANTABRIA.PC_LOTE.nom_lote is 'nombre/descripcion del lote';
+comment on column CANTABRIA.PC_LOTE.cod_potrero is 'ubicacion actual del lote';
+comment on column CANTABRIA.PC_LOTE.cod_categoria is 'categoria homogenea del lote, si aplica';
+comment on column CANTABRIA.PC_LOTE.fec_formacion is 'fecha en que se formo/inicio el lote';
+comment on column CANTABRIA.PC_LOTE.fec_cierre is 'fecha de cierre/disolucion del lote';
+comment on column CANTABRIA.PC_LOTE.cantidad_cabezas_inicial is 'cabezas al formar el lote (para especies sin registro individual)';
+comment on column CANTABRIA.PC_LOTE.cantidad_cabezas_actual is 'cabezas vivas actuales (se descuenta por mortalidad/baja)';
+comment on column CANTABRIA.PC_LOTE.flag_estado is '1=Activo, 0=Cerrado';
+comment on column CANTABRIA.PC_LOTE.cod_usr is 'usuario que registro';
+comment on column CANTABRIA.PC_LOTE.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_LOTE start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_LOTE
+before insert on CANTABRIA.PC_LOTE
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_LOTE.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+
+-- ============================================================================
 -- 2) MAESTRO DE ANIMAL (tabla-DOCUMENTO: PK = cod_animal, una sola columna)
 -- ============================================================================
 create table CANTABRIA.PC_ANIMAL
@@ -631,6 +690,7 @@ create table CANTABRIA.PC_ANIMAL
   color               VARCHAR2(40),
   cod_categoria       CHAR(3)       not null,
   cod_potrero         CHAR(6)       not null,
+  cod_lote            CHAR(6),
   flag_estado_repro   CHAR(1)       default '0',
   peso_nacimiento     NUMBER(6,2),
   peso_actual         NUMBER(6,2),
@@ -652,6 +712,7 @@ alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_ORIGEN foreign key (
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_RAZA foreign key (cod_raza) references CANTABRIA.PC_RAZA(cod_raza);
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_CATEG foreign key (cod_categoria) references CANTABRIA.PC_CATEGORIA(cod_categoria);
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_POTRERO foreign key (cod_origen, cod_potrero) references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
+alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_LOTE foreign key (cod_origen, cod_lote) references CANTABRIA.PC_LOTE(cod_origen, cod_lote);
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_SEMENTAL foreign key (cod_semental_padre) references CANTABRIA.PC_SEMENTAL(cod_semental);
 -- Auto-referencias (genealogia): padre y madre son animales del mismo hato
 alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_PADRE foreign key (cod_animal_padre) references CANTABRIA.PC_ANIMAL(cod_animal);
@@ -671,6 +732,7 @@ comment on column CANTABRIA.PC_ANIMAL.cod_semental_padre is 'FK a PC_SEMENTAL si
 comment on column CANTABRIA.PC_ANIMAL.color is 'color/marcas distintivas';
 comment on column CANTABRIA.PC_ANIMAL.cod_categoria is 'categoria/etapa actual (se recalcula por edad/estado)';
 comment on column CANTABRIA.PC_ANIMAL.cod_potrero is 'ubicacion actual (potrero)';
+comment on column CANTABRIA.PC_ANIMAL.cod_lote is 'FK opcional a PC_LOTE -- lote/cohorte de manejo al que pertenece esta cabeza (validado contra AGRI: cabezas y lotes son el mismo modelo, no ramas paralelas)';
 comment on column CANTABRIA.PC_ANIMAL.flag_estado_repro is '0=vacia, 1=servida, 2=prenada confirmada, 3=recien parida';
 comment on column CANTABRIA.PC_ANIMAL.peso_nacimiento is 'peso al nacer en kg';
 comment on column CANTABRIA.PC_ANIMAL.peso_actual is 'ultimo peso registrado en kg';
@@ -1748,13 +1810,19 @@ insert into CANTABRIA.ORDEN_TRABAJO (cod_origen, nro_orden, titulo, ot_tipo, ot_
    where not exists (select 1 from CANTABRIA.ORDEN_TRABAJO where nro_orden = 'SU00000003');
 commit;
 
+-- Lote (agrupacion de manejo, validado contra AGRI): Paloma y Luna pastan
+-- juntas en el Potrero Norte, formando un lote de vacas en produccion.
+insert into CANTABRIA.PC_LOTE (cod_origen, cod_lote, nom_lote, cod_potrero, cod_categoria, fec_formacion, cantidad_cabezas_inicial, cantidad_cabezas_actual, cod_usr)
+  values ('SU','LOT001','Vacas en produccion - Potrero Norte','POT001','VPR',TO_DATE('01/01/2026','DD/MM/YYYY'),2,2,'DEMO01');
+commit;
+
 -- Animales (orden importa: la madre antes que la cria). cod_animal y
 -- cod_interno se especifican a mano para el demo (cod_interno = arete fisico
 -- que ya usa la empresa, ej. el que trae grabado en la oreja).
-insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
-  values ('SU00000001','SU','ARE-4521','Paloma','HOLS','H',TO_DATE('15/03/2021','DD/MM/YYYY'),'VPR','POT001','3',38,550,'P','DEMO01');
-insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
-  values ('SU00000002','SU','ARE-4522','Luna','BRSW','H',TO_DATE('10/06/2020','DD/MM/YYYY'),'VPR','POT001','2',40,540,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, cod_lote, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('SU00000001','SU','ARE-4521','Paloma','HOLS','H',TO_DATE('15/03/2021','DD/MM/YYYY'),'VPR','POT001','LOT001','3',38,550,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, cod_lote, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('SU00000002','SU','ARE-4522','Luna','BRSW','H',TO_DATE('10/06/2020','DD/MM/YYYY'),'VPR','POT001','LOT001','2',40,540,'P','DEMO01');
 insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
   values ('SU00000003','SU','ARE-4001','Bravo','HOLS','M',TO_DATE('20/01/2019','DD/MM/YYYY'),'TOR','POT002',42,780,'P','DEMO01');
 insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_animal_padre, cod_animal_madre, cod_categoria, cod_potrero, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
