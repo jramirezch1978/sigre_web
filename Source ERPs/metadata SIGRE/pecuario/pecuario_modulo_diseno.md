@@ -4,6 +4,8 @@ Pecuario **no es un módulo aparte**: es una extensión de **Campo**, así que l
 
 Este documento es la **única fuente de verdad** del diseño (no se crean documentos adicionales). Incluye, además del diseño de tablas, el análisis completo de cada módulo existente que se investigó para integrar Pecuario correctamente — así no hay que volver a investigarlos.
 
+**El script (`pecuario_ddl_san_martin.sql`) es idempotente**: se puede ejecutar cuantas veces sea necesario. Al inicio, un bloque PL/SQL elimina (`DROP ... CASCADE CONSTRAINTS`) únicamente las tablas y secuencias con prefijo `PC_*`/`SEQ_PC_*` — nunca ninguna otra tabla del ERP (`ORIGEN`, `ARTICULO`, `ORDEN_TRABAJO`, etc. quedan intactas). `CASCADE CONSTRAINTS` elimina automáticamente las FK que otras tablas `PC_*` tengan hacia la que se borra, así que el orden de eliminación no importa. Los datos que el script inserta en tablas **compartidas** (`ORIGEN`, `OT_TIPO`, `ALMACEN`, `TIPO_PRODUCTO`, `ORDEN_TRABAJO`, `ORDEN_VENTA`) usan `INSERT ... WHERE NOT EXISTS` en vez de tocarlas de forma destructiva.
+
 ## 1. Regla de numeración de ventanas (confirmada por el usuario)
 
 Dentro de cada módulo, el número de ventana se asigna **por tipo de opción de menú**, no por área funcional:

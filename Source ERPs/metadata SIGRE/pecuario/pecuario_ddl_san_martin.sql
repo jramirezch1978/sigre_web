@@ -75,7 +75,50 @@
 --   Reportes    CAM716-CAM722 (hueco libre real: 716-751)
 --   Procesos    CAM900-CAM905 (rango completo sin uso previo)
 -- Detalle completo: Source ERPs/metadata SIGRE/pecuario/pecuario_modulo_diseno.md
+--
+-- IDEMPOTENCIA: este script se puede ejecutar tantas veces como se necesite.
+-- El bloque de limpieza previa (justo abajo) elimina UNICAMENTE tablas y
+-- secuencias con prefijo PC_*/SEQ_PC_* (nunca ORIGEN, ARTICULO, ORDEN_TRABAJO
+-- ni ninguna otra tabla generica del ERP) usando CASCADE CONSTRAINTS, que
+-- elimina automaticamente las FK que otras tablas PC_* tengan hacia la que
+-- se esta borrando -- por eso NO importa el orden (una tabla maestra con
+-- tablas detalle que la referencian se puede eliminar sin error). Los datos
+-- que el script inserta en tablas COMPARTIDAS (ORIGEN, OT_TIPO, ALMACEN,
+-- TIPO_PRODUCTO, ORDEN_TRABAJO, ORDEN_VENTA) usan "insertar solo si no
+-- existe" en vez de tocar esas tablas de forma destructiva.
 -- ============================================================================
+
+
+-- ============================================================================
+-- LIMPIEZA PREVIA (idempotencia) -- SOLO objetos PC_*/SEQ_PC_*
+-- ============================================================================
+begin
+  for t in (
+    select table_name from all_tables
+     where owner = 'CANTABRIA'
+       and table_name like 'PC\_%' escape '\'
+  ) loop
+    begin
+      execute immediate 'drop table CANTABRIA.' || t.table_name || ' cascade constraints';
+    exception when others then null; -- ORA-00942 si no existe: se ignora
+    end;
+  end loop;
+end;
+/
+
+begin
+  for s in (
+    select sequence_name from all_sequences
+     where sequence_owner = 'CANTABRIA'
+       and sequence_name like 'SEQ\_PC\_%' escape '\'
+  ) loop
+    begin
+      execute immediate 'drop sequence CANTABRIA.' || s.sequence_name;
+    exception when others then null; -- ORA-02289 si no existe: se ignora
+    end;
+  end loop;
+end;
+/
 
 
 -- ============================================================================
@@ -1628,8 +1671,10 @@ commit;
 --     que el resto del demo pueda referenciarlos por FK de forma legible.
 -- ============================================================================
 
--- Origen (ajustar/omitir si ya existe en el esquema real)
-insert into CANTABRIA.ORIGEN (cod_origen, nombre) values ('SU','Fundo Sur (demo Pecuario)');
+-- Origen (ajustar/omitir si ya existe en el esquema real) -- insertar solo si no existe (tabla compartida, no se trunca)
+insert into CANTABRIA.ORIGEN (cod_origen, nombre)
+  select 'SU','Fundo Sur (demo Pecuario)' from dual
+   where not exists (select 1 from CANTABRIA.ORIGEN where cod_origen = 'SU');
 commit;
 
 -- Especies y razas ya sembradas arriba (BOVI/HOLS/BRSW, etc.)
@@ -1652,7 +1697,9 @@ commit;
 -- Receta de concentrado (fabricacion propia): 1000 kg de concentrado a partir
 -- de maiz molido + afrecho de trigo (AJUSTAR cod_art de materia prima y del
 -- producto terminado en TIPO_PRODUCTO antes de ejecutar)
-insert into CANTABRIA.TIPO_PRODUCTO (cod_prod, desc_prod, cod_art, und) values ('CONCENT0001','Concentrado vacas en produccion','ART00000005','KG');
+insert into CANTABRIA.TIPO_PRODUCTO (cod_prod, desc_prod, cod_art, und)
+  select 'CONCENT0001','Concentrado vacas en produccion','ART00000005','KG' from dual
+   where not exists (select 1 from CANTABRIA.TIPO_PRODUCTO where cod_prod = 'CONCENT0001');
 commit;
 insert into CANTABRIA.PC_RECETA (cod_receta, nom_receta, cod_producto, rendimiento_kg) values ('REC001','Concentrado vacas en produccion','CONCENT0001',1000.000);
 commit;
@@ -1668,26 +1715,37 @@ commit;
 -- sus pantallas estandar (OPE302 Ordenes de Trabajo, mantenimiento de
 -- Almacenes, Tipos de Producto), NO se insertan a mano como aqui.
 -- ----------------------------------------------------------------------------
-insert into CANTABRIA.OT_TIPO (ot_tipo, descripcion) values ('PECU','Orden de Trabajo Pecuaria');
+insert into CANTABRIA.OT_TIPO (ot_tipo, descripcion)
+  select 'PECU','Orden de Trabajo Pecuaria' from dual
+   where not exists (select 1 from CANTABRIA.OT_TIPO where ot_tipo = 'PECU');
 commit;
-insert into CANTABRIA.ALMACEN (almacen, desc_almacen, cod_origen, flag_tipo_almacen) values ('ALM001','Almacen Produccion Pecuaria','SU','P');
-insert into CANTABRIA.ALMACEN (almacen, desc_almacen, cod_origen, flag_tipo_almacen) values ('ALM002','Almacen Concentrado','SU','P');
+insert into CANTABRIA.ALMACEN (almacen, desc_almacen, cod_origen, flag_tipo_almacen)
+  select 'ALM001','Almacen Produccion Pecuaria','SU','P' from dual
+   where not exists (select 1 from CANTABRIA.ALMACEN where almacen = 'ALM001');
+insert into CANTABRIA.ALMACEN (almacen, desc_almacen, cod_origen, flag_tipo_almacen)
+  select 'ALM002','Almacen Concentrado','SU','P' from dual
+   where not exists (select 1 from CANTABRIA.ALMACEN where almacen = 'ALM002');
 commit;
 -- AJUSTAR cod_art: debe ser un articulo real de tipo "producto terminado" en ARTICULO
-insert into CANTABRIA.TIPO_PRODUCTO (cod_prod, desc_prod, cod_art, und) values ('LECHE000001','Leche cruda','ART00000002','LT');
+insert into CANTABRIA.TIPO_PRODUCTO (cod_prod, desc_prod, cod_art, und)
+  select 'LECHE000001','Leche cruda','ART00000002','LT' from dual
+   where not exists (select 1 from CANTABRIA.TIPO_PRODUCTO where cod_prod = 'LECHE000001');
 commit;
 
 -- OT Pecuaria 1: alimentacion del potrero Norte (02-04 jul 2026) -- animales 1 y 2
 insert into CANTABRIA.ORDEN_TRABAJO (cod_origen, nro_orden, titulo, ot_tipo, ot_adm, fec_solicitud, fec_inicio, flag_estado, cod_usr)
-  values ('SU','SU00000001','Alimentacion potrero Norte 02-04 jul','PECU','PECU',TO_DATE('02/07/2026','DD/MM/YYYY'),TO_DATE('02/07/2026','DD/MM/YYYY'),'1','DEMO01');
+  select 'SU','SU00000001','Alimentacion potrero Norte 02-04 jul','PECU','PECU',TO_DATE('02/07/2026','DD/MM/YYYY'),TO_DATE('02/07/2026','DD/MM/YYYY'),'1','DEMO01' from dual
+   where not exists (select 1 from CANTABRIA.ORDEN_TRABAJO where nro_orden = 'SU00000001');
 
 -- OT Pecuaria 2: vacunacion/desparasitacion de febrero 2026 -- animales 1 y 2
 insert into CANTABRIA.ORDEN_TRABAJO (cod_origen, nro_orden, titulo, ot_tipo, ot_adm, fec_solicitud, fec_inicio, flag_estado, cod_usr)
-  values ('SU','SU00000002','Sanidad - vacunacion y desparasitacion feb','PECU','PECU',TO_DATE('01/02/2026','DD/MM/YYYY'),TO_DATE('01/02/2026','DD/MM/YYYY'),'1','DEMO01');
+  select 'SU','SU00000002','Sanidad - vacunacion y desparasitacion feb','PECU','PECU',TO_DATE('01/02/2026','DD/MM/YYYY'),TO_DATE('01/02/2026','DD/MM/YYYY'),'1','DEMO01' from dual
+   where not exists (select 1 from CANTABRIA.ORDEN_TRABAJO where nro_orden = 'SU00000002');
 
 -- OT Pecuaria 3: fabricacion de concentrado (consume maiz+afrecho, produce concentrado)
 insert into CANTABRIA.ORDEN_TRABAJO (cod_origen, nro_orden, titulo, ot_tipo, ot_adm, fec_solicitud, fec_inicio, flag_estado, cod_usr)
-  values ('SU','SU00000003','Fabricacion concentrado - lote 1000kg','PECU','PECU',TO_DATE('25/06/2026','DD/MM/YYYY'),TO_DATE('25/06/2026','DD/MM/YYYY'),'1','DEMO01');
+  select 'SU','SU00000003','Fabricacion concentrado - lote 1000kg','PECU','PECU',TO_DATE('25/06/2026','DD/MM/YYYY'),TO_DATE('25/06/2026','DD/MM/YYYY'),'1','DEMO01' from dual
+   where not exists (select 1 from CANTABRIA.ORDEN_TRABAJO where nro_orden = 'SU00000003');
 commit;
 
 -- Animales (orden importa: la madre antes que la cria). cod_animal y
@@ -1804,7 +1862,9 @@ commit;
 -- Ciclo de vida completo: DTA + baja por venta de Estrella (mastitis cronica
 -- recidivante). nro_ov y nro_dta son documentos EXTERNOS a este script
 -- (Comercializacion y SENASA respectivamente) -- AJUSTAR antes de ejecutar.
-insert into CANTABRIA.ORDEN_VENTA (cod_origen, nro_ov, cliente, monto_total) values ('SU','OV00000001','Camal Municipal San Martin S.A.C.',2800.00);
+insert into CANTABRIA.ORDEN_VENTA (cod_origen, nro_ov, cliente, monto_total)
+  select 'SU','OV00000001','Camal Municipal San Martin S.A.C.',2800.00 from dual
+   where not exists (select 1 from CANTABRIA.ORDEN_VENTA where nro_ov = 'OV00000001');
 commit;
 insert into CANTABRIA.PC_DTA (nro_dta, fec_emision, cod_origen_fundo, razon_social_destino, motivo, cod_usr)
   values ('DTA-2026-001',TO_DATE('01/07/2026','DD/MM/YYYY'),'SU','Camal Municipal San Martin S.A.C.','V','DEMO01');
