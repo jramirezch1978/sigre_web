@@ -37,7 +37,8 @@
 -- Orden de creacion respeta dependencias de FK:
 --   0) Especie: NO se crea tabla PC_ESPECIE -- se reutiliza CANTABRIA.TG_ESPECIES
 --      (catalogo real y ya existente del modulo de pesca), agregandole el valor
---      'P' (Pecuario) a su columna flag_tipo_especie y dos columnas nuevas
+--      'P' (Pecuario) a su columna flag_tipo_matprim, un trigger que autogenera
+--      especie (prefijo 'AQ' + correlativo via NUM_TABLAS) y dos columnas nuevas
 --      opcionales (periodo_gestacion_dias, periodo_incubacion_dias). TG_ESPECIES
 --      NO es una tabla PC_*, por lo tanto nunca se dropea con este script.
 --   1) Catalogos (PC_RAZA, PC_POTRERO, PC_ESTABLO, PC_CATEGORIA, PC_SEMENTAL,
@@ -137,20 +138,31 @@ end;
 -- 0) ESPECIE -- REUTILIZA CANTABRIA.TG_ESPECIES (catalogo real y ya existente
 -- del modulo de pesca/acopio, PK especie CHAR(8), 15 FK reales en produccion
 -- desde tablas de flota/pesca -- NO es una tabla PC_*, por eso NUNCA se dropea
--- ni se toca con las sentencias destructivas de este script).
+-- ni se toca con las sentencias destructivas de este script; solo se le
+-- agregan columnas nuevas y opcionales, de forma aditiva y guardada (si no
+-- existen), y un trigger BEFORE INSERT que solo actua cuando especie viene
+-- nula (las filas de pesca ya existentes siempre insertan su propio codigo,
+-- nunca activan este trigger).
 --
 -- Decision del usuario: en vez de crear una tabla PC_ESPECIE nueva (que solo
 -- necesitaria 3-4 columnas: codigo, nombre, estado, periodo de gestacion),
--- se reutiliza TG_ESPECIES agregando el valor 'P' (Pecuario) a su columna
--- flag_tipo_especie (que ya distingue 'H'=Hidrobiologico y 'V'=Vegetal). Los
--- procesos existentes de pesca filtran explicitamente flag_tipo_especie='H',
--- asi que las filas 'P' no interfieren con ellos.
+-- se reutiliza TG_ESPECIES. Confirmado contra datos reales (TG_ESPECIES.json):
+--   - especie SI es autonumerico: codigo real = prefijo de origen (2) +
+--     correlativo (6) = 8 caracteres, via NUM_TABLAS (igual mecanismo que
+--     PC_ANIMAL.cod_animal) -- ejemplos reales: LM000001, CH000001..CH000004.
+--     Para Pecuario se usa el prefijo fijo 'AQ' (Arequipa, indicado por el
+--     usuario para esta data de prueba) -- codigos generados: AQ000001..AQ000006.
+--   - El discriminador real de "tipo de materia prima" es flag_tipo_matprim
+--     ('H'=Hidrobiologico en las 5 filas reales de ejemplo), NO
+--     flag_tipo_especie (que en los datos reales vale '3' o null -- probable
+--     clasificacion IMARPE ajena a Pecuario, no se toca ni se reutiliza).
+--     Pecuario usa flag_tipo_matprim='P' para marcar sus propias filas.
 --
--- Columnas de TG_ESPECIES que Pecuario usa: especie (PK), descr_especie,
--- nombre_cientifico (ya existia, gratis), flag_tipo_especie='P', flag_estado,
--- y dos columnas NUEVAS y OPCIONALES (nullable, agregadas de forma aditiva
--- y solo si no existen -- jamas se elimina ni se altera ninguna columna
--- existente de esta tabla ajena):
+-- Columnas de TG_ESPECIES que Pecuario usa: especie (PK, autogenerada),
+-- descr_especie, nombre_cientifico (ya existia, gratis), flag_tipo_matprim='P',
+-- flag_estado, y dos columnas NUEVAS y OPCIONALES (nullable, agregadas de
+-- forma aditiva y solo si no existen -- jamas se elimina ni se altera ninguna
+-- columna existente de esta tabla ajena):
 --   periodo_gestacion_dias  NUMBER(4) -- mamiferos: dias de fec_servicio a fec_prob_parto
 --   periodo_incubacion_dias NUMBER(4) -- oviparos: dias de fec_carga a fec_eclosion_prevista
 -- ============================================================================
@@ -168,32 +180,61 @@ exception when others then
 end;
 /
 
-comment on column CANTABRIA.TG_ESPECIES.periodo_gestacion_dias is 'Pecuario (flag_tipo_especie=P) - dias de gestacion (mamiferos): fec_prob_parto = fec_servicio + este valor';
-comment on column CANTABRIA.TG_ESPECIES.periodo_incubacion_dias is 'Pecuario (flag_tipo_especie=P) - dias de incubacion (oviparos): fec_eclosion_prevista = fec_carga + este valor';
+comment on column CANTABRIA.TG_ESPECIES.periodo_gestacion_dias is 'Pecuario (flag_tipo_matprim=P) - dias de gestacion (mamiferos): fec_prob_parto = fec_servicio + este valor';
+comment on column CANTABRIA.TG_ESPECIES.periodo_incubacion_dias is 'Pecuario (flag_tipo_matprim=P) - dias de incubacion (oviparos): fec_eclosion_prevista = fec_carga + este valor';
 
--- Datos iniciales sugeridos (insertar solo si no existe -- TG_ESPECIES es
--- una tabla compartida, nunca se trunca ni se borra desde este script).
--- AJUSTAR/VERIFICAR antes de ejecutar en un esquema con data real de pesca:
--- confirmar que estos codigos de 4 letras no colisionen con codigos de
--- especies hidrobiologicas/vegetales ya existentes.
-insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
-  select 'BOVI','Bovino','Bos taurus','P','1',283 from dual
-   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'BOVI');
-insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
-  select 'PORC','Porcino','Sus scrofa domesticus','P','1',114 from dual
-   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'PORC');
-insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
-  select 'CAPR','Caprino','Capra aegagrus hircus','P','1',150 from dual
-   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'CAPR');
-insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
-  select 'OVIN','Ovino','Ovis aries','P','1',150 from dual
-   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'OVIN');
-insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_gestacion_dias)
-  select 'EQUI','Equino','Equus ferus caballus','P','1',340 from dual
-   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'EQUI');
-insert into CANTABRIA.TG_ESPECIES (especie, descr_especie, nombre_cientifico, flag_tipo_especie, flag_estado, periodo_incubacion_dias)
-  select 'AVES','Avicola','Gallus gallus domesticus','P','1',21 from dual
-   where not exists (select 1 from CANTABRIA.TG_ESPECIES where especie = 'AVES');
+-- Trigger de numeracion (BEFORE INSERT, "create or replace" es idempotente
+-- por definicion -- no requiere estar en el bloque de limpieza PC_*). Solo
+-- genera especie cuando viene nula; las filas de pesca/vegetal existentes o
+-- futuras que inserten su propio codigo explicito NUNCA pasan por el if y
+-- quedan exactamente igual que hoy.
+create or replace trigger CANTABRIA.TIB_TG_ESPECIES
+before insert on CANTABRIA.TG_ESPECIES
+for each row
+declare
+  ln_ult_nro CANTABRIA.NUM_TABLAS.ult_nro%type;
+  ln_count   number;
+  lc_origen  CHAR(2) := 'AQ'; -- Arequipa: origen fijo indicado por el usuario para
+                              -- especies pecuarias (catalogo global, sin cod_origen propio)
+begin
+  if :new.especie is null then
+    select count(*) into ln_count from CANTABRIA.NUM_TABLAS
+     where tabla = 'TG_ESPECIES' and origen = lc_origen;
+    if ln_count = 0 then
+      insert into CANTABRIA.NUM_TABLAS(tabla, origen, ult_nro) values ('TG_ESPECIES', lc_origen, 1);
+    end if;
+    select ult_nro into ln_ult_nro from CANTABRIA.NUM_TABLAS
+     where tabla = 'TG_ESPECIES' and origen = lc_origen for update;
+    :new.especie := lc_origen || lpad(to_char(ln_ult_nro), 6, '0');
+    update CANTABRIA.NUM_TABLAS set ult_nro = ln_ult_nro + 1
+     where tabla = 'TG_ESPECIES' and origen = lc_origen;
+  end if;
+end;
+/
+
+-- Datos iniciales sugeridos (insertar solo si no existe -- TG_ESPECIES es una
+-- tabla compartida, nunca se trunca ni se borra desde este script; como el
+-- codigo lo genera el trigger, la idempotencia se verifica por descr_especie
+-- + flag_tipo_matprim en vez de por "especie", que aun no se conoce antes
+-- del insert).
+insert into CANTABRIA.TG_ESPECIES (descr_especie, nombre_cientifico, flag_tipo_matprim, flag_estado, periodo_gestacion_dias)
+  select 'Bovino','Bos taurus','P','1',283 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where descr_especie = 'Bovino' and flag_tipo_matprim = 'P');
+insert into CANTABRIA.TG_ESPECIES (descr_especie, nombre_cientifico, flag_tipo_matprim, flag_estado, periodo_gestacion_dias)
+  select 'Porcino','Sus scrofa domesticus','P','1',114 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where descr_especie = 'Porcino' and flag_tipo_matprim = 'P');
+insert into CANTABRIA.TG_ESPECIES (descr_especie, nombre_cientifico, flag_tipo_matprim, flag_estado, periodo_gestacion_dias)
+  select 'Caprino','Capra aegagrus hircus','P','1',150 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where descr_especie = 'Caprino' and flag_tipo_matprim = 'P');
+insert into CANTABRIA.TG_ESPECIES (descr_especie, nombre_cientifico, flag_tipo_matprim, flag_estado, periodo_gestacion_dias)
+  select 'Ovino','Ovis aries','P','1',150 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where descr_especie = 'Ovino' and flag_tipo_matprim = 'P');
+insert into CANTABRIA.TG_ESPECIES (descr_especie, nombre_cientifico, flag_tipo_matprim, flag_estado, periodo_gestacion_dias)
+  select 'Equino','Equus ferus caballus','P','1',340 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where descr_especie = 'Equino' and flag_tipo_matprim = 'P');
+insert into CANTABRIA.TG_ESPECIES (descr_especie, nombre_cientifico, flag_tipo_matprim, flag_estado, periodo_incubacion_dias)
+  select 'Avicola','Gallus gallus domesticus','P','1',21 from dual
+   where not exists (select 1 from CANTABRIA.TG_ESPECIES where descr_especie = 'Avicola' and flag_tipo_matprim = 'P');
 commit;
 
 
@@ -222,7 +263,7 @@ alter table CANTABRIA.PC_RAZA add constraint FK_PC_RAZA_ESPECIE foreign key (cod
 
 comment on table CANTABRIA.PC_RAZA is 'Pecuario - Catalogo de razas (de cualquier especie)';
 comment on column CANTABRIA.PC_RAZA.reckey is 'PK autonumerica';
-comment on column CANTABRIA.PC_RAZA.cod_especie is 'FK a TG_ESPECIES.especie (catalogo compartido de especies del modulo de pesca; Pecuario usa las filas con flag_tipo_especie=P)';
+comment on column CANTABRIA.PC_RAZA.cod_especie is 'FK a TG_ESPECIES.especie (catalogo compartido de especies del modulo de pesca; Pecuario usa las filas con flag_tipo_matprim=P). El codigo (ej. AQ000001) lo genera el trigger de TG_ESPECIES, no es literal/mnemotecnico';
 comment on column CANTABRIA.PC_RAZA.cod_raza is 'codigo de raza (unique, no PK)';
 comment on column CANTABRIA.PC_RAZA.nom_raza is 'nombre de la raza';
 comment on column CANTABRIA.PC_RAZA.flag_tipo is 'L=Lechera, C=Carne, M=Doble proposito, F=Fibra/lana, T=Trabajo/traccion, R=Reproduccion/genetica (aplica a cualquier especie, no solo bovinos)';
@@ -240,42 +281,73 @@ end;
 /
 
 -- Datos iniciales sugeridos: al menos algunas razas de ejemplo por cada
--- especie sembrada en TG_ESPECIES (BOVI, PORC, CAPR, OVIN, EQUI, AVES) --
--- agregar mas razas o especies segun necesidad real del cliente.
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','HOLS','Holstein','L');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','JERS','Jersey','L');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','BRSW','Brown Swiss','M');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','GYR','Gyr','M');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','BRAH','Brahman','C');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','ANGU','Angus','C');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','CRUC','Cruzado / mestizo','M');
+-- especie sembrada en TG_ESPECIES (Bovino, Porcino, Caprino, Ovino, Equino,
+-- Avicola) -- agregar mas razas o especies segun necesidad real del cliente.
+-- cod_especie se busca por descr_especie porque el codigo real (ej.
+-- AQ000001) lo genera el trigger TIB_TG_ESPECIES, no es literal.
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'HOLS', 'Holstein', 'L' from CANTABRIA.TG_ESPECIES where descr_especie = 'Bovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'JERS', 'Jersey', 'L' from CANTABRIA.TG_ESPECIES where descr_especie = 'Bovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'BRSW', 'Brown Swiss', 'M' from CANTABRIA.TG_ESPECIES where descr_especie = 'Bovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'GYR', 'Gyr', 'M' from CANTABRIA.TG_ESPECIES where descr_especie = 'Bovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'BRAH', 'Brahman', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Bovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'ANGU', 'Angus', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Bovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'CRUC', 'Cruzado / mestizo', 'M' from CANTABRIA.TG_ESPECIES where descr_especie = 'Bovino' and flag_tipo_matprim = 'P';
 -- Porcino
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','YORK','Yorkshire (Large White)','R');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','LAND','Landrace','R');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','DURO','Duroc','C');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','HAMP','Hampshire','C');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('PORC','PIET','Pietrain','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'YORK', 'Yorkshire (Large White)', 'R' from CANTABRIA.TG_ESPECIES where descr_especie = 'Porcino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'LAND', 'Landrace', 'R' from CANTABRIA.TG_ESPECIES where descr_especie = 'Porcino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'DURO', 'Duroc', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Porcino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'HAMP', 'Hampshire', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Porcino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'PIET', 'Pietrain', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Porcino' and flag_tipo_matprim = 'P';
 -- Caprino
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','SAAN','Saanen','L');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','ALPI','Alpina','L');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','BOER','Boer','C');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','ANGO','Angora','F');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('CAPR','CRIC','Criollo','M');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'SAAN', 'Saanen', 'L' from CANTABRIA.TG_ESPECIES where descr_especie = 'Caprino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'ALPI', 'Alpina', 'L' from CANTABRIA.TG_ESPECIES where descr_especie = 'Caprino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'BOER', 'Boer', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Caprino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'ANGO', 'Angora', 'F' from CANTABRIA.TG_ESPECIES where descr_especie = 'Caprino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'CRIC', 'Criollo', 'M' from CANTABRIA.TG_ESPECIES where descr_especie = 'Caprino' and flag_tipo_matprim = 'P';
 -- Ovino
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','MERI','Merino','F');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','CORR','Corriedale','M');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','SUFF','Suffolk','C');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','DORP','Dorper','C');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('OVIN','PELI','Pelibuey','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'MERI', 'Merino', 'F' from CANTABRIA.TG_ESPECIES where descr_especie = 'Ovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'CORR', 'Corriedale', 'M' from CANTABRIA.TG_ESPECIES where descr_especie = 'Ovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'SUFF', 'Suffolk', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Ovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'DORP', 'Dorper', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Ovino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'PELI', 'Pelibuey', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Ovino' and flag_tipo_matprim = 'P';
 -- Equino
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','PERU','Peruano de Paso','T');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','CRIE','Criollo','T');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','PERC','Percheron','T');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','PASO','Paso Fino','T');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('EQUI','PSCR','Pura Sangre de Carrera','R');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'PERU', 'Peruano de Paso', 'T' from CANTABRIA.TG_ESPECIES where descr_especie = 'Equino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'CRIE', 'Criollo', 'T' from CANTABRIA.TG_ESPECIES where descr_especie = 'Equino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'PERC', 'Percheron', 'T' from CANTABRIA.TG_ESPECIES where descr_especie = 'Equino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'PASO', 'Paso Fino', 'T' from CANTABRIA.TG_ESPECIES where descr_especie = 'Equino' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'PSCR', 'Pura Sangre de Carrera', 'R' from CANTABRIA.TG_ESPECIES where descr_especie = 'Equino' and flag_tipo_matprim = 'P';
 -- Avicola
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('AVES','ROSS','Ross 308 (pollo de engorde)','C');
-insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('AVES','HYLN','Hy-Line Brown (ponedora)','L');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'ROSS', 'Ross 308 (pollo de engorde)', 'C' from CANTABRIA.TG_ESPECIES where descr_especie = 'Avicola' and flag_tipo_matprim = 'P';
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo)
+  select especie, 'HYLN', 'Hy-Line Brown (ponedora)', 'L' from CANTABRIA.TG_ESPECIES where descr_especie = 'Avicola' and flag_tipo_matprim = 'P';
 commit;
 
 
