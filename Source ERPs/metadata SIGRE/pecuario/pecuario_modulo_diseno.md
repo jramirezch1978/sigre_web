@@ -187,7 +187,76 @@ Este es el trigger que usan `TIB_PC_ANIMAL` y `TIB_PC_SERVICIO` en el script (co
 
 Ver sección 15 (Contabilización NIC 41): `AF_MAESTRO`/`ACTIVO_FIJO`, `AF_MATRIZ_CONTABLE` (resuelve cuenta contable por `tipo_activo`+`cencos`), `CNTBL_PRE_ASIENTO`/`CNTBL_PRE_ASIENTO_DET` (pre-asientos, `flag_debhab` D/H) y `CNTBL_ASIENTO`/`CNTBL_ASIENTO_DET` (libro oficial, tras mayorización). `USP_AF_ASI_DEPRECIACION` es el ejemplo end-to-end de cómo un proceso genera pre-asientos reales.
 
-## 6. Diagrama de base de datos (Mermaid)
+## 6. Diagramas (Mermaid)
+
+### 6.1 Flujo general del proceso
+
+Vista de alto nivel de todo el módulo: desde la configuración de catálogos hasta las consultas/reportes finales, separando el camino de manejo **individual** (bovino, porcino, caprino, ovino, equino — cada cabeza registrada en `PC_ANIMAL`) del camino de manejo **por lote** (aves, engorde masivo — solo `PC_LOTE`, sin fila por cabeza).
+
+```mermaid
+flowchart TD
+    A["Configurar catalogos base<br/>Especies, Razas, Categorias, Potreros,<br/>Establos, Sementales, Dietas"] --> B{"Como se maneja<br/>la crianza?"}
+
+    B -->|"Individual<br/>(bovino, porcino, caprino,<br/>ovino, equino)"| C["(CAM391) Alta de animal"]
+    B -->|"Lote masivo<br/>(aves, engorde)"| D["(CAM407) Alta de lote"]
+
+    C --> C1["Asignar potrero, establo<br/>y/o lote de manejo"]
+    C1 --> C2["Reproduccion:<br/>celo -> servicio -> diagnostico -> parto"]
+    C2 --> C3["Produccion de leche:<br/>lactancia -> ordeno -> control lechero"]
+    C1 --> C4["Nutricion:<br/>dieta y consumo de alimento"]
+    C1 --> C5["Sanidad:<br/>vacunas, desparasitaciones, tratamientos"]
+    C5 --> C6["Laboratorio<br/>(si se requiere analisis)"]
+    C1 --> C7["Movimientos:<br/>rotacion de potrero / cambio de establo"]
+    C2 --> C8["(CAM405) Baja:<br/>venta, muerte o descarte"]
+    C3 --> C8
+    C5 --> C8
+
+    D --> D1["(CAM409) Postura diaria<br/>de huevos (solo reproductoras)"]
+    D1 --> D2["(CAM410) Incubacion<br/>y resultado de eclosion"]
+    D2 --> D3["Se forma el lote de engorde<br/>(trazabilidad reproductoras -> engorde)"]
+    D3 --> D4["Consumo de alimento del lote"]
+    D3 --> D5["(CAM411) Mortalidad de lote"]
+    D4 --> D6["Venta / cierre del lote"]
+    D5 --> D6
+
+    C8 --> E["(CAM404) DTA SENASA<br/>si el animal sale del predio"]
+    D6 --> E
+    E --> F["Consultas (CAM500-506) y<br/>Reportes (CAM716-722) de gestion"]
+
+    style A fill:#1F4E79,color:#ffffff
+    style B fill:#2E74B5,color:#ffffff
+    style F fill:#1F4E79,color:#ffffff
+```
+
+### 6.2 Árbol de opciones de menú
+
+Agrupación visual de las 49 opciones nuevas (detalle completo en la sección 4):
+
+```mermaid
+flowchart TD
+    M["MODULO PECUARIO<br/>49 opciones nuevas"]
+
+    M --> T["TABLAS<br/>CAM061 - CAM070<br/>(10 opciones)<br/>Catalogos de configuracion"]
+    M --> O["OPERACIONES<br/>CAM391 - CAM411<br/>(21 opciones)<br/>Registro diario"]
+    M --> Q["CONSULTAS<br/>CAM500 - CAM506<br/>(7 opciones)<br/>Solo lectura"]
+    M --> R["REPORTES<br/>CAM716 - CAM722<br/>(7 opciones)<br/>Impresion / exportacion"]
+    M --> P["PROCESOS<br/>CAM900 - CAM903<br/>(4 opciones)<br/>Automaticos (batch)"]
+
+    T --- T1["Razas, Categorias, Potreros,<br/>Establos, Sementales,<br/>Productos sanitarios,<br/>Enfermedades, Dietas,<br/>Especies, Recetas"]
+    O --- O1["Maestro de animal, Lotes,<br/>Reproduccion, Produccion de leche,<br/>Nutricion, Sanidad, Laboratorio,<br/>Movimientos, Bajas, DTA,<br/>Postura, Incubacion, Mortalidad de lote"]
+    Q --- Q1["Ficha del animal, Historial<br/>reproductivo, Produccion de leche,<br/>Calendario sanitario, Trazabilidad<br/>SENASA, Resultados de laboratorio,<br/>Historial de consumibles"]
+    R --- R1["Resumen del hato, Indicadores<br/>reproductivos, Produccion de leche,<br/>Control lechero, Costos de<br/>alimentacion, Sanitario, Bajas"]
+    P --- P1["Recategorizacion, Actualizacion<br/>de estado reproductivo, Cierre<br/>de lactancia, Recalculo de litros"]
+
+    style M fill:#1F4E79,color:#ffffff
+    style T fill:#2E74B5,color:#ffffff
+    style O fill:#2E74B5,color:#ffffff
+    style Q fill:#2E74B5,color:#ffffff
+    style R fill:#2E74B5,color:#ffffff
+    style P fill:#2E74B5,color:#ffffff
+```
+
+### 6.3 Diagrama de entidades (modelo de datos)
 
 ```mermaid
 erDiagram
@@ -963,7 +1032,40 @@ Capturas de la demo pública de AGRI confirman en el propio producto lo descrito
 - **Pantalla "Ganadería | Cabezas"** (listado): columnas `Tag`, `Fecha Nacimiento`, `Fecha entrada`, `Fecha de salida`, `Lote`, `Último peso`, `Fecha último peso`, `Acciones` (con un ícono de tendencia/gráfico, sugiriendo un historial de pesajes por animal, no solo el último dato — ver punto 5 arriba). Las 4 capacidades destacadas del módulo: **Control de cabezas**, **Control de lotes**, **Registro de peso**, **Reportería** — confirma que son 4 vistas del mismo modelo, no módulos separados.
 - **Formulario "Ingreso de cabeza"** (`demo.agri.cl/livestocks`): campos `Fecha nacimiento`, `DIIO` (Dispositivo de Identificación Individual Oficial — el arete oficial chileno, equivalente al arete SENASA en Perú), `DIIO padre`, `DIIO madre` (genealogía referenciando directamente el arete oficial de otros animales, no un ID interno), `Hembra` (flag de sexo), `Raza`, `Id Lote` (combo, FK al lote), `Descripción`. Confirma exactamente la estructura de `PC_ANIMAL` (identidad + genealogía + raza + sexo + lote), con la única diferencia de que AGRI usa el arete oficial (`DIIO`) directamente como identificador de genealogía, mientras que en nuestro diseño la genealogía usa el documento interno `cod_animal` y el arete físico queda aparte en `cod_interno` (sección 8) — decisión ya tomada y consistente con el patrón de numeración de documentos del resto del ERP (sección 3).
 
-## 19. Próximos pasos
+## 19. Casos de uso resueltos (paso a paso)
+
+Flujos completos, de punta a punta, tal como se le explican al usuario final en el manual de usuario (`Manual_Usuario_Modulo_Pecuario.docx`). Se documentan aquí también porque son resoluciones de diseño (qué pantalla usar, en qué orden, qué queda automático) y no solo texto instructivo.
+
+### 19.1 Caso: ciclo reproductivo completo de una vaca
+
+1. Se detecta a la vaca en celo: registrar en (CAM392) Registro de celo.
+2. Se realiza la monta o inseminación: registrar en (CAM393) Registro de servicio (con el toro o el semental usado). El sistema calcula la fecha probable de parto.
+3. Meses después, se confirma la preñez: registrar en (CAM394) Diagnóstico de preñez con resultado "Preñada".
+4. Al llegar la fecha probable de parto (o antes, si se adelanta): registrar el parto en (CAM395) Registro de parto. El sistema da de alta automáticamente a la cría (`PC_PARTO.cod_animal_cria` → nuevo `PC_ANIMAL`) y abre la lactancia de la madre (`PC_LACTANCIA`, trigger implícito del flujo, no de BD).
+5. A partir de ese día, registrar los ordeños diarios en (CAM397) Ordeño diario — cada ordeño genera el ingreso real de leche en Almacén (movimiento `I09`) contra la misma OT del potrero de ese día (sección 9).
+
+**Resolución de diseño**: el cálculo de `fec_prob_parto` (283 días, gestación bovina) está hoy hardcodeado en `PC_SERVICIO` — ver punto abierto en la sección 18.3/próximos pasos sobre parametrizar el período de gestación por especie en `PC_ESPECIE`.
+
+### 19.2 Caso: dar de baja un animal por venta
+
+1. Verificar que exista la Orden de Venta correspondiente en el módulo de Comercialización (`ORDEN_VENTA`, sección 5.4).
+2. Si el animal sale del predio, tramitar y registrar el DTA en (CAM404) Documento de Tránsito Animal — el número lo asigna SENASA, es texto libre `UNIQUE`, no autogenerado (sección 3, caso 2).
+3. Ingresar a (CAM405) Baja de animal, seleccionar el animal, motivo `V` (Venta), indicar `nro_ov` (obligatorio si `flag_motivo='V'`, sección 14), el precio y, si aplica, `dta_reckey`.
+4. Guardar. El trigger `TRG_PC_BAJA_AI` desactiva automáticamente `PC_ANIMAL.flag_estado`.
+
+**Resolución de diseño**: por eso `PC_BAJA.nro_ov` es FK real a `ORDEN_VENTA`, no un campo de texto — decisión tomada tras investigar el módulo de Comercialización (sección 5.4), para que una venta de ganado no pueda registrarse sin una venta real detrás.
+
+### 19.3 Caso: ciclo de incubación de un lote de reproductoras (avícola)
+
+1. Crear (si no existe) el lote de reproductoras en (CAM407) Control de lotes, categoría `REP`.
+2. Registrar la producción diaria de huevos en (CAM409) Registro de postura (`PC_POSTURA`, una fila por lote y fecha).
+3. Cargar los huevos aptos a la incubadora en (CAM410) Incubación (`PC_INCUBACION.cod_lote_origen`, `cod_establo` con `flag_tipo='I'`), `flag_estado='1'` (En incubación).
+4. Al eclosionar: completar el mismo registro con `cantidad_nacidos`/`cantidad_mermas`, indicar (o crear) `cod_lote_destino` (lote de engorde), y cambiar `flag_estado='2'` (Eclosionada).
+5. El lote de engorde se maneja igual que cualquier otro lote: consumo de alimento (sección 11) y mortalidad agregada en (CAM411) `PC_LOTE_MORTALIDAD` — el trigger `TRG_PC_LOTEMORT_AI` descuenta automáticamente `cantidad_cabezas_actual`.
+
+**Resolución de diseño**: la trazabilidad "de qué lote de reproductoras viene este lote de engorde" se resuelve con dos FK en la misma fila de `PC_INCUBACION` (`cod_lote_origen`/`cod_lote_destino`), sin necesitar una tabla puente adicional — ver sección 8, "Extensión avícola".
+
+## 20. Próximos pasos
 
 1. Validar el diseño de tablas y la numeración de ventanas con el usuario/gerencia.
 2. Confirmar con el contador el tratamiento contable exacto (cuentas, periodicidad de revaluación, si se activa auto-post o se deja manual como Activo Fijo).
@@ -971,3 +1073,4 @@ Capturas de la demo pública de AGRI confirman en el propio producto lo descrito
 4. Diseñar las ventanas PowerBuilder (CAM061...CAM905) siguiendo esta especificación.
 5. `PC_LOTE` (control de lotes) y la extensión avícola (`PC_POSTURA`/`PC_INCUBACION`/`PC_LOTE_MORTALIDAD`, CAM409–CAM411) ya están implementados (sección 8); decidir cuáles de los ajustes restantes de la sección 18.3 (puntos 1-5) aplicar.
 6. El hueco de numeración de Operaciones (`391`–`411`) quedó **agotado** con la extensión avícola (sección 1); cualquier opción de Operaciones nueva de Pecuario debe numerarse en el siguiente hueco libre después de `CAM434`.
+7. **Pendiente de decisión (planteado por el usuario)**: evaluar si `PC_ESPECIE` debe enriquecerse con `periodo_gestacion_dias`/`periodo_incubacion_dias`, `nombre_cientifico` y `unidad_produccion_principal` — esto además corregiría que `PC_SERVICIO` hoy calcula `fec_prob_parto` con 283 días hardcodeado (gestación bovina) en vez de leerlo por especie. Se investigó `TG_ESPECIES` (catálogo real de especies hidrobiológicas/vegetales del módulo de pesca, 15 FK reales) como alternativa a reutilizar — **descartado**: no comparte dominio (habitat/temperatura de agua/tallas de captura IMARPE) y tocar su DDL arriesga un módulo de pesca en producción.
