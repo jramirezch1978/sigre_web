@@ -72,6 +72,16 @@ comment on column CANTABRIA.PC_RAZA.nom_raza is 'nombre de la raza';
 comment on column CANTABRIA.PC_RAZA.flag_tipo is 'L=Lechera, C=Carne, M=Doble proposito';
 comment on column CANTABRIA.PC_RAZA.flag_estado is 'flag_estado';
 
+-- Datos iniciales sugeridos
+insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('HOLS','Holstein','L');
+insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('JERS','Jersey','L');
+insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('BRSW','Brown Swiss','M');
+insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('GYR','Gyr','M');
+insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('BRAH','Brahman','C');
+insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('ANGU','Angus','C');
+insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('CRUC','Cruzado / mestizo','M');
+commit;
+
 
 -- ----------------------------------------------------------------------------
 -- PC_POTRERO
@@ -245,6 +255,20 @@ comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.periodo_retiro is 'dias de ret
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.unidad_medida is 'unidad de medida de la dosis';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.flag_estado is 'flag_estado';
 
+-- Datos iniciales sugeridos (calendario sanitario base para bovinos en Peru, referencia SENASA)
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC001','Vacuna Aftosa','V',180,21,'DOS');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC002','Vacuna Brucelosis (Cepa 19)','V',null,0,'DOS');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC003','Vacuna Carbunco sintomatico / Clostridiales','V',365,21,'DOS');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC004','Vacuna Rabia bovina','V',365,21,'DOS');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC005','Vacuna IBR-BVD','V',180,0,'DOS');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC006','Vacuna Leptospirosis','V',180,0,'DOS');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('DES001','Desparasitante interno (Ivermectina)','D',90,35,'ML');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('DES002','Desparasitante externo (bano garrapaticida)','D',30,0,'LT');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, periodo_retiro, unidad_medida) values ('MED001','Antibiotico intramamario (mastitis)','M',5,'TUB');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, periodo_retiro, unidad_medida) values ('MED002','Antiinflamatorio','M',3,'ML');
+insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, periodo_retiro, unidad_medida) values ('SUP001','Sales minerales','S',0,'KG');
+commit;
+
 
 -- ----------------------------------------------------------------------------
 -- PC_ENFERMEDAD
@@ -277,6 +301,21 @@ comment on column CANTABRIA.PC_ENFERMEDAD.cod_enfermedad is 'codigo de enfermeda
 comment on column CANTABRIA.PC_ENFERMEDAD.nom_enfermedad is 'nombre de la enfermedad';
 comment on column CANTABRIA.PC_ENFERMEDAD.flag_reproductiva is 'afecta el ciclo reproductivo (1=si)';
 comment on column CANTABRIA.PC_ENFERMEDAD.flag_estado is 'flag_estado';
+
+-- Datos iniciales sugeridos
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('MASTI1','Mastitis','0');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('HIPOC1','Hipocalcemia / fiebre de leche','0');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('CETOS1','Cetosis','0');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('COJER1','Cojera / laminitis','0');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('NEUMO1','Neumonia en terneros','0');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('DIARR1','Diarrea neonatal','0');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('BRUCE1','Brucelosis','1');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('IBRBV1','IBR / BVD','1');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('LEPTO1','Leptospirosis','1');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('METRI1','Metritis','1');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('RETPL1','Retencion de placenta','1');
+insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('DISTO1','Distocia','1');
+commit;
 
 
 -- ----------------------------------------------------------------------------
@@ -1367,6 +1406,129 @@ begin
 end;
 /
 
+commit;
+
+
+-- ============================================================================
+-- 9) DATA DE PRUEBA (DEMO) -- para QA / pulir pantallas, NO usar en produccion
+-- ============================================================================
+-- Escenario encadenado con cod_origen = '01' (ajustar al codigo real del fundo
+-- San Martin en CONFIGURACION/ORIGEN antes de usar). Incluye: 2 potreros, 1
+-- semental, 1 dieta con su componente, 5 animales (2 vacas, 1 toro, 1 cria,
+-- 1 vaca de descarte), un ciclo reproductivo completo (celo->servicio->
+-- diagnostico->parto), lactancia con ordenos y control lechero, condicion
+-- corporal, consumo de alimento, eventos sanitarios, resultados de
+-- laboratorio (mastitis + calidad de semen), movimiento de potrero, y el
+-- ciclo de vida completo de una baja por venta con su DTA.
+--
+-- ADVERTENCIA: PC_DIETA_COMPONENTE y PC_ALIMENTACION_CONSUMO referencian
+-- CANTABRIA.ARTICULO(cod_art) -- el codigo 'ART00000001' usado abajo es un
+-- PLACEHOLDER: reemplazarlo por un cod_art real existente en ARTICULO antes
+-- de ejecutar esas dos secciones, o comentarlas si aun no aplica.
+-- ============================================================================
+
+-- Potreros
+insert into CANTABRIA.PC_POTRERO (cod_origen, cod_potrero, nom_potrero, area_has, tipo_pasto, capacidad_cab) values ('01','POT001','Potrero Norte',10,'Brachiaria brizantha',40);
+insert into CANTABRIA.PC_POTRERO (cod_origen, cod_potrero, nom_potrero, area_has, tipo_pasto, capacidad_cab) values ('01','POT002','Potrero Sur',8,'Brachiaria brizantha',30);
+commit;
+
+-- Semental
+insert into CANTABRIA.PC_SEMENTAL (cod_semental, nom_semental, cod_raza, proveedor, registro_genet) values ('SEM0000001','Toro IA Holstein 245','HOLS','Central Genetica Peru','US-12345');
+commit;
+
+-- Dieta y componente (AJUSTAR cod_art antes de ejecutar si ARTICULO no tiene este codigo)
+insert into CANTABRIA.PC_DIETA (cod_dieta, nom_dieta, cod_categoria, costo_kg_prom) values ('DIE001','Dieta vacas en produccion','VPR',1.20);
+commit;
+insert into CANTABRIA.PC_DIETA_COMPONENTE (cod_dieta, item, cod_art, cantidad_kg) values ('DIE001',1,'ART00000001',15.000);
+commit;
+
+-- Animales (orden importa: la madre antes que la cria)
+insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('01','ANI000000001','Paloma','HOLS','H',TO_DATE('15/03/2021','DD/MM/YYYY'),'VPR','POT001','3',38,550,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('01','ANI000000002','Luna','BRSW','H',TO_DATE('10/06/2020','DD/MM/YYYY'),'VPR','POT001','2',40,540,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('01','ANI000000003','Bravo','HOLS','M',TO_DATE('20/01/2019','DD/MM/YYYY'),'TOR','POT002',42,780,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_animal_padre, cod_animal_madre, cod_categoria, cod_potrero, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('01','ANI000000004','Cria de Paloma','HOLS','H',TO_DATE('15/06/2026','DD/MM/YYYY'),'ANI000000003','ANI000000001','TER','POT001',35,35,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('01','ANI000000005','Estrella','HOLS','H',TO_DATE('02/02/2019','DD/MM/YYYY'),'VDE','POT002','0',37,520,'P','DEMO01');
+commit;
+
+-- Ciclo reproductivo de Paloma (servicio natural con Bravo -> diagnostico -> parto -> cria)
+insert into CANTABRIA.PC_SERVICIO (cod_origen, cod_animal, nro_servicio, fec_servicio, flag_tipo_servicio, cod_animal_toro, fec_prob_parto, cod_usr)
+  values ('01','ANI000000001',1,TO_DATE('05/09/2025','DD/MM/YYYY'),'N','ANI000000003',TO_DATE('15/06/2026','DD/MM/YYYY'),'DEMO01');
+insert into CANTABRIA.PC_DIAGNOSTICO_PRENEZ (cod_origen, cod_animal, nro_servicio, fec_diagnostico, metodo, resultado, dias_gestacion, cod_veterinario, cod_usr)
+  values ('01','ANI000000001',1,TO_DATE('05/12/2025','DD/MM/YYYY'),'T','P',91,'VET001','DEMO01');
+insert into CANTABRIA.PC_PARTO (cod_origen, cod_animal, fec_parto, nro_servicio, flag_tipo_parto, flag_asistido, cod_animal_cria, sexo_cria, peso_cria, flag_cria_viva, flag_retencion_placenta, cod_veterinario, cod_usr)
+  values ('01','ANI000000001',TO_DATE('15/06/2026','DD/MM/YYYY'),1,'E','0','ANI000000004','H',35,'1','0','VET001','DEMO01');
+commit;
+
+-- Ciclo reproductivo de Luna, en curso (celo -> servicio por IA -> diagnostico positivo, sin parto todavia)
+insert into CANTABRIA.PC_CELO (cod_origen, cod_animal, fec_celo, metodo_deteccion, flag_servido, cod_usr)
+  values ('01','ANI000000002',TO_DATE('01/03/2026','DD/MM/YYYY'),'V','1','DEMO01');
+insert into CANTABRIA.PC_SERVICIO (cod_origen, cod_animal, nro_servicio, fec_servicio, flag_tipo_servicio, cod_semental, cod_tecnico, fec_prob_parto, cod_usr)
+  values ('01','ANI000000002',1,TO_DATE('01/03/2026','DD/MM/YYYY'),'I','SEM0000001','VET001',TO_DATE('09/12/2026','DD/MM/YYYY'),'DEMO01');
+insert into CANTABRIA.PC_DIAGNOSTICO_PRENEZ (cod_origen, cod_animal, nro_servicio, fec_diagnostico, metodo, resultado, dias_gestacion, cod_veterinario, cod_usr)
+  values ('01','ANI000000002',1,TO_DATE('15/04/2026','DD/MM/YYYY'),'E','P',45,'VET001','DEMO01');
+commit;
+
+-- Lactancia de Paloma (2da lactancia, abierta por el parto de arriba) + ordenos + control lechero
+insert into CANTABRIA.PC_LACTANCIA (cod_origen, cod_animal, nro_lactancia, fec_parto, flag_estado, cod_usr)
+  values ('01','ANI000000001',2,TO_DATE('15/06/2026','DD/MM/YYYY'),'1','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('02/07/2026','DD/MM/YYYY'),1,12.5,'DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('02/07/2026','DD/MM/YYYY'),2,10.2,'DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('03/07/2026','DD/MM/YYYY'),1,13.0,'DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('03/07/2026','DD/MM/YYYY'),2,10.5,'DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('04/07/2026','DD/MM/YYYY'),1,12.8,'DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, cod_usr) values ('01','ANI000000001',TO_DATE('04/07/2026','DD/MM/YYYY'),2,10.0,'DEMO01');
+update CANTABRIA.PC_LACTANCIA set litros_totales = 69.0 where cod_origen='01' and cod_animal='ANI000000001' and nro_lactancia=2;
+insert into CANTABRIA.PC_CONTROL_LECHERO (cod_origen, cod_animal, fec_control, porc_grasa, porc_proteina, celulas_somaticas, litros_dia_proy, cod_usr)
+  values ('01','ANI000000001',TO_DATE('01/07/2026','DD/MM/YYYY'),3.8,3.2,180000,23.0,'DEMO01');
+commit;
+
+-- Condicion corporal
+insert into CANTABRIA.PC_CONDICION_CORPORAL (cod_origen, cod_animal, fec_evaluacion, puntaje_bcs, cod_usr) values ('01','ANI000000001',TO_DATE('01/07/2026','DD/MM/YYYY'),3.0,'DEMO01');
+insert into CANTABRIA.PC_CONDICION_CORPORAL (cod_origen, cod_animal, fec_evaluacion, puntaje_bcs, cod_usr) values ('01','ANI000000002',TO_DATE('01/07/2026','DD/MM/YYYY'),3.5,'DEMO01');
+commit;
+
+-- Consumo de alimento (AJUSTAR cod_art antes de ejecutar si ARTICULO no tiene 'ART00000001')
+insert into CANTABRIA.PC_ALIMENTACION_CONSUMO (cod_origen, cod_potrero, fec_consumo, cod_dieta, cabezas_lote, cod_art, cantidad_kg, costo_total, cod_usr)
+  values ('01','POT001',TO_DATE('03/07/2026','DD/MM/YYYY'),'DIE001',2,'ART00000001',30.000,36.00,'DEMO01');
+commit;
+
+-- Eventos sanitarios
+insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_prod_san, dosis, cod_veterinario, costo, fec_prox_refuerzo, fec_fin_retiro, cod_usr)
+  values ('01','ANI000000001',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'V','VAC001',2,'VET001',15.00,TO_DATE('01/08/2026','DD/MM/YYYY'),TO_DATE('22/02/2026','DD/MM/YYYY'),'DEMO01');
+insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_prod_san, dosis, cod_veterinario, costo, fec_prox_refuerzo, fec_fin_retiro, cod_usr)
+  values ('01','ANI000000002',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'D','DES001',20,'VET001',8.00,TO_DATE('01/05/2026','DD/MM/YYYY'),TO_DATE('05/03/2026','DD/MM/YYYY'),'DEMO01');
+insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_enfermedad, cod_veterinario, costo, observaciones, cod_usr)
+  values ('01','ANI000000005',1,TO_DATE('20/05/2026','DD/MM/YYYY'),'X','MASTI1','VET001',25.00,'Mastitis clinica, cuartil posterior derecho','DEMO01');
+commit;
+
+-- Resultados de laboratorio: cultivo de mastitis de Estrella + calidad de semen del semental
+insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, cod_animal, fec_muestra, flag_tipo_muestra, laboratorio, cod_veterinario, nro_evento, fec_resultado, flag_estado, cod_usr)
+  values ('MU0000000001','01','ANI000000005',TO_DATE('20/05/2026','DD/MM/YYYY'),'L','Laboratorio Veterinario San Martin','VET001',1,TO_DATE('22/05/2026','DD/MM/YYYY'),'2','DEMO01');
+insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, flag_interpretacion) values ('MU0000000001',1,'Cultivo microbiologico','Staphylococcus aureus','A');
+insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, valor_ref_max, flag_interpretacion) values ('MU0000000001',2,'Celulas somaticas','850000','cel/ml',200000,'A');
+
+insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, cod_semental, fec_muestra, flag_tipo_muestra, laboratorio, fec_resultado, flag_estado, cod_usr)
+  values ('MU0000000002','01','SEM0000001',TO_DATE('10/01/2026','DD/MM/YYYY'),'M','Central Genetica Peru',TO_DATE('12/01/2026','DD/MM/YYYY'),'2','DEMO01');
+insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, valor_ref_min, flag_interpretacion) values ('MU0000000002',1,'Motilidad espermatica','78','%',60,'N');
+insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, valor_ref_min, flag_interpretacion) values ('MU0000000002',2,'Concentracion','1200','millones/ml',800,'N');
+commit;
+
+-- Movimiento de potrero (Estrella aislada por mastitis)
+insert into CANTABRIA.PC_MOVIMIENTO_POTRERO (cod_origen, cod_animal, fec_movimiento, cod_potrero_origen, cod_potrero_destino, motivo, cod_usr)
+  values ('01','ANI000000005',TO_DATE('10/05/2026','DD/MM/YYYY'),'POT001','POT002','Aislamiento por mastitis','DEMO01');
+commit;
+
+-- Ciclo de vida completo: DTA + baja por venta de Estrella (mastitis cronica recidivante)
+insert into CANTABRIA.PC_DTA (nro_dta, fec_emision, cod_origen_fundo, razon_social_destino, motivo, cod_usr)
+  values ('DTA00000000001',TO_DATE('01/07/2026','DD/MM/YYYY'),'01','Camal Municipal San Martin S.A.C.','V','DEMO01');
+insert into CANTABRIA.PC_DTA_DETALLE (nro_dta, item, cod_origen, cod_animal) values ('DTA00000000001',1,'01','ANI000000005');
+insert into CANTABRIA.PC_BAJA (cod_origen, cod_animal, fec_baja, flag_motivo, precio_venta, nro_dta, observaciones, cod_usr)
+  values ('01','ANI000000005',TO_DATE('01/07/2026','DD/MM/YYYY'),'V',2800.00,'DTA00000000001','Vendida por descarte, mastitis cronica recidivante','DEMO01');
 commit;
 
 -- ============================================================================

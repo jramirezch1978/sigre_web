@@ -154,7 +154,331 @@ Puntos clave ya confirmados en el sistema actual:
   4. **Baja por muerte/descarte** (CAM454) — retiro del activo con pérdida.
   5. (Opcional) **Costeo de leche producida** — la leche es inventario (NIC 2), no activo biológico; en la cosecha (ordeño, CAM446) se reconoce como producto agrícola a valor razonable en el punto de cosecha.
 
-## 14. Próximos pasos
+## 14. Diccionario de datos
+
+Detalle columna por columna de cada tabla (fuente de verdad: `pecuario_ddl_san_martin.sql`, que además trae todo esto como `comment on column`). "Null" = admite nulo.
+
+### Catálogos
+
+#### `PC_RAZA` — Razas bovinas
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_raza` | CHAR(4) | PK | Código de raza |
+| `nom_raza` | VARCHAR2(60) | No | Nombre de la raza |
+| `flag_tipo` | CHAR(1) | No | L=Lechera, C=Carne, M=Doble propósito |
+| `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
+
+#### `PC_POTRERO` — Potreros de pastoreo
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen` | CHAR(2) | PK | Fundo/sucursal |
+| `cod_potrero` | CHAR(6) | PK | Código de potrero |
+| `nom_potrero` | VARCHAR2(80) | No | Nombre del potrero |
+| `area_has` | NUMBER(8,2) | Sí | Área en hectáreas |
+| `tipo_pasto` | VARCHAR2(60) | Sí | Tipo de pasto sembrado |
+| `capacidad_cab` | NUMBER(6) | Sí | Capacidad de carga en cabezas |
+| `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
+
+#### `PC_CATEGORIA` — Etapas del animal
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_categoria` | CHAR(3) | PK | TER, VAQ, NOV, VPR, VSC, VDE, TOR, TDE |
+| `nom_categoria` | VARCHAR2(60) | No | Nombre de la categoría |
+| `flag_sexo` | CHAR(1) | Sí | M/H, null si aplica a ambos |
+| `edad_min_meses` | NUMBER(4) | Sí | Edad mínima en meses |
+| `edad_max_meses` | NUMBER(4) | Sí | Edad máxima en meses |
+| `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
+
+#### `PC_SEMENTAL` — Catálogo de sementales/pajillas (IA)
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_semental` | CHAR(10) | PK | Código del semental/pajilla |
+| `nom_semental` | VARCHAR2(80) | No | Nombre del semental |
+| `cod_raza` | CHAR(4) | No | FK → `PC_RAZA` |
+| `proveedor` | VARCHAR2(100) | Sí | Central de inseminación / proveedor |
+| `registro_genet` | VARCHAR2(40) | Sí | Registro genealógico / código de catálogo |
+| `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
+
+#### `PC_PRODUCTO_SANITARIO` — Vacunas, medicamentos, insumos veterinarios
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_prod_san` | CHAR(10) | PK | Código de producto sanitario |
+| `nom_producto` | VARCHAR2(100) | No | Nombre del producto |
+| `flag_tipo` | CHAR(1) | No | V=Vacuna, D=Desparasitante, M=Medicamento, S=Suplemento |
+| `dias_refuerzo` | NUMBER(4) | Sí | Días hasta la próxima dosis de refuerzo |
+| `periodo_retiro` | NUMBER(3) | Sí | Días de retiro de leche/carne tras aplicar |
+| `unidad_medida` | CHAR(3) | Sí | Unidad de medida de la dosis |
+| `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
+
+#### `PC_ENFERMEDAD` — Enfermedades/diagnósticos
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_enfermedad` | CHAR(6) | PK | Código de enfermedad |
+| `nom_enfermedad` | VARCHAR2(100) | No | Nombre de la enfermedad |
+| `flag_reproductiva` | CHAR(1) | Sí | 1 si afecta el ciclo reproductivo |
+| `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
+
+#### `PC_DIETA` / `PC_DIETA_COMPONENTE` — Raciones por categoría
+| Tabla | Columna | Tipo | Null | Descripción |
+|---|---|---|---|---|
+| `PC_DIETA` | `cod_dieta` | CHAR(6) | PK | Código de dieta |
+| `PC_DIETA` | `nom_dieta` | VARCHAR2(80) | No | Nombre de la dieta |
+| `PC_DIETA` | `cod_categoria` | CHAR(3) | No | FK → `PC_CATEGORIA` |
+| `PC_DIETA` | `costo_kg_prom` | NUMBER(10,4) | Sí | Costo promedio por kg |
+| `PC_DIETA` | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
+| `PC_DIETA_COMPONENTE` | `cod_dieta` | CHAR(6) | PK | FK → `PC_DIETA` |
+| `PC_DIETA_COMPONENTE` | `item` | NUMBER(3) | PK | Correlativo |
+| `PC_DIETA_COMPONENTE` | `cod_art` | CHAR(12) | No | FK → `ARTICULO` (Almacén) |
+| `PC_DIETA_COMPONENTE` | `cantidad_kg` | NUMBER(8,3) | No | Cantidad en kg por animal/día |
+| `PC_DIETA_COMPONENTE` | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Inactivo |
+
+### Maestro de animal
+
+#### `PC_ANIMAL` — Ganado individual
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen` | CHAR(2) | PK | Fundo/sucursal |
+| `cod_animal` | CHAR(12) | PK | Arete/chapa oficial |
+| `nom_animal` | VARCHAR2(60) | Sí | Apodo, opcional |
+| `cod_raza` | CHAR(4) | No | FK → `PC_RAZA` |
+| `flag_sexo` | CHAR(1) | No | M=Macho, H=Hembra |
+| `fec_nacimiento` | DATE | No | Fecha de nacimiento |
+| `cod_animal_padre` | CHAR(12) | Sí | FK genealogía (auto-referencia) — padre, si es del hato |
+| `cod_animal_madre` | CHAR(12) | Sí | FK genealogía (auto-referencia) — madre, si es del hato |
+| `cod_semental_padre` | CHAR(10) | Sí | FK → `PC_SEMENTAL`, si el padre fue por IA |
+| `color` | VARCHAR2(40) | Sí | Color/marcas distintivas |
+| `cod_categoria` | CHAR(3) | No | FK → `PC_CATEGORIA`, recalculada por el proceso CAM900 |
+| `cod_potrero` | CHAR(6) | No | FK → `PC_POTRERO`, ubicación actual |
+| `flag_estado_repro` | CHAR(1) | Sí | 0=vacía, 1=servida, 2=preñada, 3=recién parida; recalculado por CAM901 |
+| `peso_nacimiento` | NUMBER(6,2) | Sí | Peso al nacer, kg |
+| `peso_actual` | NUMBER(6,2) | Sí | Último peso registrado, kg |
+| `fec_ult_pesaje` | DATE | Sí | Fecha del último pesaje |
+| `cod_procedencia` | CHAR(1) | No | P=Nacido en el predio, C=Comprado |
+| `fec_ingreso` | DATE | No | Fecha de alta al hato |
+| `precio_compra` | NUMBER(12,2) | Sí | Precio de compra, para costeo/NIC 41 |
+| `flag_estado` | CHAR(1) | No | 1=Activo en el hato, 0=de baja |
+| `cod_usr` | CHAR(6) | Sí | Usuario que registró |
+| `fec_registro` | DATE | No | Fecha de registro en el sistema |
+
+### Reproducción
+
+#### `PC_CELO`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen` | CHAR(2) | PK | Fundo/sucursal |
+| `cod_animal` | CHAR(12) | PK | FK → `PC_ANIMAL` |
+| `fec_celo` | DATE | PK | Fecha de detección |
+| `hora_deteccion` | DATE | Sí | Hora exacta |
+| `metodo_deteccion` | CHAR(1) | Sí | V=Visual, P=Podómetro/collar, H=Hormonal |
+| `flag_servido` | CHAR(1) | Sí | 1 si este celo derivó en un servicio |
+| `cod_usr` / `fec_registro` | CHAR(6) / DATE | Sí / No | Auditoría |
+
+#### `PC_SERVICIO`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal` | CHAR(2), CHAR(12) | PK | Hembra servida |
+| `nro_servicio` | NUMBER(3) | PK | Correlativo por animal |
+| `fec_servicio` | DATE | No | Fecha del servicio |
+| `flag_tipo_servicio` | CHAR(1) | No | N=Monta natural, I=Inseminación artificial |
+| `cod_animal_toro` | CHAR(12) | Sí | FK → `PC_ANIMAL`, si monta natural |
+| `cod_semental` | CHAR(10) | Sí | FK → `PC_SEMENTAL`, si IA |
+| `cod_tecnico` | CHAR(6) | Sí | Responsable de la inseminación |
+| `fec_prob_parto` | DATE | Sí | `fec_servicio` + 283 días |
+| `flag_estado` | CHAR(1) | No | 1=Vigente, 0=Anulado (repitió celo) |
+| `cod_usr` / `fec_registro` | CHAR(6) / DATE | Sí / No | Auditoría |
+
+#### `PC_DIAGNOSTICO_PRENEZ`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal`, `nro_servicio` | — | PK/FK | FK → `PC_SERVICIO` |
+| `fec_diagnostico` | DATE | PK | Fecha del diagnóstico |
+| `metodo` | CHAR(1) | Sí | T=Tacto rectal, E=Ecografía |
+| `resultado` | CHAR(1) | No | P=Preñada, V=Vacía |
+| `dias_gestacion` | NUMBER(3) | Sí | Días de gestación calculados |
+| `cod_veterinario` | CHAR(6) | Sí | Veterinario responsable |
+| `cod_usr` / `fec_registro` | CHAR(6) / DATE | Sí / No | Auditoría |
+
+#### `PC_PARTO`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal` | — | PK | Madre |
+| `fec_parto` | DATE | PK | Fecha del parto |
+| `nro_servicio` | NUMBER(3) | Sí | FK → `PC_SERVICIO` que originó el parto |
+| `flag_tipo_parto` | CHAR(1) | Sí | E=Eutócico, D=Distócico |
+| `flag_asistido` | CHAR(1) | Sí | 1=Parto asistido |
+| `cod_animal_cria` | CHAR(12) | Sí | FK → `PC_ANIMAL`, la cría recién nacida |
+| `sexo_cria` | CHAR(1) | Sí | Sexo de la cría |
+| `peso_cria` | NUMBER(6,2) | Sí | Peso al nacer, kg |
+| `flag_cria_viva` | CHAR(1) | Sí | 1=Viva, 0=Nació muerta |
+| `flag_retencion_placenta` | CHAR(1) | Sí | 1=Hubo retención |
+| `observaciones` | VARCHAR2(500) | Sí | Observaciones del parto |
+| `cod_veterinario` / `cod_usr` / `fec_registro` | — | Sí / Sí / No | Auditoría |
+
+### Producción de leche
+
+#### `PC_LACTANCIA`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal` | — | PK | Vaca |
+| `nro_lactancia` | NUMBER(2) | PK | Correlativo (1ra, 2da…) |
+| `fec_parto` | DATE | No | FK → `PC_PARTO` que abrió la lactancia |
+| `fec_secado` | DATE | Sí | Cierre de la lactancia |
+| `dias_lactancia` | NUMBER(4) | Sí | Calculado al secar |
+| `litros_totales` | NUMBER(10,2) | Sí | Recalculado desde `PC_ORDENO` (proceso CAM903) |
+| `flag_estado` | CHAR(1) | No | 1=En curso, 0=Cerrada |
+| `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
+
+#### `PC_ORDENO`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal` | — | PK | Vaca ordeñada |
+| `fec_ordeno` | DATE | PK | Fecha del ordeño |
+| `nro_turno` | NUMBER(1) | PK | 1=Mañana, 2=Tarde, 3=Noche |
+| `litros` | NUMBER(6,2) | No | Litros obtenidos |
+| `flag_descarte` | CHAR(1) | Sí | 1 si la leche no se vende (retiro por medicamento) |
+| `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
+
+#### `PC_CONTROL_LECHERO`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal` | — | PK | Vaca controlada |
+| `fec_control` | DATE | PK | Fecha del muestreo |
+| `porc_grasa` | NUMBER(4,2) | Sí | % de grasa |
+| `porc_proteina` | NUMBER(4,2) | Sí | % de proteína |
+| `celulas_somaticas` | NUMBER(10) | Sí | CCS/SCC, células/ml |
+| `litros_dia_proy` | NUMBER(6,2) | Sí | Litros/día proyectados |
+| `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
+
+### Nutrición
+
+#### `PC_CONDICION_CORPORAL`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal` | — | PK | Animal evaluado |
+| `fec_evaluacion` | DATE | PK | Fecha de evaluación |
+| `puntaje_bcs` | NUMBER(2,1) | No | Escala 1.0–5.0 |
+| `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
+
+#### `PC_ALIMENTACION_CONSUMO`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_potrero` | — | PK/FK | Potrero/lote |
+| `fec_consumo` | DATE | PK | Fecha del consumo |
+| `cod_dieta` | CHAR(6) | PK/FK | Dieta aplicada |
+| `cabezas_lote` | NUMBER(5) | No | Animales que comieron esa dieta ese día |
+| `cod_art` | CHAR(12) | PK/FK | FK → `ARTICULO`, insumo consumido |
+| `cantidad_kg` | NUMBER(10,3) | No | Cantidad total consumida, kg |
+| `costo_total` | NUMBER(12,2) | Sí | Costo total, para costeo (reporte CAM804) |
+| `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
+
+### Sanidad
+
+#### `PC_SANIDAD_EVENTO`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal` | — | PK | Animal atendido |
+| `nro_evento` | NUMBER(5) | PK | Correlativo por animal |
+| `fec_evento` | DATE | No | Fecha del evento |
+| `flag_tipo_evento` | CHAR(1) | No | V=Vacuna, D=Desparasitación, T=Tratamiento, X=Diagnóstico |
+| `cod_prod_san` | CHAR(10) | Sí | FK → `PC_PRODUCTO_SANITARIO` |
+| `dosis` | NUMBER(8,3) | Sí | Dosis aplicada |
+| `cod_enfermedad` | CHAR(6) | Sí | FK → `PC_ENFERMEDAD` |
+| `cod_veterinario` | CHAR(6) | Sí | Veterinario responsable |
+| `costo` | NUMBER(10,2) | Sí | Costo del evento |
+| `fec_prox_refuerzo` | DATE | Sí | Calculado por CAM905 según `dias_refuerzo` del producto |
+| `fec_fin_retiro` | DATE | Sí | Calculado por CAM905 según `periodo_retiro` del producto |
+| `observaciones` | VARCHAR2(500) | Sí | Observaciones |
+| `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
+
+### Resultados de laboratorio
+
+#### `PC_LABORATORIO`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `nro_muestra` | CHAR(12) | PK | Número de muestra |
+| `cod_origen` | CHAR(2) | No | Fundo/sucursal |
+| `cod_animal` | CHAR(12) | Sí | FK → `PC_ANIMAL` (nulo si no aplica a un animal puntual) |
+| `cod_semental` | CHAR(10) | Sí | FK → `PC_SEMENTAL`, si es control de calidad de semen |
+| `fec_muestra` | DATE | No | Fecha de toma |
+| `flag_tipo_muestra` | CHAR(1) | No | S=Sangre, L=Leche, F=Fecal, M=Semen, T=Tejido, O=Otro |
+| `laboratorio` | VARCHAR2(100) | Sí | Laboratorio externo |
+| `cod_veterinario` | CHAR(6) | Sí | Quien tomó la muestra |
+| `nro_evento` | NUMBER(5) | Sí | FK opcional → `PC_SANIDAD_EVENTO` |
+| `fec_resultado` | DATE | Sí | Fecha de entrega del resultado |
+| `flag_estado` | CHAR(1) | No | 0=Anulada, 1=Pendiente, 2=Con resultado |
+| `observaciones` | VARCHAR2(500) | Sí | Observaciones |
+| `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
+
+#### `PC_LABORATORIO_DET`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `nro_muestra` | CHAR(12) | PK/FK | Muestra a la que pertenece |
+| `item` | NUMBER(3) | PK | Correlativo |
+| `parametro` | VARCHAR2(100) | No | Nombre del analito (ej. "Brucelosis - ELISA") |
+| `valor_resultado` | VARCHAR2(60) | Sí | Texto (admite cualitativo o numérico) |
+| `unidad_medida` | VARCHAR2(20) | Sí | Unidad, si es numérico |
+| `valor_ref_min` / `valor_ref_max` | NUMBER(12,4) | Sí | Rango de referencia |
+| `flag_interpretacion` | CHAR(1) | Sí | N=Normal, A=Alterado |
+
+### Movimientos, trazabilidad y bajas
+
+#### `PC_MOVIMIENTO_POTRERO`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal` | — | PK | Animal movido |
+| `fec_movimiento` | DATE | PK | Fecha del movimiento |
+| `cod_potrero_origen` | CHAR(6) | Sí | FK → `PC_POTRERO` |
+| `cod_potrero_destino` | CHAR(6) | No | FK → `PC_POTRERO` |
+| `motivo` | VARCHAR2(200) | Sí | Motivo del movimiento |
+| `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
+
+#### `PC_DTA` / `PC_DTA_DETALLE`
+| Tabla | Columna | Tipo | Null | Descripción |
+|---|---|---|---|---|
+| `PC_DTA` | `nro_dta` | CHAR(15) | PK | Número de DTA |
+| `PC_DTA` | `fec_emision` | DATE | No | Fecha de emisión |
+| `PC_DTA` | `cod_origen_fundo` | CHAR(2) | No | Fundo de origen |
+| `PC_DTA` | `cod_destino_fundo` | CHAR(2) | Sí | Fundo de destino, si traslado interno |
+| `PC_DTA` | `razon_social_destino` | VARCHAR2(150) | Sí | Razón social del destino, si venta |
+| `PC_DTA` | `motivo` | CHAR(1) | No | V=Venta, T=Traslado interno, F=Feria/exposición |
+| `PC_DTA` | `flag_estado` | CHAR(1) | No | 1=Activo, 0=Anulado |
+| `PC_DTA_DETALLE` | `nro_dta` | CHAR(15) | PK/FK | DTA al que pertenece |
+| `PC_DTA_DETALLE` | `item` | NUMBER(4) | PK | Correlativo |
+| `PC_DTA_DETALLE` | `cod_origen`, `cod_animal` | — | FK | Animal incluido en el traslado |
+
+#### `PC_BAJA`
+| Columna | Tipo | Null | Descripción |
+|---|---|---|---|
+| `cod_origen`, `cod_animal` | — | PK/FK | Animal dado de baja |
+| `fec_baja` | DATE | No | Fecha de la baja |
+| `flag_motivo` | CHAR(1) | No | V=Venta, M=Muerte, D=Descarte |
+| `causa_muerte` | VARCHAR2(200) | Sí | Si `flag_motivo`=M |
+| `precio_venta` | NUMBER(12,2) | Sí | Si `flag_motivo`=V |
+| `nro_dta` | CHAR(15) | Sí | FK → `PC_DTA`, si implicó traslado |
+| `observaciones` | VARCHAR2(300) | Sí | Observaciones de la baja |
+| `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
+
+## 15. Data inicial y de prueba (incluida en el script SQL)
+
+**Catálogos de referencia** (datos reales, para producción — se insertan siempre):
+- `PC_CATEGORIA`: las 8 categorías del ciclo de vida (TER, VAQ, NOV, VPR, VSC, VDE, TOR, TDE).
+- `PC_RAZA`: 7 razas comunes en Perú (Holstein, Jersey, Brown Swiss, Gyr, Brahman, Angus, Cruzado).
+- `PC_PRODUCTO_SANITARIO`: calendario sanitario base (aftosa, brucelosis, carbunco/clostridiales, rabia, IBR-BVD, leptospirosis, desparasitantes interno/externo, antibiótico intramamario, antiinflamatorio, sales minerales), con `dias_refuerzo` y `periodo_retiro` ya cargados.
+- `PC_ENFERMEDAD`: 12 enfermedades comunes (mastitis, hipocalcemia, cetosis, cojera, neumonía/diarrea de terneros, brucelosis, IBR/BVD, leptospirosis, metritis, retención de placenta, distocia).
+
+**Data de prueba (demo, sección 9 del script — no usar en producción)**: un escenario encadenado con `cod_origen = '01'`, pensado para poder probar cada pantalla de punta a punta sin tener que cargar todo a mano:
+
+| Animal | Categoría | Historia que ilustra |
+|---|---|---|
+| `ANI000000001` "Paloma" | Vaca en producción | Ciclo reproductivo completo (servicio natural → diagnóstico → parto), lactancia abierta con 3 días de ordeño y un control lechero |
+| `ANI000000002` "Luna" | Vaca en producción | Ciclo reproductivo en curso (celo → servicio por IA con el semental del catálogo → diagnóstico positivo, sin parto todavía) |
+| `ANI000000003` "Bravo" | Toro reproductor | Padre por monta natural de la cría de Paloma |
+| `ANI000000004` (cría de Paloma) | Ternero(a) | Alta automática vía `PC_PARTO.cod_animal_cria`, con genealogía completa (padre y madre) |
+| `ANI000000005` "Estrella" | Vaca de descarte | Ciclo de vida completo: diagnóstico de mastitis → muestra de laboratorio con resultado alterado → movimiento de potrero (aislamiento) → venta con DTA → baja |
+
+También incluye: 2 potreros, 1 semental, 1 dieta con su componente (referencia a `ARTICULO` — **ajustar el `cod_art` placeholder antes de ejecutar esa parte**), y una muestra de calidad de semen del semental.
+
+## 16. Próximos pasos
 
 1. Validar el diseño de tablas y la numeración de ventanas con el gerente de San Martín.
 2. Confirmar con el contador el tratamiento contable exacto (cuentas, periodicidad de revaluación, si se activa auto-post o se deja manual como Activo Fijo).
