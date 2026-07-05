@@ -1,12 +1,45 @@
 -- ============================================================================
--- MODULO PECUARIO (PC_*) -- San Martin (Agro Industrial)
+-- MODULO PECUARIO (PC_*) -- generico, cualquier especie (bovino, porcino,
+-- caprino, ovino, equino, etc.), no exclusivo de una empresa ni de vacunos.
 -- Compatible con Oracle 11g R2. Ejecutar como el usuario/esquema correspondiente
 -- (ajustar el nombre de esquema si no es CANTABRIA -- buscar/reemplazar
 -- "CANTABRIA." por el esquema de la empresa destino antes de correr).
 --
+-- ============================================================================
+-- CONVENCION DE CLAVES PRIMARIAS (obligatoria, sin excepcion)
+-- ============================================================================
+-- 1) Tablas-DOCUMENTO (identidad = un numero de documento interno, igual
+--    concepto que nro_orden/nro_os/nro_orden_compra en el resto del ERP):
+--    PK = UNA SOLA COLUMNA CHAR(10), formato cod_origen(2) + correlativo(8,
+--    zero-padded), ej. 'SU00000001'. El cod_origen queda embebido en el
+--    propio numero, por eso NO es PK compuesta con cod_origen -- cod_origen
+--    sigue existiendo como columna aparte (con su propia FK a ORIGEN) solo
+--    para filtrar/consultar. Se genera con un trigger BEFORE INSERT que usa
+--    la tabla generica NUM_TABLAS (tabla, origen, ult_nro), EXACTAMENTE el
+--    mismo mecanismo que ya usa el resto del sistema (confirmado en
+--    package_body_cantabria.sql y en la ventana w_cam006_numeracion_origen).
+--    Tablas de este tipo en Pecuario: PC_ANIMAL (cod_animal), PC_SERVICIO
+--    (nro_servicio).
+-- 2) Tablas-DOCUMENTO EXTERNO (el numero lo asigna un tercero, ej. SENASA):
+--    PK = reckey interno (ver 3), y el numero externo queda como columna de
+--    texto libre UNIQUE, NO autogenerada. Tabla de este tipo: PC_DTA.
+-- 3) Todo el resto de tablas (catalogos, detalle, eventos): PK = reckey
+--    NUMBER(10), autonumerico via SEQUENCE + trigger BEFORE INSERT, mismo
+--    patron ya usado en ARTICULO_MOV.nro_mov (SEQ_ALM_ARTICULO_MOV +
+--    TIB_ARTICULO_MOV_NRO_MOV, confirmado en triggers_cantabria.sql). Los
+--    codigos de negocio (cod_raza, cod_potrero, etc.) se mantienen como
+--    columnas con constraint UNIQUE (no PK), asi las FK de otras tablas que
+--    ya apuntaban a esos codigos NO cambian.
+-- 4) cod_origen: SIN EXCEPCION, toda tabla que tenga esta columna debe
+--    tener FK a CANTABRIA.ORIGEN(cod_origen).
+-- ============================================================================
+--
 -- Orden de creacion respeta dependencias de FK:
+--   0) PC_ESPECIE (nuevo: agrupa razas por especie -- bovino/porcino/etc.)
 --   1) Catalogos (PC_RAZA, PC_POTRERO, PC_CATEGORIA, PC_SEMENTAL,
 --      PC_PRODUCTO_SANITARIO, PC_ENFERMEDAD, PC_DIETA, PC_DIETA_COMPONENTE)
+--   1b) PC_RECETA / PC_RECETA_DET (nuevo: receta de fabricacion de
+--      concentrado -- ver seccion de integracion con Almacen/Produccion)
 --   2) Maestro de animal (PC_ANIMAL, PC_OT_ANIMAL)
 --   3) Reproduccion (PC_CELO, PC_SERVICIO, PC_DIAGNOSTICO_PRENEZ, PC_PARTO)
 --   4) Produccion de leche (PC_LACTANCIA, PC_ORDENO, PC_CONTROL_LECHERO)
@@ -17,39 +50,73 @@
 --      PC_DTA_DETALLE, PC_BAJA)
 --
 -- NOTA: ARTICULO, ORDEN_TRABAJO, OPERACIONES, ARTICULO_MOV, VALE_MOV,
--- ORDEN_SERVICIO, ALMACEN, TIPO_PRODUCTO y OT_TIPO se asumen YA EXISTENTES
--- (son tablas genericas y compartidas del ERP, no exclusivas de Pecuario).
+-- ORDEN_SERVICIO, ALMACEN, TIPO_PRODUCTO, OT_TIPO, ORIGEN, NUM_TABLAS y
+-- ORDEN_VENTA se asumen YA EXISTENTES (son tablas genericas y compartidas
+-- del ERP, no exclusivas de Pecuario).
 --
--- INTEGRACION CON ORDEN DE TRABAJO (OT) -- "OT Pecuaria":
--- Ninguna tabla de Pecuario duplica cantidades/costos que ya vive en Almacen.
--- El consumo REAL de insumos (alimento, vacunas, medicinas) se registra
--- siempre contra una Orden de Trabajo ya existente en el sistema
--- (ORDEN_TRABAJO, con ot_adm='PECU', igual patron que Campo con ot_adm=
--- 'CAMPO'): ORDEN_TRABAJO -> OPERACIONES -> ARTICULO_MOV (FK real oper_sec,
--- confirmado en el schema), con ARTICULO_MOV.nro_vale -> VALE_MOV para el
--- numero de vale. PC_OT_ANIMAL vincula esa OT con el/los animal(es) que
--- cubre, permitiendo reconstruir el historial de consumo de cada animal sin
--- duplicar datos. Los tratamientos/servicios con costo externo (veterinario,
--- laboratorio de terceros) se registran como ORDEN_SERVICIO (ya vinculada a
--- ORDEN_TRABAJO via ORDEN_SERVICIO.nro_orden). La produccion de leche genera
--- un ingreso real tipo I09 (INGRESOS POR PRODUCCION en ARTICULO_MOV_TIPO)
--- contra el mismo ALMACEN/TIPO_PRODUCTO/OT del dia. Detalle completo en
--- Source ERPs/metadata SIGRE/pecuario/pecuario_modulo_diseno.md.
+-- INTEGRACION CON ORDEN DE TRABAJO (OT) -- "OT Pecuaria": ver seccion 6 del
+-- documento pecuario_modulo_diseno.md para el detalle completo (cadena real
+-- ORDEN_TRABAJO -> OPERACIONES -> ARTICULO_MOV -> VALE_MOV, ORDEN_SERVICIO
+-- para costos externos, I09 para ingresos de produccion). Una "OT Pecuaria"
+-- es una fila de ORDEN_TRABAJO con ot_adm='PECU', y es POR EVENTO/PERIODO
+-- operativo (ej. una semana de alimentacion, una campana de vacunacion), NO
+-- una OT de por vida del animal ni por etapa -- ver seccion 6 para el
+-- razonamiento completo.
 --
 -- NOTA SOBRE VENTANAS: las tablas usan el prefijo PC_* (Pecuario), pero las
 -- VENTANAS PowerBuilder usan el prefijo real de Campo (CAM###), numeradas por
 -- TIPO de opcion (igual regla que el resto del sistema): Tablas 000-299,
 -- Operaciones 300-499, Consultas 500-699, Reportes 700-899, Procesos 900-999.
--- Bloques asignados a Pecuario: se relleno el primer hueco contiguo
--- suficientemente grande dentro de cada rango (no se continuo tras el
--- ultimo codigo usado por Campo/cana):
---   Tablas      CAM061-CAM067 (hueco libre real: 061-199)
---   Operaciones CAM391-CAM405 (hueco libre real: 391-411)
---   Consultas   CAM500-CAM505 (rango completo sin uso previo)
+-- Bloques asignados a Pecuario (primer hueco contiguo libre en cada rango,
+-- NO continuacion tras el ultimo codigo de Campo/cana):
+--   Tablas      CAM061-CAM069 (hueco libre real: 061-199)
+--   Operaciones CAM391-CAM406 (hueco libre real: 391-411)
+--   Consultas   CAM500-CAM506 (rango completo sin uso previo)
 --   Reportes    CAM716-CAM722 (hueco libre real: 716-751)
 --   Procesos    CAM900-CAM905 (rango completo sin uso previo)
 -- Detalle completo: Source ERPs/metadata SIGRE/pecuario/pecuario_modulo_diseno.md
 -- ============================================================================
+
+
+-- ============================================================================
+-- 0) ESPECIE (nuevo -- agrupa razas por tipo de animal)
+-- ============================================================================
+create table CANTABRIA.PC_ESPECIE
+(
+  reckey        NUMBER(10)    not null,
+  cod_especie   CHAR(4)       not null,
+  nom_especie   VARCHAR2(60)  not null,
+  flag_estado   CHAR(1)       default '1' not null
+)
+tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_ESPECIE add constraint PK_PC_ESPECIE primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ESPECIE add constraint UQ_PC_ESPECIE_COD unique (cod_especie) using index tablespace CANTABRIA;
+
+comment on table CANTABRIA.PC_ESPECIE is 'Pecuario - Catalogo de especies animales (bovino, porcino, caprino, ovino, equino, etc.)';
+comment on column CANTABRIA.PC_ESPECIE.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_ESPECIE.cod_especie is 'codigo de especie (unique, no PK)';
+comment on column CANTABRIA.PC_ESPECIE.nom_especie is 'nombre de la especie';
+comment on column CANTABRIA.PC_ESPECIE.flag_estado is '1=Activo, 0=Inactivo';
+
+create sequence CANTABRIA.SEQ_PC_ESPECIE start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_ESPECIE
+before insert on CANTABRIA.PC_ESPECIE
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_ESPECIE.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+-- Datos iniciales sugeridos
+insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('BOVI','Bovino');
+insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('PORC','Porcino');
+insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('CAPR','Caprino');
+insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('OVIN','Ovino');
+insert into CANTABRIA.PC_ESPECIE (cod_especie, nom_especie) values ('EQUI','Equino');
+commit;
 
 
 -- ============================================================================
@@ -61,44 +128,47 @@
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_RAZA
 (
+  reckey        NUMBER(10)    not null,
+  cod_especie   CHAR(4)       not null,
   cod_raza      CHAR(4)       not null,
   nom_raza      VARCHAR2(60)  not null,
   flag_tipo     CHAR(1)       default 'L' not null,
   flag_estado   CHAR(1)       default '1' not null
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_RAZA
-  add constraint PK_PC_RAZA primary key (cod_raza)
-  using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_RAZA add constraint PK_PC_RAZA primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_RAZA add constraint UQ_PC_RAZA_COD unique (cod_raza) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_RAZA add constraint CK_PC_RAZA_TIPO check (flag_tipo in ('L','C','M'));
+alter table CANTABRIA.PC_RAZA add constraint FK_PC_RAZA_ESPECIE foreign key (cod_especie) references CANTABRIA.PC_ESPECIE(cod_especie);
 
-alter table CANTABRIA.PC_RAZA
-  add constraint CK_PC_RAZA_TIPO check (flag_tipo in ('L','C','M'));
-
-comment on table CANTABRIA.PC_RAZA is 'Pecuario - Catalogo de razas bovinas';
-comment on column CANTABRIA.PC_RAZA.cod_raza is 'codigo de raza';
+comment on table CANTABRIA.PC_RAZA is 'Pecuario - Catalogo de razas (de cualquier especie)';
+comment on column CANTABRIA.PC_RAZA.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_RAZA.cod_especie is 'FK a PC_ESPECIE (bovino, porcino, etc.)';
+comment on column CANTABRIA.PC_RAZA.cod_raza is 'codigo de raza (unique, no PK)';
 comment on column CANTABRIA.PC_RAZA.nom_raza is 'nombre de la raza';
 comment on column CANTABRIA.PC_RAZA.flag_tipo is 'L=Lechera, C=Carne, M=Doble proposito';
 comment on column CANTABRIA.PC_RAZA.flag_estado is 'flag_estado';
 
--- Datos iniciales sugeridos
-insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('HOLS','Holstein','L');
-insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('JERS','Jersey','L');
-insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('BRSW','Brown Swiss','M');
-insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('GYR','Gyr','M');
-insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('BRAH','Brahman','C');
-insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('ANGU','Angus','C');
-insert into CANTABRIA.PC_RAZA (cod_raza, nom_raza, flag_tipo) values ('CRUC','Cruzado / mestizo','M');
+create sequence CANTABRIA.SEQ_PC_RAZA start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_RAZA
+before insert on CANTABRIA.PC_RAZA
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_RAZA.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+-- Datos iniciales sugeridos (bovinos; agregar razas de otras especies segun necesidad)
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','HOLS','Holstein','L');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','JERS','Jersey','L');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','BRSW','Brown Swiss','M');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','GYR','Gyr','M');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','BRAH','Brahman','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','ANGU','Angus','C');
+insert into CANTABRIA.PC_RAZA (cod_especie, cod_raza, nom_raza, flag_tipo) values ('BOVI','CRUC','Cruzado / mestizo','M');
 commit;
 
 
@@ -107,6 +177,7 @@ commit;
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_POTRERO
 (
+  reckey         NUMBER(10)    not null,
   cod_origen     CHAR(2)       not null,
   cod_potrero    CHAR(6)       not null,
   nom_potrero    VARCHAR2(80)  not null,
@@ -115,30 +186,32 @@ create table CANTABRIA.PC_POTRERO
   capacidad_cab  NUMBER(6),
   flag_estado    CHAR(1)       default '1' not null
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_POTRERO
-  add constraint PK_PC_POTRERO primary key (cod_origen, cod_potrero)
-  using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_POTRERO add constraint PK_PC_POTRERO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_POTRERO add constraint UQ_PC_POTRERO unique (cod_origen, cod_potrero) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_POTRERO add constraint FK_PC_POTRERO_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
 
 comment on table CANTABRIA.PC_POTRERO is 'Pecuario - Potreros/lotes de pastoreo por fundo';
-comment on column CANTABRIA.PC_POTRERO.cod_origen is 'fundo/sucursal';
-comment on column CANTABRIA.PC_POTRERO.cod_potrero is 'codigo de potrero';
+comment on column CANTABRIA.PC_POTRERO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_POTRERO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
+comment on column CANTABRIA.PC_POTRERO.cod_potrero is 'codigo de potrero (unique junto a cod_origen, no PK)';
 comment on column CANTABRIA.PC_POTRERO.nom_potrero is 'nombre del potrero';
 comment on column CANTABRIA.PC_POTRERO.area_has is 'area en hectareas';
 comment on column CANTABRIA.PC_POTRERO.tipo_pasto is 'tipo de pasto';
 comment on column CANTABRIA.PC_POTRERO.capacidad_cab is 'capacidad de carga en numero de cabezas';
 comment on column CANTABRIA.PC_POTRERO.flag_estado is 'flag_estado';
+
+create sequence CANTABRIA.SEQ_PC_POTRERO start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_POTRERO
+before insert on CANTABRIA.PC_POTRERO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_POTRERO.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ----------------------------------------------------------------------------
@@ -146,6 +219,7 @@ comment on column CANTABRIA.PC_POTRERO.flag_estado is 'flag_estado';
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_CATEGORIA
 (
+  reckey          NUMBER(10)    not null,
   cod_categoria   CHAR(3)       not null,
   nom_categoria   VARCHAR2(60)  not null,
   flag_sexo       CHAR(1),
@@ -153,32 +227,31 @@ create table CANTABRIA.PC_CATEGORIA
   edad_max_meses  NUMBER(4),
   flag_estado     CHAR(1)       default '1' not null
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_CATEGORIA
-  add constraint PK_PC_CATEGORIA primary key (cod_categoria)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_CATEGORIA
-  add constraint CK_PC_CATEGORIA_SEXO check (flag_sexo in ('M','H') or flag_sexo is null);
+alter table CANTABRIA.PC_CATEGORIA add constraint PK_PC_CATEGORIA primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_CATEGORIA add constraint UQ_PC_CATEGORIA_COD unique (cod_categoria) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_CATEGORIA add constraint CK_PC_CATEGORIA_SEXO check (flag_sexo in ('M','H') or flag_sexo is null);
 
 comment on table CANTABRIA.PC_CATEGORIA is 'Pecuario - Catalogo de categorias/etapas del animal';
-comment on column CANTABRIA.PC_CATEGORIA.cod_categoria is 'codigo de categoria (TER, VAQ, NOV, VPR, VSC, VDE, TOR, TDE)';
+comment on column CANTABRIA.PC_CATEGORIA.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_CATEGORIA.cod_categoria is 'codigo de categoria (TER, VAQ, NOV, VPR, VSC, VDE, TOR, TDE) -- unique, no PK';
 comment on column CANTABRIA.PC_CATEGORIA.nom_categoria is 'nombre de la categoria';
 comment on column CANTABRIA.PC_CATEGORIA.flag_sexo is 'M/H/null=ambos';
 comment on column CANTABRIA.PC_CATEGORIA.edad_min_meses is 'edad minima en meses';
 comment on column CANTABRIA.PC_CATEGORIA.edad_max_meses is 'edad maxima en meses';
 comment on column CANTABRIA.PC_CATEGORIA.flag_estado is 'flag_estado';
+
+create sequence CANTABRIA.SEQ_PC_CATEGORIA start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_CATEGORIA
+before insert on CANTABRIA.PC_CATEGORIA
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_CATEGORIA.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 -- Datos iniciales sugeridos
 insert into CANTABRIA.PC_CATEGORIA (cod_categoria, nom_categoria, flag_sexo, edad_min_meses, edad_max_meses) values ('TER','Ternero(a)', null, 0, 3);
@@ -197,6 +270,7 @@ commit;
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_SEMENTAL
 (
+  reckey          NUMBER(10)    not null,
   cod_semental    CHAR(10)      not null,
   nom_semental    VARCHAR2(80)  not null,
   cod_raza        CHAR(4)       not null,
@@ -204,33 +278,31 @@ create table CANTABRIA.PC_SEMENTAL
   registro_genet  VARCHAR2(40),
   flag_estado     CHAR(1)       default '1' not null
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_SEMENTAL
-  add constraint PK_PC_SEMENTAL primary key (cod_semental)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_SEMENTAL
-  add constraint FK_PC_SEMENTAL_RAZA foreign key (cod_raza)
-  references CANTABRIA.PC_RAZA(cod_raza);
+alter table CANTABRIA.PC_SEMENTAL add constraint PK_PC_SEMENTAL primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_SEMENTAL add constraint UQ_PC_SEMENTAL_COD unique (cod_semental) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_SEMENTAL add constraint FK_PC_SEMENTAL_RAZA foreign key (cod_raza) references CANTABRIA.PC_RAZA(cod_raza);
 
 comment on table CANTABRIA.PC_SEMENTAL is 'Pecuario - Catalogo de sementales/pajillas para inseminacion artificial';
-comment on column CANTABRIA.PC_SEMENTAL.cod_semental is 'codigo del semental/pajilla';
+comment on column CANTABRIA.PC_SEMENTAL.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_SEMENTAL.cod_semental is 'codigo del semental/pajilla (unique, no PK)';
 comment on column CANTABRIA.PC_SEMENTAL.nom_semental is 'nombre del semental';
 comment on column CANTABRIA.PC_SEMENTAL.cod_raza is 'raza del semental';
 comment on column CANTABRIA.PC_SEMENTAL.proveedor is 'proveedor / central de inseminacion';
 comment on column CANTABRIA.PC_SEMENTAL.registro_genet is 'registro genealogico / codigo de catalogo del proveedor';
 comment on column CANTABRIA.PC_SEMENTAL.flag_estado is 'flag_estado';
+
+create sequence CANTABRIA.SEQ_PC_SEMENTAL start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_SEMENTAL
+before insert on CANTABRIA.PC_SEMENTAL
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_SEMENTAL.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ----------------------------------------------------------------------------
@@ -238,6 +310,7 @@ comment on column CANTABRIA.PC_SEMENTAL.flag_estado is 'flag_estado';
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_PRODUCTO_SANITARIO
 (
+  reckey          NUMBER(10)     not null,
   cod_prod_san    CHAR(10)       not null,
   nom_producto    VARCHAR2(100)  not null,
   flag_tipo       CHAR(1)        not null,
@@ -247,38 +320,34 @@ create table CANTABRIA.PC_PRODUCTO_SANITARIO
   unidad_medida   CHAR(3),
   flag_estado     CHAR(1)        default '1' not null
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_PRODUCTO_SANITARIO
-  add constraint PK_PC_PRODUCTO_SANITARIO primary key (cod_prod_san)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_PRODUCTO_SANITARIO
-  add constraint CK_PC_PRODSAN_TIPO check (flag_tipo in ('V','D','M','S'));
-
-alter table CANTABRIA.PC_PRODUCTO_SANITARIO
-  add constraint FK_PC_PRODSAN_ART foreign key (cod_art)
-  references CANTABRIA.ARTICULO(cod_art);
+alter table CANTABRIA.PC_PRODUCTO_SANITARIO add constraint PK_PC_PRODUCTO_SANITARIO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_PRODUCTO_SANITARIO add constraint UQ_PC_PRODSAN_COD unique (cod_prod_san) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_PRODUCTO_SANITARIO add constraint CK_PC_PRODSAN_TIPO check (flag_tipo in ('V','D','M','S'));
+alter table CANTABRIA.PC_PRODUCTO_SANITARIO add constraint FK_PC_PRODSAN_ART foreign key (cod_art) references CANTABRIA.ARTICULO(cod_art);
 
 comment on table CANTABRIA.PC_PRODUCTO_SANITARIO is 'Pecuario - Catalogo de vacunas, medicamentos e insumos veterinarios';
-comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.cod_prod_san is 'codigo de producto sanitario';
+comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.cod_prod_san is 'codigo de producto sanitario (unique, no PK)';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.nom_producto is 'nombre del producto';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.flag_tipo is 'V=Vacuna, D=Desparasitante, M=Medicamento, S=Suplemento';
-comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.cod_art is 'FK a ARTICULO (Almacen) -- el articulo real de stock que se descuenta al consumir este producto via una OT';
+comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.cod_art is 'FK a ARTICULO (Almacen) -- articulo real de stock que se descuenta al consumir este producto via una OT';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.dias_refuerzo is 'dias hasta la proxima dosis de refuerzo (si aplica)';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.periodo_retiro is 'dias de retiro de leche/carne tras aplicar';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.unidad_medida is 'unidad de medida de la dosis';
 comment on column CANTABRIA.PC_PRODUCTO_SANITARIO.flag_estado is 'flag_estado';
+
+create sequence CANTABRIA.SEQ_PC_PRODUCTO_SANIT start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_PRODUCTO_SANIT
+before insert on CANTABRIA.PC_PRODUCTO_SANITARIO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_PRODUCTO_SANIT.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 -- Datos iniciales sugeridos (calendario sanitario base para bovinos en Peru, referencia SENASA)
 insert into CANTABRIA.PC_PRODUCTO_SANITARIO (cod_prod_san, nom_producto, flag_tipo, dias_refuerzo, periodo_retiro, unidad_medida) values ('VAC001','Vacuna Aftosa','V',180,21,'DOS');
@@ -300,32 +369,34 @@ commit;
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_ENFERMEDAD
 (
+  reckey             NUMBER(10)     not null,
   cod_enfermedad     CHAR(6)        not null,
   nom_enfermedad     VARCHAR2(100)  not null,
   flag_reproductiva  CHAR(1)        default '0',
   flag_estado        CHAR(1)        default '1' not null
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_ENFERMEDAD
-  add constraint PK_PC_ENFERMEDAD primary key (cod_enfermedad)
-  using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ENFERMEDAD add constraint PK_PC_ENFERMEDAD primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ENFERMEDAD add constraint UQ_PC_ENFERMEDAD_COD unique (cod_enfermedad) using index tablespace CANTABRIA;
 
 comment on table CANTABRIA.PC_ENFERMEDAD is 'Pecuario - Catalogo de enfermedades/diagnosticos';
-comment on column CANTABRIA.PC_ENFERMEDAD.cod_enfermedad is 'codigo de enfermedad';
+comment on column CANTABRIA.PC_ENFERMEDAD.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_ENFERMEDAD.cod_enfermedad is 'codigo de enfermedad (unique, no PK)';
 comment on column CANTABRIA.PC_ENFERMEDAD.nom_enfermedad is 'nombre de la enfermedad';
 comment on column CANTABRIA.PC_ENFERMEDAD.flag_reproductiva is 'afecta el ciclo reproductivo (1=si)';
 comment on column CANTABRIA.PC_ENFERMEDAD.flag_estado is 'flag_estado';
+
+create sequence CANTABRIA.SEQ_PC_ENFERMEDAD start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_ENFERMEDAD
+before insert on CANTABRIA.PC_ENFERMEDAD
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_ENFERMEDAD.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 -- Datos iniciales sugeridos
 insert into CANTABRIA.PC_ENFERMEDAD (cod_enfermedad, nom_enfermedad, flag_reproductiva) values ('MASTI1','Mastitis','0');
@@ -348,38 +419,37 @@ commit;
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_DIETA
 (
+  reckey          NUMBER(10)    not null,
   cod_dieta       CHAR(6)       not null,
   nom_dieta       VARCHAR2(80)  not null,
   cod_categoria   CHAR(3)       not null,
   costo_kg_prom   NUMBER(10,4),
   flag_estado     CHAR(1)       default '1' not null
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_DIETA
-  add constraint PK_PC_DIETA primary key (cod_dieta)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_DIETA
-  add constraint FK_PC_DIETA_CATEG foreign key (cod_categoria)
-  references CANTABRIA.PC_CATEGORIA(cod_categoria);
+alter table CANTABRIA.PC_DIETA add constraint PK_PC_DIETA primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DIETA add constraint UQ_PC_DIETA_COD unique (cod_dieta) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DIETA add constraint FK_PC_DIETA_CATEG foreign key (cod_categoria) references CANTABRIA.PC_CATEGORIA(cod_categoria);
 
 comment on table CANTABRIA.PC_DIETA is 'Pecuario - Catalogo de dietas/raciones por categoria';
-comment on column CANTABRIA.PC_DIETA.cod_dieta is 'codigo de dieta';
+comment on column CANTABRIA.PC_DIETA.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_DIETA.cod_dieta is 'codigo de dieta (unique, no PK)';
 comment on column CANTABRIA.PC_DIETA.nom_dieta is 'nombre de la dieta';
 comment on column CANTABRIA.PC_DIETA.cod_categoria is 'categoria de animal a la que aplica';
 comment on column CANTABRIA.PC_DIETA.costo_kg_prom is 'costo promedio por kg, para costeo';
 comment on column CANTABRIA.PC_DIETA.flag_estado is 'flag_estado';
+
+create sequence CANTABRIA.SEQ_PC_DIETA start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_DIETA
+before insert on CANTABRIA.PC_DIETA
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_DIETA.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ----------------------------------------------------------------------------
@@ -387,58 +457,135 @@ comment on column CANTABRIA.PC_DIETA.flag_estado is 'flag_estado';
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_DIETA_COMPONENTE
 (
+  reckey          NUMBER(10)     not null,
   cod_dieta       CHAR(6)        not null,
   item            NUMBER(3)      not null,
   cod_art         CHAR(12)       not null,
   cantidad_kg     NUMBER(8,3)    not null,
   flag_estado     CHAR(1)        default '1' not null
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_DIETA_COMPONENTE
-  add constraint PK_PC_DIETA_COMPONENTE primary key (cod_dieta, item)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_DIETA_COMPONENTE
-  add constraint FK_PC_DIETACOMP_DIETA foreign key (cod_dieta)
-  references CANTABRIA.PC_DIETA(cod_dieta);
-
-alter table CANTABRIA.PC_DIETA_COMPONENTE
-  add constraint FK_PC_DIETACOMP_ART foreign key (cod_art)
-  references CANTABRIA.ARTICULO(cod_art);
+alter table CANTABRIA.PC_DIETA_COMPONENTE add constraint PK_PC_DIETA_COMPONENTE primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DIETA_COMPONENTE add constraint UQ_PC_DIETACOMP unique (cod_dieta, item) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DIETA_COMPONENTE add constraint FK_PC_DIETACOMP_DIETA foreign key (cod_dieta) references CANTABRIA.PC_DIETA(cod_dieta);
+alter table CANTABRIA.PC_DIETA_COMPONENTE add constraint FK_PC_DIETACOMP_ART foreign key (cod_art) references CANTABRIA.ARTICULO(cod_art);
 
 comment on table CANTABRIA.PC_DIETA_COMPONENTE is 'Pecuario - Detalle de insumos que componen cada dieta';
+comment on column CANTABRIA.PC_DIETA_COMPONENTE.reckey is 'PK autonumerica';
 comment on column CANTABRIA.PC_DIETA_COMPONENTE.cod_dieta is 'dieta a la que pertenece';
-comment on column CANTABRIA.PC_DIETA_COMPONENTE.item is 'item correlativo';
+comment on column CANTABRIA.PC_DIETA_COMPONENTE.item is 'item correlativo (unique junto a cod_dieta, no PK)';
 comment on column CANTABRIA.PC_DIETA_COMPONENTE.cod_art is 'articulo de almacen (forraje/concentrado/mineral)';
 comment on column CANTABRIA.PC_DIETA_COMPONENTE.cantidad_kg is 'cantidad en kg por animal/dia';
 comment on column CANTABRIA.PC_DIETA_COMPONENTE.flag_estado is 'flag_estado';
 
+create sequence CANTABRIA.SEQ_PC_DIETACOMP start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_DIETACOMP
+before insert on CANTABRIA.PC_DIETA_COMPONENTE
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_DIETACOMP.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
 
 -- ============================================================================
--- 2) MAESTRO DE ANIMAL
+-- 1b) RECETA DE CONCENTRADO (nuevo) -- ver seccion 6 del .md: la fabricacion
+-- del concentrado es OTRA OT (distinta de la OT que alimenta a los animales),
+-- que consume materia prima y produce "concentrado" (un TIPO_PRODUCTO mas,
+-- igual mecanismo I09 que la leche) hacia un almacen de concentrado.
 -- ============================================================================
 
+-- ----------------------------------------------------------------------------
+-- PC_RECETA (cabecera: que producto se fabrica y su rendimiento)
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_RECETA
+(
+  reckey          NUMBER(10)     not null,
+  cod_receta      CHAR(6)        not null,
+  nom_receta      VARCHAR2(80)   not null,
+  cod_producto    CHAR(12)       not null,
+  rendimiento_kg  NUMBER(10,3)   not null,
+  flag_estado     CHAR(1)        default '1' not null
+)
+tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_RECETA add constraint PK_PC_RECETA primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_RECETA add constraint UQ_PC_RECETA_COD unique (cod_receta) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_RECETA add constraint FK_PC_RECETA_PRODUCTO foreign key (cod_producto) references CANTABRIA.TIPO_PRODUCTO(cod_prod);
+
+comment on table CANTABRIA.PC_RECETA is 'Pecuario - Receta/formula de fabricacion de concentrado u otro insumo propio';
+comment on column CANTABRIA.PC_RECETA.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_RECETA.cod_receta is 'codigo de receta (unique, no PK)';
+comment on column CANTABRIA.PC_RECETA.nom_receta is 'nombre de la receta (ej. Concentrado vacas en produccion)';
+comment on column CANTABRIA.PC_RECETA.cod_producto is 'FK a TIPO_PRODUCTO -- producto terminado que se fabrica (el concentrado)';
+comment on column CANTABRIA.PC_RECETA.rendimiento_kg is 'kg de producto terminado que rinde un lote de esta receta';
+comment on column CANTABRIA.PC_RECETA.flag_estado is 'flag_estado';
+
+create sequence CANTABRIA.SEQ_PC_RECETA start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_RECETA
+before insert on CANTABRIA.PC_RECETA
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_RECETA.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+-- ----------------------------------------------------------------------------
+-- PC_RECETA_DET (materia prima que consume un lote de la receta)
+-- ----------------------------------------------------------------------------
+create table CANTABRIA.PC_RECETA_DET
+(
+  reckey          NUMBER(10)     not null,
+  cod_receta      CHAR(6)        not null,
+  item            NUMBER(3)      not null,
+  cod_art         CHAR(12)       not null,
+  cantidad_kg     NUMBER(10,3)   not null
+)
+tablespace CANTABRIA;
+
+alter table CANTABRIA.PC_RECETA_DET add constraint PK_PC_RECETA_DET primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_RECETA_DET add constraint UQ_PC_RECETADET unique (cod_receta, item) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_RECETA_DET add constraint FK_PC_RECETADET_RECETA foreign key (cod_receta) references CANTABRIA.PC_RECETA(cod_receta);
+alter table CANTABRIA.PC_RECETA_DET add constraint FK_PC_RECETADET_ART foreign key (cod_art) references CANTABRIA.ARTICULO(cod_art);
+
+comment on table CANTABRIA.PC_RECETA_DET is 'Pecuario - Materia prima (por kg) que consume un lote de la receta';
+comment on column CANTABRIA.PC_RECETA_DET.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_RECETA_DET.cod_receta is 'receta a la que pertenece';
+comment on column CANTABRIA.PC_RECETA_DET.item is 'item correlativo (unique junto a cod_receta, no PK)';
+comment on column CANTABRIA.PC_RECETA_DET.cod_art is 'FK a ARTICULO -- materia prima consumida';
+comment on column CANTABRIA.PC_RECETA_DET.cantidad_kg is 'cantidad de materia prima, en kg, por lote de rendimiento_kg';
+
+create sequence CANTABRIA.SEQ_PC_RECETADET start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_RECETADET
+before insert on CANTABRIA.PC_RECETA_DET
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_RECETADET.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
+
+-- ============================================================================
+-- 2) MAESTRO DE ANIMAL (tabla-DOCUMENTO: PK = cod_animal, una sola columna)
+-- ============================================================================
 create table CANTABRIA.PC_ANIMAL
 (
+  cod_animal          CHAR(10)      not null,
   cod_origen          CHAR(2)       not null,
-  cod_animal          CHAR(12)      not null,
+  cod_interno         VARCHAR2(20),
   nom_animal          VARCHAR2(60),
   cod_raza            CHAR(4)       not null,
   flag_sexo           CHAR(1)       not null,
   fec_nacimiento      DATE          not null,
-  cod_animal_padre    CHAR(12),
-  cod_animal_madre    CHAR(12),
+  cod_animal_padre    CHAR(10),
+  cod_animal_madre    CHAR(10),
   cod_semental_padre  CHAR(10),
   color               VARCHAR2(40),
   cod_categoria       CHAR(3)       not null,
@@ -454,65 +601,31 @@ create table CANTABRIA.PC_ANIMAL
   cod_usr             CHAR(6),
   fec_registro        DATE          default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 256K
-    next 256K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_ANIMAL
-  add constraint PK_PC_ANIMAL primary key (cod_origen, cod_animal)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_ANIMAL
-  add constraint CK_PC_ANIMAL_SEXO check (flag_sexo in ('M','H'));
-
-alter table CANTABRIA.PC_ANIMAL
-  add constraint CK_PC_ANIMAL_PROCED check (cod_procedencia in ('P','C'));
-
-alter table CANTABRIA.PC_ANIMAL
-  add constraint CK_PC_ANIMAL_EST_REPRO check (flag_estado_repro in ('0','1','2','3'));
-
-alter table CANTABRIA.PC_ANIMAL
-  add constraint FK_PC_ANIMAL_RAZA foreign key (cod_raza)
-  references CANTABRIA.PC_RAZA(cod_raza);
-
-alter table CANTABRIA.PC_ANIMAL
-  add constraint FK_PC_ANIMAL_CATEG foreign key (cod_categoria)
-  references CANTABRIA.PC_CATEGORIA(cod_categoria);
-
-alter table CANTABRIA.PC_ANIMAL
-  add constraint FK_PC_ANIMAL_POTRERO foreign key (cod_origen, cod_potrero)
-  references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
-
-alter table CANTABRIA.PC_ANIMAL
-  add constraint FK_PC_ANIMAL_SEMENTAL foreign key (cod_semental_padre)
-  references CANTABRIA.PC_SEMENTAL(cod_semental);
-
+alter table CANTABRIA.PC_ANIMAL add constraint PK_PC_ANIMAL primary key (cod_animal) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ANIMAL add constraint CK_PC_ANIMAL_SEXO check (flag_sexo in ('M','H'));
+alter table CANTABRIA.PC_ANIMAL add constraint CK_PC_ANIMAL_PROCED check (cod_procedencia in ('P','C'));
+alter table CANTABRIA.PC_ANIMAL add constraint CK_PC_ANIMAL_EST_REPRO check (flag_estado_repro in ('0','1','2','3'));
+alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_RAZA foreign key (cod_raza) references CANTABRIA.PC_RAZA(cod_raza);
+alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_CATEG foreign key (cod_categoria) references CANTABRIA.PC_CATEGORIA(cod_categoria);
+alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_POTRERO foreign key (cod_origen, cod_potrero) references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
+alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_SEMENTAL foreign key (cod_semental_padre) references CANTABRIA.PC_SEMENTAL(cod_semental);
 -- Auto-referencias (genealogia): padre y madre son animales del mismo hato
-alter table CANTABRIA.PC_ANIMAL
-  add constraint FK_PC_ANIMAL_PADRE foreign key (cod_origen, cod_animal_padre)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
+alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_PADRE foreign key (cod_animal_padre) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_ANIMAL add constraint FK_PC_ANIMAL_MADRE foreign key (cod_animal_madre) references CANTABRIA.PC_ANIMAL(cod_animal);
 
-alter table CANTABRIA.PC_ANIMAL
-  add constraint FK_PC_ANIMAL_MADRE foreign key (cod_origen, cod_animal_madre)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-comment on table CANTABRIA.PC_ANIMAL is 'Pecuario - Maestro de ganado (animal individual)';
-comment on column CANTABRIA.PC_ANIMAL.cod_origen is 'fundo/sucursal';
-comment on column CANTABRIA.PC_ANIMAL.cod_animal is 'arete/chapa oficial (identificacion fisica)';
+comment on table CANTABRIA.PC_ANIMAL is 'Pecuario - Maestro de ganado (animal individual, de cualquier especie)';
+comment on column CANTABRIA.PC_ANIMAL.cod_animal is 'PK -- numero de documento del animal: cod_origen(2) + correlativo(8), generado por trigger via NUM_TABLAS (ej. SU00000001). Es UNA SOLA COLUMNA; el origen ya queda embebido';
+comment on column CANTABRIA.PC_ANIMAL.cod_origen is 'FK a ORIGEN -- fundo/sucursal (tambien va embebido en cod_animal)';
+comment on column CANTABRIA.PC_ANIMAL.cod_interno is 'codigo interno/arete fisico que usa la empresa (libre, distinto del documento generado por el sistema)';
 comment on column CANTABRIA.PC_ANIMAL.nom_animal is 'apodo, opcional';
 comment on column CANTABRIA.PC_ANIMAL.cod_raza is 'raza del animal';
 comment on column CANTABRIA.PC_ANIMAL.flag_sexo is 'M=Macho, H=Hembra';
 comment on column CANTABRIA.PC_ANIMAL.fec_nacimiento is 'fecha de nacimiento';
-comment on column CANTABRIA.PC_ANIMAL.cod_animal_padre is 'FK genealogia - padre (si es del propio hato)';
-comment on column CANTABRIA.PC_ANIMAL.cod_animal_madre is 'FK genealogia - madre (si es del propio hato)';
+comment on column CANTABRIA.PC_ANIMAL.cod_animal_padre is 'FK genealogia (auto-referencia) - padre, si es del propio hato';
+comment on column CANTABRIA.PC_ANIMAL.cod_animal_madre is 'FK genealogia (auto-referencia) - madre, si es del propio hato';
 comment on column CANTABRIA.PC_ANIMAL.cod_semental_padre is 'FK a PC_SEMENTAL si el padre fue por inseminacion artificial';
 comment on column CANTABRIA.PC_ANIMAL.color is 'color/marcas distintivas';
 comment on column CANTABRIA.PC_ANIMAL.cod_categoria is 'categoria/etapa actual (se recalcula por edad/estado)';
@@ -528,6 +641,30 @@ comment on column CANTABRIA.PC_ANIMAL.flag_estado is '1=activo en el hato, 0=de 
 comment on column CANTABRIA.PC_ANIMAL.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_ANIMAL.fec_registro is 'fecha de registro en el sistema';
 
+-- Trigger de numeracion de documento (mismo patron que TB_ASISTENCIA_HT580,
+-- pero usando la tabla generica NUM_TABLAS en vez de una tabla dedicada)
+create or replace trigger CANTABRIA.TIB_PC_ANIMAL
+before insert on CANTABRIA.PC_ANIMAL
+for each row
+declare
+  ln_ult_nro  CANTABRIA.NUM_TABLAS.ult_nro%type;
+  ln_count    number;
+begin
+  if :new.cod_animal is null then
+    select count(*) into ln_count from CANTABRIA.NUM_TABLAS
+     where tabla = 'PC_ANIMAL' and origen = :new.cod_origen;
+    if ln_count = 0 then
+      insert into CANTABRIA.NUM_TABLAS(tabla, origen, ult_nro) values ('PC_ANIMAL', :new.cod_origen, 1);
+    end if;
+    select ult_nro into ln_ult_nro from CANTABRIA.NUM_TABLAS
+     where tabla = 'PC_ANIMAL' and origen = :new.cod_origen for update;
+    :new.cod_animal := trim(:new.cod_origen) || lpad(to_char(ln_ult_nro), 8, '0');
+    update CANTABRIA.NUM_TABLAS set ult_nro = ln_ult_nro + 1
+     where tabla = 'PC_ANIMAL' and origen = :new.cod_origen;
+  end if;
+end;
+/
+
 
 -- ----------------------------------------------------------------------------
 -- PC_OT_ANIMAL -- vincula una Orden de Trabajo (ORDEN_TRABAJO, tabla generica
@@ -537,46 +674,49 @@ comment on column CANTABRIA.PC_ANIMAL.fec_registro is 'fecha de registro en el s
 -- tabla -> ORDEN_TRABAJO -> OPERACIONES -> ARTICULO_MOV (movimiento real de
 -- Almacen), en vez de duplicar cantidades en tablas propias de Pecuario.
 -- Una "OT Pecuaria" es, simplemente, una fila de ORDEN_TRABAJO con
--- ot_adm = 'PECU' (mismo patron que usa Campo con ot_adm = 'CAMPO').
+-- ot_adm = 'PECU' (mismo patron que usa Campo con ot_adm = 'CAMPO'), y es
+-- POR EVENTO/PERIODO operativo (ej. una semana de alimentacion, una campana
+-- de vacunacion) -- NUNCA una OT de por vida del animal ni por etapa, porque
+-- ORDEN_TRABAJO tiene fec_inicio/fecha_fin_estimada/costo_estimado/
+-- costo_ejecutado: es una unidad de trabajo acotada y cerrable en todo el
+-- ERP, no una relacion que dura anos. Por eso esta tabla es muchos-a-muchos:
+-- una OT cubre varios animales, y un animal pasa por muchas OTs en su vida.
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_OT_ANIMAL
 (
-  nro_orden     CHAR(10)  not null,
-  cod_origen    CHAR(2)   not null,
-  cod_animal    CHAR(12)  not null,
+  reckey        NUMBER(10)  not null,
+  nro_orden     CHAR(10)    not null,
+  cod_origen    CHAR(2)     not null,
+  cod_animal    CHAR(10)    not null,
   cod_usr       CHAR(6),
-  fec_registro  DATE      default sysdate
+  fec_registro  DATE        default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_OT_ANIMAL
-  add constraint PK_PC_OT_ANIMAL primary key (nro_orden, cod_origen, cod_animal)
-  using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_OT_ANIMAL add constraint PK_PC_OT_ANIMAL primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_OT_ANIMAL add constraint UQ_PC_OTANIMAL unique (nro_orden, cod_animal) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_OT_ANIMAL add constraint FK_PC_OTANIMAL_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_OT_ANIMAL add constraint FK_PC_OTANIMAL_OT foreign key (nro_orden) references CANTABRIA.ORDEN_TRABAJO(nro_orden);
+alter table CANTABRIA.PC_OT_ANIMAL add constraint FK_PC_OTANIMAL_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
 
-alter table CANTABRIA.PC_OT_ANIMAL
-  add constraint FK_PC_OTANIMAL_OT foreign key (nro_orden)
-  references CANTABRIA.ORDEN_TRABAJO(nro_orden);
-
-alter table CANTABRIA.PC_OT_ANIMAL
-  add constraint FK_PC_OTANIMAL_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-comment on table CANTABRIA.PC_OT_ANIMAL is 'Pecuario - Vinculo entre una Orden de Trabajo (OT Pecuaria, ot_adm=PECU en ORDEN_TRABAJO) y los animales que cubre; base para reconstruir el historial de consumibles de un animal desde los movimientos reales de Almacen';
+comment on table CANTABRIA.PC_OT_ANIMAL is 'Pecuario - Vinculo entre una Orden de Trabajo (OT Pecuaria, ot_adm=PECU en ORDEN_TRABAJO) y los animales que cubre';
+comment on column CANTABRIA.PC_OT_ANIMAL.reckey is 'PK autonumerica';
 comment on column CANTABRIA.PC_OT_ANIMAL.nro_orden is 'FK a ORDEN_TRABAJO';
-comment on column CANTABRIA.PC_OT_ANIMAL.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_OT_ANIMAL.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_OT_ANIMAL.cod_animal is 'FK a PC_ANIMAL, animal cubierto por esta OT';
 comment on column CANTABRIA.PC_OT_ANIMAL.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_OT_ANIMAL.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_OT_ANIMAL start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_OT_ANIMAL
+before insert on CANTABRIA.PC_OT_ANIMAL
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_OT_ANIMAL.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ============================================================================
@@ -588,8 +728,9 @@ comment on column CANTABRIA.PC_OT_ANIMAL.fec_registro is 'fecha de registro en e
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_CELO
 (
+  reckey            NUMBER(10) not null,
   cod_origen        CHAR(2)   not null,
-  cod_animal        CHAR(12)  not null,
+  cod_animal        CHAR(10)  not null,
   fec_celo          DATE      not null,
   hora_deteccion    DATE,
   metodo_deteccion  CHAR(1)   default 'V',
@@ -597,31 +738,17 @@ create table CANTABRIA.PC_CELO
   cod_usr           CHAR(6),
   fec_registro      DATE      default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_CELO
-  add constraint PK_PC_CELO primary key (cod_origen, cod_animal, fec_celo)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_CELO
-  add constraint CK_PC_CELO_METODO check (metodo_deteccion in ('V','P','H'));
-
-alter table CANTABRIA.PC_CELO
-  add constraint FK_PC_CELO_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
+alter table CANTABRIA.PC_CELO add constraint PK_PC_CELO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_CELO add constraint UQ_PC_CELO unique (cod_animal, fec_celo) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_CELO add constraint CK_PC_CELO_METODO check (metodo_deteccion in ('V','P','H'));
+alter table CANTABRIA.PC_CELO add constraint FK_PC_CELO_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_CELO add constraint FK_PC_CELO_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
 
 comment on table CANTABRIA.PC_CELO is 'Pecuario - Registro de detecciones de celo';
-comment on column CANTABRIA.PC_CELO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_CELO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_CELO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_CELO.cod_animal is 'animal (hembra) en celo';
 comment on column CANTABRIA.PC_CELO.fec_celo is 'fecha de deteccion del celo';
 comment on column CANTABRIA.PC_CELO.hora_deteccion is 'hora exacta de deteccion';
@@ -630,18 +757,29 @@ comment on column CANTABRIA.PC_CELO.flag_servido is '1 si este celo derivo en un
 comment on column CANTABRIA.PC_CELO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_CELO.fec_registro is 'fecha de registro en el sistema';
 
+create sequence CANTABRIA.SEQ_PC_CELO start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_CELO
+before insert on CANTABRIA.PC_CELO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_CELO.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
 
 -- ----------------------------------------------------------------------------
--- PC_SERVICIO
+-- PC_SERVICIO (tabla-DOCUMENTO: PK = nro_servicio, una sola columna)
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_SERVICIO
 (
-  cod_origen          CHAR(2)   not null,
   nro_servicio        CHAR(10)  not null,
-  cod_animal          CHAR(12)  not null,
+  cod_origen          CHAR(2)   not null,
+  cod_animal          CHAR(10)  not null,
   fec_servicio        DATE      not null,
   flag_tipo_servicio  CHAR(1)   not null,
-  cod_animal_toro     CHAR(12),
+  cod_animal_toro     CHAR(10),
   cod_semental        CHAR(10),
   cod_tecnico         CHAR(6),
   fec_prob_parto      DATE,
@@ -649,41 +787,19 @@ create table CANTABRIA.PC_SERVICIO
   cod_usr             CHAR(6),
   fec_registro        DATE      default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_SERVICIO
-  add constraint PK_PC_SERVICIO primary key (cod_origen, nro_servicio)
-  using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_SERVICIO add constraint PK_PC_SERVICIO primary key (nro_servicio) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_SERVICIO add constraint CK_PC_SERVICIO_TIPO check (flag_tipo_servicio in ('N','I'));
+alter table CANTABRIA.PC_SERVICIO add constraint FK_PC_SERVICIO_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_SERVICIO add constraint FK_PC_SERVICIO_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_SERVICIO add constraint FK_PC_SERVICIO_TORO foreign key (cod_animal_toro) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_SERVICIO add constraint FK_PC_SERVICIO_SEMENTAL foreign key (cod_semental) references CANTABRIA.PC_SEMENTAL(cod_semental);
 
-alter table CANTABRIA.PC_SERVICIO
-  add constraint CK_PC_SERVICIO_TIPO check (flag_tipo_servicio in ('N','I'));
-
-alter table CANTABRIA.PC_SERVICIO
-  add constraint FK_PC_SERVICIO_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-alter table CANTABRIA.PC_SERVICIO
-  add constraint FK_PC_SERVICIO_TORO foreign key (cod_origen, cod_animal_toro)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-alter table CANTABRIA.PC_SERVICIO
-  add constraint FK_PC_SERVICIO_SEMENTAL foreign key (cod_semental)
-  references CANTABRIA.PC_SEMENTAL(cod_semental);
-
-comment on table CANTABRIA.PC_SERVICIO is 'Pecuario - Registro de servicio (monta natural o inseminacion artificial)';
-comment on column CANTABRIA.PC_SERVICIO.cod_origen is 'fundo/sucursal';
-comment on column CANTABRIA.PC_SERVICIO.nro_servicio is 'numero de documento del servicio (numerador estandar: cod_origen + correlativo de 8 digitos, igual patron que nro_orden/nro_os/nro_dta) -- NO es un correlativo por animal: cod_animal puede repetirse en muchas filas (historial), nro_servicio identifica UNA fila';
-comment on column CANTABRIA.PC_SERVICIO.cod_animal is 'hembra servida';
+comment on table CANTABRIA.PC_SERVICIO is 'Pecuario - Registro de servicio (monta natural o inseminacion artificial). Es un HISTORIAL: un mismo animal tiene tantas filas como servicios reciba en su vida';
+comment on column CANTABRIA.PC_SERVICIO.nro_servicio is 'PK -- numero de documento del servicio: cod_origen(2) + correlativo(8), generado por trigger via NUM_TABLAS (ej. SU00000001). UNA SOLA COLUMNA, el origen ya va embebido';
+comment on column CANTABRIA.PC_SERVICIO.cod_origen is 'FK a ORIGEN -- fundo/sucursal (tambien va embebido en nro_servicio)';
+comment on column CANTABRIA.PC_SERVICIO.cod_animal is 'FK a PC_ANIMAL -- hembra servida';
 comment on column CANTABRIA.PC_SERVICIO.fec_servicio is 'fecha del servicio';
 comment on column CANTABRIA.PC_SERVICIO.flag_tipo_servicio is 'N=Monta natural, I=Inseminacion artificial';
 comment on column CANTABRIA.PC_SERVICIO.cod_animal_toro is 'toro del propio hato (si monta natural)';
@@ -694,15 +810,38 @@ comment on column CANTABRIA.PC_SERVICIO.flag_estado is '1=vigente/en curso, 0=an
 comment on column CANTABRIA.PC_SERVICIO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_SERVICIO.fec_registro is 'fecha de registro en el sistema';
 
+create or replace trigger CANTABRIA.TIB_PC_SERVICIO
+before insert on CANTABRIA.PC_SERVICIO
+for each row
+declare
+  ln_ult_nro  CANTABRIA.NUM_TABLAS.ult_nro%type;
+  ln_count    number;
+begin
+  if :new.nro_servicio is null then
+    select count(*) into ln_count from CANTABRIA.NUM_TABLAS
+     where tabla = 'PC_SERVICIO' and origen = :new.cod_origen;
+    if ln_count = 0 then
+      insert into CANTABRIA.NUM_TABLAS(tabla, origen, ult_nro) values ('PC_SERVICIO', :new.cod_origen, 1);
+    end if;
+    select ult_nro into ln_ult_nro from CANTABRIA.NUM_TABLAS
+     where tabla = 'PC_SERVICIO' and origen = :new.cod_origen for update;
+    :new.nro_servicio := trim(:new.cod_origen) || lpad(to_char(ln_ult_nro), 8, '0');
+    update CANTABRIA.NUM_TABLAS set ult_nro = ln_ult_nro + 1
+     where tabla = 'PC_SERVICIO' and origen = :new.cod_origen;
+  end if;
+end;
+/
+
 
 -- ----------------------------------------------------------------------------
 -- PC_DIAGNOSTICO_PRENEZ
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
 (
+  reckey            NUMBER(10) not null,
   cod_origen        CHAR(2)   not null,
   nro_servicio      CHAR(10)  not null,
-  cod_animal        CHAR(12)  not null,
+  cod_animal        CHAR(10)  not null,
   fec_diagnostico   DATE      not null,
   metodo            CHAR(1)   default 'T',
   resultado         CHAR(1)   not null,
@@ -711,40 +850,21 @@ create table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
   cod_usr           CHAR(6),
   fec_registro      DATE      default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
-  add constraint PK_PC_DIAGNOSTICO_PRENEZ primary key (cod_origen, nro_servicio, fec_diagnostico)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
-  add constraint CK_PC_DXPRE_METODO check (metodo in ('T','E'));
-
-alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
-  add constraint CK_PC_DXPRE_RESULT check (resultado in ('P','V'));
-
-alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
-  add constraint FK_PC_DXPRE_SERVICIO foreign key (cod_origen, nro_servicio)
-  references CANTABRIA.PC_SERVICIO(cod_origen, nro_servicio);
-
-alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ
-  add constraint FK_PC_DXPRE_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
+alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint PK_PC_DIAGNOSTICO_PRENEZ primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint UQ_PC_DXPRE unique (nro_servicio, fec_diagnostico) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint CK_PC_DXPRE_METODO check (metodo in ('T','E'));
+alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint CK_PC_DXPRE_RESULT check (resultado in ('P','V'));
+alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint FK_PC_DXPRE_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint FK_PC_DXPRE_SERVICIO foreign key (nro_servicio) references CANTABRIA.PC_SERVICIO(nro_servicio);
+alter table CANTABRIA.PC_DIAGNOSTICO_PRENEZ add constraint FK_PC_DXPRE_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
 
 comment on table CANTABRIA.PC_DIAGNOSTICO_PRENEZ is 'Pecuario - Diagnostico de prenez posterior al servicio';
-comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_origen is 'fundo/sucursal';
-comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.nro_servicio is 'FK al servicio (PC_SERVICIO) que se esta confirmando';
-comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_animal is 'animal diagnosticado (denormalizado desde PC_SERVICIO para consulta directa)';
+comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
+comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.nro_servicio is 'FK a PC_SERVICIO que se esta confirmando';
+comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_animal is 'FK a PC_ANIMAL (denormalizado desde PC_SERVICIO para consulta directa)';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.fec_diagnostico is 'fecha del diagnostico';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.metodo is 'T=Tacto rectal, E=Ecografia';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.resultado is 'P=Prenada, V=Vacia';
@@ -753,19 +873,31 @@ comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_veterinario is 'veterinari
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_DIAGNOSTICO_PRENEZ.fec_registro is 'fecha de registro en el sistema';
 
+create sequence CANTABRIA.SEQ_PC_DXPRE start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_DXPRE
+before insert on CANTABRIA.PC_DIAGNOSTICO_PRENEZ
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_DXPRE.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
 
 -- ----------------------------------------------------------------------------
 -- PC_PARTO
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_PARTO
 (
+  reckey                   NUMBER(10) not null,
   cod_origen               CHAR(2)   not null,
-  cod_animal               CHAR(12)  not null,
+  cod_animal               CHAR(10)  not null,
   fec_parto                DATE      not null,
   nro_servicio             CHAR(10),
   flag_tipo_parto          CHAR(1)   default 'E',
   flag_asistido            CHAR(1)   default '0',
-  cod_animal_cria          CHAR(12),
+  cod_animal_cria          CHAR(10),
   sexo_cria                CHAR(1),
   peso_cria                NUMBER(6,2),
   flag_cria_viva           CHAR(1)   default '1',
@@ -775,42 +907,22 @@ create table CANTABRIA.PC_PARTO
   cod_usr                  CHAR(6),
   fec_registro             DATE      default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_PARTO
-  add constraint PK_PC_PARTO primary key (cod_origen, cod_animal, fec_parto)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_PARTO
-  add constraint CK_PC_PARTO_TIPO check (flag_tipo_parto in ('E','D'));
-
-alter table CANTABRIA.PC_PARTO
-  add constraint FK_PC_PARTO_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-alter table CANTABRIA.PC_PARTO
-  add constraint FK_PC_PARTO_SERVICIO foreign key (cod_origen, nro_servicio)
-  references CANTABRIA.PC_SERVICIO(cod_origen, nro_servicio);
-
-alter table CANTABRIA.PC_PARTO
-  add constraint FK_PC_PARTO_CRIA foreign key (cod_origen, cod_animal_cria)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
+alter table CANTABRIA.PC_PARTO add constraint PK_PC_PARTO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_PARTO add constraint UQ_PC_PARTO unique (cod_animal, fec_parto) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_PARTO add constraint CK_PC_PARTO_TIPO check (flag_tipo_parto in ('E','D'));
+alter table CANTABRIA.PC_PARTO add constraint FK_PC_PARTO_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_PARTO add constraint FK_PC_PARTO_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_PARTO add constraint FK_PC_PARTO_SERVICIO foreign key (nro_servicio) references CANTABRIA.PC_SERVICIO(nro_servicio);
+alter table CANTABRIA.PC_PARTO add constraint FK_PC_PARTO_CRIA foreign key (cod_animal_cria) references CANTABRIA.PC_ANIMAL(cod_animal);
 
 comment on table CANTABRIA.PC_PARTO is 'Pecuario - Registro de parto';
-comment on column CANTABRIA.PC_PARTO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_PARTO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_PARTO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_PARTO.cod_animal is 'animal (madre) que pario';
 comment on column CANTABRIA.PC_PARTO.fec_parto is 'fecha del parto';
-comment on column CANTABRIA.PC_PARTO.nro_servicio is 'FK al servicio que origino este parto (si se conoce)';
+comment on column CANTABRIA.PC_PARTO.nro_servicio is 'FK a PC_SERVICIO que origino este parto (si se conoce)';
 comment on column CANTABRIA.PC_PARTO.flag_tipo_parto is 'E=Eutocico (normal), D=Distocico (con complicaciones)';
 comment on column CANTABRIA.PC_PARTO.flag_asistido is 'parto asistido (1=si)';
 comment on column CANTABRIA.PC_PARTO.cod_animal_cria is 'FK a PC_ANIMAL - la cria recien nacida';
@@ -823,6 +935,17 @@ comment on column CANTABRIA.PC_PARTO.cod_veterinario is 'veterinario responsable
 comment on column CANTABRIA.PC_PARTO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_PARTO.fec_registro is 'fecha de registro en el sistema';
 
+create sequence CANTABRIA.SEQ_PC_PARTO start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_PARTO
+before insert on CANTABRIA.PC_PARTO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_PARTO.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
 
 -- ============================================================================
 -- 4) PRODUCCION DE LECHE
@@ -833,8 +956,9 @@ comment on column CANTABRIA.PC_PARTO.fec_registro is 'fecha de registro en el si
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_LACTANCIA
 (
+  reckey          NUMBER(10) not null,
   cod_origen      CHAR(2)    not null,
-  cod_animal      CHAR(12)   not null,
+  cod_animal      CHAR(10)   not null,
   nro_lactancia   NUMBER(2)  not null,
   fec_parto       DATE       not null,
   fec_secado      DATE,
@@ -844,31 +968,19 @@ create table CANTABRIA.PC_LACTANCIA
   cod_usr         CHAR(6),
   fec_registro    DATE       default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_LACTANCIA
-  add constraint PK_PC_LACTANCIA primary key (cod_origen, cod_animal, nro_lactancia)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_LACTANCIA
-  add constraint FK_PC_LACTANCIA_PARTO foreign key (cod_origen, cod_animal, fec_parto)
-  references CANTABRIA.PC_PARTO(cod_origen, cod_animal, fec_parto);
+alter table CANTABRIA.PC_LACTANCIA add constraint PK_PC_LACTANCIA primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_LACTANCIA add constraint UQ_PC_LACTANCIA unique (cod_animal, nro_lactancia) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_LACTANCIA add constraint FK_PC_LACTANCIA_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_LACTANCIA add constraint FK_PC_LACTANCIA_PARTO foreign key (cod_animal, fec_parto) references CANTABRIA.PC_PARTO(cod_animal, fec_parto);
 
 comment on table CANTABRIA.PC_LACTANCIA is 'Pecuario - Periodos de lactancia (uno por parto)';
-comment on column CANTABRIA.PC_LACTANCIA.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_LACTANCIA.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_LACTANCIA.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_LACTANCIA.cod_animal is 'vaca en lactancia';
 comment on column CANTABRIA.PC_LACTANCIA.nro_lactancia is 'correlativo de lactancia de esta vaca (1ra, 2da, ...)';
-comment on column CANTABRIA.PC_LACTANCIA.fec_parto is 'FK al parto que inicio esta lactancia';
+comment on column CANTABRIA.PC_LACTANCIA.fec_parto is 'FK (junto a cod_animal) al parto que inicio esta lactancia';
 comment on column CANTABRIA.PC_LACTANCIA.fec_secado is 'fecha de secado (cierre de la lactancia)';
 comment on column CANTABRIA.PC_LACTANCIA.dias_lactancia is 'dias de lactancia, calculado al secar';
 comment on column CANTABRIA.PC_LACTANCIA.litros_totales is 'litros acumulados, recalculado desde PC_ORDENO';
@@ -876,14 +988,26 @@ comment on column CANTABRIA.PC_LACTANCIA.flag_estado is '1=en curso, 0=cerrada (
 comment on column CANTABRIA.PC_LACTANCIA.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_LACTANCIA.fec_registro is 'fecha de registro en el sistema';
 
+create sequence CANTABRIA.SEQ_PC_LACTANCIA start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_LACTANCIA
+before insert on CANTABRIA.PC_LACTANCIA
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_LACTANCIA.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
 
 -- ----------------------------------------------------------------------------
 -- PC_ORDENO
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_ORDENO
 (
+  reckey          NUMBER(10) not null,
   cod_origen      CHAR(2)   not null,
-  cod_animal      CHAR(12)  not null,
+  cod_animal      CHAR(10)  not null,
   fec_ordeno      DATE      not null,
   nro_turno       NUMBER(1) not null,
   litros          NUMBER(6,2) not null,
@@ -894,43 +1018,20 @@ create table CANTABRIA.PC_ORDENO
   cod_usr         CHAR(6),
   fec_registro    DATE      default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 512K
-    next 512K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_ORDENO
-  add constraint PK_PC_ORDENO primary key (cod_origen, cod_animal, fec_ordeno, nro_turno)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_ORDENO
-  add constraint CK_PC_ORDENO_TURNO check (nro_turno in (1,2,3));
-
-alter table CANTABRIA.PC_ORDENO
-  add constraint FK_PC_ORDENO_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-alter table CANTABRIA.PC_ORDENO
-  add constraint FK_PC_ORDENO_OT foreign key (nro_orden)
-  references CANTABRIA.ORDEN_TRABAJO(nro_orden);
-
-alter table CANTABRIA.PC_ORDENO
-  add constraint FK_PC_ORDENO_ALMACEN foreign key (cod_almacen)
-  references CANTABRIA.ALMACEN(almacen);
-
-alter table CANTABRIA.PC_ORDENO
-  add constraint FK_PC_ORDENO_PRODUCTO foreign key (cod_producto)
-  references CANTABRIA.TIPO_PRODUCTO(cod_prod);
+alter table CANTABRIA.PC_ORDENO add constraint PK_PC_ORDENO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ORDENO add constraint UQ_PC_ORDENO unique (cod_animal, fec_ordeno, nro_turno) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ORDENO add constraint CK_PC_ORDENO_TURNO check (nro_turno in (1,2,3));
+alter table CANTABRIA.PC_ORDENO add constraint FK_PC_ORDENO_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_ORDENO add constraint FK_PC_ORDENO_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_ORDENO add constraint FK_PC_ORDENO_OT foreign key (nro_orden) references CANTABRIA.ORDEN_TRABAJO(nro_orden);
+alter table CANTABRIA.PC_ORDENO add constraint FK_PC_ORDENO_ALMACEN foreign key (cod_almacen) references CANTABRIA.ALMACEN(almacen);
+alter table CANTABRIA.PC_ORDENO add constraint FK_PC_ORDENO_PRODUCTO foreign key (cod_producto) references CANTABRIA.TIPO_PRODUCTO(cod_prod);
 
 comment on table CANTABRIA.PC_ORDENO is 'Pecuario - Detalle diario de ordeno';
-comment on column CANTABRIA.PC_ORDENO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_ORDENO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_ORDENO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_ORDENO.cod_animal is 'vaca ordenada';
 comment on column CANTABRIA.PC_ORDENO.fec_ordeno is 'fecha del ordeno';
 comment on column CANTABRIA.PC_ORDENO.nro_turno is '1=manana, 2=tarde, 3=noche';
@@ -942,14 +1043,26 @@ comment on column CANTABRIA.PC_ORDENO.cod_producto is 'FK a TIPO_PRODUCTO -- pro
 comment on column CANTABRIA.PC_ORDENO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_ORDENO.fec_registro is 'fecha de registro en el sistema';
 
+create sequence CANTABRIA.SEQ_PC_ORDENO start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_ORDENO
+before insert on CANTABRIA.PC_ORDENO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_ORDENO.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
 
 -- ----------------------------------------------------------------------------
 -- PC_CONTROL_LECHERO
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_CONTROL_LECHERO
 (
+  reckey             NUMBER(10) not null,
   cod_origen         CHAR(2)   not null,
-  cod_animal         CHAR(12)  not null,
+  cod_animal         CHAR(10)  not null,
   fec_control        DATE      not null,
   porc_grasa         NUMBER(4,2),
   porc_proteina      NUMBER(4,2),
@@ -958,28 +1071,16 @@ create table CANTABRIA.PC_CONTROL_LECHERO
   cod_usr            CHAR(6),
   fec_registro       DATE      default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_CONTROL_LECHERO
-  add constraint PK_PC_CONTROL_LECHERO primary key (cod_origen, cod_animal, fec_control)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_CONTROL_LECHERO
-  add constraint FK_PC_CTRLLECHE_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
+alter table CANTABRIA.PC_CONTROL_LECHERO add constraint PK_PC_CONTROL_LECHERO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_CONTROL_LECHERO add constraint UQ_PC_CTRLLECHE unique (cod_animal, fec_control) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_CONTROL_LECHERO add constraint FK_PC_CTRLLECHE_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_CONTROL_LECHERO add constraint FK_PC_CTRLLECHE_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
 
 comment on table CANTABRIA.PC_CONTROL_LECHERO is 'Pecuario - Control lechero mensual (calidad de leche)';
-comment on column CANTABRIA.PC_CONTROL_LECHERO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_CONTROL_LECHERO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_CONTROL_LECHERO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_CONTROL_LECHERO.cod_animal is 'vaca controlada';
 comment on column CANTABRIA.PC_CONTROL_LECHERO.fec_control is 'fecha del muestreo';
 comment on column CANTABRIA.PC_CONTROL_LECHERO.porc_grasa is 'porcentaje de grasa';
@@ -988,6 +1089,17 @@ comment on column CANTABRIA.PC_CONTROL_LECHERO.celulas_somaticas is 'conteo de c
 comment on column CANTABRIA.PC_CONTROL_LECHERO.litros_dia_proy is 'litros/dia proyectados el dia del control';
 comment on column CANTABRIA.PC_CONTROL_LECHERO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_CONTROL_LECHERO.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_CTRLLECHE start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_CTRLLECHE
+before insert on CANTABRIA.PC_CONTROL_LECHERO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_CTRLLECHE.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ============================================================================
@@ -999,43 +1111,41 @@ comment on column CANTABRIA.PC_CONTROL_LECHERO.fec_registro is 'fecha de registr
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_CONDICION_CORPORAL
 (
+  reckey          NUMBER(10)  not null,
   cod_origen      CHAR(2)     not null,
-  cod_animal      CHAR(12)    not null,
+  cod_animal      CHAR(10)    not null,
   fec_evaluacion  DATE        not null,
   puntaje_bcs     NUMBER(2,1) not null,
   cod_usr         CHAR(6),
   fec_registro    DATE        default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_CONDICION_CORPORAL
-  add constraint PK_PC_CONDICION_CORPORAL primary key (cod_origen, cod_animal, fec_evaluacion)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_CONDICION_CORPORAL
-  add constraint CK_PC_BCS_RANGO check (puntaje_bcs between 1 and 5);
-
-alter table CANTABRIA.PC_CONDICION_CORPORAL
-  add constraint FK_PC_BCS_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
+alter table CANTABRIA.PC_CONDICION_CORPORAL add constraint PK_PC_CONDICION_CORPORAL primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_CONDICION_CORPORAL add constraint UQ_PC_BCS unique (cod_animal, fec_evaluacion) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_CONDICION_CORPORAL add constraint CK_PC_BCS_RANGO check (puntaje_bcs between 1 and 5);
+alter table CANTABRIA.PC_CONDICION_CORPORAL add constraint FK_PC_BCS_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_CONDICION_CORPORAL add constraint FK_PC_BCS_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
 
 comment on table CANTABRIA.PC_CONDICION_CORPORAL is 'Pecuario - Historico de condicion corporal (BCS)';
-comment on column CANTABRIA.PC_CONDICION_CORPORAL.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_CONDICION_CORPORAL.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_CONDICION_CORPORAL.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_CONDICION_CORPORAL.cod_animal is 'animal evaluado';
 comment on column CANTABRIA.PC_CONDICION_CORPORAL.fec_evaluacion is 'fecha de evaluacion';
 comment on column CANTABRIA.PC_CONDICION_CORPORAL.puntaje_bcs is 'puntaje BCS, escala 1.0 a 5.0';
 comment on column CANTABRIA.PC_CONDICION_CORPORAL.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_CONDICION_CORPORAL.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_BCS start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_BCS
+before insert on CANTABRIA.PC_CONDICION_CORPORAL
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_BCS.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ----------------------------------------------------------------------------
@@ -1044,6 +1154,7 @@ comment on column CANTABRIA.PC_CONDICION_CORPORAL.fec_registro is 'fecha de regi
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_ALIMENTACION_CONSUMO
 (
+  reckey          NUMBER(10)   not null,
   cod_origen      CHAR(2)      not null,
   cod_potrero     CHAR(6)      not null,
   fec_consumo     DATE         not null,
@@ -1053,36 +1164,18 @@ create table CANTABRIA.PC_ALIMENTACION_CONSUMO
   cod_usr         CHAR(6),
   fec_registro    DATE         default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 256K
-    next 256K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_ALIMENTACION_CONSUMO
-  add constraint PK_PC_ALIM_CONSUMO primary key (cod_origen, cod_potrero, fec_consumo, cod_dieta)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_ALIMENTACION_CONSUMO
-  add constraint FK_PC_ALIMCONS_POTRERO foreign key (cod_origen, cod_potrero)
-  references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
-
-alter table CANTABRIA.PC_ALIMENTACION_CONSUMO
-  add constraint FK_PC_ALIMCONS_DIETA foreign key (cod_dieta)
-  references CANTABRIA.PC_DIETA(cod_dieta);
-
-alter table CANTABRIA.PC_ALIMENTACION_CONSUMO
-  add constraint FK_PC_ALIMCONS_OT foreign key (nro_orden)
-  references CANTABRIA.ORDEN_TRABAJO(nro_orden);
+alter table CANTABRIA.PC_ALIMENTACION_CONSUMO add constraint PK_PC_ALIM_CONSUMO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ALIMENTACION_CONSUMO add constraint UQ_PC_ALIMCONS unique (cod_origen, cod_potrero, fec_consumo, cod_dieta) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_ALIMENTACION_CONSUMO add constraint FK_PC_ALIMCONS_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_ALIMENTACION_CONSUMO add constraint FK_PC_ALIMCONS_POTRERO foreign key (cod_origen, cod_potrero) references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
+alter table CANTABRIA.PC_ALIMENTACION_CONSUMO add constraint FK_PC_ALIMCONS_DIETA foreign key (cod_dieta) references CANTABRIA.PC_DIETA(cod_dieta);
+alter table CANTABRIA.PC_ALIMENTACION_CONSUMO add constraint FK_PC_ALIMCONS_OT foreign key (nro_orden) references CANTABRIA.ORDEN_TRABAJO(nro_orden);
 
 comment on table CANTABRIA.PC_ALIMENTACION_CONSUMO is 'Pecuario - Planificacion de alimentacion diaria por potrero/lote (dieta + cabezas); el consumo real de insumos (cod_art, cantidad) queda registrado en ARTICULO_MOV contra la OT de esta fila';
-comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_potrero is 'potrero/lote donde se dio el alimento';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.fec_consumo is 'fecha del consumo';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_dieta is 'dieta aplicada';
@@ -1091,15 +1184,26 @@ comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.nro_orden is 'FK a ORDEN_TRA
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_ALIMENTACION_CONSUMO.fec_registro is 'fecha de registro en el sistema';
 
+create sequence CANTABRIA.SEQ_PC_ALIMCONS start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_ALIMCONS
+before insert on CANTABRIA.PC_ALIMENTACION_CONSUMO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_ALIMCONS.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
 
 -- ============================================================================
 -- 6) SANIDAD
 -- ============================================================================
-
 create table CANTABRIA.PC_SANIDAD_EVENTO
 (
+  reckey             NUMBER(10) not null,
   cod_origen         CHAR(2)   not null,
-  cod_animal         CHAR(12)  not null,
+  cod_animal         CHAR(10)  not null,
   nro_evento         NUMBER(5) not null,
   fec_evento         DATE      not null,
   flag_tipo_evento   CHAR(1)   not null,
@@ -1116,49 +1220,23 @@ create table CANTABRIA.PC_SANIDAD_EVENTO
   cod_usr            CHAR(6),
   fec_registro       DATE      default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 256K
-    next 256K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_SANIDAD_EVENTO
-  add constraint PK_PC_SANIDAD_EVENTO primary key (cod_origen, cod_animal, nro_evento)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_SANIDAD_EVENTO
-  add constraint CK_PC_SANIDAD_TIPO check (flag_tipo_evento in ('V','D','T','X'));
-
-alter table CANTABRIA.PC_SANIDAD_EVENTO
-  add constraint FK_PC_SANIDAD_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-alter table CANTABRIA.PC_SANIDAD_EVENTO
-  add constraint FK_PC_SANIDAD_PROD foreign key (cod_prod_san)
-  references CANTABRIA.PC_PRODUCTO_SANITARIO(cod_prod_san);
-
-alter table CANTABRIA.PC_SANIDAD_EVENTO
-  add constraint FK_PC_SANIDAD_ENFERM foreign key (cod_enfermedad)
-  references CANTABRIA.PC_ENFERMEDAD(cod_enfermedad);
-
-alter table CANTABRIA.PC_SANIDAD_EVENTO
-  add constraint FK_PC_SANIDAD_OT foreign key (nro_orden)
-  references CANTABRIA.ORDEN_TRABAJO(nro_orden);
-
-alter table CANTABRIA.PC_SANIDAD_EVENTO
-  add constraint FK_PC_SANIDAD_OS foreign key (cod_origen, nro_os)
-  references CANTABRIA.ORDEN_SERVICIO(cod_origen, nro_os);
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint PK_PC_SANIDAD_EVENTO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint UQ_PC_SANIDAD unique (cod_animal, nro_evento) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint CK_PC_SANIDAD_TIPO check (flag_tipo_evento in ('V','D','T','X'));
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_PROD foreign key (cod_prod_san) references CANTABRIA.PC_PRODUCTO_SANITARIO(cod_prod_san);
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_ENFERM foreign key (cod_enfermedad) references CANTABRIA.PC_ENFERMEDAD(cod_enfermedad);
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_OT foreign key (nro_orden) references CANTABRIA.ORDEN_TRABAJO(nro_orden);
+alter table CANTABRIA.PC_SANIDAD_EVENTO add constraint FK_PC_SANIDAD_OS foreign key (cod_origen, nro_os) references CANTABRIA.ORDEN_SERVICIO(cod_origen, nro_os);
 
 comment on table CANTABRIA.PC_SANIDAD_EVENTO is 'Pecuario - Eventos veterinarios (vacunas, desparasitaciones, tratamientos, diagnosticos)';
-comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_SANIDAD_EVENTO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_animal is 'animal atendido';
-comment on column CANTABRIA.PC_SANIDAD_EVENTO.nro_evento is 'correlativo de eventos sanitarios de este animal';
+comment on column CANTABRIA.PC_SANIDAD_EVENTO.nro_evento is 'correlativo de eventos sanitarios de este animal (unique junto a cod_animal, no PK)';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.fec_evento is 'fecha del evento';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.flag_tipo_evento is 'V=Vacuna, D=Desparasitacion, T=Tratamiento, X=Diagnostico';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_prod_san is 'producto aplicado (vacuna/medicamento)';
@@ -1174,6 +1252,17 @@ comment on column CANTABRIA.PC_SANIDAD_EVENTO.observaciones is 'observaciones de
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_SANIDAD_EVENTO.fec_registro is 'fecha de registro en el sistema';
 
+create sequence CANTABRIA.SEQ_PC_SANIDAD start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_SANIDAD
+before insert on CANTABRIA.PC_SANIDAD_EVENTO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_SANIDAD.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
 
 -- ============================================================================
 -- 7) RESULTADOS DE LABORATORIO
@@ -1184,9 +1273,10 @@ comment on column CANTABRIA.PC_SANIDAD_EVENTO.fec_registro is 'fecha de registro
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_LABORATORIO
 (
-  nro_muestra       CHAR(12)   not null,
+  reckey            NUMBER(10) not null,
+  nro_muestra       VARCHAR2(20),
   cod_origen        CHAR(2)    not null,
-  cod_animal        CHAR(12),
+  cod_animal        CHAR(10),
   cod_semental      CHAR(10),
   fec_muestra       DATE       not null,
   flag_tipo_muestra CHAR(1)    not null,
@@ -1203,62 +1293,48 @@ create table CANTABRIA.PC_LABORATORIO
   cod_usr           CHAR(6),
   fec_registro      DATE       default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_LABORATORIO
-  add constraint PK_PC_LABORATORIO primary key (nro_muestra)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_LABORATORIO
-  add constraint CK_PC_LAB_TIPO_MUESTRA check (flag_tipo_muestra in ('S','L','F','M','T','O'));
-
-alter table CANTABRIA.PC_LABORATORIO
-  add constraint CK_PC_LAB_ESTADO check (flag_estado in ('0','1','2'));
-
-alter table CANTABRIA.PC_LABORATORIO
-  add constraint CK_PC_LAB_ORIGEN check (flag_origen in ('P','C'));
-
-alter table CANTABRIA.PC_LABORATORIO
-  add constraint FK_PC_LAB_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-alter table CANTABRIA.PC_LABORATORIO
-  add constraint FK_PC_LAB_SEMENTAL foreign key (cod_semental)
-  references CANTABRIA.PC_SEMENTAL(cod_semental);
-
-alter table CANTABRIA.PC_LABORATORIO
-  add constraint FK_PC_LAB_SANIDAD foreign key (cod_origen, cod_animal, nro_evento)
-  references CANTABRIA.PC_SANIDAD_EVENTO(cod_origen, cod_animal, nro_evento);
+alter table CANTABRIA.PC_LABORATORIO add constraint PK_PC_LABORATORIO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_LABORATORIO add constraint CK_PC_LAB_TIPO_MUESTRA check (flag_tipo_muestra in ('S','L','F','M','T','O'));
+alter table CANTABRIA.PC_LABORATORIO add constraint CK_PC_LAB_ESTADO check (flag_estado in ('0','1','2'));
+alter table CANTABRIA.PC_LABORATORIO add constraint CK_PC_LAB_ORIGEN_TIPO check (flag_origen in ('P','C'));
+alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_SEMENTAL foreign key (cod_semental) references CANTABRIA.PC_SEMENTAL(cod_semental);
+alter table CANTABRIA.PC_LABORATORIO add constraint FK_PC_LAB_SANIDAD foreign key (cod_animal, nro_evento) references CANTABRIA.PC_SANIDAD_EVENTO(cod_animal, nro_evento);
 
 comment on table CANTABRIA.PC_LABORATORIO is 'Pecuario - Cabecera de muestras enviadas a laboratorio (sangre, leche, fecal, semen, tejido)';
-comment on column CANTABRIA.PC_LABORATORIO.nro_muestra is 'numero de muestra (correlativo/codigo de laboratorio)';
-comment on column CANTABRIA.PC_LABORATORIO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_LABORATORIO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_LABORATORIO.nro_muestra is 'codigo de muestra del laboratorio externo (texto libre, no autogenerado, no PK)';
+comment on column CANTABRIA.PC_LABORATORIO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_LABORATORIO.cod_animal is 'animal muestreado (nulo si la muestra no es de un animal puntual, ej. forraje/agua)';
 comment on column CANTABRIA.PC_LABORATORIO.cod_semental is 'semental analizado, si la muestra es de control de calidad de semen';
 comment on column CANTABRIA.PC_LABORATORIO.fec_muestra is 'fecha de toma de la muestra';
 comment on column CANTABRIA.PC_LABORATORIO.flag_tipo_muestra is 'S=Sangre, L=Leche, F=Fecal, M=Semen, T=Tejido/necropsia, O=Otro';
 comment on column CANTABRIA.PC_LABORATORIO.laboratorio is 'laboratorio externo que proceso la muestra';
 comment on column CANTABRIA.PC_LABORATORIO.cod_veterinario is 'veterinario que tomo la muestra';
-comment on column CANTABRIA.PC_LABORATORIO.nro_evento is 'FK opcional a PC_SANIDAD_EVENTO, si la muestra es parte de un evento sanitario ya registrado';
-comment on column CANTABRIA.PC_LABORATORIO.flag_origen is 'P=Propio (laboratorio/veterinario nuestro), C=Cliente (lo realiza el comprador de la leche, ej. Laive, y descuenta el costo de la factura)';
-comment on column CANTABRIA.PC_LABORATORIO.cliente is 'nombre del cliente que realizo/solicito el analisis, si flag_origen=C (ej. Laive S.A.)';
-comment on column CANTABRIA.PC_LABORATORIO.costo_analisis is 'costo del analisis; si flag_origen=C, es el monto que el cliente descuenta de la factura de venta de leche';
-comment on column CANTABRIA.PC_LABORATORIO.flag_facturado is '1 si el costo del analisis ya fue descontado/facturado';
+comment on column CANTABRIA.PC_LABORATORIO.nro_evento is 'FK opcional (junto a cod_animal) a PC_SANIDAD_EVENTO, si la muestra es parte de un evento sanitario ya registrado';
 comment on column CANTABRIA.PC_LABORATORIO.fec_resultado is 'fecha en que el laboratorio entrego el resultado';
 comment on column CANTABRIA.PC_LABORATORIO.flag_estado is '0=Anulada, 1=Pendiente de resultado, 2=Con resultado';
+comment on column CANTABRIA.PC_LABORATORIO.flag_origen is 'P=Propio (laboratorio/veterinario nuestro), C=Cliente (lo realiza el comprador de la leche, ej. Laive, y descuenta el costo de la factura)';
+comment on column CANTABRIA.PC_LABORATORIO.cliente is 'nombre del cliente que realizo/solicito el analisis, si flag_origen=C';
+comment on column CANTABRIA.PC_LABORATORIO.costo_analisis is 'costo del analisis; si flag_origen=C, es el monto que el cliente descuenta de la factura de venta';
+comment on column CANTABRIA.PC_LABORATORIO.flag_facturado is '1 si el costo del analisis ya fue descontado/facturado';
 comment on column CANTABRIA.PC_LABORATORIO.observaciones is 'observaciones de la muestra';
 comment on column CANTABRIA.PC_LABORATORIO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_LABORATORIO.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_LABORATORIO start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_LABORATORIO
+before insert on CANTABRIA.PC_LABORATORIO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_LABORATORIO.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ----------------------------------------------------------------------------
@@ -1266,47 +1342,44 @@ comment on column CANTABRIA.PC_LABORATORIO.fec_registro is 'fecha de registro en
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_LABORATORIO_DET
 (
-  nro_muestra        CHAR(12)      not null,
-  item               NUMBER(3)     not null,
-  parametro          VARCHAR2(100) not null,
-  valor_resultado    VARCHAR2(60),
-  unidad_medida      VARCHAR2(20),
-  valor_ref_min      NUMBER(12,4),
-  valor_ref_max      NUMBER(12,4),
+  reckey              NUMBER(10)    not null,
+  lab_reckey          NUMBER(10)    not null,
+  item                NUMBER(3)     not null,
+  parametro           VARCHAR2(100) not null,
+  valor_resultado     VARCHAR2(60),
+  unidad_medida       VARCHAR2(20),
+  valor_ref_min       NUMBER(12,4),
+  valor_ref_max       NUMBER(12,4),
   flag_interpretacion CHAR(1)
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_LABORATORIO_DET
-  add constraint PK_PC_LABORATORIO_DET primary key (nro_muestra, item)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_LABORATORIO_DET
-  add constraint CK_PC_LABDET_INTERP check (flag_interpretacion in ('N','A') or flag_interpretacion is null);
-
-alter table CANTABRIA.PC_LABORATORIO_DET
-  add constraint FK_PC_LABDET_MUESTRA foreign key (nro_muestra)
-  references CANTABRIA.PC_LABORATORIO(nro_muestra);
+alter table CANTABRIA.PC_LABORATORIO_DET add constraint PK_PC_LABORATORIO_DET primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_LABORATORIO_DET add constraint UQ_PC_LABDET unique (lab_reckey, item) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_LABORATORIO_DET add constraint CK_PC_LABDET_INTERP check (flag_interpretacion in ('N','A') or flag_interpretacion is null);
+alter table CANTABRIA.PC_LABORATORIO_DET add constraint FK_PC_LABDET_MUESTRA foreign key (lab_reckey) references CANTABRIA.PC_LABORATORIO(reckey);
 
 comment on table CANTABRIA.PC_LABORATORIO_DET is 'Pecuario - Detalle de parametros/analitos resultantes de una muestra de laboratorio';
-comment on column CANTABRIA.PC_LABORATORIO_DET.nro_muestra is 'muestra a la que pertenece';
-comment on column CANTABRIA.PC_LABORATORIO_DET.item is 'item correlativo';
+comment on column CANTABRIA.PC_LABORATORIO_DET.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_LABORATORIO_DET.lab_reckey is 'FK a PC_LABORATORIO.reckey -- muestra a la que pertenece';
+comment on column CANTABRIA.PC_LABORATORIO_DET.item is 'item correlativo (unique junto a lab_reckey, no PK)';
 comment on column CANTABRIA.PC_LABORATORIO_DET.parametro is 'nombre del parametro/analito (ej. Brucelosis - ELISA, Motilidad espermatica, Huevos por gramo)';
 comment on column CANTABRIA.PC_LABORATORIO_DET.valor_resultado is 'valor del resultado (texto, admite cualitativo Positivo/Negativo o numerico)';
 comment on column CANTABRIA.PC_LABORATORIO_DET.unidad_medida is 'unidad de medida del resultado, si es numerico';
 comment on column CANTABRIA.PC_LABORATORIO_DET.valor_ref_min is 'limite inferior del rango de referencia, si aplica';
 comment on column CANTABRIA.PC_LABORATORIO_DET.valor_ref_max is 'limite superior del rango de referencia, si aplica';
 comment on column CANTABRIA.PC_LABORATORIO_DET.flag_interpretacion is 'N=Normal, A=Alterado';
+
+create sequence CANTABRIA.SEQ_PC_LABDET start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_LABDET
+before insert on CANTABRIA.PC_LABORATORIO_DET
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_LABDET.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ============================================================================
@@ -1318,8 +1391,9 @@ comment on column CANTABRIA.PC_LABORATORIO_DET.flag_interpretacion is 'N=Normal,
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_MOVIMIENTO_POTRERO
 (
+  reckey               NUMBER(10) not null,
   cod_origen           CHAR(2)   not null,
-  cod_animal           CHAR(12)  not null,
+  cod_animal           CHAR(10)  not null,
   fec_movimiento       DATE      not null,
   cod_potrero_origen   CHAR(6),
   cod_potrero_destino  CHAR(6)   not null,
@@ -1327,36 +1401,18 @@ create table CANTABRIA.PC_MOVIMIENTO_POTRERO
   cod_usr              CHAR(6),
   fec_registro         DATE      default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 256K
-    next 256K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_MOVIMIENTO_POTRERO
-  add constraint PK_PC_MOV_POTRERO primary key (cod_origen, cod_animal, fec_movimiento)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_MOVIMIENTO_POTRERO
-  add constraint FK_PC_MOVPOT_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-alter table CANTABRIA.PC_MOVIMIENTO_POTRERO
-  add constraint FK_PC_MOVPOT_POT_ORIG foreign key (cod_origen, cod_potrero_origen)
-  references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
-
-alter table CANTABRIA.PC_MOVIMIENTO_POTRERO
-  add constraint FK_PC_MOVPOT_POT_DEST foreign key (cod_origen, cod_potrero_destino)
-  references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
+alter table CANTABRIA.PC_MOVIMIENTO_POTRERO add constraint PK_PC_MOV_POTRERO primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_MOVIMIENTO_POTRERO add constraint UQ_PC_MOVPOT unique (cod_animal, fec_movimiento) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_MOVIMIENTO_POTRERO add constraint FK_PC_MOVPOT_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_MOVIMIENTO_POTRERO add constraint FK_PC_MOVPOT_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_MOVIMIENTO_POTRERO add constraint FK_PC_MOVPOT_POT_ORIG foreign key (cod_origen, cod_potrero_origen) references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
+alter table CANTABRIA.PC_MOVIMIENTO_POTRERO add constraint FK_PC_MOVPOT_POT_DEST foreign key (cod_origen, cod_potrero_destino) references CANTABRIA.PC_POTRERO(cod_origen, cod_potrero);
 
 comment on table CANTABRIA.PC_MOVIMIENTO_POTRERO is 'Pecuario - Historico de cambios de potrero (rotacion de pastoreo)';
-comment on column CANTABRIA.PC_MOVIMIENTO_POTRERO.cod_origen is 'fundo/sucursal';
+comment on column CANTABRIA.PC_MOVIMIENTO_POTRERO.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_MOVIMIENTO_POTRERO.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
 comment on column CANTABRIA.PC_MOVIMIENTO_POTRERO.cod_animal is 'animal movido';
 comment on column CANTABRIA.PC_MOVIMIENTO_POTRERO.fec_movimiento is 'fecha del movimiento';
 comment on column CANTABRIA.PC_MOVIMIENTO_POTRERO.cod_potrero_origen is 'potrero de origen';
@@ -1365,13 +1421,26 @@ comment on column CANTABRIA.PC_MOVIMIENTO_POTRERO.motivo is 'motivo del movimien
 comment on column CANTABRIA.PC_MOVIMIENTO_POTRERO.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_MOVIMIENTO_POTRERO.fec_registro is 'fecha de registro en el sistema';
 
+create sequence CANTABRIA.SEQ_PC_MOVPOT start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_MOVPOT
+before insert on CANTABRIA.PC_MOVIMIENTO_POTRERO
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_MOVPOT.nextval into :new.reckey from dual;
+  end if;
+end;
+/
+
 
 -- ----------------------------------------------------------------------------
--- PC_DTA (Documento de Transito Animal)
+-- PC_DTA (Documento de Transito Animal -- DOCUMENTO EXTERNO: lo emite SENASA,
+-- no lo genera nuestro sistema, por eso PK=reckey y nro_dta es texto libre)
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_DTA
 (
-  nro_dta               CHAR(15)      not null,
+  reckey                NUMBER(10)    not null,
+  nro_dta                VARCHAR2(20),
   fec_emision           DATE          not null,
   cod_origen_fundo      CHAR(2)       not null,
   cod_destino_fundo     CHAR(2),
@@ -1381,35 +1450,36 @@ create table CANTABRIA.PC_DTA
   cod_usr               CHAR(6),
   fec_registro          DATE          default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_DTA
-  add constraint PK_PC_DTA primary key (nro_dta)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_DTA
-  add constraint CK_PC_DTA_MOTIVO check (motivo in ('V','T','F'));
+alter table CANTABRIA.PC_DTA add constraint PK_PC_DTA primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DTA add constraint UQ_PC_DTA_NRO unique (nro_dta) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DTA add constraint CK_PC_DTA_MOTIVO check (motivo in ('V','T','F'));
+alter table CANTABRIA.PC_DTA add constraint FK_PC_DTA_ORIGEN foreign key (cod_origen_fundo) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_DTA add constraint FK_PC_DTA_DESTINO foreign key (cod_destino_fundo) references CANTABRIA.ORIGEN(cod_origen);
 
 comment on table CANTABRIA.PC_DTA is 'Pecuario - Documento de Transito Animal (trazabilidad SENASA)';
-comment on column CANTABRIA.PC_DTA.nro_dta is 'numero de DTA';
+comment on column CANTABRIA.PC_DTA.reckey is 'PK autonumerica (interna)';
+comment on column CANTABRIA.PC_DTA.nro_dta is 'numero de DTA asignado por SENASA -- documento EXTERNO, texto libre, no autogenerado por este sistema';
 comment on column CANTABRIA.PC_DTA.fec_emision is 'fecha de emision';
-comment on column CANTABRIA.PC_DTA.cod_origen_fundo is 'fundo de origen';
-comment on column CANTABRIA.PC_DTA.cod_destino_fundo is 'fundo de destino (si es traslado interno)';
+comment on column CANTABRIA.PC_DTA.cod_origen_fundo is 'FK a ORIGEN -- fundo de origen';
+comment on column CANTABRIA.PC_DTA.cod_destino_fundo is 'FK a ORIGEN -- fundo de destino (si es traslado interno)';
 comment on column CANTABRIA.PC_DTA.razon_social_destino is 'razon social del destino (si es venta a un tercero)';
 comment on column CANTABRIA.PC_DTA.motivo is 'V=Venta, T=Traslado interno, F=Feria/exposicion';
 comment on column CANTABRIA.PC_DTA.flag_estado is 'flag_estado';
 comment on column CANTABRIA.PC_DTA.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_DTA.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_DTA start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_DTA
+before insert on CANTABRIA.PC_DTA
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_DTA.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ----------------------------------------------------------------------------
@@ -1417,40 +1487,34 @@ comment on column CANTABRIA.PC_DTA.fec_registro is 'fecha de registro en el sist
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_DTA_DETALLE
 (
-  nro_dta      CHAR(15)  not null,
-  item         NUMBER(4) not null,
-  cod_origen   CHAR(2)   not null,
-  cod_animal   CHAR(12)  not null
+  reckey       NUMBER(10) not null,
+  dta_reckey   NUMBER(10) not null,
+  item         NUMBER(4)  not null,
+  cod_animal   CHAR(10)   not null
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 64K
-    next 64K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_DTA_DETALLE
-  add constraint PK_PC_DTA_DETALLE primary key (nro_dta, item)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_DTA_DETALLE
-  add constraint FK_PC_DTADET_DTA foreign key (nro_dta)
-  references CANTABRIA.PC_DTA(nro_dta);
-
-alter table CANTABRIA.PC_DTA_DETALLE
-  add constraint FK_PC_DTADET_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
+alter table CANTABRIA.PC_DTA_DETALLE add constraint PK_PC_DTA_DETALLE primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DTA_DETALLE add constraint UQ_PC_DTADET unique (dta_reckey, item) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_DTA_DETALLE add constraint FK_PC_DTADET_DTA foreign key (dta_reckey) references CANTABRIA.PC_DTA(reckey);
+alter table CANTABRIA.PC_DTA_DETALLE add constraint FK_PC_DTADET_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
 
 comment on table CANTABRIA.PC_DTA_DETALLE is 'Pecuario - Animales incluidos en cada DTA';
-comment on column CANTABRIA.PC_DTA_DETALLE.nro_dta is 'DTA al que pertenece';
-comment on column CANTABRIA.PC_DTA_DETALLE.item is 'item correlativo';
-comment on column CANTABRIA.PC_DTA_DETALLE.cod_origen is 'fundo/sucursal del animal';
+comment on column CANTABRIA.PC_DTA_DETALLE.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_DTA_DETALLE.dta_reckey is 'FK a PC_DTA.reckey -- DTA al que pertenece';
+comment on column CANTABRIA.PC_DTA_DETALLE.item is 'item correlativo (unique junto a dta_reckey, no PK)';
 comment on column CANTABRIA.PC_DTA_DETALLE.cod_animal is 'animal incluido en el traslado';
+
+create sequence CANTABRIA.SEQ_PC_DTADET start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_DTADET
+before insert on CANTABRIA.PC_DTA_DETALLE
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_DTADET.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ----------------------------------------------------------------------------
@@ -1458,55 +1522,53 @@ comment on column CANTABRIA.PC_DTA_DETALLE.cod_animal is 'animal incluido en el 
 -- ----------------------------------------------------------------------------
 create table CANTABRIA.PC_BAJA
 (
+  reckey           NUMBER(10) not null,
   cod_origen       CHAR(2)   not null,
-  cod_animal       CHAR(12)  not null,
+  cod_animal       CHAR(10)  not null,
   fec_baja         DATE      not null,
   flag_motivo      CHAR(1)   not null,
   causa_muerte     VARCHAR2(200),
   precio_venta     NUMBER(12,2),
-  nro_dta          CHAR(15),
+  nro_ov           CHAR(10),
+  dta_reckey       NUMBER(10),
   observaciones    VARCHAR2(300),
   cod_usr          CHAR(6),
   fec_registro     DATE      default sysdate
 )
-tablespace CANTABRIA
-  pctfree 10
-  initrans 1
-  maxtrans 255
-  storage
-  (
-    initial 128K
-    next 128K
-    minextents 1
-    maxextents unlimited
-  );
+tablespace CANTABRIA;
 
-alter table CANTABRIA.PC_BAJA
-  add constraint PK_PC_BAJA primary key (cod_origen, cod_animal)
-  using index tablespace CANTABRIA;
-
-alter table CANTABRIA.PC_BAJA
-  add constraint CK_PC_BAJA_MOTIVO check (flag_motivo in ('V','M','D'));
-
-alter table CANTABRIA.PC_BAJA
-  add constraint FK_PC_BAJA_ANIMAL foreign key (cod_origen, cod_animal)
-  references CANTABRIA.PC_ANIMAL(cod_origen, cod_animal);
-
-alter table CANTABRIA.PC_BAJA
-  add constraint FK_PC_BAJA_DTA foreign key (nro_dta)
-  references CANTABRIA.PC_DTA(nro_dta);
+alter table CANTABRIA.PC_BAJA add constraint PK_PC_BAJA primary key (reckey) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_BAJA add constraint UQ_PC_BAJA_ANIMAL unique (cod_animal) using index tablespace CANTABRIA;
+alter table CANTABRIA.PC_BAJA add constraint CK_PC_BAJA_MOTIVO check (flag_motivo in ('V','M','D'));
+alter table CANTABRIA.PC_BAJA add constraint FK_PC_BAJA_ORIGEN foreign key (cod_origen) references CANTABRIA.ORIGEN(cod_origen);
+alter table CANTABRIA.PC_BAJA add constraint FK_PC_BAJA_ANIMAL foreign key (cod_animal) references CANTABRIA.PC_ANIMAL(cod_animal);
+alter table CANTABRIA.PC_BAJA add constraint FK_PC_BAJA_OV foreign key (nro_ov) references CANTABRIA.ORDEN_VENTA(nro_ov);
+alter table CANTABRIA.PC_BAJA add constraint FK_PC_BAJA_DTA foreign key (dta_reckey) references CANTABRIA.PC_DTA(reckey);
 
 comment on table CANTABRIA.PC_BAJA is 'Pecuario - Bajas del hato (venta, muerte o descarte)';
-comment on column CANTABRIA.PC_BAJA.cod_origen is 'fundo/sucursal';
-comment on column CANTABRIA.PC_BAJA.cod_animal is 'animal dado de baja';
+comment on column CANTABRIA.PC_BAJA.reckey is 'PK autonumerica';
+comment on column CANTABRIA.PC_BAJA.cod_origen is 'FK a ORIGEN -- fundo/sucursal';
+comment on column CANTABRIA.PC_BAJA.cod_animal is 'animal dado de baja (unique, no PK -- una baja por animal)';
 comment on column CANTABRIA.PC_BAJA.fec_baja is 'fecha de la baja';
 comment on column CANTABRIA.PC_BAJA.flag_motivo is 'V=Venta, M=Muerte, D=Descarte (infertil/enfermo/vejez)';
 comment on column CANTABRIA.PC_BAJA.causa_muerte is 'causa de muerte, si flag_motivo=M';
 comment on column CANTABRIA.PC_BAJA.precio_venta is 'precio de venta, si flag_motivo=V';
-comment on column CANTABRIA.PC_BAJA.nro_dta is 'FK al DTA si la baja implico traslado';
+comment on column CANTABRIA.PC_BAJA.nro_ov is 'FK a ORDEN_VENTA -- orden/factura de venta real (modulo Comercializacion), si flag_motivo=V';
+comment on column CANTABRIA.PC_BAJA.dta_reckey is 'FK a PC_DTA.reckey si la baja implico traslado';
 comment on column CANTABRIA.PC_BAJA.observaciones is 'observaciones de la baja';
 comment on column CANTABRIA.PC_BAJA.cod_usr is 'usuario que registro';
 comment on column CANTABRIA.PC_BAJA.fec_registro is 'fecha de registro en el sistema';
+
+create sequence CANTABRIA.SEQ_PC_BAJA start with 1 increment by 1 nocache;
+create or replace trigger CANTABRIA.TIB_PC_BAJA
+before insert on CANTABRIA.PC_BAJA
+for each row
+begin
+  if :new.reckey is null then
+    select SEQ_PC_BAJA.nextval into :new.reckey from dual;
+  end if;
+end;
+/
 
 
 -- ----------------------------------------------------------------------------
@@ -1518,8 +1580,7 @@ for each row
 begin
   update CANTABRIA.PC_ANIMAL
      set flag_estado = '0'
-   where cod_origen = :new.cod_origen
-     and cod_animal = :new.cod_animal;
+   where cod_animal = :new.cod_animal;
 end;
 /
 
@@ -1529,34 +1590,50 @@ commit;
 -- ============================================================================
 -- 9) DATA DE PRUEBA (DEMO) -- para QA / pulir pantallas, NO usar en produccion
 -- ============================================================================
--- Escenario encadenado con cod_origen = '01' (ajustar al codigo real del fundo
--- San Martin en CONFIGURACION/ORIGEN antes de usar). Incluye: 2 potreros, 1
--- semental, 1 dieta con su componente, 2 Ordenes de Trabajo Pecuarias (OT
--- Pecuaria = ORDEN_TRABAJO con ot_adm='PECU'), 5 animales (2 vacas, 1 toro,
--- 1 cria, 1 vaca de descarte), un ciclo reproductivo completo (celo->
--- servicio->diagnostico->parto), lactancia con ordenos amarrados a la OT y
--- con ingreso de produccion (almacen+producto terminado), condicion
--- corporal, consumo de alimento amarrado a la OT, eventos sanitarios (con OT
--- para el consumo propio, con Orden de Servicio para el costo externo),
--- resultados de laboratorio (mastitis propio + calidad de semen propio +
--- analisis de calidad de leche hecho por el cliente Laive), movimiento de
--- potrero, y el ciclo de vida completo de una baja por venta con su DTA.
+-- Escenario encadenado con cod_origen = 'SU' (placeholder de 2 caracteres --
+-- ajustar al codigo real de ORIGEN antes de usar; el formato de documento
+-- (cod_animal, nro_servicio) es cod_origen + correlativo de 8 digitos, ej.
+-- 'SU00000001'). Incluye: 2 potreros, 1 semental, 1 dieta con su componente,
+-- 1 receta de concentrado, 2 Ordenes de Trabajo Pecuarias (ORDEN_TRABAJO con
+-- ot_adm='PECU') vinculadas a sus animales via PC_OT_ANIMAL, 5 animales (2
+-- vacas, 1 toro, 1 cria, 1 vaca de descarte) con su codigo-documento y su
+-- cod_interno (arete fisico), un ciclo reproductivo completo (celo->
+-- servicio->diagnostico->parto), lactancia con ordenos (con ingreso real
+-- I09: almacen+producto terminado), condicion corporal, consumo de alimento
+-- amarrado a la OT, eventos sanitarios (con OT para consumo propio, con
+-- Orden de Servicio para costo externo), resultados de laboratorio (mastitis
+-- propio + calidad de semen propio + analisis de leche del cliente Laive), y
+-- el ciclo de vida completo de una baja por venta con su DTA y su orden de
+-- venta.
 --
 -- ADVERTENCIA -- placeholders que deben ajustarse antes de ejecutar en un
 -- esquema real (o comentar esas lineas si aun no aplican):
---   - 'ART00000001' (PC_DIETA_COMPONENTE) y 'ART00000002' (TIPO_PRODUCTO):
---     deben ser codigos reales existentes en ARTICULO.
+--   - 'SU' como cod_origen: reemplazar por el codigo real de ORIGEN.
+--   - 'ART00000001' (PC_DIETA_COMPONENTE), 'ART00000002' (TIPO_PRODUCTO
+--     leche) y 'ART00000003'/'ART00000004' (PC_RECETA_DET materia prima del
+--     concentrado): deben ser codigos reales existentes en ARTICULO.
 --   - '0100000099' (PC_SANIDAD_EVENTO.nro_os): debe ser una ORDEN_SERVICIO
 --     real (modulo Compras, pantalla w_cm314) por el costo de la visita
 --     veterinaria de Estrella.
---   - Las filas de ORDEN_TRABAJO/OT_TIPO/ALMACEN/TIPO_PRODUCTO de este
---     bloque son minimas para poder correr el demo end-to-end; en
+--   - 'OV00000001' (PC_BAJA.nro_ov): debe ser una ORDEN_VENTA real (modulo
+--     Comercializacion) por la venta de Estrella.
+--   - Las filas de ORDEN_TRABAJO/OT_TIPO/ALMACEN/TIPO_PRODUCTO/ORIGEN de
+--     este bloque son minimas para poder correr el demo end-to-end; en
 --     produccion se crean desde sus pantallas estandar, no a mano.
+--   - cod_animal, nro_servicio: se especifican explicitamente aqui (los
+--     triggers los respetan porque solo generan el valor si viene NULL) para
+--     que el resto del demo pueda referenciarlos por FK de forma legible.
 -- ============================================================================
 
+-- Origen (ajustar/omitir si ya existe en el esquema real)
+insert into CANTABRIA.ORIGEN (cod_origen, nombre) values ('SU','Fundo Sur (demo Pecuario)');
+commit;
+
+-- Especies y razas ya sembradas arriba (BOVI/HOLS/BRSW, etc.)
+
 -- Potreros
-insert into CANTABRIA.PC_POTRERO (cod_origen, cod_potrero, nom_potrero, area_has, tipo_pasto, capacidad_cab) values ('01','POT001','Potrero Norte',10,'Brachiaria brizantha',40);
-insert into CANTABRIA.PC_POTRERO (cod_origen, cod_potrero, nom_potrero, area_has, tipo_pasto, capacidad_cab) values ('01','POT002','Potrero Sur',8,'Brachiaria brizantha',30);
+insert into CANTABRIA.PC_POTRERO (cod_origen, cod_potrero, nom_potrero, area_has, tipo_pasto, capacidad_cab) values ('SU','POT001','Potrero Norte',10,'Brachiaria brizantha',40);
+insert into CANTABRIA.PC_POTRERO (cod_origen, cod_potrero, nom_potrero, area_has, tipo_pasto, capacidad_cab) values ('SU','POT002','Potrero Sur',8,'Brachiaria brizantha',30);
 commit;
 
 -- Semental
@@ -1569,6 +1646,17 @@ commit;
 insert into CANTABRIA.PC_DIETA_COMPONENTE (cod_dieta, item, cod_art, cantidad_kg) values ('DIE001',1,'ART00000001',15.000);
 commit;
 
+-- Receta de concentrado (fabricacion propia): 1000 kg de concentrado a partir
+-- de maiz molido + afrecho de trigo (AJUSTAR cod_art de materia prima y del
+-- producto terminado en TIPO_PRODUCTO antes de ejecutar)
+insert into CANTABRIA.TIPO_PRODUCTO (cod_prod, desc_prod, cod_art, und) values ('CONCENT0001','Concentrado vacas en produccion','ART00000005','KG');
+commit;
+insert into CANTABRIA.PC_RECETA (cod_receta, nom_receta, cod_producto, rendimiento_kg) values ('REC001','Concentrado vacas en produccion','CONCENT0001',1000.000);
+commit;
+insert into CANTABRIA.PC_RECETA_DET (cod_receta, item, cod_art, cantidad_kg) values ('REC001',1,'ART00000003',700.000);
+insert into CANTABRIA.PC_RECETA_DET (cod_receta, item, cod_art, cantidad_kg) values ('REC001',2,'ART00000004',300.000);
+commit;
+
 -- ----------------------------------------------------------------------------
 -- Integracion con OT / Almacen (tablas GENERICAS y ya existentes del ERP,
 -- NO exclusivas de Pecuario). Se inserta lo minimo indispensable para que el
@@ -1579,132 +1667,149 @@ commit;
 -- ----------------------------------------------------------------------------
 insert into CANTABRIA.OT_TIPO (ot_tipo, descripcion) values ('PECU','Orden de Trabajo Pecuaria');
 commit;
-insert into CANTABRIA.ALMACEN (almacen, desc_almacen, cod_origen, flag_tipo_almacen) values ('ALM001','Almacen Produccion Pecuaria','01','P');
+insert into CANTABRIA.ALMACEN (almacen, desc_almacen, cod_origen, flag_tipo_almacen) values ('ALM001','Almacen Produccion Pecuaria','SU','P');
+insert into CANTABRIA.ALMACEN (almacen, desc_almacen, cod_origen, flag_tipo_almacen) values ('ALM002','Almacen Concentrado','SU','P');
 commit;
 -- AJUSTAR cod_art: debe ser un articulo real de tipo "producto terminado" en ARTICULO
 insert into CANTABRIA.TIPO_PRODUCTO (cod_prod, desc_prod, cod_art, und) values ('LECHE000001','Leche cruda','ART00000002','LT');
 commit;
 
--- OT Pecuaria 1: alimentacion del potrero Norte (02-04 jul 2026) -- Paloma y Luna
+-- OT Pecuaria 1: alimentacion del potrero Norte (02-04 jul 2026) -- animales 1 y 2
 insert into CANTABRIA.ORDEN_TRABAJO (cod_origen, nro_orden, titulo, ot_tipo, ot_adm, fec_solicitud, fec_inicio, flag_estado, cod_usr)
-  values ('01','0100000001','Alimentacion potrero Norte 02-04 jul','PECU','PECU',TO_DATE('02/07/2026','DD/MM/YYYY'),TO_DATE('02/07/2026','DD/MM/YYYY'),'1','DEMO01');
-insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('0100000001','01','ANI000000001','DEMO01');
-insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('0100000001','01','ANI000000002','DEMO01');
+  values ('SU','SU00000001','Alimentacion potrero Norte 02-04 jul','PECU','PECU',TO_DATE('02/07/2026','DD/MM/YYYY'),TO_DATE('02/07/2026','DD/MM/YYYY'),'1','DEMO01');
 
--- OT Pecuaria 2: vacunacion/desparasitacion de febrero 2026 -- Paloma y Luna
+-- OT Pecuaria 2: vacunacion/desparasitacion de febrero 2026 -- animales 1 y 2
 insert into CANTABRIA.ORDEN_TRABAJO (cod_origen, nro_orden, titulo, ot_tipo, ot_adm, fec_solicitud, fec_inicio, flag_estado, cod_usr)
-  values ('01','0100000002','Sanidad - vacunacion y desparasitacion feb','PECU','PECU',TO_DATE('01/02/2026','DD/MM/YYYY'),TO_DATE('01/02/2026','DD/MM/YYYY'),'1','DEMO01');
-insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('0100000002','01','ANI000000001','DEMO01');
-insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('0100000002','01','ANI000000002','DEMO01');
+  values ('SU','SU00000002','Sanidad - vacunacion y desparasitacion feb','PECU','PECU',TO_DATE('01/02/2026','DD/MM/YYYY'),TO_DATE('01/02/2026','DD/MM/YYYY'),'1','DEMO01');
+
+-- OT Pecuaria 3: fabricacion de concentrado (consume maiz+afrecho, produce concentrado)
+insert into CANTABRIA.ORDEN_TRABAJO (cod_origen, nro_orden, titulo, ot_tipo, ot_adm, fec_solicitud, fec_inicio, flag_estado, cod_usr)
+  values ('SU','SU00000003','Fabricacion concentrado - lote 1000kg','PECU','PECU',TO_DATE('25/06/2026','DD/MM/YYYY'),TO_DATE('25/06/2026','DD/MM/YYYY'),'1','DEMO01');
 commit;
 
--- NOTA: el consumo real de insumos (cod_art, cantidad, nro_vale) de estas dos
--- OT queda en ARTICULO_MOV (via ORDEN_TRABAJO -> OPERACIONES -> ARTICULO_MOV),
+-- Animales (orden importa: la madre antes que la cria). cod_animal y
+-- cod_interno se especifican a mano para el demo (cod_interno = arete fisico
+-- que ya usa la empresa, ej. el que trae grabado en la oreja).
+insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('SU00000001','SU','ARE-4521','Paloma','HOLS','H',TO_DATE('15/03/2021','DD/MM/YYYY'),'VPR','POT001','3',38,550,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('SU00000002','SU','ARE-4522','Luna','BRSW','H',TO_DATE('10/06/2020','DD/MM/YYYY'),'VPR','POT001','2',40,540,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('SU00000003','SU','ARE-4001','Bravo','HOLS','M',TO_DATE('20/01/2019','DD/MM/YYYY'),'TOR','POT002',42,780,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_animal_padre, cod_animal_madre, cod_categoria, cod_potrero, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('SU00000004','SU','ARE-4890','Cria de Paloma','HOLS','H',TO_DATE('15/06/2026','DD/MM/YYYY'),'SU00000003','SU00000001','TER','POT001',35,35,'P','DEMO01');
+insert into CANTABRIA.PC_ANIMAL (cod_animal, cod_origen, cod_interno, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
+  values ('SU00000005','SU','ARE-3980','Estrella','HOLS','H',TO_DATE('02/02/2019','DD/MM/YYYY'),'VDE','POT002','0',37,520,'P','DEMO01');
+commit;
+
+-- Vinculo OT <-> animales
+insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('SU00000001','SU','SU00000001','DEMO01');
+insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('SU00000001','SU','SU00000002','DEMO01');
+insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('SU00000002','SU','SU00000001','DEMO01');
+insert into CANTABRIA.PC_OT_ANIMAL (nro_orden, cod_origen, cod_animal, cod_usr) values ('SU00000002','SU','SU00000002','DEMO01');
+commit;
+-- NOTA: el consumo real de insumos (cod_art, cantidad, nro_vale) de estas OT
+-- queda en ARTICULO_MOV (via ORDEN_TRABAJO -> OPERACIONES -> ARTICULO_MOV),
 -- que se genera desde las pantallas estandar de Almacen/OPE302, no en este
 -- script -- Pecuario solo necesita el nro_orden para reconstruir el historial.
 
--- Animales (orden importa: la madre antes que la cria)
-insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
-  values ('01','ANI000000001','Paloma','HOLS','H',TO_DATE('15/03/2021','DD/MM/YYYY'),'VPR','POT001','3',38,550,'P','DEMO01');
-insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
-  values ('01','ANI000000002','Luna','BRSW','H',TO_DATE('10/06/2020','DD/MM/YYYY'),'VPR','POT001','2',40,540,'P','DEMO01');
-insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
-  values ('01','ANI000000003','Bravo','HOLS','M',TO_DATE('20/01/2019','DD/MM/YYYY'),'TOR','POT002',42,780,'P','DEMO01');
-insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_animal_padre, cod_animal_madre, cod_categoria, cod_potrero, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
-  values ('01','ANI000000004','Cria de Paloma','HOLS','H',TO_DATE('15/06/2026','DD/MM/YYYY'),'ANI000000003','ANI000000001','TER','POT001',35,35,'P','DEMO01');
-insert into CANTABRIA.PC_ANIMAL (cod_origen, cod_animal, nom_animal, cod_raza, flag_sexo, fec_nacimiento, cod_categoria, cod_potrero, flag_estado_repro, peso_nacimiento, peso_actual, cod_procedencia, cod_usr)
-  values ('01','ANI000000005','Estrella','HOLS','H',TO_DATE('02/02/2019','DD/MM/YYYY'),'VDE','POT002','0',37,520,'P','DEMO01');
-commit;
-
 -- Ciclo reproductivo de Paloma (servicio natural con Bravo -> diagnostico -> parto -> cria)
--- nro_servicio ya NO es un correlativo por animal: es un numero de documento
--- (cod_origen + correlativo de 8 digitos), igual patron que nro_orden/nro_os/nro_dta.
-insert into CANTABRIA.PC_SERVICIO (cod_origen, nro_servicio, cod_animal, fec_servicio, flag_tipo_servicio, cod_animal_toro, fec_prob_parto, cod_usr)
-  values ('01','0100000001','ANI000000001',TO_DATE('05/09/2025','DD/MM/YYYY'),'N','ANI000000003',TO_DATE('15/06/2026','DD/MM/YYYY'),'DEMO01');
+insert into CANTABRIA.PC_SERVICIO (nro_servicio, cod_origen, cod_animal, fec_servicio, flag_tipo_servicio, cod_animal_toro, fec_prob_parto, cod_usr)
+  values ('SU00000001','SU','SU00000001',TO_DATE('05/09/2025','DD/MM/YYYY'),'N','SU00000003',TO_DATE('15/06/2026','DD/MM/YYYY'),'DEMO01');
 insert into CANTABRIA.PC_DIAGNOSTICO_PRENEZ (cod_origen, nro_servicio, cod_animal, fec_diagnostico, metodo, resultado, dias_gestacion, cod_veterinario, cod_usr)
-  values ('01','0100000001','ANI000000001',TO_DATE('05/12/2025','DD/MM/YYYY'),'T','P',91,'VET001','DEMO01');
+  values ('SU','SU00000001','SU00000001',TO_DATE('05/12/2025','DD/MM/YYYY'),'T','P',91,'VET001','DEMO01');
 insert into CANTABRIA.PC_PARTO (cod_origen, cod_animal, fec_parto, nro_servicio, flag_tipo_parto, flag_asistido, cod_animal_cria, sexo_cria, peso_cria, flag_cria_viva, flag_retencion_placenta, cod_veterinario, cod_usr)
-  values ('01','ANI000000001',TO_DATE('15/06/2026','DD/MM/YYYY'),'0100000001','E','0','ANI000000004','H',35,'1','0','VET001','DEMO01');
+  values ('SU','SU00000001',TO_DATE('15/06/2026','DD/MM/YYYY'),'SU00000001','E','0','SU00000004','H',35,'1','0','VET001','DEMO01');
 commit;
 
 -- Ciclo reproductivo de Luna, en curso (celo -> servicio por IA -> diagnostico positivo, sin parto todavia)
 insert into CANTABRIA.PC_CELO (cod_origen, cod_animal, fec_celo, metodo_deteccion, flag_servido, cod_usr)
-  values ('01','ANI000000002',TO_DATE('01/03/2026','DD/MM/YYYY'),'V','1','DEMO01');
-insert into CANTABRIA.PC_SERVICIO (cod_origen, nro_servicio, cod_animal, fec_servicio, flag_tipo_servicio, cod_semental, cod_tecnico, fec_prob_parto, cod_usr)
-  values ('01','0100000002','ANI000000002',TO_DATE('01/03/2026','DD/MM/YYYY'),'I','SEM0000001','VET001',TO_DATE('09/12/2026','DD/MM/YYYY'),'DEMO01');
+  values ('SU','SU00000002',TO_DATE('01/03/2026','DD/MM/YYYY'),'V','1','DEMO01');
+insert into CANTABRIA.PC_SERVICIO (nro_servicio, cod_origen, cod_animal, fec_servicio, flag_tipo_servicio, cod_semental, cod_tecnico, fec_prob_parto, cod_usr)
+  values ('SU00000002','SU','SU00000002',TO_DATE('01/03/2026','DD/MM/YYYY'),'I','SEM0000001','VET001',TO_DATE('09/12/2026','DD/MM/YYYY'),'DEMO01');
 insert into CANTABRIA.PC_DIAGNOSTICO_PRENEZ (cod_origen, nro_servicio, cod_animal, fec_diagnostico, metodo, resultado, dias_gestacion, cod_veterinario, cod_usr)
-  values ('01','0100000002','ANI000000002',TO_DATE('15/04/2026','DD/MM/YYYY'),'E','P',45,'VET001','DEMO01');
+  values ('SU','SU00000002','SU00000002',TO_DATE('15/04/2026','DD/MM/YYYY'),'E','P',45,'VET001','DEMO01');
 commit;
 
--- Lactancia de Paloma (2da lactancia, abierta por el parto de arriba) + ordenos + control lechero
+-- Lactancia de Paloma (2da lactancia, abierta por el parto de arriba) + ordenos
+-- (con ingreso real I09: almacen+producto terminado+OT) + control lechero
 insert into CANTABRIA.PC_LACTANCIA (cod_origen, cod_animal, nro_lactancia, fec_parto, flag_estado, cod_usr)
-  values ('01','ANI000000001',2,TO_DATE('15/06/2026','DD/MM/YYYY'),'1','DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('02/07/2026','DD/MM/YYYY'),1,12.5,'0100000001','ALM001','LECHE000001','DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('02/07/2026','DD/MM/YYYY'),2,10.2,'0100000001','ALM001','LECHE000001','DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('03/07/2026','DD/MM/YYYY'),1,13.0,'0100000001','ALM001','LECHE000001','DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('03/07/2026','DD/MM/YYYY'),2,10.5,'0100000001','ALM001','LECHE000001','DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('04/07/2026','DD/MM/YYYY'),1,12.8,'0100000001','ALM001','LECHE000001','DEMO01');
-insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('01','ANI000000001',TO_DATE('04/07/2026','DD/MM/YYYY'),2,10.0,'0100000001','ALM001','LECHE000001','DEMO01');
-update CANTABRIA.PC_LACTANCIA set litros_totales = 69.0 where cod_origen='01' and cod_animal='ANI000000001' and nro_lactancia=2;
+  values ('SU','SU00000001',2,TO_DATE('15/06/2026','DD/MM/YYYY'),'1','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('SU','SU00000001',TO_DATE('02/07/2026','DD/MM/YYYY'),1,12.5,'SU00000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('SU','SU00000001',TO_DATE('02/07/2026','DD/MM/YYYY'),2,10.2,'SU00000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('SU','SU00000001',TO_DATE('03/07/2026','DD/MM/YYYY'),1,13.0,'SU00000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('SU','SU00000001',TO_DATE('03/07/2026','DD/MM/YYYY'),2,10.5,'SU00000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('SU','SU00000001',TO_DATE('04/07/2026','DD/MM/YYYY'),1,12.8,'SU00000001','ALM001','LECHE000001','DEMO01');
+insert into CANTABRIA.PC_ORDENO (cod_origen, cod_animal, fec_ordeno, nro_turno, litros, nro_orden, cod_almacen, cod_producto, cod_usr) values ('SU','SU00000001',TO_DATE('04/07/2026','DD/MM/YYYY'),2,10.0,'SU00000001','ALM001','LECHE000001','DEMO01');
+update CANTABRIA.PC_LACTANCIA set litros_totales = 69.0 where cod_animal='SU00000001' and nro_lactancia=2;
 insert into CANTABRIA.PC_CONTROL_LECHERO (cod_origen, cod_animal, fec_control, porc_grasa, porc_proteina, celulas_somaticas, litros_dia_proy, cod_usr)
-  values ('01','ANI000000001',TO_DATE('01/07/2026','DD/MM/YYYY'),3.8,3.2,180000,23.0,'DEMO01');
+  values ('SU','SU00000001',TO_DATE('01/07/2026','DD/MM/YYYY'),3.8,3.2,180000,23.0,'DEMO01');
 commit;
 
 -- Condicion corporal
-insert into CANTABRIA.PC_CONDICION_CORPORAL (cod_origen, cod_animal, fec_evaluacion, puntaje_bcs, cod_usr) values ('01','ANI000000001',TO_DATE('01/07/2026','DD/MM/YYYY'),3.0,'DEMO01');
-insert into CANTABRIA.PC_CONDICION_CORPORAL (cod_origen, cod_animal, fec_evaluacion, puntaje_bcs, cod_usr) values ('01','ANI000000002',TO_DATE('01/07/2026','DD/MM/YYYY'),3.5,'DEMO01');
+insert into CANTABRIA.PC_CONDICION_CORPORAL (cod_origen, cod_animal, fec_evaluacion, puntaje_bcs, cod_usr) values ('SU','SU00000001',TO_DATE('01/07/2026','DD/MM/YYYY'),3.0,'DEMO01');
+insert into CANTABRIA.PC_CONDICION_CORPORAL (cod_origen, cod_animal, fec_evaluacion, puntaje_bcs, cod_usr) values ('SU','SU00000002',TO_DATE('01/07/2026','DD/MM/YYYY'),3.5,'DEMO01');
 commit;
 
--- Consumo de alimento: registro zootecnico de planificacion (potrero/dieta/
--- cabezas) amarrado a la OT 0100000001 -- el consumo REAL de insumos vive en
--- ARTICULO_MOV contra esa misma OT (ver nota de integracion mas arriba)
+-- Consumo de alimento: registro zootecnico de planificacion amarrado a la OT SU00000001
 insert into CANTABRIA.PC_ALIMENTACION_CONSUMO (cod_origen, cod_potrero, fec_consumo, cod_dieta, cabezas_lote, nro_orden, cod_usr)
-  values ('01','POT001',TO_DATE('03/07/2026','DD/MM/YYYY'),'DIE001',2,'0100000001','DEMO01');
+  values ('SU','POT001',TO_DATE('03/07/2026','DD/MM/YYYY'),'DIE001',2,'SU00000001','DEMO01');
 commit;
 
--- Eventos sanitarios: vacuna y desparasitante amarrados a la OT 0100000002
--- (el consumo real del producto sanitario vive en ARTICULO_MOV contra esa OT)
+-- Eventos sanitarios: vacuna y desparasitante amarrados a la OT SU00000002
 insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_prod_san, dosis, cod_veterinario, costo, nro_orden, fec_prox_refuerzo, fec_fin_retiro, cod_usr)
-  values ('01','ANI000000001',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'V','VAC001',2,'VET001',15.00,'0100000002',TO_DATE('01/08/2026','DD/MM/YYYY'),TO_DATE('22/02/2026','DD/MM/YYYY'),'DEMO01');
+  values ('SU','SU00000001',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'V','VAC001',2,'VET001',15.00,'SU00000002',TO_DATE('01/08/2026','DD/MM/YYYY'),TO_DATE('22/02/2026','DD/MM/YYYY'),'DEMO01');
 insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_prod_san, dosis, cod_veterinario, costo, nro_orden, fec_prox_refuerzo, fec_fin_retiro, cod_usr)
-  values ('01','ANI000000002',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'D','DES001',20,'VET001',8.00,'0100000002',TO_DATE('01/05/2026','DD/MM/YYYY'),TO_DATE('05/03/2026','DD/MM/YYYY'),'DEMO01');
+  values ('SU','SU00000002',1,TO_DATE('01/02/2026','DD/MM/YYYY'),'D','DES001',20,'VET001',8.00,'SU00000002',TO_DATE('01/05/2026','DD/MM/YYYY'),TO_DATE('05/03/2026','DD/MM/YYYY'),'DEMO01');
 -- Diagnostico de mastitis de Estrella: sin OT (no hay consumible propio), con
 -- Orden de Servicio (nro_os) porque implica el costo de la visita veterinaria
 -- externa -- AJUSTAR nro_os a una ORDEN_SERVICIO real (modulo Compras, w_cm314)
 insert into CANTABRIA.PC_SANIDAD_EVENTO (cod_origen, cod_animal, nro_evento, fec_evento, flag_tipo_evento, cod_enfermedad, cod_veterinario, costo, nro_os, observaciones, cod_usr)
-  values ('01','ANI000000005',1,TO_DATE('20/05/2026','DD/MM/YYYY'),'X','MASTI1','VET001',25.00,'0100000099','Mastitis clinica, cuartil posterior derecho','DEMO01');
+  values ('SU','SU00000005',1,TO_DATE('20/05/2026','DD/MM/YYYY'),'X','MASTI1','VET001',25.00,'0100000099','Mastitis clinica, cuartil posterior derecho','DEMO01');
 commit;
 
 -- Resultados de laboratorio: cultivo de mastitis de Estrella (propio) +
 -- calidad de semen del semental (propio) + analisis de calidad de leche
 -- hecho por el CLIENTE (Laive), que descuenta el costo de la factura de venta
 insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, cod_animal, fec_muestra, flag_tipo_muestra, laboratorio, cod_veterinario, nro_evento, fec_resultado, flag_estado, flag_origen, cod_usr)
-  values ('MU0000000001','01','ANI000000005',TO_DATE('20/05/2026','DD/MM/YYYY'),'L','Laboratorio Veterinario San Martin','VET001',1,TO_DATE('22/05/2026','DD/MM/YYYY'),'2','P','DEMO01');
-insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, flag_interpretacion) values ('MU0000000001',1,'Cultivo microbiologico','Staphylococcus aureus','A');
-insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, valor_ref_max, flag_interpretacion) values ('MU0000000001',2,'Celulas somaticas','850000','cel/ml',200000,'A');
+  values ('MU-00001','SU','SU00000005',TO_DATE('20/05/2026','DD/MM/YYYY'),'L','Laboratorio Veterinario San Martin','VET001',1,TO_DATE('22/05/2026','DD/MM/YYYY'),'2','P','DEMO01');
+insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_resultado, flag_interpretacion)
+  select reckey, 1, 'Cultivo microbiologico', 'Staphylococcus aureus', 'A' from CANTABRIA.PC_LABORATORIO where nro_muestra = 'MU-00001';
+insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_resultado, unidad_medida, valor_ref_max, flag_interpretacion)
+  select reckey, 2, 'Celulas somaticas', '850000', 'cel/ml', 200000, 'A' from CANTABRIA.PC_LABORATORIO where nro_muestra = 'MU-00001';
 
 insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, cod_semental, fec_muestra, flag_tipo_muestra, laboratorio, fec_resultado, flag_estado, flag_origen, cod_usr)
-  values ('MU0000000002','01','SEM0000001',TO_DATE('10/01/2026','DD/MM/YYYY'),'M','Central Genetica Peru',TO_DATE('12/01/2026','DD/MM/YYYY'),'2','P','DEMO01');
-insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, valor_ref_min, flag_interpretacion) values ('MU0000000002',1,'Motilidad espermatica','78','%',60,'N');
-insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, valor_ref_min, flag_interpretacion) values ('MU0000000002',2,'Concentracion','1200','millones/ml',800,'N');
+  values ('MU-00002','SU','SEM0000001',TO_DATE('10/01/2026','DD/MM/YYYY'),'M','Central Genetica Peru',TO_DATE('12/01/2026','DD/MM/YYYY'),'2','P','DEMO01');
+insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_resultado, unidad_medida, valor_ref_min, flag_interpretacion)
+  select reckey, 1, 'Motilidad espermatica', '78', '%', 60, 'N' from CANTABRIA.PC_LABORATORIO where nro_muestra = 'MU-00002';
+insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_resultado, unidad_medida, valor_ref_min, flag_interpretacion)
+  select reckey, 2, 'Concentracion', '1200', 'millones/ml', 800, 'N' from CANTABRIA.PC_LABORATORIO where nro_muestra = 'MU-00002';
 
 insert into CANTABRIA.PC_LABORATORIO (nro_muestra, cod_origen, fec_muestra, flag_tipo_muestra, laboratorio, fec_resultado, flag_estado, flag_origen, cliente, costo_analisis, flag_facturado, observaciones, cod_usr)
-  values ('MU0000000003','01',TO_DATE('03/07/2026','DD/MM/YYYY'),'L','Laive S.A.',TO_DATE('04/07/2026','DD/MM/YYYY'),'2','C','Laive S.A.',45.00,'1','Analisis de calidad de leche del lote entregado 03/07/2026, descontado de la factura de venta','DEMO01');
-insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, flag_interpretacion) values ('MU0000000003',1,'Grasa','3.7','%','N');
-insert into CANTABRIA.PC_LABORATORIO_DET (nro_muestra, item, parametro, valor_resultado, unidad_medida, flag_interpretacion) values ('MU0000000003',2,'Antibioticos (inhibidores)','Negativo',null,'N');
+  values ('MU-00003','SU',TO_DATE('03/07/2026','DD/MM/YYYY'),'L','Laive S.A.',TO_DATE('04/07/2026','DD/MM/YYYY'),'2','C','Laive S.A.',45.00,'1','Analisis de calidad de leche del lote entregado 03/07/2026, descontado de la factura de venta','DEMO01');
+insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_resultado, unidad_medida, flag_interpretacion)
+  select reckey, 1, 'Grasa', '3.7', '%', 'N' from CANTABRIA.PC_LABORATORIO where nro_muestra = 'MU-00003';
+insert into CANTABRIA.PC_LABORATORIO_DET (lab_reckey, item, parametro, valor_resultado, unidad_medida, flag_interpretacion)
+  select reckey, 2, 'Antibioticos (inhibidores)', 'Negativo', null, 'N' from CANTABRIA.PC_LABORATORIO where nro_muestra = 'MU-00003';
 commit;
 
 -- Movimiento de potrero (Estrella aislada por mastitis)
 insert into CANTABRIA.PC_MOVIMIENTO_POTRERO (cod_origen, cod_animal, fec_movimiento, cod_potrero_origen, cod_potrero_destino, motivo, cod_usr)
-  values ('01','ANI000000005',TO_DATE('10/05/2026','DD/MM/YYYY'),'POT001','POT002','Aislamiento por mastitis','DEMO01');
+  values ('SU','SU00000005',TO_DATE('10/05/2026','DD/MM/YYYY'),'POT001','POT002','Aislamiento por mastitis','DEMO01');
 commit;
 
--- Ciclo de vida completo: DTA + baja por venta de Estrella (mastitis cronica recidivante)
+-- Ciclo de vida completo: DTA + baja por venta de Estrella (mastitis cronica
+-- recidivante). nro_ov y nro_dta son documentos EXTERNOS a este script
+-- (Comercializacion y SENASA respectivamente) -- AJUSTAR antes de ejecutar.
+insert into CANTABRIA.ORDEN_VENTA (cod_origen, nro_ov, cliente, monto_total) values ('SU','OV00000001','Camal Municipal San Martin S.A.C.',2800.00);
+commit;
 insert into CANTABRIA.PC_DTA (nro_dta, fec_emision, cod_origen_fundo, razon_social_destino, motivo, cod_usr)
-  values ('DTA00000000001',TO_DATE('01/07/2026','DD/MM/YYYY'),'01','Camal Municipal San Martin S.A.C.','V','DEMO01');
-insert into CANTABRIA.PC_DTA_DETALLE (nro_dta, item, cod_origen, cod_animal) values ('DTA00000000001',1,'01','ANI000000005');
-insert into CANTABRIA.PC_BAJA (cod_origen, cod_animal, fec_baja, flag_motivo, precio_venta, nro_dta, observaciones, cod_usr)
-  values ('01','ANI000000005',TO_DATE('01/07/2026','DD/MM/YYYY'),'V',2800.00,'DTA00000000001','Vendida por descarte, mastitis cronica recidivante','DEMO01');
+  values ('DTA-2026-001',TO_DATE('01/07/2026','DD/MM/YYYY'),'SU','Camal Municipal San Martin S.A.C.','V','DEMO01');
+insert into CANTABRIA.PC_DTA_DETALLE (dta_reckey, item, cod_animal)
+  select reckey, 1, 'SU00000005' from CANTABRIA.PC_DTA where nro_dta = 'DTA-2026-001';
+insert into CANTABRIA.PC_BAJA (cod_origen, cod_animal, fec_baja, flag_motivo, precio_venta, nro_ov, dta_reckey, observaciones, cod_usr)
+  select 'SU', 'SU00000005', TO_DATE('01/07/2026','DD/MM/YYYY'), 'V', 2800.00, 'OV00000001', reckey, 'Vendida por descarte, mastitis cronica recidivante', 'DEMO01'
+    from CANTABRIA.PC_DTA where nro_dta = 'DTA-2026-001';
 commit;
 
 -- ============================================================================
