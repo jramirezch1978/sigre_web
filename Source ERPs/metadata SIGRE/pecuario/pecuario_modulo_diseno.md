@@ -1088,7 +1088,7 @@ También incluye: 2 potreros, **3 establos** (`PC_ESTABLO`: sala de ordeño, cor
 
 **Placeholders que hay que ajustar antes de ejecutar** (ver advertencia completa al inicio de la sección 9 del script): `cod_art` en `PC_DIETA_COMPONENTE`/`TIPO_PRODUCTO`/`PC_RECETA_DET` (deben ser artículos reales de `ARTICULO`), `nro_os` en el evento de mastitis de Estrella (debe ser una `ORDEN_SERVICIO` real), `nro_ov` en la baja de Estrella (debe ser una `ORDEN_VENTA` real), y `cod_origen='SU'` (debe ser el código real del fundo en `ORIGEN`).
 
-## 18. Investigación de mercado — SAP y Nisira (validación externa del diseño)
+## 18. Investigación de mercado — SAP, Nisira y otros ERP/software ganadero (validación externa del diseño)
 
 Investigación en internet (julio 2026) sobre si los ERP de referencia SAP y Nisira tienen módulo de producción pecuaria, para validar/ajustar este diseño contra lo que ya existe en el mercado. Se documenta aquí completa para no repetirla.
 
@@ -1140,6 +1140,11 @@ Nuestro diseño (`PC_ANIMAL`) asume **identidad individual por animal** (un `cod
 4. Reporte de "conversión alimenticia" (kg alimento / kg producido) y "% mortalidad" por lote, tomados del patrón de Nisira Avícola — aplicable también a bovino de engorde, no solo aves; se puede calcular sobre `PC_LOTE` + `PC_ALIMENTACION_CONSUMO`/`ARTICULO_MOV` sin tablas nuevas.
 5. Historial de pesajes (`PC_PESAJE`, un registro por pesada en vez de solo el último peso denormalizado en `PC_ANIMAL`), si se necesita curva de crecimiento — visto en la demo de AGRI (ver sección 18.4).
 6. ~~Decisión mayor pendiente: tablas específicas de incubación/eclosión para especies ovíparas~~ — **implementado**: `PC_POSTURA`, `PC_INCUBACION`, `PC_LOTE_MORTALIDAD` (CAM409–CAM411, sección 8 "Extensión avícola").
+7. **Identificación electrónica** (chapeta/arete RFID, bolo ruminal con chip — visto en Software Ganadero SG, sección 18.5): un campo `cod_rfid`/`cod_chip` opcional en `PC_ANIMAL`, para integrarse a futuro con lectores RFID sin tener que rediseñar el maestro.
+8. **Costeo por unidad producida** (costo por litro de leche, por kilo de carne, por destete — visto en Software Ganadero SG y Calipso, sección 18.5): reporte que cruza `PC_ORDENO`/`PC_LOTE` con el costo real de `ARTICULO_MOV` (alimentación) más costos indirectos vía `CENTROS_COSTO`; no requiere tablas nuevas, es una extensión de reportería (candidato a reporte nuevo, siguiente hueco libre en Reportes).
+9. **Tasa de descarte y reemplazo** (% del hato dado de baja/repuesto por período — visto en Software Ganadero SG): calculable sobre `PC_BAJA`/`PC_ANIMAL` sin tablas nuevas; candidato a indicador dentro del reporte `CAM717` (Indicadores reproductivos) o uno nuevo.
+10. **Técnicas reproductivas avanzadas** (transferencia de embriones, semen sexado, donadoras/receptoras — visto en Software Ganadero SG): `PC_SERVICIO.flag_tipo_servicio` hoy distingue monta natural (`N`) e inseminación artificial (`A`); se podría ampliar el dominio de valores (ej. `E`=Transferencia de embriones) sin cambiar la estructura de la tabla, si el cliente lo necesita.
+11. **Integración IoT** (básculas, collares inteligentes, drones para praderas — visto en Software Ganadero SG): fuera de alcance actual; si se requiere, sería una capa de integración externa que alimenta `PC_CONDICION_CORPORAL`/`PC_ANIMAL.peso_actual`/`PC_POTRERO`, no un cambio al modelo de datos.
 
 ### 18.4 Evidencia concreta: demo real de AGRI (`demo.agri.cl`)
 
@@ -1147,6 +1152,28 @@ Capturas de la demo pública de AGRI confirman en el propio producto lo descrito
 
 - **Pantalla "Ganadería | Cabezas"** (listado): columnas `Tag`, `Fecha Nacimiento`, `Fecha entrada`, `Fecha de salida`, `Lote`, `Último peso`, `Fecha último peso`, `Acciones` (con un ícono de tendencia/gráfico, sugiriendo un historial de pesajes por animal, no solo el último dato — ver punto 5 arriba). Las 4 capacidades destacadas del módulo: **Control de cabezas**, **Control de lotes**, **Registro de peso**, **Reportería** — confirma que son 4 vistas del mismo modelo, no módulos separados.
 - **Formulario "Ingreso de cabeza"** (`demo.agri.cl/livestocks`): campos `Fecha nacimiento`, `DIIO` (Dispositivo de Identificación Individual Oficial — el arete oficial chileno, equivalente al arete SENASA en Perú), `DIIO padre`, `DIIO madre` (genealogía referenciando directamente el arete oficial de otros animales, no un ID interno), `Hembra` (flag de sexo), `Raza`, `Id Lote` (combo, FK al lote), `Descripción`. Confirma exactamente la estructura de `PC_ANIMAL` (identidad + genealogía + raza + sexo + lote), con la única diferencia de que AGRI usa el arete oficial (`DIIO`) directamente como identificador de genealogía, mientras que en nuestro diseño la genealogía usa el documento interno `cod_animal` y el arete físico queda aparte en `cod_interno` (sección 8) — decisión ya tomada y consistente con el patrón de numeración de documentos del resto del ERP (sección 3).
+
+### 18.5 Otros ERP y software especializado en ganadería (ampliación de la investigación, julio 2026)
+
+Investigación adicional en internet, más allá de SAP y Nisira, para verificar si hay otros ERP o software especializado que valide o cuestione este diseño. Se encontraron principalmente **software especializado (vertical) de ganadería**, no ERP genéricos con módulo nativo — el mismo patrón que SAP (que necesita el add-on "AGRI") se repite en todo el mercado: ningún ERP genérico grande trae ganadería de fábrica.
+
+**Calipso ERP** (`calipso.com`, industria agropecuaria): controla el ciclo de vida completo del animal desde nacimiento o compra, con historia clínica individual, categorías, unidades de medida configurables (cabezas/kilos), manejo de alimento por categoría, sanidad con control de disponibilidad de remedios, movimientos de engorde/reproducción, pesaje, liquidación de ventas y consignaciones, con reglas de comercialización según estándares FAO. Confirma la misma estructura básica que ya tenemos: animal individual con categoría + historia clínica + trazabilidad desde nacimiento/compra hasta venta (exactamente `PC_ANIMAL` + `PC_SANIDAD_EVENTO` + `PC_BAJA`).
+
+**Software Ganadero SG** (`softwareganadero.com`, descrito como líder en Latinoamérica, presente en 21 países): el hallazgo más rico de esta ampliación. Cubre:
+- **Hato y lotes**: inventario por individuo/edad/peso/categoría/estado productivo/grupo/lote/potrero/raza, con tasas de descarte y reemplazo calculadas automáticamente — **gap identificado**, ver punto 9 de la sección 18.3.
+- **Reproducción**: días abiertos, intervalo servicio-concepción, tablero de fertilidad, inseminación artificial, **transferencia de embriones, donadoras/receptoras y semen sexado** — más avanzado que nuestro `PC_SERVICIO` actual (solo natural/IA) — ver punto 10 de la sección 18.3.
+- **Producción lechera**: por animal/lote/día/semana/mes, curvas de lactancia, persistencia, días secos, y calidad con **células somáticas y MUN** (Nitrógeno Ureico en Leche) — confirma `PC_CONTROL_LECHERO`, con MUN como parámetro adicional posible.
+- **Sanidad**: alertas de mastitis/retención de placenta, **compatibilidad con collares inteligentes**, y **tiempo de retiro de productos aplicados** — confirma exactamente el diseño de `PC_SANIDAD_EVENTO`/`PC_PRODUCTO_SANITARIO.dias_retiro`.
+- **Trazabilidad**: auditoría de cuándo se ingresó cada dato, **identificación electrónica (chapetas RFID, bolos ruminales con chip)** — gap identificado, ver punto 7 de la sección 18.3.
+- **Potreros**: praderas, días de descanso, rotación tipo "pastoreo Voisin", capacidad de carga en kilos y cabezas — confirma exactamente `PC_POTRERO`.
+- **Costeo**: costo por litro de leche, por kilo de carne, por destete, por novilla de vientre, vía absorción total de costos — gap identificado, ver punto 8 de la sección 18.3.
+- **Integración IoT**: básculas, collares, drones — fuera de alcance, ver punto 11 de la sección 18.3.
+
+**PROGAN** y **Guals/Aritmos Granjas** (mencionados en la búsqueda, no investigados en profundidad): software especializado similar, este último cubre explícitamente porcino/caprino/ovino/vacuno/avícola/equino en una misma plataforma — confirma que el enfoque "cualquier especie" de este módulo (sección 2) es una práctica de mercado real, no una idea aislada.
+
+**Odoo** (ERP genérico open-source): no trae ganadería nativa — existen varios addons de terceros en su tienda de apps (`apps.odoo.com`) con funcionalidad similar (identificación individual, genealogía, sanidad, alimentación, movimientos de grupo). Confirma el mismo patrón que SAP: los ERP genéricos grandes dejan la ganadería a addons/partners especializados, nunca la traen en el núcleo — validación adicional de que un módulo `PC_*` separado (no fusionado con Campo) es el enfoque correcto, consistente con la discusión de módulo independiente vs. Campo tratada anteriormente en esta sesión.
+
+Fuentes consultadas: [Calipso — Software agropecuario ganadero](https://www.calipso.com/industrias/software-agropecuario/ganadero/), [Software Ganadero SG](https://www.softwareganadero.com/), [PROGAN Software Ganadero](https://progansoftware.com/), [Aritmos Granjas](https://agriaritmos.azurewebsites.net/esp/software-gestion-granjas-porcino-caprino-ovino-vacuno-bovino-avicola-equino.php), [Odoo Apps — Farm Livestock](https://apps.odoo.com/apps/modules/19.0/farm_livestock), [Odoo Apps — Smart Livestock Management](https://apps.odoo.com/apps/modules/17.0/animal_management).
 
 ## 19. Casos de uso resueltos (paso a paso)
 
