@@ -1,6 +1,6 @@
-# Módulo Agropecuario (Campo + Pecuario) — Diseño funcional
+# Módulo Pecuario — Diseño funcional
 
-Pecuario **no es un módulo aparte**: es una extensión de **Campo**, así que las ventanas usan el mismo prefijo PowerBuilder que ya existe para Campo (`w_cam###`, confirmado en `ws_objects/Campo`) en vez de un prefijo propio. Las tablas sí mantienen su propio prefijo `PC_*` (Pecuario) para distinguirlas claramente de las tablas agrícolas (`CAMPO_*`) dentro del mismo esquema — solo cambia la numeración de ventanas, no las tablas.
+**Pecuario es un módulo independiente**, no una extensión de Campo (decisión final, sección 20 punto 10). Tiene su propia librería PowerBuilder (`ws_objects/Pecuario/pecuario_w.pbl.src`, `pecuario_dw.pbl.src`, etc., ya creada) y su propio prefijo de ventana, **`PC###`** (no `w_cam###` de Campo) — igual patrón que cada dominio de negocio del sistema (`Almacen`, `Comercializacion`, `Contabilidad`... cada uno con su propia librería PBL y su propio prefijo). Las tablas usan el prefijo `PC_*`, coincidiendo con el prefijo de ventana.
 
 Este documento es la **única fuente de verdad** del diseño (no se crean documentos adicionales). Incluye, además del diseño de tablas, el análisis completo de cada módulo existente que se investigó para integrar Pecuario correctamente — así no hay que volver a investigarlos.
 
@@ -18,17 +18,17 @@ Dentro de cada módulo, el número de ventana se asigna **por tipo de opción de
 | 700–899 | Reportes (impresión/exportación) |
 | 900–999 | Procesos (batch, sin interacción de usuario) |
 
-Campo (caña) ya ocupa: `001–060` y `200–201` (Tablas), `301–390` y `412–434` (Operaciones), `700–715` y `752–758` (Reportes). **No se numera simplemente continuando después del último código usado**: se rellena el primer hueco contiguo lo bastante grande dentro de cada rango (ej. entre `CAM060` y `CAM200` hay un hueco de 139 números libres — ahí es donde va Pecuario, no después de `CAM201`):
+Al ser Pecuario un **módulo independiente con su propio prefijo (`PC`)**, no comparte espacio de numeración con Campo (`CAM###`) ni con ningún otro módulo — por eso se numera **secuencialmente desde el inicio de cada rango**, sin necesidad de buscar huecos ni evitar colisiones con otro dominio:
 
-| Tipo | Hueco usado (tamaño) | Bloque asignado a Pecuario |
+| Tipo | Bloque asignado a Pecuario | Ocupado / disponible |
 |---|---|---|
-| Tablas | `061`–`199` (139 libres) | `CAM061`–`CAM070` (10) |
-| Operaciones | `391`–`411` (21 libres) | `CAM391`–`CAM411` (21 — **hueco agotado**, ver nota) |
-| Consultas | `500`–`699` (todo libre) | `CAM500`–`CAM506` (7) |
-| Reportes | `716`–`751` (36 libres) | `CAM716`–`CAM722` (7) |
-| Procesos | `900`–`999` (todo libre) | `CAM900`–`CAM905` (6) |
+| Tablas | `PC001`–`PC010` (10) | quedan `PC011`–`PC299` libres (289) |
+| Operaciones | `PC301`–`PC321` (21) | quedan `PC322`–`PC499` libres (178) |
+| Consultas | `PC501`–`PC507` (7) | quedan `PC508`–`PC699` libres (192) |
+| Reportes | `PC701`–`PC707` (7) | quedan `PC708`–`PC899` libres (192) |
+| Procesos | `PC901`–`PC906` (6) | quedan `PC907`–`PC999` libres (93) |
 
-**Nota — hueco de Operaciones agotado**: la extensión avícola (sección 8b: `PC_POSTURA` CAM409, `PC_INCUBACION` CAM410, `PC_LOTE_MORTALIDAD` CAM411) consume los últimos 3 códigos libres del hueco `391`–`411`. Cualquier opción de tipo Operaciones que se agregue a Pecuario en el futuro deberá numerarse en el **siguiente** hueco contiguo libre después de `CAM434` (donde retoma Campo), no continuar informalmente en `412` en adelante.
+A diferencia de cuando se evaluó fusionar con Campo (donde el rango de Operaciones se agotó tras la extensión avícola, ver historial de decisiones), como módulo independiente Pecuario tiene sus 199 números de Operaciones enteros para sí mismo — cualquier opción nueva simplemente continúa la secuencia (`PC322` sería la siguiente).
 
 **Criterio de clasificación** (mismo que ya usa el módulo de Activo Fijo para su "Maestro de Activo Fijo"): el maestro de cada *especimen individual* (acá `PC_ANIMAL`) va en **Operaciones**, no en Tablas — porque es un registro vivo que crece todos los días, a diferencia de un catálogo de parametrización.
 
@@ -52,57 +52,57 @@ Regla confirmada por el usuario: **toda tabla debe tener un campo como PK**. Hay
 
 | Menú Principal | Código | Ventana / Proceso | Tabla | Descripción |
 |---|---|---|---|---|
-| **TABLAS** | CAM061 | Razas | `PC_RAZA` | Razas (de cualquier especie) |
-| TABLAS | CAM062 | Categorías | `PC_CATEGORIA` | Etapas del animal (ternero, vaquillona, novilla, vaca en producción/seca/descarte, toro) — viene precargada |
-| TABLAS | CAM063 | Potreros | `PC_POTRERO` | Potreros de pastoreo por fundo, con capacidad de carga |
-| TABLAS | CAM064 | Sementales | `PC_SEMENTAL` | Catálogo de sementales/pajillas para inseminación artificial |
-| TABLAS | CAM065 | Productos sanitarios | `PC_PRODUCTO_SANITARIO` | Vacunas, desparasitantes, medicamentos, con período de retiro |
-| TABLAS | CAM066 | Enfermedades | `PC_ENFERMEDAD` | Catálogo de enfermedades/diagnósticos |
-| TABLAS | CAM067 | Dietas | `PC_DIETA` + `PC_DIETA_COMPONENTE` | Raciones por categoría, con insumos referenciados a `ARTICULO` (Almacén) |
-| TABLAS | CAM068 | Especies | `TG_ESPECIES` (filtrado `flag_tipo_matprim='P'`) | Bovino, porcino, caprino, ovino, equino, aves, etc. — agrupa las razas; reutiliza el catálogo compartido de especies, no crea tabla propia. Código autogenerado (`AQ000001`...) vía `NUM_TABLAS` |
-| TABLAS | CAM069 | Recetas de concentrado | `PC_RECETA` + `PC_RECETA_DET` | Fórmula de fabricación propia de concentrado/insumos (materia prima → producto terminado) |
-| TABLAS | CAM070 | Establos | `PC_ESTABLO` | Ubicación cubierta por fundo (sala de ordeño, maternidad, cuarentena, corral de manejo, engorde) |
-| **OPERACIONES** | CAM391 | Maestro de animal | `PC_ANIMAL` | Alta y mantenimiento del hato (identificación, genealogía, categoría, ubicación) |
-| OPERACIONES | CAM392 | Registro de celo | `PC_CELO` | Detección de celo (visual, podómetro/collar, hormonal) |
-| OPERACIONES | CAM393 | Registro de servicio | `PC_SERVICIO` | Monta natural o inseminación artificial |
-| OPERACIONES | CAM394 | Diagnóstico de preñez | `PC_DIAGNOSTICO_PRENEZ` | Confirmación/descarte de preñez (tacto rectal o ecografía) |
-| OPERACIONES | CAM395 | Registro de parto | `PC_PARTO` | Parto, alta automática de la cría |
-| OPERACIONES | CAM396 | Lactancia | `PC_LACTANCIA` | Apertura automática al parto; cierre (secado) manual |
-| OPERACIONES | CAM397 | Ordeño diario | `PC_ORDENO` | Litros por turno (mañana/tarde/noche) |
-| OPERACIONES | CAM398 | Control lechero | `PC_CONTROL_LECHERO` | Muestreo periódico de calidad (grasa, proteína, CCS) |
-| OPERACIONES | CAM399 | Condición corporal | `PC_CONDICION_CORPORAL` | Evaluación BCS (escala 1-5) |
-| OPERACIONES | CAM400 | Consumo de alimento | `PC_ALIMENTACION_CONSUMO` | Consumo diario de dieta por potrero/lote |
-| OPERACIONES | CAM401 | Eventos sanitarios | `PC_SANIDAD_EVENTO` | Vacunas, desparasitaciones, tratamientos, diagnósticos |
-| OPERACIONES | CAM402 | Muestras de laboratorio | `PC_LABORATORIO` + `PC_LABORATORIO_DET` | Toma de muestra y carga de resultados (sangre, leche, fecal, semen, tejido) |
-| OPERACIONES | CAM403 | Movimiento de potrero | `PC_MOVIMIENTO_POTRERO` | Traslado/rotación de potreros |
-| OPERACIONES | CAM404 | Documento de Tránsito Animal | `PC_DTA` + `PC_DTA_DETALLE` | Emisión de DTA para venta o traslado (SENASA) |
-| OPERACIONES | CAM405 | Baja de animal | `PC_BAJA` | Venta (con FK a `ORDEN_VENTA`), muerte o descarte; desactiva el animal (trigger) |
-| OPERACIONES | CAM406 | Vinculación de animales a OT | `PC_OT_ANIMAL` | Asocia una Orden de Trabajo Pecuaria (`ORDEN_TRABAJO`, `ot_adm='PECU'`) con el/los animal(es) que cubre |
-| OPERACIONES | CAM407 | Control de lotes | `PC_LOTE` | Alta/cierre de lotes (cohortes de manejo); las cabezas se asignan vía `PC_ANIMAL.cod_lote` |
-| OPERACIONES | CAM408 | Movimiento de establo | `PC_MOVIMIENTO_ESTABLO` | Traslado entre establos (sala de ordeño, maternidad, cuarentena), independiente del potrero |
-| OPERACIONES | CAM409 | Registro de postura | `PC_POSTURA` | Producción diaria de huevos de un lote de reproductoras (avícola) |
-| OPERACIONES | CAM410 | Incubación | `PC_INCUBACION` | Carga de incubadora y resultado de eclosión; traza lote-reproductoras → lote-engorde (avícola) |
-| OPERACIONES | CAM411 | Mortalidad de lote | `PC_LOTE_MORTALIDAD` | Mortalidad agregada de un lote sin registro individual por cabeza (avícola / engorde masivo) |
-| **CONSULTAS** | CAM500 | Ficha del animal | — | Vista 360°: datos generales + genealogía + historial reproductivo + producción + sanidad |
-| CONSULTAS | CAM501 | Historial reproductivo | — | Por animal o por rango de fechas (celos, servicios, diagnósticos, partos) |
-| CONSULTAS | CAM502 | Producción de leche | — | Por animal, por potrero o por período |
-| CONSULTAS | CAM503 | Calendario sanitario | — | Próximos refuerzos y fin de período de retiro vigente |
-| CONSULTAS | CAM504 | Trazabilidad SENASA | — | DTA por animal |
-| CONSULTAS | CAM505 | Resultados de laboratorio | — | Pendientes y con resultado, por animal o por tipo de muestra |
-| CONSULTAS | CAM506 | Historial de consumibles por animal | — | Alimentación + medicinas, leídas de `ARTICULO_MOV` real (vía `PC_OT_ANIMAL` → `ORDEN_TRABAJO` → `OPERACIONES`), no de una tabla propia de Pecuario |
-| **REPORTES** | CAM716 | Resumen del hato | — | Inventario de animales por categoría, potrero y estado reproductivo |
-| REPORTES | CAM717 | Indicadores reproductivos | — | Intervalo entre partos, días abiertos, tasa de preñez, % distocias |
-| REPORTES | CAM718 | Producción de leche | — | Mensual, consolidado y por vaca |
-| REPORTES | CAM719 | Control lechero | — | Calidad de leche (grasa/proteína/CCS) por período |
-| REPORTES | CAM720 | Costos de alimentación | — | Por potrero/categoría, cruzando `PC_ALIMENTACION_CONSUMO` con costo de `ARTICULO` |
-| REPORTES | CAM721 | Sanitario | — | Vacunas aplicadas, próximos vencimientos, período de retiro vigente |
-| REPORTES | CAM722 | Bajas del período | — | Ventas, muertes y descartes |
-| **PROCESOS** | CAM900 | Recategorización automática | — | Recalcula `PC_ANIMAL.cod_categoria` según edad y estado reproductivo |
-| PROCESOS | CAM901 | Actualización de estado reproductivo | — | Recalcula `PC_ANIMAL.flag_estado_repro` según el último evento (celo/servicio/diagnóstico/parto) |
-| PROCESOS | CAM902 | Cierre automático de lactancia | — | Marca `fec_secado` cuando se alcanza la fecha proyectada |
-| PROCESOS | CAM903 | Recálculo de litros de lactancia | — | Recalcula `PC_LACTANCIA.litros_totales` sumando `PC_ORDENO` |
-| PROCESOS | CAM904 | Revaluación NIC 41 | — | Ajuste periódico a valor razonable del activo biológico (ver sección 15) |
-| PROCESOS | CAM905 | Cálculo de vencimientos sanitarios | — | Recalcula `fec_prox_refuerzo` y `fec_fin_retiro` en `PC_SANIDAD_EVENTO` |
+| **TABLAS** | PC001 | Razas | `PC_RAZA` | Razas (de cualquier especie) |
+| TABLAS | PC002 | Categorías | `PC_CATEGORIA` | Etapas del animal (ternero, vaquillona, novilla, vaca en producción/seca/descarte, toro) — viene precargada |
+| TABLAS | PC003 | Potreros | `PC_POTRERO` | Potreros de pastoreo por fundo, con capacidad de carga |
+| TABLAS | PC004 | Sementales | `PC_SEMENTAL` | Catálogo de sementales/pajillas para inseminación artificial |
+| TABLAS | PC005 | Productos sanitarios | `PC_PRODUCTO_SANITARIO` | Vacunas, desparasitantes, medicamentos, con período de retiro |
+| TABLAS | PC006 | Enfermedades | `PC_ENFERMEDAD` | Catálogo de enfermedades/diagnósticos |
+| TABLAS | PC007 | Dietas | `PC_DIETA` + `PC_DIETA_COMPONENTE` | Raciones por categoría, con insumos referenciados a `ARTICULO` (Almacén) |
+| TABLAS | PC008 | Especies | `TG_ESPECIES` (filtrado `flag_tipo_matprim='P'`) | Bovino, porcino, caprino, ovino, equino, aves, etc. — agrupa las razas; reutiliza el catálogo compartido de especies, no crea tabla propia. Código autogenerado (`AQ000001`...) vía `NUM_TABLAS` |
+| TABLAS | PC009 | Recetas de concentrado | `PC_RECETA` + `PC_RECETA_DET` | Fórmula de fabricación propia de concentrado/insumos (materia prima → producto terminado) |
+| TABLAS | PC010 | Establos | `PC_ESTABLO` | Ubicación cubierta por fundo (sala de ordeño, maternidad, cuarentena, corral de manejo, engorde) |
+| **OPERACIONES** | PC301 | Maestro de animal | `PC_ANIMAL` | Alta y mantenimiento del hato (identificación, genealogía, categoría, ubicación) |
+| OPERACIONES | PC302 | Registro de celo | `PC_CELO` | Detección de celo (visual, podómetro/collar, hormonal) |
+| OPERACIONES | PC303 | Registro de servicio | `PC_SERVICIO` | Monta natural o inseminación artificial |
+| OPERACIONES | PC304 | Diagnóstico de preñez | `PC_DIAGNOSTICO_PRENEZ` | Confirmación/descarte de preñez (tacto rectal o ecografía) |
+| OPERACIONES | PC305 | Registro de parto | `PC_PARTO` | Parto, alta automática de la cría |
+| OPERACIONES | PC306 | Lactancia | `PC_LACTANCIA` | Apertura automática al parto; cierre (secado) manual |
+| OPERACIONES | PC307 | Ordeño diario | `PC_ORDENO` | Litros por turno (mañana/tarde/noche) |
+| OPERACIONES | PC308 | Control lechero | `PC_CONTROL_LECHERO` | Muestreo periódico de calidad (grasa, proteína, CCS) |
+| OPERACIONES | PC309 | Condición corporal | `PC_CONDICION_CORPORAL` | Evaluación BCS (escala 1-5) |
+| OPERACIONES | PC310 | Consumo de alimento | `PC_ALIMENTACION_CONSUMO` | Consumo diario de dieta por potrero/lote |
+| OPERACIONES | PC311 | Eventos sanitarios | `PC_SANIDAD_EVENTO` | Vacunas, desparasitaciones, tratamientos, diagnósticos |
+| OPERACIONES | PC312 | Muestras de laboratorio | `PC_LABORATORIO` + `PC_LABORATORIO_DET` | Toma de muestra y carga de resultados (sangre, leche, fecal, semen, tejido) |
+| OPERACIONES | PC313 | Movimiento de potrero | `PC_MOVIMIENTO_POTRERO` | Traslado/rotación de potreros |
+| OPERACIONES | PC314 | Documento de Tránsito Animal | `PC_DTA` + `PC_DTA_DETALLE` | Emisión de DTA para venta o traslado (SENASA) |
+| OPERACIONES | PC315 | Baja de animal | `PC_BAJA` | Venta (con FK a `ORDEN_VENTA`), muerte o descarte; desactiva el animal (trigger) |
+| OPERACIONES | PC316 | Vinculación de animales a OT | `PC_OT_ANIMAL` | Asocia una Orden de Trabajo Pecuaria (`ORDEN_TRABAJO`, `ot_adm='PECU'`) con el/los animal(es) que cubre |
+| OPERACIONES | PC317 | Control de lotes | `PC_LOTE` | Alta/cierre de lotes (cohortes de manejo); las cabezas se asignan vía `PC_ANIMAL.cod_lote` |
+| OPERACIONES | PC318 | Movimiento de establo | `PC_MOVIMIENTO_ESTABLO` | Traslado entre establos (sala de ordeño, maternidad, cuarentena), independiente del potrero |
+| OPERACIONES | PC319 | Registro de postura | `PC_POSTURA` | Producción diaria de huevos de un lote de reproductoras (avícola) |
+| OPERACIONES | PC320 | Incubación | `PC_INCUBACION` | Carga de incubadora y resultado de eclosión; traza lote-reproductoras → lote-engorde (avícola) |
+| OPERACIONES | PC321 | Mortalidad de lote | `PC_LOTE_MORTALIDAD` | Mortalidad agregada de un lote sin registro individual por cabeza (avícola / engorde masivo) |
+| **CONSULTAS** | PC501 | Ficha del animal | — | Vista 360°: datos generales + genealogía + historial reproductivo + producción + sanidad |
+| CONSULTAS | PC502 | Historial reproductivo | — | Por animal o por rango de fechas (celos, servicios, diagnósticos, partos) |
+| CONSULTAS | PC503 | Producción de leche | — | Por animal, por potrero o por período |
+| CONSULTAS | PC504 | Calendario sanitario | — | Próximos refuerzos y fin de período de retiro vigente |
+| CONSULTAS | PC505 | Trazabilidad SENASA | — | DTA por animal |
+| CONSULTAS | PC506 | Resultados de laboratorio | — | Pendientes y con resultado, por animal o por tipo de muestra |
+| CONSULTAS | PC507 | Historial de consumibles por animal | — | Alimentación + medicinas, leídas de `ARTICULO_MOV` real (vía `PC_OT_ANIMAL` → `ORDEN_TRABAJO` → `OPERACIONES`), no de una tabla propia de Pecuario |
+| **REPORTES** | PC701 | Resumen del hato | — | Inventario de animales por categoría, potrero y estado reproductivo |
+| REPORTES | PC702 | Indicadores reproductivos | — | Intervalo entre partos, días abiertos, tasa de preñez, % distocias |
+| REPORTES | PC703 | Producción de leche | — | Mensual, consolidado y por vaca |
+| REPORTES | PC704 | Control lechero | — | Calidad de leche (grasa/proteína/CCS) por período |
+| REPORTES | PC705 | Costos de alimentación | — | Por potrero/categoría, cruzando `PC_ALIMENTACION_CONSUMO` con costo de `ARTICULO` |
+| REPORTES | PC706 | Sanitario | — | Vacunas aplicadas, próximos vencimientos, período de retiro vigente |
+| REPORTES | PC707 | Bajas del período | — | Ventas, muertes y descartes |
+| **PROCESOS** | PC901 | Recategorización automática | — | Recalcula `PC_ANIMAL.cod_categoria` según edad y estado reproductivo |
+| PROCESOS | PC902 | Actualización de estado reproductivo | — | Recalcula `PC_ANIMAL.flag_estado_repro` según el último evento (celo/servicio/diagnóstico/parto) |
+| PROCESOS | PC903 | Cierre automático de lactancia | — | Marca `fec_secado` cuando se alcanza la fecha proyectada |
+| PROCESOS | PC904 | Recálculo de litros de lactancia | — | Recalcula `PC_LACTANCIA.litros_totales` sumando `PC_ORDENO` |
+| PROCESOS | PC905 | Revaluación NIC 41 | — | Ajuste periódico a valor razonable del activo biológico (ver sección 15) |
+| PROCESOS | PC906 | Cálculo de vencimientos sanitarios | — | Recalcula `fec_prox_refuerzo` y `fec_fin_retiro` en `PC_SANIDAD_EVENTO` |
 
 ## 5. Análisis de módulos existentes (investigación persistida — no repetir)
 
@@ -197,34 +197,34 @@ Vista de alto nivel de todo el módulo: desde la configuración de catálogos ha
 flowchart TD
     A["Configurar catalogos base<br/>Especies (TG_ESPECIES), Razas, Categorias,<br/>Potreros, Establos, Sementales, Dietas"] --> B{"Como se maneja<br/>la crianza?"}
 
-    B -->|"Individual<br/>(bovino, porcino, caprino,<br/>ovino, equino)"| C["(CAM391) Alta de animal"]
-    B -->|"Lote masivo<br/>(aves, engorde)"| D["(CAM407) Alta de lote"]
+    B -->|"Individual<br/>(bovino, porcino, caprino,<br/>ovino, equino)"| C["(PC301) Alta de animal"]
+    B -->|"Lote masivo<br/>(aves, engorde)"| D["(PC317) Alta de lote"]
 
     C --> C1["Asignar potrero, establo<br/>y/o lote de manejo"]
     C1 --> C2["Reproduccion:<br/>celo -> servicio -> diagnostico -> parto"]
-    C2 --> C3["(CAM396) Lactancia<br/>se abre automaticamente al parto"]
-    C3 --> C3a["(CAM397) Ordeno diario<br/>genera ingreso real I09 en Almacen<br/>(misma OT del consumo de alimento)"]
-    C3a --> C3b["(CAM398) Control lechero<br/>calidad: grasa, proteina, CCS"]
-    C3b --> C3c["(CAM402) Analisis de laboratorio de leche<br/>propio, o del CLIENTE (ej. Laive: descuenta<br/>el costo de la factura de venta)"]
+    C2 --> C3["(PC306) Lactancia<br/>se abre automaticamente al parto"]
+    C3 --> C3a["(PC307) Ordeno diario<br/>genera ingreso real I09 en Almacen<br/>(misma OT del consumo de alimento)"]
+    C3a --> C3b["(PC308) Control lechero<br/>calidad: grasa, proteina, CCS"]
+    C3b --> C3c["(PC312) Analisis de laboratorio de leche<br/>propio, o del CLIENTE (ej. Laive: descuenta<br/>el costo de la factura de venta)"]
     C1 --> C4["Nutricion:<br/>dieta y consumo de alimento"]
     C1 --> C5["Sanidad:<br/>vacunas, desparasitaciones, tratamientos"]
-    C5 --> C6["(CAM402) Laboratorio veterinario<br/>(si se requiere analisis)"]
+    C5 --> C6["(PC312) Laboratorio veterinario<br/>(si se requiere analisis)"]
     C1 --> C7["Movimientos:<br/>rotacion de potrero / cambio de establo"]
-    C2 --> C8["(CAM405) Baja:<br/>venta, muerte o descarte"]
+    C2 --> C8["(PC315) Baja:<br/>venta, muerte o descarte"]
     C3c --> C8
     C5 --> C8
 
-    D --> D1["(CAM409) Postura diaria<br/>de huevos (solo reproductoras)"]
-    D1 --> D2["(CAM410) Incubacion<br/>y resultado de eclosion"]
+    D --> D1["(PC319) Postura diaria<br/>de huevos (solo reproductoras)"]
+    D1 --> D2["(PC320) Incubacion<br/>y resultado de eclosion"]
     D2 --> D3["Se forma el lote de engorde<br/>(trazabilidad reproductoras -> engorde)"]
     D3 --> D4["Consumo de alimento del lote"]
-    D3 --> D5["(CAM411) Mortalidad de lote"]
+    D3 --> D5["(PC321) Mortalidad de lote"]
     D4 --> D6["Venta / cierre del lote"]
     D5 --> D6
 
-    C8 --> E["(CAM404) DTA SENASA<br/>si el animal sale del predio"]
+    C8 --> E["(PC314) DTA SENASA<br/>si el animal sale del predio"]
     D6 --> E
-    E --> F["Consultas (CAM500-506) y<br/>Reportes (CAM716-722) de gestion"]
+    E --> F["Consultas (PC501-507) y<br/>Reportes (PC701-707) de gestion"]
 
     style A fill:#1F4E79,color:#ffffff
     style B fill:#2E74B5,color:#ffffff
@@ -235,23 +235,23 @@ flowchart TD
 
 ### 6.2 Árbol de opciones de menú
 
-Agrupación visual de las 49 opciones nuevas (detalle completo en la sección 4):
+Agrupación visual de las 51 opciones (detalle completo en la sección 4):
 
 ```mermaid
 flowchart TD
-    M["MODULO PECUARIO<br/>49 opciones nuevas"]
+    M["MODULO PECUARIO<br/>51 opciones"]
 
-    M --> T["TABLAS<br/>CAM061 - CAM070<br/>(10 opciones)<br/>Catalogos de configuracion"]
-    M --> O["OPERACIONES<br/>CAM391 - CAM411<br/>(21 opciones)<br/>Registro diario"]
-    M --> Q["CONSULTAS<br/>CAM500 - CAM506<br/>(7 opciones)<br/>Solo lectura"]
-    M --> R["REPORTES<br/>CAM716 - CAM722<br/>(7 opciones)<br/>Impresion / exportacion"]
-    M --> P["PROCESOS<br/>CAM900 - CAM903<br/>(4 opciones)<br/>Automaticos (batch)"]
+    M --> T["TABLAS<br/>PC001 - PC010<br/>(10 opciones)<br/>Catalogos de configuracion"]
+    M --> O["OPERACIONES<br/>PC301 - PC321<br/>(21 opciones)<br/>Registro diario"]
+    M --> Q["CONSULTAS<br/>PC501 - PC507<br/>(7 opciones)<br/>Solo lectura"]
+    M --> R["REPORTES<br/>PC701 - PC707<br/>(7 opciones)<br/>Impresion / exportacion"]
+    M --> P["PROCESOS<br/>PC901 - PC906<br/>(6 opciones)<br/>Automaticos (batch)"]
 
     T --- T1["Razas, Categorias, Potreros,<br/>Establos, Sementales,<br/>Productos sanitarios,<br/>Enfermedades, Dietas,<br/>Especies, Recetas"]
     O --- O1["Maestro de animal, Lotes,<br/>Reproduccion, Produccion de leche,<br/>Nutricion, Sanidad, Laboratorio,<br/>Movimientos, Bajas, DTA,<br/>Postura, Incubacion, Mortalidad de lote"]
     Q --- Q1["Ficha del animal, Historial<br/>reproductivo, Produccion de leche,<br/>Calendario sanitario, Trazabilidad<br/>SENASA, Resultados de laboratorio,<br/>Historial de consumibles"]
     R --- R1["Resumen del hato, Indicadores<br/>reproductivos, Produccion de leche,<br/>Control lechero, Costos de<br/>alimentacion, Sanitario, Bajas"]
-    P --- P1["Recategorizacion, Actualizacion<br/>de estado reproductivo, Cierre<br/>de lactancia, Recalculo de litros"]
+    P --- P1["Recategorizacion, Actualizacion<br/>de estado reproductivo, Cierre<br/>de lactancia, Recalculo de litros,<br/>Revaluacion NIC 41, Vencimientos<br/>sanitarios"]
 
     style M fill:#1F4E79,color:#ffffff
     style T fill:#2E74B5,color:#ffffff
@@ -332,37 +332,37 @@ erDiagram
 
 ![Diagrama de entidades](diagrama_entidades.png)
 
-## 7. Catálogos maestros (CAM061–CAM070)
+## 7. Catálogos maestros (PC001–PC010)
 
-- **Especies** (CAM068): **no existe tabla `PC_ESPECIE`** — se reutiliza `CANTABRIA.TG_ESPECIES`, el catálogo real y ya existente del módulo de pesca/acopio (PK `especie CHAR(8)`, 15 FK reales en producción desde tablas de flota pesquera). Se le agregó el valor `'P'` (Pecuario) a su columna **`flag_tipo_matprim`** (confirmado con datos reales, `data/TG_ESPECIES.json`: las 5 filas de pesca tienen `flag_tipo_matprim='H'`; **`flag_tipo_especie` NO es el discriminador correcto** — en esos mismos datos vale `'3'` o `null`, probablemente una clasificación IMARPE ajena a Pecuario, que no se toca) y dos columnas nuevas y opcionales: `periodo_gestacion_dias` (mamíferos) y `periodo_incubacion_dias` (aves). CAM068 es una pantalla de Pecuario que mantiene únicamente las filas con `flag_tipo_matprim='P'` de esa tabla compartida — decisión tomada tras investigar que `PC_ESPECIE` solo necesitaba 3-4 columnas (código, nombre, estado, período de gestación), no ameritaba una tabla nueva; se descartó adaptar `TG_ESPECIES` para nada más que esto porque el resto de sus columnas (`habitat`, `longitud_max/min`, `peso_max/min`, `temperatura`, `cod_produce`) son específicas de tallas de captura/temperatura de agua (regulación IMARPE), sin uso en pecuaria.
+- **Especies** (PC008): **no existe tabla `PC_ESPECIE`** — se reutiliza `CANTABRIA.TG_ESPECIES`, el catálogo real y ya existente del módulo de pesca/acopio (PK `especie CHAR(8)`, 15 FK reales en producción desde tablas de flota pesquera). Se le agregó el valor `'P'` (Pecuario) a su columna **`flag_tipo_matprim`** (confirmado con datos reales, `data/TG_ESPECIES.json`: las 5 filas de pesca tienen `flag_tipo_matprim='H'`; **`flag_tipo_especie` NO es el discriminador correcto** — en esos mismos datos vale `'3'` o `null`, probablemente una clasificación IMARPE ajena a Pecuario, que no se toca) y dos columnas nuevas y opcionales: `periodo_gestacion_dias` (mamíferos) y `periodo_incubacion_dias` (aves). PC008 es una pantalla de Pecuario que mantiene únicamente las filas con `flag_tipo_matprim='P'` de esa tabla compartida — decisión tomada tras investigar que `PC_ESPECIE` solo necesitaba 3-4 columnas (código, nombre, estado, período de gestación), no ameritaba una tabla nueva; se descartó adaptar `TG_ESPECIES` para nada más que esto porque el resto de sus columnas (`habitat`, `longitud_max/min`, `peso_max/min`, `temperatura`, `cod_produce`) son específicas de tallas de captura/temperatura de agua (regulación IMARPE), sin uso en pecuaria.
 
   **`especie` es autonumérico** (confirmado con los mismos datos reales: `LM000001`, `CH000001`...`CH000004` — prefijo de 2 caracteres + correlativo de 6 dígitos = 8 caracteres, vía `NUM_TABLAS`, igual mecanismo que `PC_ANIMAL.cod_animal`). El trigger `TIB_TG_ESPECIES` genera el código solo cuando `especie` viene nulo (las filas de pesca que insertan su propio código explícito nunca activan el trigger); Pecuario usa el prefijo fijo **`AQ`** (Arequipa, indicado por el usuario para esta data de prueba) — códigos generados: `AQ000001`...`AQ000006`. Como el código no se conoce antes del insert, la siembra de especies verifica idempotencia por `descr_especie` + `flag_tipo_matprim`, no por `especie`.
-- **`PC_RAZA`** (CAM061): FK a `TG_ESPECIES.especie` (`cod_especie` ahora `CHAR(8)` para calzar con el tipo real de esa columna). Los 29 `insert` de razas de ejemplo ya no usan códigos literales (`'BOVI'`, `'PORC'`...) — buscan `especie` por `descr_especie` en `TG_ESPECIES`, porque el código real es autogenerado.
-- **`PC_CATEGORIA`** (CAM062): viene precargada con ternero/vaquillona/novilla/vaca en producción-seca-descarte/toro (nomenclatura bovina) más `REP`/`ENG` (reproductora/pollo de engorde, avícola — sección 8, "Extensión avícola"); para otra especie se cargarían categorías análogas, ej. lechón/gorrino/cerda para porcinos.
-- **`PC_POTRERO`** (CAM063): **¿qué es un potrero?** — es el término usado en Perú/Latinoamérica para una parcela o subdivisión **cercada de terreno destinada al pastoreo** del ganado (un lote de campo con pasto, delimitado por cercos, donde los animales comen libremente). Por eso se mide en `area_has` (hectáreas) y `capacidad_cab` (cuántas cabezas soporta sin sobrepastorear) — es terreno **abierto**, a diferencia de `PC_ESTABLO` que es una construcción **cubierta**. El "pastoreo rotativo" (`PC_MOVIMIENTO_POTRERO`) es mover el ganado de un potrero a otro para que el pasto de los demás se recupere.
-- **`PC_SEMENTAL`** (CAM064), **`PC_PRODUCTO_SANITARIO`** (CAM065), **`PC_ENFERMEDAD`** (CAM066), **`PC_DIETA`** + **`PC_DIETA_COMPONENTE`** (CAM067).
-- **`PC_RECETA`** + **`PC_RECETA_DET`** (CAM069, nuevo): fórmula de fabricación de un insumo propio (típicamente concentrado) — ver sección 11.
-- **`PC_ESTABLO`** (CAM070, nuevo): ubicación **cubierta** (sala de ordeño, maternidad, cuarentena, corral de manejo, engorde, **incubadora** — `flag_tipo='I'`, ver sección 8 "Extensión avícola"), a diferencia de `PC_POTRERO` que es pastoreo a cielo abierto medido en hectáreas. Un animal puede estar en un potrero y en un establo a la vez — son dos dimensiones de ubicación independientes, no excluyentes (ver sección 8).
+- **`PC_RAZA`** (PC001): FK a `TG_ESPECIES.especie` (`cod_especie` ahora `CHAR(8)` para calzar con el tipo real de esa columna). Los 29 `insert` de razas de ejemplo ya no usan códigos literales (`'BOVI'`, `'PORC'`...) — buscan `especie` por `descr_especie` en `TG_ESPECIES`, porque el código real es autogenerado.
+- **`PC_CATEGORIA`** (PC002): viene precargada con ternero/vaquillona/novilla/vaca en producción-seca-descarte/toro (nomenclatura bovina) más `REP`/`ENG` (reproductora/pollo de engorde, avícola — sección 8, "Extensión avícola"); para otra especie se cargarían categorías análogas, ej. lechón/gorrino/cerda para porcinos.
+- **`PC_POTRERO`** (PC003): **¿qué es un potrero?** — es el término usado en Perú/Latinoamérica para una parcela o subdivisión **cercada de terreno destinada al pastoreo** del ganado (un lote de campo con pasto, delimitado por cercos, donde los animales comen libremente). Por eso se mide en `area_has` (hectáreas) y `capacidad_cab` (cuántas cabezas soporta sin sobrepastorear) — es terreno **abierto**, a diferencia de `PC_ESTABLO` que es una construcción **cubierta**. El "pastoreo rotativo" (`PC_MOVIMIENTO_POTRERO`) es mover el ganado de un potrero a otro para que el pasto de los demás se recupere.
+- **`PC_SEMENTAL`** (PC004), **`PC_PRODUCTO_SANITARIO`** (PC005), **`PC_ENFERMEDAD`** (PC006), **`PC_DIETA`** + **`PC_DIETA_COMPONENTE`** (PC007).
+- **`PC_RECETA`** + **`PC_RECETA_DET`** (PC009, nuevo): fórmula de fabricación de un insumo propio (típicamente concentrado) — ver sección 11.
+- **`PC_ESTABLO`** (PC010, nuevo): ubicación **cubierta** (sala de ordeño, maternidad, cuarentena, corral de manejo, engorde, **incubadora** — `flag_tipo='I'`, ver sección 8 "Extensión avícola"), a diferencia de `PC_POTRERO` que es pastoreo a cielo abierto medido en hectáreas. Un animal puede estar en un potrero y en un establo a la vez — son dos dimensiones de ubicación independientes, no excluyentes (ver sección 8).
 
 Estas tablas se configuran una sola vez (o rara vez) antes de operar.
 
-## 8. Maestro de animal — CAM391 (`PC_ANIMAL`)
+## 8. Maestro de animal — PC301 (`PC_ANIMAL`)
 
 Ventana tabular tipo maestro (clasificada como Operación porque el registro crece todos los días, igual criterio que "Maestro de Activo Fijo"). Cada fila es un animal individual, identificado por **`cod_animal`**, que ahora es un **documento generado por el sistema** (`cod_origen` + correlativo de 8 dígitos vía `NUM_TABLAS`, ej. `SU00000001`) — no un campo libre. Para el arete/chapa física que la empresa ya usa (y que no necesariamente sigue este formato), existe **`cod_interno` VARCHAR2(20)**, de texto libre.
 
 Captura: raza, sexo, fecha de nacimiento, genealogía (padre/madre, propios o por IA), categoría actual, potrero actual, procedencia (nacido en el predio vs. comprado), peso de nacimiento y peso actual.
 
-El campo `flag_estado_repro` (vacía / servida / preñada / recién parida) se mantiene desnormalizado en el maestro para que la ficha del animal (CAM500) no tenga que hacer joins contra `PC_SERVICIO`/`PC_PARTO` cada vez — se actualiza por el proceso batch CAM901 cuando ocurre un evento reproductivo.
+El campo `flag_estado_repro` (vacía / servida / preñada / recién parida) se mantiene desnormalizado en el maestro para que la ficha del animal (PC501) no tenga que hacer joins contra `PC_SERVICIO`/`PC_PARTO` cada vez — se actualiza por el proceso batch PC902 cuando ocurre un evento reproductivo.
 
-La recategorización (ternero → vaquillona → novilla → vaca) es el proceso batch CAM900, que evalúa edad y estado reproductivo contra `PC_CATEGORIA.edad_min_meses/edad_max_meses`.
+La recategorización (ternero → vaquillona → novilla → vaca) es el proceso batch PC901, que evalúa edad y estado reproductivo contra `PC_CATEGORIA.edad_min_meses/edad_max_meses`.
 
-### Lotes — CAM407 (`PC_LOTE`)
+### Lotes — PC317 (`PC_LOTE`)
 
 Validado contra la demo real de AGRI (ver sección 18.4): "Control de cabezas" y "Control de lotes" son **dos vistas del mismo modelo**, no dos ramas paralelas. `PC_LOTE` es una cohorte de manejo (ej. "Vacas en producción — Potrero Norte"), con `fec_formacion`/`fec_cierre`, ubicación (`cod_potrero`) y categoría homogénea opcional. `PC_ANIMAL.cod_lote` (nullable) asigna cada cabeza a su lote — igual que el campo "Id Lote" del formulario "Ingreso de cabeza" de AGRI.
 
 Para especies o operaciones donde no se registra cada cabeza individualmente (engorde masivo, aves — ver "Extensión avícola" más abajo), `PC_LOTE` lleva además `cantidad_cabezas_inicial`/`cantidad_cabezas_actual` como conteo agregado, sin necesidad de una fila en `PC_ANIMAL` por cabeza.
 
-### Establos — CAM070 / CAM408 (`PC_ESTABLO` / `PC_MOVIMIENTO_ESTABLO`)
+### Establos — PC010 / PC318 (`PC_ESTABLO` / `PC_MOVIMIENTO_ESTABLO`)
 
 Un animal puede pasar por **varios establos** a lo largo de su vida (sala de ordeño en la mañana, corral de manejo para un tratamiento, maternidad al parir, cuarentena si se enferma), independientemente de en qué potrero esté pastando. Se modela **exactamente igual que `PC_POTRERO`/`PC_MOVIMIENTO_POTRERO`**, pero para la ubicación cubierta:
 
@@ -371,59 +371,59 @@ Un animal puede pasar por **varios establos** a lo largo de su vida (sala de ord
 
 Potrero y establo son dos dimensiones de ubicación **independientes**: un movimiento de potrero no genera automáticamente un movimiento de establo ni viceversa (ej. Estrella se traslada de Potrero Norte a Potrero Sur el 10/05, y por separado entra al corral de cuarentena el 20/05 — dos hechos distintos, dos tablas de historial distintas).
 
-### Extensión avícola — CAM409–CAM411 (`PC_POSTURA`, `PC_INCUBACION`, `PC_LOTE_MORTALIDAD`)
+### Extensión avícola — PC319–PC321 (`PC_POSTURA`, `PC_INCUBACION`, `PC_LOTE_MORTALIDAD`)
 
 Confirmado con el usuario: el módulo debe cubrir también la parte avícola para cuando SIGRE se venda a ese giro de negocio. El ciclo reproductivo de especies **ovíparas** (aves) es estructuralmente distinto al de mamíferos (sección 10): no hay celo/servicio/preñez/parto — hay **postura de huevos → incubación → eclosión**, y toda la operación se lleva **por lote**, nunca por ave individual (`PC_ANIMAL` no se usa para pollos de engorde ni reproductoras; ver "Lotes" arriba). Esto es exactamente el gap que había quedado documentado como pendiente en la sección 18.2 (comparación contra Nisira Avícola) y que ahora se cierra:
 
-- **`PC_POSTURA`** (CAM409): producción diaria de huevos de un lote de reproductoras (`cod_lote` FK a `PC_LOTE`, categoría `REP`). Registra `cantidad_huevos` recolectados y `cantidad_descarte` (rotos/sucios/deformes, no aptos para incubar). Una fila por lote y fecha (`UNIQUE cod_origen, cod_lote, fec_postura`).
-- **`PC_INCUBACION`** (CAM410): carga de la incubadora (`cod_establo` con `PC_ESTABLO.flag_tipo='I'`, nuevo valor agregado al catálogo) con los huevos aptos acumulados, y su resultado: `cantidad_nacidos` / `cantidad_mermas` (infértiles o muerte embrionaria) a la `fec_eclosion_real`. El **% de eclosión** (métrica estándar de Nisira Avícola) se calcula como `cantidad_nacidos / cantidad_huevos_cargados`. `flag_estado` (0=Anulada, 1=En incubación, 2=Eclosionada) controla el ciclo de vida del registro.
+- **`PC_POSTURA`** (PC319): producción diaria de huevos de un lote de reproductoras (`cod_lote` FK a `PC_LOTE`, categoría `REP`). Registra `cantidad_huevos` recolectados y `cantidad_descarte` (rotos/sucios/deformes, no aptos para incubar). Una fila por lote y fecha (`UNIQUE cod_origen, cod_lote, fec_postura`).
+- **`PC_INCUBACION`** (PC320): carga de la incubadora (`cod_establo` con `PC_ESTABLO.flag_tipo='I'`, nuevo valor agregado al catálogo) con los huevos aptos acumulados, y su resultado: `cantidad_nacidos` / `cantidad_mermas` (infértiles o muerte embrionaria) a la `fec_eclosion_real`. El **% de eclosión** (métrica estándar de Nisira Avícola) se calcula como `cantidad_nacidos / cantidad_huevos_cargados`. `flag_estado` (0=Anulada, 1=En incubación, 2=Eclosionada) controla el ciclo de vida del registro.
   - **Trazabilidad lote-reproductoras → lote-engorde**: `PC_INCUBACION.cod_lote_origen` (de dónde vinieron los huevos) y `cod_lote_destino` (el lote de engorde que se forma con los pollitos nacidos) son ambos FK a `PC_LOTE` — permite responder "de qué lote de reproductoras viene este lote de engorde" sin tabla intermedia adicional.
-- **`PC_LOTE_MORTALIDAD`** (CAM411): mortalidad **agregada** de un lote (aves de engorde, o cualquier especie manejada en lote masivo), sin registrar cabeza por cabeza — a diferencia de `PC_BAJA`, que es por animal individual. El trigger `TRG_PC_LOTEMORT_AI` descuenta automáticamente `cantidad_muertes` de `PC_LOTE.cantidad_cabezas_actual` al insertar (mismo patrón que `TRG_PC_BAJA_AI` para `PC_ANIMAL`), para que el conteo vivo del lote nunca quede desactualizado manualmente.
+- **`PC_LOTE_MORTALIDAD`** (PC321): mortalidad **agregada** de un lote (aves de engorde, o cualquier especie manejada en lote masivo), sin registrar cabeza por cabeza — a diferencia de `PC_BAJA`, que es por animal individual. El trigger `TRG_PC_LOTEMORT_AI` descuenta automáticamente `cantidad_muertes` de `PC_LOTE.cantidad_cabezas_actual` al insertar (mismo patrón que `TRG_PC_BAJA_AI` para `PC_ANIMAL`), para que el conteo vivo del lote nunca quede desactualizado manualmente.
 
 `TG_ESPECIES` ya tiene sembrada la fila Avícola (`flag_tipo_matprim='P'`, `periodo_incubacion_dias=21`, código autogenerado `AQ00000x`); `PC_RAZA` suma dos razas de ejemplo: `ROSS` (Ross 308, pollo de engorde, `flag_tipo='C'`) y `HYLN` (Hy-Line Brown, ponedora, `flag_tipo='L'`). `PC_CATEGORIA` suma `REP` (Reproductora, aves) y `ENG` (Pollo de engorde, aves) para clasificar los lotes avícolas igual que se clasifican los bovinos.
 
 **Lo que sigue quedando fuera de alcance** (no se inventa sin avisar): reportería específica de engorde (% mortalidad acumulado, índice de conversión alimenticia por lote — análogo al reporte de cierre de Nisira Avícola) y el flujo de clasificación/venta de pollo por peso. Ambos son extensiones de reportería (sección "Próximos pasos"), no requieren tablas nuevas — se arman sobre `PC_LOTE` + `PC_LOTE_MORTALIDAD` + `PC_ALIMENTACION_CONSUMO` ya existentes.
 
-## 9. Integración con Orden de Trabajo — "OT Pecuaria" (CAM406)
+## 9. Integración con Orden de Trabajo — "OT Pecuaria" (PC316)
 
 Requisito explícito: el historial de **todo consumible** (alimento, vacunas, medicinas) tiene que salir de los movimientos reales de Almacén, no de cantidades escritas a mano. El mecanismo completo (investigado en la sección 5.1) se reutiliza tal cual — no se crea ninguna tabla paralela.
 
-Una **OT Pecuaria** es una fila de `ORDEN_TRABAJO` con `ot_adm = 'PECU'`. Es **por evento/período operativo** (ej. "alimentación potrero Norte 02-04 jul", "campaña de vacunación febrero"), nunca de por vida del animal ni por etapa (ver razonamiento completo en 5.1). `PC_OT_ANIMAL` (CAM406) vincula esa OT con los animales que cubre.
+Una **OT Pecuaria** es una fila de `ORDEN_TRABAJO` con `ot_adm = 'PECU'`. Es **por evento/período operativo** (ej. "alimentación potrero Norte 02-04 jul", "campaña de vacunación febrero"), nunca de por vida del animal ni por etapa (ver razonamiento completo en 5.1). `PC_OT_ANIMAL` (PC316) vincula esa OT con los animales que cubre.
 
-`PC_ALIMENTACION_CONSUMO` (CAM400) y `PC_SANIDAD_EVENTO` (CAM401) ya no guardan `cod_art`/cantidad/costo propios: solo `nro_orden`. El historial de consumibles de un animal (CAM506) se arma uniendo `PC_OT_ANIMAL → ORDEN_TRABAJO → OPERACIONES → ARTICULO_MOV → ARTICULO`.
+`PC_ALIMENTACION_CONSUMO` (PC310) y `PC_SANIDAD_EVENTO` (PC311) ya no guardan `cod_art`/cantidad/costo propios: solo `nro_orden`. El historial de consumibles de un animal (PC507) se arma uniendo `PC_OT_ANIMAL → ORDEN_TRABAJO → OPERACIONES → ARTICULO_MOV → ARTICULO`.
 
 **Tratamientos y servicios con costo externo → Orden de Servicio**: `PC_SANIDAD_EVENTO` tiene dos FK opcionales e independientes: `nro_orden` (consumo propio vía Almacén) y `nro_os` (costo externo vía `ORDEN_SERVICIO`, ya vinculada a `ORDEN_TRABAJO` — sección 5.3). Un mismo evento puede tener una, otra, ambas o ninguna.
 
-**Producción de leche → ingreso real (I09)**: `PC_ORDENO` (CAM397) lleva `cod_almacen`, `cod_producto` (FK `TIPO_PRODUCTO`) y `nro_orden` — la misma OT que agrupó el consumo de alimento de ese potrero/día, cerrando el círculo: la misma orden de trabajo que "gastó" alimento es la que "produjo" leche (movimiento `I09`, sección 5.2).
+**Producción de leche → ingreso real (I09)**: `PC_ORDENO` (PC307) lleva `cod_almacen`, `cod_producto` (FK `TIPO_PRODUCTO`) y `nro_orden` — la misma OT que agrupó el consumo de alimento de ese potrero/día, cerrando el círculo: la misma orden de trabajo que "gastó" alimento es la que "produjo" leche (movimiento `I09`, sección 5.2).
 
-## 10. Reproducción (CAM392–CAM395)
+## 10. Reproducción (PC302–PC305)
 
-Flujo secuencial: **celo (CAM392) → servicio (CAM393) → diagnóstico de preñez (CAM394) → parto (CAM395)**.
+Flujo secuencial: **celo (PC302) → servicio (PC303) → diagnóstico de preñez (PC304) → parto (PC305)**.
 
 - `PC_CELO`: registro de detección de celo (visual, podómetro/collar, hormonal).
 - `PC_SERVICIO`: monta natural (con toro propio, `cod_animal_toro`) o inseminación artificial (con `cod_semental`). Calcula `fec_prob_parto` = `fec_servicio` + 283 días. **Es un historial**: `nro_servicio` es un número de documento (PK de una sola columna, `cod_origen` embebido — sección 3), no un correlativo por animal; `cod_animal` es columna normal (FK), así un mismo animal tiene tantas filas de `PC_SERVICIO` como servicios reciba en su vida.
 - `PC_DIAGNOSTICO_PRENEZ`: confirma o descarta el servicio. Si "vacía", el animal reinicia el ciclo.
 - `PC_PARTO`: cierra el ciclo. Registra tipo de parto, asistencia, retención de placenta, y **da de alta a la cría como un nuevo `PC_ANIMAL`** (vínculo `cod_animal_cria`).
 
-Los indicadores (intervalo entre partos, días abiertos, tasa de preñez, % distocias) se calculan en el reporte CAM717.
+Los indicadores (intervalo entre partos, días abiertos, tasa de preñez, % distocias) se calculan en el reporte PC702.
 
-## 11. Producción de leche y nutrición (CAM396–CAM400, CAM069)
+## 11. Producción de leche y nutrición (PC306–PC310, PC009)
 
-- `PC_LACTANCIA` (CAM396): se abre automáticamente al parto; se cierra por el proceso CAM902.
-- `PC_ORDENO` (CAM397): detalle diario (hasta 3 turnos), con `cod_almacen`/`cod_producto`/`nro_orden` para el ingreso I09 (sección 9).
-- `PC_CONTROL_LECHERO` (CAM398): calidad de leche (grasa, proteína, CCS).
-- `PC_CONDICION_CORPORAL` (CAM399): BCS, escala 1-5.
-- `PC_ALIMENTACION_CONSUMO` (CAM400): planificación (potrero/dieta/cabezas) amarrada a la OT; el consumo real vive en `ARTICULO_MOV`.
+- `PC_LACTANCIA` (PC306): se abre automáticamente al parto; se cierra por el proceso PC903.
+- `PC_ORDENO` (PC307): detalle diario (hasta 3 turnos), con `cod_almacen`/`cod_producto`/`nro_orden` para el ingreso I09 (sección 9).
+- `PC_CONTROL_LECHERO` (PC308): calidad de leche (grasa, proteína, CCS).
+- `PC_CONDICION_CORPORAL` (PC309): BCS, escala 1-5.
+- `PC_ALIMENTACION_CONSUMO` (PC310): planificación (potrero/dieta/cabezas) amarrada a la OT; el consumo real vive en `ARTICULO_MOV`.
 
-**Fabricación de concentrado** (`PC_RECETA`/`PC_RECETA_DET`, CAM069): la empresa puede fabricar su propio concentrado (la dieta de las vacas) en vez de comprarlo. El concentrado tiene una **receta** (bill of materials): `PC_RECETA` define el producto terminado (FK `TIPO_PRODUCTO`) y el rendimiento por lote; `PC_RECETA_DET` lista la materia prima (FK `ARTICULO`) y su cantidad por lote. La fabricación en sí **es otra OT Pecuaria** (una OT distinta de la que alimenta a los animales): consume materia prima (egreso real vía `ARTICULO_MOV`, igual mecanismo que cualquier consumo) y produce concentrado (ingreso real `I09`, igual mecanismo que la leche) hacia un almacén de concentrado (`ALMACEN`, ej. `ALM002`). No se necesita ninguna tabla nueva de "producción de concentrado": es el mismo patrón `ORDEN_TRABAJO` → `ARTICULO_MOV` ya usado en todo el módulo, solo con otra receta y otro destino.
+**Fabricación de concentrado** (`PC_RECETA`/`PC_RECETA_DET`, PC009): la empresa puede fabricar su propio concentrado (la dieta de las vacas) en vez de comprarlo. El concentrado tiene una **receta** (bill of materials): `PC_RECETA` define el producto terminado (FK `TIPO_PRODUCTO`) y el rendimiento por lote; `PC_RECETA_DET` lista la materia prima (FK `ARTICULO`) y su cantidad por lote. La fabricación en sí **es otra OT Pecuaria** (una OT distinta de la que alimenta a los animales): consume materia prima (egreso real vía `ARTICULO_MOV`, igual mecanismo que cualquier consumo) y produce concentrado (ingreso real `I09`, igual mecanismo que la leche) hacia un almacén de concentrado (`ALMACEN`, ej. `ALM002`). No se necesita ninguna tabla nueva de "producción de concentrado": es el mismo patrón `ORDEN_TRABAJO` → `ARTICULO_MOV` ya usado en todo el módulo, solo con otra receta y otro destino.
 
-## 12. Sanidad (CAM401)
+## 12. Sanidad (PC311)
 
-`PC_SANIDAD_EVENTO` es una tabla única para vacunas, desparasitaciones, tratamientos y diagnósticos (discriminada por `flag_tipo_evento`) — simplifica el calendario sanitario (consulta CAM503, recalculado por CAM905) y el control de período de retiro (`fec_fin_retiro`, cruzado contra `PC_ORDENO.flag_descarte`).
+`PC_SANIDAD_EVENTO` es una tabla única para vacunas, desparasitaciones, tratamientos y diagnósticos (discriminada por `flag_tipo_evento`) — simplifica el calendario sanitario (consulta PC504, recalculado por PC906) y el control de período de retiro (`fec_fin_retiro`, cruzado contra `PC_ORDENO.flag_descarte`).
 
 Cada evento puede tener, independientemente: `nro_orden` (OT Pecuaria, consumo propio) y/o `nro_os` (Orden de Servicio, costo externo) — ver sección 9.
 
-## 13. Resultados de laboratorio (CAM402)
+## 13. Resultados de laboratorio (PC312)
 
 Cubre tanto exámenes veterinarios (serología, coprológico, perfil metabólico) como control de calidad de semen **y** análisis de calidad de leche que pide el cliente.
 
@@ -431,12 +431,12 @@ Cubre tanto exámenes veterinarios (serología, coprológico, perfil metabólico
 - `PC_LABORATORIO_DET`: detalle por parámetro/analito (valor, unidad, rango de referencia, interpretación).
 - **Caso Laive** (`flag_origen`): cuando el cliente que compra la leche (ej. Laive) hace su propio análisis y **descuenta el costo de la factura de venta** en vez de facturarlo aparte, se registra con `flag_origen='C'` (Cliente), `cod_cliente` (FK real a `PROVEEDOR`, no texto libre), `costo_analisis` y `flag_facturado` — sin Orden de Servicio, porque no es un pago que la empresa hace, es un descuento que el cliente aplica. Diseño preliminar hasta integrarlo con Ventas/Facturación.
 
-## 14. Movimientos, trazabilidad y bajas (CAM403–CAM405, CAM408)
+## 14. Movimientos, trazabilidad y bajas (PC313–PC315, PC318)
 
-- `PC_MOVIMIENTO_POTRERO` (CAM403): histórico de rotación de potreros.
-- `PC_MOVIMIENTO_ESTABLO` (CAM408): histórico de cambios de establo (sección 8) — independiente del historial de potreros.
-- `PC_DTA` + `PC_DTA_DETALLE` (CAM404): Documento de Tránsito Animal SENASA. **`PC_DTA` es un documento EXTERNO** (lo asigna SENASA, no nuestro sistema): PK = `reckey` interno, `nro_dta` es texto libre `UNIQUE` (sección 3, caso 2).
-- `PC_BAJA` (CAM405): venta, muerte o descarte; trigger desactiva el animal. **Si `flag_motivo='V'`, referencia `ORDEN_VENTA(nro_ov)`** (módulo Comercialización, sección 5.4) — la orden/venta real, no un campo de texto libre.
+- `PC_MOVIMIENTO_POTRERO` (PC313): histórico de rotación de potreros.
+- `PC_MOVIMIENTO_ESTABLO` (PC318): histórico de cambios de establo (sección 8) — independiente del historial de potreros.
+- `PC_DTA` + `PC_DTA_DETALLE` (PC314): Documento de Tránsito Animal SENASA. **`PC_DTA` es un documento EXTERNO** (lo asigna SENASA, no nuestro sistema): PK = `reckey` interno, `nro_dta` es texto libre `UNIQUE` (sección 3, caso 2).
+- `PC_BAJA` (PC315): venta, muerte o descarte; trigger desactiva el animal. **Si `flag_motivo='V'`, referencia `ORDEN_VENTA(nro_ov)`** (módulo Comercialización, sección 5.4) — la orden/venta real, no un campo de texto libre.
 
 ## 15. Contabilización — Activo biológico (NIC 41)
 
@@ -501,11 +501,11 @@ El débito/crédito es un solo flag `flag_debhab` por línea (no columnas separa
 Bajo NIC 41, el ganado **no se deprecia** — se revalúa periódicamente a valor razonable menos costos de venta, con la variación a resultados (no a una cuenta de depreciación acumulada). Esto significa que la matriz contable de Pecuario necesita conceptos distintos a los de Activo Fijo: en vez de (activo / depreciación acumulada / gasto por depreciación), sería (activo biológico / ingreso o gasto por cambio en valor razonable) — una nueva "matriz contable Pecuario" análoga a `AF_MATRIZ_CONTABLE`, con dimensión `(cencos, cod_categoria)` en vez de `(cencos, tipo_activo)`.
 
 Hechos económicos que necesitarían generar un pre-asiento, replicando el patrón de `USP_AF_ASI_DEPRECIACION`:
-1. **Alta** (nacimiento o compra, CAM391) — reconocimiento inicial del activo biológico a valor razonable.
-2. **Revaluación periódica** (proceso CAM904, mensual o anual) — ajuste a valor razonable, con contrapartida a resultados.
-3. **Baja por venta** (CAM405, con `ORDEN_VENTA`) — retiro del activo + reconocimiento de ingreso por venta.
-4. **Baja por muerte/descarte** (CAM405) — retiro del activo con pérdida.
-5. (Opcional) **Costeo de leche producida** — la leche es inventario (NIC 2), no activo biológico; en la cosecha (el ordeño, CAM397) se reconoce como producto agrícola a valor razonable en el punto de cosecha.
+1. **Alta** (nacimiento o compra, PC301) — reconocimiento inicial del activo biológico a valor razonable.
+2. **Revaluación periódica** (proceso PC905, mensual o anual) — ajuste a valor razonable, con contrapartida a resultados.
+3. **Baja por venta** (PC315, con `ORDEN_VENTA`) — retiro del activo + reconocimiento de ingreso por venta.
+4. **Baja por muerte/descarte** (PC315) — retiro del activo con pérdida.
+5. (Opcional) **Costeo de leche producida** — la leche es inventario (NIC 2), no activo biológico; en la cosecha (el ordeño, PC307) se reconoce como producto agrícola a valor razonable en el punto de cosecha.
 
 ### 15.7 Asiento contable — ejemplo práctico y cuentas PCGE (investigación externa, julio 2026)
 
@@ -529,7 +529,7 @@ Investigación en internet sobre cómo se registra en la práctica (Perú, PCGE)
    | 35 Activos biológicos — 351 Producción — 3511 Origen animal | VR cría | |
    | 76.2 Ganancia por medición de activos no financieros al valor razonable | | VR cría |
 
-**Medición posterior** (cada cierre, proceso CAM904 "Revaluación NIC 41"): se revalúa el animal/lote a su nuevo valor razonable menos costos de venta y se reconoce la variación directamente en resultados (nunca en patrimonio ni como ajuste diferido):
+**Medición posterior** (cada cierre, proceso PC905 "Revaluación NIC 41"): se revalúa el animal/lote a su nuevo valor razonable menos costos de venta y se reconoce la variación directamente en resultados (nunca en patrimonio ni como ajuste diferido):
 
 - Si el valor **sube** (ej. de S/ 30,000 a S/ 37,000):
 
@@ -592,7 +592,7 @@ Ejemplos completos, con los mismos nombres de campo de las tablas reales, usando
 | 1 | `35110101` | D | Compra vaquillona a valor razonable (=precio pagado) | 30,000.00 |
 | 2 | 46 Cuentas por pagar diversas | H | Factura de compra pendiente de pago | 30,000.00 |
 
-**Ejemplo 3 — Revaluación de cierre** (proceso CAM904, 31/12/2026, categoría `VPR` "Vaca en producción", fundo SU — Paloma y Luna suben de valor, un tercer animal hipotético de otra categoría baja, para ilustrar ambos signos en el mismo asiento de cierre):
+**Ejemplo 3 — Revaluación de cierre** (proceso PC905, 31/12/2026, categoría `VPR` "Vaca en producción", fundo SU — Paloma y Luna suben de valor, un tercer animal hipotético de otra categoría baja, para ilustrar ambos signos en el mismo asiento de cierre):
 
 `CNTBL_PRE_ASIENTO` (cabecera): `origen=SU`, `nro_libro=06`, `nro_provisional=0000015`, `desc_glosa='Revaluación NIC 41 — cierre diciembre 2026'`, `fec_cntbl=31/12/2026`, `tot_soldeb=4,200.00`, `tot_solhab=4,200.00` (neto: ambos lados cuadran porque ganancias y pérdidas se registran cada una con su propia contrapartida, no se compensan entre sí).
 
@@ -901,7 +901,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 | `fec_parto` | DATE | No | FK (con `cod_animal`) → `PC_PARTO` |
 | `fec_secado` | DATE | Sí | Cierre |
 | `dias_lactancia` | NUMBER(4) | Sí | Al secar |
-| `litros_totales` | NUMBER(10,2) | Sí | Recalculado (CAM903) |
+| `litros_totales` | NUMBER(10,2) | Sí | Recalculado (PC904) |
 | `flag_estado` | CHAR(1) | No | 1=En curso, 0=Cerrada |
 | `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
 
@@ -966,7 +966,7 @@ Columna por columna. "Null" = admite nulo. El tipo de PK de cada tabla sigue la 
 | `costo` | NUMBER(10,2) | Sí | Referencia rápida |
 | `nro_orden` | CHAR(10) | Sí | FK opcional → `ORDEN_TRABAJO` |
 | `nro_os` | CHAR(10) | Sí | FK opcional → `ORDEN_SERVICIO` |
-| `fec_prox_refuerzo` / `fec_fin_retiro` | DATE | Sí | Calculados (CAM905) |
+| `fec_prox_refuerzo` / `fec_fin_retiro` | DATE | Sí | Calculados (PC906) |
 | `observaciones` | VARCHAR2(500) | Sí | — |
 | `cod_usr` / `fec_registro` | — | Sí / No | Auditoría |
 
@@ -1098,9 +1098,9 @@ SAP no trae un módulo de ganadería nativo en el núcleo de SAP Business One; l
 
 **Funcionalidad confirmada del módulo "Ganadería" de AGRI:**
 - **Manejo del animal**: integra registros de origen, nutrición, sanidad y manejo del animal a lo largo de toda su vida — igual enfoque de "historial completo por animal" que `PC_ANIMAL` + sus tablas relacionadas.
-- **Control de existencias en cabezas y kilos**: inventario del hato tanto por número de cabezas como por peso — en nuestro diseño esto es `PC_ANIMAL.peso_actual` + reportes (CAM716 Resumen del hato); AGRI lo llama específicamente **"planillas de hacienda"**, con informes de evolución en cabezas y kilos, balance de movimientos y de producción de carne — **candidato a reporte adicional** (ver sección 18.3).
+- **Control de existencias en cabezas y kilos**: inventario del hato tanto por número de cabezas como por peso — en nuestro diseño esto es `PC_ANIMAL.peso_actual` + reportes (PC701 Resumen del hato); AGRI lo llama específicamente **"planillas de hacienda"**, con informes de evolución en cabezas y kilos, balance de movimientos y de producción de carne — **candidato a reporte adicional** (ver sección 18.3).
 - **Manejo por categorías agrupadas en rebaños ("lotes")**: igual concepto que `PC_CATEGORIA` + `PC_POTRERO`, permitiendo monitorear la evolución de cada grupo.
-- **Control reproductivo**: medir y comparar datos productivos y reproductivos en cualquier momento — igual que nuestras consultas CAM501 (historial reproductivo) y reporte CAM717 (indicadores reproductivos).
+- **Control reproductivo**: medir y comparar datos productivos y reproductivos en cualquier momento — igual que nuestras consultas PC502 (historial reproductivo) y reporte PC702 (indicadores reproductivos).
 - **Leche**: controla volumen de leche que entra y sale del tanque, temperaturas del proceso, curva de enfriamiento y ciclo de lavado — **más detallado que nuestro diseño actual**: `PC_ORDENO` registra litros por ordeño, pero no temperatura de tanque ni ciclo de lavado del equipo de frío. Queda como posible campo adicional si el negocio realmente enfría/almacena en tanque propio (no aplica si se entrega la leche cruda directamente, como en el caso Laive de este documento).
 - **Sanidad**: historial por animal o por rebaño de tratamientos, curaciones y vacunaciones, con descripción de enfermedades, medicamentos y dosis — **coincide casi exactamente** con `PC_SANIDAD_EVENTO`.
 - **Trazabilidad**: información cronológica y georreferenciada desde el origen hasta el destino final de la producción, siguiendo estándares de certificación de origen y calidad — cubierto por `PC_DTA`/`PC_MOVIMIENTO_POTRERO`, aunque **sin georreferenciación** (coordenadas GPS del potrero/movimiento) — posible campo adicional (`latitud`/`longitud` en `PC_POTRERO` y/o `PC_MOVIMIENTO_POTRERO`) si se requiere certificación de origen más estricta (ej. exportación).
@@ -1130,19 +1130,19 @@ Nuestro diseño (`PC_ANIMAL`) asume **identidad individual por animal** (un `cod
 | Métricas clave | Peso, producción de leche, genealogía individual | % mortalidad, conversión alimenticia, cabezas vivas del lote |
 | Sanidad | Evento por animal | Tratamiento aplicado a todo el lote |
 
-**Gap resuelto**: revisando la demo real de AGRI (sección 18.4) se confirma que "cabeza individual" y "lote" **no son dos ramas paralelas** sino dos vistas del mismo modelo — por eso se implementó `PC_LOTE` (sección 8) como una cohorte a la que cualquier `PC_ANIMAL` puede pertenecer (`cod_lote` opcional), con conteo agregado propio (`cantidad_cabezas_inicial`/`cantidad_cabezas_actual`) para cuando no se registra cada cabeza individualmente. Esto cubre el caso "bovino agrupado en lotes de manejo" (lo que muestra AGRI). El ciclo reproductivo específico de especies ovíparas (reproductoras → incubación → eclosión de huevos, con % de eclosión por lote) y la mortalidad agregada de lotes de engorde masivo, confirmados por el usuario como necesarios para vender SIGRE al giro avícola, ya están implementados: `PC_POSTURA`, `PC_INCUBACION` y `PC_LOTE_MORTALIDAD` (CAM409–CAM411, sección 8 "Extensión avícola"). Lo único que sigue fuera de alcance es la reportería de conversión alimenticia/% mortalidad acumulado por lote (ver sección 18.3, punto 4 — no requiere tablas nuevas).
+**Gap resuelto**: revisando la demo real de AGRI (sección 18.4) se confirma que "cabeza individual" y "lote" **no son dos ramas paralelas** sino dos vistas del mismo modelo — por eso se implementó `PC_LOTE` (sección 8) como una cohorte a la que cualquier `PC_ANIMAL` puede pertenecer (`cod_lote` opcional), con conteo agregado propio (`cantidad_cabezas_inicial`/`cantidad_cabezas_actual`) para cuando no se registra cada cabeza individualmente. Esto cubre el caso "bovino agrupado en lotes de manejo" (lo que muestra AGRI). El ciclo reproductivo específico de especies ovíparas (reproductoras → incubación → eclosión de huevos, con % de eclosión por lote) y la mortalidad agregada de lotes de engorde masivo, confirmados por el usuario como necesarios para vender SIGRE al giro avícola, ya están implementados: `PC_POSTURA`, `PC_INCUBACION` y `PC_LOTE_MORTALIDAD` (PC319–PC321, sección 8 "Extensión avícola"). Lo único que sigue fuera de alcance es la reportería de conversión alimenticia/% mortalidad acumulado por lote (ver sección 18.3, punto 4 — no requiere tablas nuevas).
 
 ### 18.3 Ajustes/adiciones que esta investigación sugiere (para decidir con el usuario)
 
-1. Reporte "planillas de hacienda" (AGRI): evolución de cabezas y kilos por período, balance de movimientos — se puede armar sobre `PC_ANIMAL`/`PC_LOTE`/`PC_MOVIMIENTO_POTRERO`/`PC_BAJA` sin tablas nuevas; candidato a nuevo reporte (`CAM723`, siguiente hueco libre en el rango de Reportes).
+1. Reporte "planillas de hacienda" (AGRI): evolución de cabezas y kilos por período, balance de movimientos — se puede armar sobre `PC_ANIMAL`/`PC_LOTE`/`PC_MOVIMIENTO_POTRERO`/`PC_BAJA` sin tablas nuevas; candidato a nuevo reporte (`PC708`, siguiente código libre en el rango de Reportes).
 2. Campos de georreferenciación (`latitud`/`longitud`) en `PC_POTRERO` y/o `PC_MOVIMIENTO_POTRERO`, si se requiere trazabilidad de exportación.
 3. Detalle de tanque de leche (temperatura, ciclo de lavado) en `PC_ORDENO` o una tabla nueva `PC_TANQUE_LECHE`, si el negocio enfría/almacena en tanque propio.
 4. Reporte de "conversión alimenticia" (kg alimento / kg producido) y "% mortalidad" por lote, tomados del patrón de Nisira Avícola — aplicable también a bovino de engorde, no solo aves; se puede calcular sobre `PC_LOTE` + `PC_ALIMENTACION_CONSUMO`/`ARTICULO_MOV` sin tablas nuevas.
 5. Historial de pesajes (`PC_PESAJE`, un registro por pesada en vez de solo el último peso denormalizado en `PC_ANIMAL`), si se necesita curva de crecimiento — visto en la demo de AGRI (ver sección 18.4).
-6. ~~Decisión mayor pendiente: tablas específicas de incubación/eclosión para especies ovíparas~~ — **implementado**: `PC_POSTURA`, `PC_INCUBACION`, `PC_LOTE_MORTALIDAD` (CAM409–CAM411, sección 8 "Extensión avícola").
+6. ~~Decisión mayor pendiente: tablas específicas de incubación/eclosión para especies ovíparas~~ — **implementado**: `PC_POSTURA`, `PC_INCUBACION`, `PC_LOTE_MORTALIDAD` (PC319–PC321, sección 8 "Extensión avícola").
 7. **Identificación electrónica** (chapeta/arete RFID, bolo ruminal con chip — visto en Software Ganadero SG, sección 18.5): un campo `cod_rfid`/`cod_chip` opcional en `PC_ANIMAL`, para integrarse a futuro con lectores RFID sin tener que rediseñar el maestro.
 8. **Costeo por unidad producida** (costo por litro de leche, por kilo de carne, por destete — visto en Software Ganadero SG y Calipso, sección 18.5): reporte que cruza `PC_ORDENO`/`PC_LOTE` con el costo real de `ARTICULO_MOV` (alimentación) más costos indirectos vía `CENTROS_COSTO`; no requiere tablas nuevas, es una extensión de reportería (candidato a reporte nuevo, siguiente hueco libre en Reportes).
-9. **Tasa de descarte y reemplazo** (% del hato dado de baja/repuesto por período — visto en Software Ganadero SG): calculable sobre `PC_BAJA`/`PC_ANIMAL` sin tablas nuevas; candidato a indicador dentro del reporte `CAM717` (Indicadores reproductivos) o uno nuevo.
+9. **Tasa de descarte y reemplazo** (% del hato dado de baja/repuesto por período — visto en Software Ganadero SG): calculable sobre `PC_BAJA`/`PC_ANIMAL` sin tablas nuevas; candidato a indicador dentro del reporte `PC702` (Indicadores reproductivos) o uno nuevo.
 10. **Técnicas reproductivas avanzadas** (transferencia de embriones, semen sexado, donadoras/receptoras — visto en Software Ganadero SG): `PC_SERVICIO.flag_tipo_servicio` hoy distingue monta natural (`N`) e inseminación artificial (`A`); se podría ampliar el dominio de valores (ej. `E`=Transferencia de embriones) sin cambiar la estructura de la tabla, si el cliente lo necesita.
 11. **Integración IoT** (básculas, collares inteligentes, drones para praderas — visto en Software Ganadero SG): fuera de alcance actual; si se requiere, sería una capa de integración externa que alimenta `PC_CONDICION_CORPORAL`/`PC_ANIMAL.peso_actual`/`PC_POTRERO`, no un cambio al modelo de datos.
 
@@ -1181,30 +1181,30 @@ Flujos completos, de punta a punta, tal como se le explican al usuario final en 
 
 ### 19.1 Caso: ciclo reproductivo completo de una vaca
 
-1. Se detecta a la vaca en celo: registrar en (CAM392) Registro de celo.
-2. Se realiza la monta o inseminación: registrar en (CAM393) Registro de servicio (con el toro o el semental usado). El sistema calcula la fecha probable de parto.
-3. Meses después, se confirma la preñez: registrar en (CAM394) Diagnóstico de preñez con resultado "Preñada".
-4. Al llegar la fecha probable de parto (o antes, si se adelanta): registrar el parto en (CAM395) Registro de parto. El sistema da de alta automáticamente a la cría (`PC_PARTO.cod_animal_cria` → nuevo `PC_ANIMAL`) y abre la lactancia de la madre (`PC_LACTANCIA`, trigger implícito del flujo, no de BD).
-5. A partir de ese día, registrar los ordeños diarios en (CAM397) Ordeño diario — cada ordeño genera el ingreso real de leche en Almacén (movimiento `I09`) contra la misma OT del potrero de ese día (sección 9).
+1. Se detecta a la vaca en celo: registrar en (PC302) Registro de celo.
+2. Se realiza la monta o inseminación: registrar en (PC303) Registro de servicio (con el toro o el semental usado). El sistema calcula la fecha probable de parto.
+3. Meses después, se confirma la preñez: registrar en (PC304) Diagnóstico de preñez con resultado "Preñada".
+4. Al llegar la fecha probable de parto (o antes, si se adelanta): registrar el parto en (PC305) Registro de parto. El sistema da de alta automáticamente a la cría (`PC_PARTO.cod_animal_cria` → nuevo `PC_ANIMAL`) y abre la lactancia de la madre (`PC_LACTANCIA`, trigger implícito del flujo, no de BD).
+5. A partir de ese día, registrar los ordeños diarios en (PC307) Ordeño diario — cada ordeño genera el ingreso real de leche en Almacén (movimiento `I09`) contra la misma OT del potrero de ese día (sección 9).
 
 **Resolución de diseño**: el cálculo de `fec_prob_parto` ya no depende de un valor hardcodeado — se lee `TG_ESPECIES.periodo_gestacion_dias` de la especie del animal (vía `PC_ANIMAL.cod_raza` → `PC_RAZA.cod_especie` → `TG_ESPECIES`), con 283 días como valor sembrado por defecto para bovinos (ver sección 7 y diccionario de datos).
 
 ### 19.2 Caso: dar de baja un animal por venta
 
 1. Verificar que exista la Orden de Venta correspondiente en el módulo de Comercialización (`ORDEN_VENTA`, sección 5.4).
-2. Si el animal sale del predio, tramitar y registrar el DTA en (CAM404) Documento de Tránsito Animal — el número lo asigna SENASA, es texto libre `UNIQUE`, no autogenerado (sección 3, caso 2).
-3. Ingresar a (CAM405) Baja de animal, seleccionar el animal, motivo `V` (Venta), indicar `nro_ov` (obligatorio si `flag_motivo='V'`, sección 14), el precio y, si aplica, `dta_reckey`.
+2. Si el animal sale del predio, tramitar y registrar el DTA en (PC314) Documento de Tránsito Animal — el número lo asigna SENASA, es texto libre `UNIQUE`, no autogenerado (sección 3, caso 2).
+3. Ingresar a (PC315) Baja de animal, seleccionar el animal, motivo `V` (Venta), indicar `nro_ov` (obligatorio si `flag_motivo='V'`, sección 14), el precio y, si aplica, `dta_reckey`.
 4. Guardar. El trigger `TRG_PC_BAJA_AI` desactiva automáticamente `PC_ANIMAL.flag_estado`.
 
 **Resolución de diseño**: por eso `PC_BAJA.nro_ov` es FK real a `ORDEN_VENTA`, no un campo de texto — decisión tomada tras investigar el módulo de Comercialización (sección 5.4), para que una venta de ganado no pueda registrarse sin una venta real detrás.
 
 ### 19.3 Caso: ciclo de incubación de un lote de reproductoras (avícola)
 
-1. Crear (si no existe) el lote de reproductoras en (CAM407) Control de lotes, categoría `REP`.
-2. Registrar la producción diaria de huevos en (CAM409) Registro de postura (`PC_POSTURA`, una fila por lote y fecha).
-3. Cargar los huevos aptos a la incubadora en (CAM410) Incubación (`PC_INCUBACION.cod_lote_origen`, `cod_establo` con `flag_tipo='I'`), `flag_estado='1'` (En incubación).
+1. Crear (si no existe) el lote de reproductoras en (PC317) Control de lotes, categoría `REP`.
+2. Registrar la producción diaria de huevos en (PC319) Registro de postura (`PC_POSTURA`, una fila por lote y fecha).
+3. Cargar los huevos aptos a la incubadora en (PC320) Incubación (`PC_INCUBACION.cod_lote_origen`, `cod_establo` con `flag_tipo='I'`), `flag_estado='1'` (En incubación).
 4. Al eclosionar: completar el mismo registro con `cantidad_nacidos`/`cantidad_mermas`, indicar (o crear) `cod_lote_destino` (lote de engorde), y cambiar `flag_estado='2'` (Eclosionada).
-5. El lote de engorde se maneja igual que cualquier otro lote: consumo de alimento (sección 11) y mortalidad agregada en (CAM411) `PC_LOTE_MORTALIDAD` — el trigger `TRG_PC_LOTEMORT_AI` descuenta automáticamente `cantidad_cabezas_actual`.
+5. El lote de engorde se maneja igual que cualquier otro lote: consumo de alimento (sección 11) y mortalidad agregada en (PC321) `PC_LOTE_MORTALIDAD` — el trigger `TRG_PC_LOTEMORT_AI` descuenta automáticamente `cantidad_cabezas_actual`.
 
 **Resolución de diseño**: la trazabilidad "de qué lote de reproductoras viene este lote de engorde" se resuelve con dos FK en la misma fila de `PC_INCUBACION` (`cod_lote_origen`/`cod_lote_destino`), sin necesitar una tabla puente adicional — ver sección 8, "Extensión avícola".
 
@@ -1213,9 +1213,9 @@ Flujos completos, de punta a punta, tal como se le explican al usuario final en 
 1. Validar el diseño de tablas y la numeración de ventanas con el usuario/gerencia.
 2. Confirmar con el contador el tratamiento contable exacto (cuentas, periodicidad de revaluación, si se activa auto-post o se deja manual como Activo Fijo).
 3. `PC_ESTABLO`/`PC_MOVIMIENTO_ESTABLO` ya están implementados (sección 8); queda pendiente definir si `PC_ANIMAL` lleva `cod_centro_costo` directo (pendiente de confirmación).
-4. Diseñar las ventanas PowerBuilder (CAM061...CAM905) siguiendo esta especificación.
-5. `PC_LOTE` (control de lotes) y la extensión avícola (`PC_POSTURA`/`PC_INCUBACION`/`PC_LOTE_MORTALIDAD`, CAM409–CAM411) ya están implementados (sección 8); decidir cuáles de los ajustes restantes de la sección 18.3 (puntos 1-5) aplicar.
-6. El hueco de numeración de Operaciones (`391`–`411`) quedó **agotado** con la extensión avícola (sección 1); cualquier opción de Operaciones nueva de Pecuario debe numerarse en el siguiente hueco libre después de `CAM434`.
+4. Diseñar las ventanas PowerBuilder (PC001...PC906) siguiendo esta especificación.
+5. `PC_LOTE` (control de lotes) y la extensión avícola (`PC_POSTURA`/`PC_INCUBACION`/`PC_LOTE_MORTALIDAD`, PC319–PC321) ya están implementados (sección 8); decidir cuáles de los ajustes restantes de la sección 18.3 (puntos 1-5) aplicar.
+6. ~~El hueco de numeración de Operaciones quedó agotado~~ — **ya no aplica**: al confirmarse Pecuario como módulo independiente con prefijo propio `PC` (sección 20, punto 10), el rango de Operaciones (`PC301`–`PC499`) es enteramente suyo, sin compartir espacio con Campo. La siguiente opción de Operaciones nueva sería `PC322` (sección 1).
 7. ~~Pendiente de decisión: enriquecer el catálogo de especies con período de gestación/incubación~~ — **implementado, decisión final del usuario**: no se creó `PC_ESPECIE`; se reutilizó `TG_ESPECIES` (catálogo real de especies del módulo de pesca) agregando `flag_tipo_matprim='P'` y las columnas opcionales `periodo_gestacion_dias`/`periodo_incubacion_dias` (ver sección 7). `nombre_cientifico` ya existía en esa tabla, sin costo adicional. `unidad_produccion_principal` no se agregó (no fue solicitado).
 8. ~~Decisión pendiente del usuario: cómo se genera `TG_ESPECIES.especie`~~ — **implementado, confirmado contra datos reales**: el usuario compartió el contenido real de `TG_ESPECIES` (`data/TG_ESPECIES.json`), que probó dos cosas — (a) `especie` **sí** es autonumérico (prefijo 2 + correlativo 6 vía `NUM_TABLAS`, ej. `LM000001`, `CH000001`...`CH000004`), y (b) el discriminador real de tipo es `flag_tipo_matprim` (`'H'` en las 5 filas reales), no `flag_tipo_especie` (que vale `'3'`/`null`, ajeno a Pecuario). Se implementó el trigger `TIB_TG_ESPECIES` con prefijo fijo `AQ` (Arequipa, indicado por el usuario) y se regeneraron las 6 especies + 29 razas de ejemplo sin códigos literales — ver sección 7. Esto además resuelve por completo la preocupación anterior de colisión de códigos: al ser autogenerado por `NUM_TABLAS` con prefijo propio (`AQ`), es estructuralmente imposible que choque con códigos de pesca/vegetal ya existentes.
 9. **Prerrequisito contable real, confirmado contra el plan de cuentas** (sección 15.7): las cuentas **35** (Activos biológicos) y **76** (Ganancia por medición a valor razonable) **no existen hoy** en `CNTBL_CNTA` de esta empresa (el plan actual es 100% pesquero); hay que darlas de alta antes de activar cualquier generación automática de asientos para Pecuario. La cuenta 66 existente es de otro concepto (activos mantenidos para la venta) — no reutilizar, crear subcuenta propia.
@@ -1224,4 +1224,5 @@ Flujos completos, de punta a punta, tal como se le explican al usuario final en 
     - **PowerBuilder**, no .NET ni los microservicios Java/Angular nuevos (`03. backend/`) — estos últimos usan PostgreSQL, mientras que todo este diseño (`PC_*`, `TG_ESPECIES`) es Oracle 11gR2/CANTABRIA; portar a Postgres sería un proyecto aparte, no lo que se pidió. El código fuente PowerBuilder existe como texto plano exportado (`.srw`/`.srd`/`.sru`), lo que sí permite generarlo/editarlo directamente (ver ejemplo real estudiado: `w_cam001_elem_quimicos.srw` + `d_abc_elemento_quimico_tbl.srd`).
     - **Empresa destino: Agroindustria San Martín, NO CANTABRIA.** `CANTABRIA` (con datos reales de pesca: `LM000001`, `CH000001`...) fue el esquema de referencia usado para investigar la arquitectura real del sistema (por ser el que teníamos visibilidad completa), pero **no es el cliente para el que se construye este módulo**. El usuario confirmó que `TG_ESPECIES` **sí existe también en el esquema de San Martín** (es una tabla genérica del núcleo del ERP, no exclusiva de empresas pesqueras) — la decisión de reutilizarla con `flag_tipo_matprim='P'` y el trigger `TIB_TG_ESPECIES` (prefijo `AQ`) se mantiene sin cambios.
     - **Pendiente de verificar contra el esquema real de San Martín antes de ejecutar en producción** (a diferencia de `TG_ESPECIES`, esto NO se ha confirmado aún): (a) que el nombre de esquema/owner sea efectivamente `CANTABRIA` también en San Martín, o si es otro (el script ya trae la advertencia de buscar/reemplazar en el encabezado); (b) el prerrequisito contable del punto 9 (cuentas 35/76 faltantes) se verificó contra el plan de cuentas de `CANTABRIA` — el plan de cuentas de San Martín es un plan de cuentas **distinto** y debe verificarse por separado, no asumir que aplica igual.
-    - Logo del módulo generado: `Source ERPs/metadata SIGRE/pecuario/logo_pecuario.png`.
+    - Logo del módulo generado: `Source ERPs/metadata SIGRE/pecuario/logo_pecuario.png`. Ícono `.ico` (multi-resolución, mismo lenguaje visual que `campo.ico`/`Almacen.ico`/etc.): `Source ERPs/metadata SIGRE/pecuario/Pecuario.ico`.
+11. **Carpeta del módulo ya creada por el usuario** (`ws_objects/Pecuario/`: `pecuario.pbl.src`, `pecuario_dw.pbl.src`, `pecuario_f.pbl.src`, `pecuario_m.pbl.src`, `pecuario_st.pbl.src`, `pecuario_uo.pbl.src`, `pecuario_w.pbl.src`), aún vacía. **Numeración migrada de `CAM` (prestada de Campo, con huecos) a `PC` (propia, secuencial desde el inicio de cada rango)** — ver sección 1 para el detalle completo y la sección 4 para el mapeo final de las 51 opciones.
