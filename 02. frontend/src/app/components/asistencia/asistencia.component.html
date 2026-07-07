@@ -74,7 +74,7 @@
         </div>
       </mat-card-content>
       
-      <mat-card-actions class="card-actions">
+      <mat-card-actions class="card-actions" *ngIf="!modoKiosco">
         <button 
           mat-stroked-button 
           color="secondary" 
@@ -119,9 +119,25 @@
     (cerrar)="onPopupCerrado('raciones')"
   ></app-popup-raciones>
 
-  <!-- 🔍 INDICADOR DE VERSIÓN (para verificar cache) -->
-  <div class="version-indicator" title="Versión del Frontend - Para verificar cache">
+  <!-- 🔍 INDICADOR DE VERSIÓN (solo fuera de kiosco IP fija) -->
+  <div class="version-indicator" *ngIf="!modoKiosco" title="Versión del Frontend - Para verificar cache">
     v{{ appVersion$ | async }} | {{ buildTimestamp$ | async }}
+  </div>
+
+  <!-- Activación de pantalla completa en kioscos (requiere un toque en algunos navegadores) -->
+  <div
+    class="kiosk-fullscreen-overlay"
+    *ngIf="mostrarActivacionKiosco"
+    (click)="activarPantallaCompletaKiosco()"
+    role="button"
+    tabindex="0"
+    aria-label="Tocar para activar pantalla completa"
+  >
+    <div class="kiosk-fullscreen-prompt">
+      <mat-icon>fullscreen</mat-icon>
+      <p>Tocar la pantalla para iniciar</p>
+      <span>Modo kiosco — pantalla completa</span>
+    </div>
   </div>
 
   <!-- Loader de Procesamiento API -->

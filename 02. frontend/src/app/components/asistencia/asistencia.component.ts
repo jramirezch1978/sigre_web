@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -18,6 +18,7 @@ import { abrirDialogoMetoxi } from '@sigre-common';
 import { ErrorPopupComponent, ErrorData } from '../error-popup/error-popup.component';
 import { ConfigService } from '../../services/config.service';
 import { IpRoutingService } from '../../services/ip-routing.service';
+import { KioskFullscreenService } from '../../services/kiosk-fullscreen.service';
 import { ClockService } from '../../services/clock.service';
 import { VersionService } from '../../services/version.service';
 import { Observable } from 'rxjs';
@@ -53,7 +54,7 @@ export interface Racion {
   templateUrl: './asistencia.component.html',
   styleUrls: ['./asistencia.component.scss']
 })
-export class AsistenciaComponent implements OnInit {
+export class AsistenciaComponent implements OnInit, OnDestroy {
   
   @ViewChild('codigoInputRef') codigoInputRef!: ElementRef;
   
@@ -81,6 +82,15 @@ export class AsistenciaComponent implements OnInit {
   deviceIP: string = '';
   capturandoIpDispositivo = true;
 
+  /** Tablet/kiosco con IP fija de garita o producción (validada por backend). */
+  modoKiosco = false;
+  /** Muestra aviso de toque cuando el navegador exige gesto para pantalla completa. */
+  mostrarActivacionKiosco = false;
+
+  private readonly activarFullscreenPorGesto = (): void => {
+    void this.activarPantallaCompletaKiosco();
+  };
+
   // Propiedades observables para versión
   appVersion$!: Observable<string>;
   buildTimestamp$!: Observable<string>;
@@ -92,6 +102,7 @@ export class AsistenciaComponent implements OnInit {
     private http: HttpClient,
     private configService: ConfigService,
     private ipRoutingService: IpRoutingService,
+    private kioskFullscreenService: KioskFullscreenService,
     private dialog: MatDialog,
     private clockService: ClockService,
     private versionService: VersionService
@@ -106,8 +117,10 @@ export class AsistenciaComponent implements OnInit {
     
     // Capturar IP del dispositivo
     await this.capturarIPDispositivo();
+
+    await this.evaluarModoKiosco();
     
-    console.log('🔧 Componente inicializado - Tipo marcaje:', this.tipoMarcaje, 'IP:', this.deviceIP);
+    console.log('🔧 Componente inicializado - Tipo marcaje:', this.tipoMarcaje, 'IP:', this.deviceIP, 'Kiosco:', this.modoKiosco);
     
     // ENFOCAR input automáticamente para lector de tarjetas de proximidad
     setTimeout(() => {
@@ -117,6 +130,46 @@ export class AsistenciaComponent implements OnInit {
     // Inicializar observables de versión
     this.appVersion$ = this.versionService.getAppVersion();
     this.buildTimestamp$ = this.versionService.getBuildTimestamp();
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener('pointerdown', this.activarFullscreenPorGesto);
+    if (this.modoKiosco) {
+      this.kioskFullscreenService.desactivarModoKiosco();
+    }
+  }
+
+  /**
+   * En IPs fijas de kiosco (garita/producción) activa pantalla completa para
+   * ocultar la interfaz del navegador. Requiere un toque si el SO lo exige.
+   */
+  private async evaluarModoKiosco(): Promise<void> {
+    const esKiosco = await this.ipRoutingService.esDispositivoKiosco();
+    if (!esKiosco) {
+      return;
+    }
+
+    this.modoKiosco = true;
+    this.kioskFullscreenService.aplicarMetaTagsApp();
+    this.kioskFullscreenService.activarClaseBodyKiosco();
+
+    const activado = await this.kioskFullscreenService.solicitarPantallaCompleta();
+    if (activado) {
+      console.log('🖥️ Modo kiosco: pantalla completa activa');
+      return;
+    }
+
+    this.mostrarActivacionKiosco = true;
+    document.addEventListener('pointerdown', this.activarFullscreenPorGesto, { once: true });
+    console.log('🖥️ Modo kiosco: toque la pantalla una vez para activar pantalla completa');
+  }
+
+  async activarPantallaCompletaKiosco(): Promise<void> {
+    const activado = await this.kioskFullscreenService.solicitarPantallaCompleta();
+    if (activado) {
+      this.mostrarActivacionKiosco = false;
+      console.log('🖥️ Pantalla completa activada por gesto del usuario');
+    }
   }
 
   /**

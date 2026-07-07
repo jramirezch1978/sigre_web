@@ -40,6 +40,7 @@ export class IpRoutingService {
 
   private ipDispositivoCache: string | null = null;
   private ipDetectadaBackend: string | null = null;
+  private rutaPorIpCache: RutaMarcajePorIp | null | undefined;
 
   constructor(
     private http: HttpClient,
@@ -47,6 +48,23 @@ export class IpRoutingService {
   ) {}
 
   async resolverRutaAutomatica(): Promise<RutaMarcajePorIp | null> {
+    return this.consultarRutaPorIp();
+  }
+
+  /**
+   * Indica si la IP del dispositivo coincide con una IP fija de kiosco
+   * (garita simplificado o marcación de producción) según el backend.
+   */
+  async esDispositivoKiosco(): Promise<boolean> {
+    const ruta = await this.consultarRutaPorIp();
+    return ruta !== null;
+  }
+
+  private async consultarRutaPorIp(): Promise<RutaMarcajePorIp | null> {
+    if (this.rutaPorIpCache !== undefined) {
+      return this.rutaPorIpCache;
+    }
+
     const ipDispositivo = await this.capturarIpDispositivo();
     if (!ipDispositivo) {
       console.warn('⚠️ No se pudo capturar la IP privada vía WebRTC; se intentará con la IP del servidor');
@@ -68,9 +86,11 @@ export class IpRoutingService {
         this.ipDetectadaBackend = response.ipDetectada;
       }
 
-      return this.mapearRuta(response);
+      this.rutaPorIpCache = this.mapearRuta(response);
+      return this.rutaPorIpCache;
     } catch (error) {
       console.warn('⚠️ No se pudo resolver la ruta automática por IP, se mostrará el menú por defecto:', error);
+      this.rutaPorIpCache = null;
       return null;
     }
   }
