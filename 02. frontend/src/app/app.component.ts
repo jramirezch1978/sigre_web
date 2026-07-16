@@ -83,7 +83,7 @@ export class AppComponent implements OnInit, OnDestroy {
     const path = url.split('?')[0];
 
     // Páginas ERP públicas (sin sidebar/header fijos) que necesitan scroll de cuerpo completo
-    const erpPublicPrefixes = ['/sigre/inicio', '/sigre/registro', '/sigre/modulo/'];
+    const erpPublicPrefixes = ['/sigre/inicio', '/sigre/registro', '/sigre/modulo/', '/sigre/politicas-seguridad'];
     const isErpPublicPage = erpPublicPrefixes.some(prefix => path.startsWith(prefix));
 
     // Shell con sidebar + header fijos (solo .main-wrapper debe scrollear, body bloqueado):
