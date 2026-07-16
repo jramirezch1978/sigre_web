@@ -323,6 +323,10 @@ export class ErpLandingComponent implements OnInit {
     void this.router.navigateByUrl('/sigre/registro');
   }
 
+  irAPoliticasSeguridad(): void {
+    void this.router.navigateByUrl('/sigre/politicas-seguridad');
+  }
+
   abrirDetalle(modulo: ModuloInfo): void {
     this.showDropdown = '';
     void this.router.navigateByUrl(`/sigre/modulo/${modulo.codigo.toLowerCase()}`);

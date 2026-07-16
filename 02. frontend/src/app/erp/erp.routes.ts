@@ -18,6 +18,12 @@ export const erpRoutes: Routes = [
       import('./pages/erp-modulo-detalle/erp-modulo-detalle.component').then(m => m.ErpModuloDetalleComponent),
   },
   {
+    path: 'politicas-seguridad',
+    loadComponent: () =>
+      import('./pages/erp-politicas-seguridad/erp-politicas-seguridad.component')
+        .then(m => m.ErpPoliticasSeguridadComponent),
+  },
+  {
     path: '',
     canActivate: [erpSessionGuard],
     loadComponent: () =>

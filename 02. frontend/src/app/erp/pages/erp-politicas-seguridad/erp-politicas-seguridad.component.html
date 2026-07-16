@@ -1,0 +1,170 @@
+<div class="politicas-page">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand" (click)="volver()">
+      <img src="assets/imagenes/auth/logo-sigre.png" alt="SIGRE" class="brand-logo">
+      <span class="brand-text">SIGRE</span>
+    </div>
+    <div class="navbar-actions">
+      <button class="btn-volver" (click)="volver()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M10 12L6 8l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Volver al inicio
+      </button>
+      <button class="btn-login" (click)="irALogin()">Iniciar sesión</button>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="politicas-hero">
+    <div class="hero-content">
+      <span class="hero-badge">Seguridad y cumplimiento</span>
+      <h1>Políticas de Seguridad y Protección de Datos</h1>
+      <p class="hero-desc">
+        Cómo protegemos la información de nuestros clientes y cómo protegemos la plataforma,
+        el código fuente y la base de datos de SIGRE.
+      </p>
+    </div>
+  </section>
+
+  <!-- Protección de datos de clientes -->
+  <section class="contenido-section">
+    <div class="container">
+      <h2>1. Protección de datos personales de nuestros clientes</h2>
+      <p class="section-intro">
+        El tratamiento de datos personales de nuestros clientes y de los usuarios finales del ERP
+        se rige por el marco legal peruano de protección de datos personales:
+        <strong>Ley N.º 29733, Ley de Protección de Datos Personales</strong>, y su reglamento vigente,
+        el <strong>{{ reglamentoVigente.norma }}</strong> ({{ reglamentoVigente.vigencia }}).
+      </p>
+
+      <div class="normas-grid">
+        <div class="norma-card" *ngFor="let n of normativaPeru">
+          <span class="norma-articulo">{{ n.articulo }}</span>
+          <h3>{{ n.titulo }}</h3>
+          <blockquote>"{{ n.texto }}"</blockquote>
+        </div>
+      </div>
+
+      <div class="reglamento-box">
+        <h3>Reglamento vigente — {{ reglamentoVigente.norma }}</h3>
+        <p>Reglamento {{ reglamentoVigente.vigencia }}. Principales exigencias que orientan nuestros
+          procesos internos:</p>
+        <ul>
+          <li *ngFor="let p of reglamentoVigente.puntos">{{ p }}</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Derechos ARCO -->
+  <section class="contenido-section alt">
+    <div class="container">
+      <h2>2. Derechos de los titulares de datos (Derechos ARCO)</h2>
+      <p class="section-intro">
+        Conforme a los artículos 18 al 21 de la Ley N.º 29733, todo titular de datos personales
+        puede ejercer los siguientes derechos, de forma gratuita e irrenunciable. Atendemos las
+        solicitudes dentro del plazo legal de veinte (20) días hábiles.
+      </p>
+      <div class="arco-grid">
+        <div class="arco-card" *ngFor="let d of derechosArco">
+          <div class="arco-letra">{{ d.letra }}</div>
+          <div class="arco-info">
+            <h3>{{ d.nombre }} <span>{{ d.articulo }}</span></h3>
+            <p>{{ d.desc }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seguridad técnica -->
+  <section class="contenido-section">
+    <div class="container">
+      <h2>3. Seguridad técnica de la plataforma, el código y la base de datos</h2>
+      <p class="section-intro">
+        Nuestra arquitectura está diseñada para que cada control de seguridad se aplique por
+        diseño, no como una medida agregada después:
+      </p>
+      <div class="tecnica-grid">
+        <div class="tecnica-card">
+          <h3>Aislamiento multi-tenant</h3>
+          <p>Cada empresa cliente opera sobre su propia base de datos, clonada de un esquema
+            plantilla, separada de la de otros clientes — sin datos compartidos entre razones
+            sociales distintas.</p>
+        </div>
+        <div class="tecnica-card">
+          <h3>Control de acceso basado en roles</h3>
+          <p>Acceso por roles y permisos configurables por usuario y por módulo, con auditoría
+            de cada operación registrada en el sistema.</p>
+        </div>
+        <div class="tecnica-card">
+          <h3>Cifrado en tránsito</h3>
+          <p>Todas las comunicaciones entre el cliente y la plataforma viajan cifradas mediante
+            HTTPS/TLS.</p>
+        </div>
+        <div class="tecnica-card">
+          <h3>Separación de ambientes</h3>
+          <p>Entornos de desarrollo, pruebas y producción separados, con control de versiones
+            sobre todo el código fuente del backend, frontend y base de datos.</p>
+        </div>
+        <div class="tecnica-card">
+          <h3>Copias de seguridad</h3>
+          <p>Respaldo periódico de las bases de datos de cada cliente, independiente del resto
+            de tenants de la plataforma.</p>
+        </div>
+        <div class="tecnica-card">
+          <h3>Trazabilidad</h3>
+          <p>Registro de auditoría (usuario, fecha, operación) sobre las transacciones críticas
+            del ERP, disponible para revisión del propio cliente.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Marco internacional -->
+  <section class="contenido-section alt">
+    <div class="container">
+      <h2>4. Marco internacional de referencia</h2>
+      <p class="section-intro">
+        Además del marco legal peruano, alineamos nuestros criterios de seguridad con estándares
+        y normas internacionales de referencia:
+      </p>
+      <div class="normas-grid">
+        <div class="norma-card" *ngFor="let n of internacional">
+          <span class="norma-articulo">{{ n.articulo }}</span>
+          <h3>{{ n.titulo }}</h3>
+          <blockquote>"{{ n.texto }}"</blockquote>
+        </div>
+      </div>
+      <div class="reglamento-box">
+        <h3>ISO/IEC 27001</h3>
+        <p>Estándar internacional de gestión de seguridad de la información. No es una norma legal
+          de cumplimiento obligatorio en el Perú, pero la tomamos como referencia de buenas
+          prácticas para el diseño de nuestros controles internos de seguridad.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contacto -->
+  <section class="cta-section">
+    <div class="container cta-content">
+      <h2>¿Tienes una consulta sobre protección de datos o seguridad?</h2>
+      <p>Escríbenos y coordinamos la atención de tu solicitud, incluido el ejercicio de tus
+        derechos ARCO.</p>
+      <a class="btn-cta" href="mailto:jramirez@npssac.com.pe">jramirez&#64;npssac.com.pe</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; {{ currentYear }} SIGRE — Sistema Integrado de Gestión de Recursos Empresariales</p>
+    <p class="footer-nota">
+      Este documento es una referencia informativa y no sustituye el análisis legal de un
+      profesional del derecho aplicado a tu operación específica.
+    </p>
+  </footer>
+
+</div>
