@@ -1,0 +1,75 @@
+<sigre-metoxi-modal-shell
+  [titulo]="numero ? 'Solicitud de Compra — ' + numero : 'Nueva Solicitud de Compra'"
+  size="xl"
+  [cerrarDeshabilitado]="guardando"
+  (cerrar)="cancelar()">
+
+  @if (cargando) {
+    <div class="sigre-metoxi-modal__loading">
+      <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div>
+      <span>Cargando formulario…</span>
+    </div>
+  } @else {
+    <form [formGroup]="form" class="sc-md">
+      <div class="sc-md__seccion">Cabecera</div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Sucursal *</label>
+          <sigre-searchable-select formControlName="sucursalId" [options]="sucursales" placeholder="Seleccione…" [permitirVacio]="false" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Fecha *</label>
+          <input type="date" class="form-control" formControlName="fecha" />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Prioridad</label>
+          <sigre-searchable-select formControlName="prioridad" [options]="prioridades" placeholder="Seleccione…" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Solicitante</label>
+          <sigre-searchable-select formControlName="solicitanteId" [options]="usuarios" placeholder="Usuario que solicita…" />
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Justificación</label>
+          <input type="text" class="form-control" formControlName="justificacion" maxlength="500" placeholder="Motivo de la solicitud…" />
+        </div>
+      </div>
+
+      <div class="sc-md__seccion sc-md__seccion--det">
+        <span>Artículos solicitados</span>
+        @if (!soloLectura) {
+          <button type="button" class="btn btn-sm btn-primary" (click)="agregarLinea()">
+            <i class="material-icons-outlined fs-6">add</i> Agregar ítem
+          </button>
+        }
+      </div>
+
+      <div class="sc-md__detalle" formArrayName="lineas">
+        <div class="sc-md__det-head">
+          <span>Artículo *</span><span>Almacén destino</span><span>Cantidad *</span><span>Especificaciones</span><span></span>
+        </div>
+        @for (ctrl of lineas.controls; track $index; let i = $index) {
+          <div class="sc-md__det-row" [formGroupName]="i">
+            <sigre-articulo-select formControlName="articuloId" />
+            <sigre-searchable-select formControlName="almacenId" [options]="almacenes" placeholder="Opcional…" />
+            <input type="number" class="form-control" formControlName="cantidad" placeholder="0.00" />
+            <input type="text" class="form-control" formControlName="especificaciones" placeholder="Especificaciones…" />
+            @if (!soloLectura) {
+              <button type="button" class="btn btn-sm btn-outline-danger" title="Quitar" (click)="quitarLinea(i)">
+                <i class="material-icons-outlined fs-6">delete</i>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </form>
+  }
+
+  <div sigreMetoxiModalFooter>
+    <sigre-metoxi-modal-actions
+      [mostrarCancelar]="true" [mostrarGuardar]="!soloLectura"
+      [textoCancelar]="soloLectura ? 'Cerrar' : 'Cancelar'"
+      [guardando]="guardando" [deshabilitado]="guardando || cargando"
+      (cancelar)="cancelar()" (guardar)="guardar()" />
+  </div>
+</sigre-metoxi-modal-shell>

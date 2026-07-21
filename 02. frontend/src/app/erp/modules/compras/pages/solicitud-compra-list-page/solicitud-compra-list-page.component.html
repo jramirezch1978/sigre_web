@@ -1,0 +1,97 @@
+<app-erp-metoxi-list-page
+  modulo="Compras"
+  [codigo]="codigo"
+  [titulo]="nombre"
+  [mostrarTabsEstado]="false"
+  [puedeGestionar]="true"
+  [cargando]="cargando"
+  textoBotonAnadir="Nueva solicitud"
+  placeholderBusqueda="Buscar por N° de solicitud…"
+  [(busqueda)]="busqueda"
+  (anadir)="anadir()"
+  (recargar)="recargar()">
+
+  <div class="row g-2 mb-3">
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Estado</label>
+      <select class="form-select" [(ngModel)]="filtroEstado" (ngModelChange)="aplicarFiltros()">
+        <option value="">Todos</option>
+        <option value="1">Activa</option>
+        <option value="0">Rechazada / Anulada</option>
+        <option value="2">Convertida</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Prioridad</label>
+      <select class="form-select" [(ngModel)]="filtroPrioridad" (ngModelChange)="aplicarFiltros()">
+        <option value="">Todas</option>
+        <option value="BAJA">Baja</option>
+        <option value="MEDIA">Media</option>
+        <option value="ALTA">Alta</option>
+        <option value="URGENTE">Urgente</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Fecha desde</label>
+      <input type="date" class="form-control" [(ngModel)]="filtroFechaDesde" (ngModelChange)="aplicarFiltros()" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small mb-1">Fecha hasta</label>
+      <input type="date" class="form-control" [(ngModel)]="filtroFechaHasta" (ngModelChange)="aplicarFiltros()" />
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>N° Solicitud</th>
+          <th>Fecha</th>
+          <th>Prioridad</th>
+          <th>Ítems</th>
+          <th>Estado</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (cargando) {
+          <tr><td colspan="6" class="text-center py-4 text-muted">Cargando…</td></tr>
+        } @else if (filasVisibles.length === 0) {
+          <tr><td colspan="6" class="text-center py-4 text-muted">Sin registros</td></tr>
+        } @else {
+          @for (f of filasVisibles; track f.id) {
+            <tr>
+              <td class="fw-semibold">{{ f.numero }}</td>
+              <td>{{ f.fecha | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ f.prioridad || '—' }}</td>
+              <td>{{ f.totalItems }}</td>
+              <td><span class="badge rounded-pill" [ngClass]="etiquetaEstado(f.flagEstado).clase">{{ etiquetaEstado(f.flagEstado).texto }}</span></td>
+              <td class="text-end">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    Acciones
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="javascript:void(0)" (click)="ver(f)">Ver detalle</a></li>
+                    @if (puedeEditar(f)) {
+                      <li><a class="dropdown-item" href="javascript:void(0)" (click)="editar(f)">Editar</a></li>
+                    }
+                    @if (puedeAccionar(f)) {
+                      <li><hr class="dropdown-divider" /></li>
+                      <li><a class="dropdown-item" href="javascript:void(0)" (click)="enviar(f)">Enviar</a></li>
+                      <li><a class="dropdown-item" href="javascript:void(0)" (click)="aprobar(f)">Aprobar</a></li>
+                      <li><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="rechazar(f)">Rechazar</a></li>
+                      <li><a class="dropdown-item text-danger" href="javascript:void(0)" (click)="anular(f)">Anular</a></li>
+                      <li><hr class="dropdown-divider" /></li>
+                      <li><a class="dropdown-item fw-semibold" href="javascript:void(0)" (click)="convertir(f)">Convertir a Cotización/OC</a></li>
+                    }
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</app-erp-metoxi-list-page>

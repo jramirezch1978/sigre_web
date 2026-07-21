@@ -3,6 +3,13 @@ import { Routes } from '@angular/router';
 /** Rutas del módulo Compras. Por ahora: Ficha de Proveedores/Clientes (CM002). */
 export const comprasRoutes: Routes = [
   {
+    path: 'operaciones/solicitud-de-compra',
+    loadComponent: () =>
+      import('./pages/solicitud-compra-list-page/solicitud-compra-list-page.component').then(
+        m => m.SolicitudCompraListPageComponent,
+      ),
+  },
+  {
     path: 'tablas/proveedores',
     loadComponent: () =>
       import('./pages/proveedores-list-page/proveedores-list-page.component').then(

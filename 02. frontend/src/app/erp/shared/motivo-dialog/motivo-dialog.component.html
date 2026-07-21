@@ -1,0 +1,24 @@
+<sigre-metoxi-modal-shell [titulo]="data.titulo" size="md" (cerrar)="cancelar()">
+  <form [formGroup]="form">
+    <label class="form-label">{{ data.etiqueta || 'Motivo *' }}</label>
+    <textarea
+      class="form-control"
+      rows="4"
+      formControlName="motivo"
+      maxlength="500"
+      placeholder="Escriba el motivo…"></textarea>
+    @if (form.get('motivo')?.invalid && form.get('motivo')?.touched) {
+      <small class="text-danger">Ingrese un motivo de al menos 5 caracteres.</small>
+    }
+  </form>
+
+  <div sigreMetoxiModalFooter>
+    <sigre-metoxi-modal-actions
+      [mostrarCancelar]="true"
+      [mostrarPrimario]="true"
+      [textoPrimario]="data.textoConfirmar || 'Confirmar'"
+      [primarioPeligroso]="true"
+      (cancelar)="cancelar()"
+      (primario)="confirmar()" />
+  </div>
+</sigre-metoxi-modal-shell>

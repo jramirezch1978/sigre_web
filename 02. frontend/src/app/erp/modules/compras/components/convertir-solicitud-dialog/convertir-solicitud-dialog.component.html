@@ -1,0 +1,51 @@
+<sigre-metoxi-modal-shell
+  [titulo]="'Convertir Solicitud ' + data.numero"
+  size="md"
+  [cerrarDeshabilitado]="procesando"
+  (cerrar)="cancelar()">
+
+  @if (cargando) {
+    <div class="sigre-metoxi-modal__loading">
+      <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div>
+      <span>Cargando proveedores…</span>
+    </div>
+  } @else {
+    <div class="mb-3">
+      <label class="form-label">Convertir a *</label>
+      <div class="d-flex gap-4">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="destino" id="destinoCot" value="COTIZACION" [(ngModel)]="destino" />
+          <label class="form-check-label" for="destinoCot">Cotización</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="destino" id="destinoOc" value="ORDEN_COMPRA" [(ngModel)]="destino" />
+          <label class="form-check-label" for="destinoOc">Orden de Compra directa</label>
+        </div>
+      </div>
+    </div>
+
+    <label class="form-label">Proveedores * <small class="text-muted">(se genera un documento por proveedor seleccionado)</small></label>
+    <div class="border rounded p-2" style="max-height: 260px; overflow-y: auto;">
+      @if (proveedores.length === 0) {
+        <p class="text-muted mb-0 p-2">No hay proveedores activos registrados.</p>
+      }
+      @for (p of proveedores; track p.id) {
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" [id]="'prov-' + p.id" [(ngModel)]="p.marcado" />
+          <label class="form-check-label" [for]="'prov-' + p.id">{{ p.label }}</label>
+        </div>
+      }
+    </div>
+  }
+
+  <div sigreMetoxiModalFooter>
+    <sigre-metoxi-modal-actions
+      [mostrarCancelar]="true"
+      [mostrarPrimario]="true"
+      textoPrimario="Convertir"
+      [guardando]="procesando"
+      [deshabilitado]="procesando || cargando"
+      (cancelar)="cancelar()"
+      (primario)="confirmar()" />
+  </div>
+</sigre-metoxi-modal-shell>
