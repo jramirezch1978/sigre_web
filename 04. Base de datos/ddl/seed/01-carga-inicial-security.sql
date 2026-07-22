@@ -14,14 +14,19 @@ SET statement_timeout = '0';
 -- TX 0: EMPRESA (master)
 BEGIN;
 
--- Tenants demo externos eliminados; SIGRE arranca con Cantabria y Blue Coast.
-DELETE FROM master.empresa WHERE id BETWEEN 4 AND 9;
+-- Tenants demo externos eliminados; SIGRE arranca con Cantabria, Blue Coast y ADGEMINCO (demo).
+DELETE FROM master.empresa WHERE id BETWEEN 5 AND 9;
 
+-- NOTA sobre ADGEMINCO (id=4, DEMO0011): su BD real quedo con el nombre 'sigre_demo_11'
+-- (prefijo sigre_demo_ + correlativo, NO sigre_emp_<sigla> como el resto) porque el flujo
+-- de registro-demo (RegistroDemoService) nunca uso el campo "sigla" para nombrar la BD -
+-- se corrigio ese flujo para futuras altas, pero esta fila conserva el nombre real de la
+-- BD fisica ya existente; renombrarlo aqui sin renombrar la BD en Postgres rompe la conexion.
 INSERT INTO master.empresa (
     id, codigo, ruc, razon_social, nombre_comercial, direccion_fiscal, ubigeo,
     distrito_id, representante_legal, dni_representante_legal,
     correo_contacto, telefono_contacto, db_host, db_port,
-    db_name, db_user, db_password_encrypted, flag_estado
+    db_name, db_user, db_password_encrypted, flag_demo, flag_estado
 )
 VALUES
     (
@@ -30,15 +35,25 @@ VALUES
         NULL, 'JUAN CARLOS PEREZ RAMIREZ', NULL,
         'contacto@cantabria.com.pe', '999888777',
         'postgres', 5432, 'sigre_emp_cantabria', 'cantabria',
-        '5gC+og7bqKDE8zKIZpm2wJeSNkWxsaGfpaWws5CUJY0Lr4aT4yjWjV6rD7sLGQ==', '1'
+        '5gC+og7bqKDE8zKIZpm2wJeSNkWxsaGfpaWws5CUJY0Lr4aT4yjWjV6rD7sLGQ==', '0', '1'
     ),
     (
         3, 'T0000010', '20609837340', 'BLUE COAST S.A.C.', 'BLUE COAST S.A.C.',
         'AV. RIVERA NAVARRETE NRO. 2801 DPTO. 1606', '150131',
-        NULL, 'Francisco Camino Rivera', '12345678',
+        1371, 'Francisco Camino Rivera', '12345678',
         'javier.camino@bluecoastsac.com', '+51 994 076 286',
         'postgres', 5432, 'sigre_emp_bluecoast', 'bluecoast',
-        'Jkke6fZxOXE+EiGVEMuHwwl9BmrvptRoExA7QX5swBCmcYyErg==', '1'
+        'Jkke6fZxOXE+EiGVEMuHwwl9BmrvptRoExA7QX5swBCmcYyErg==', '0', '1'
+    ),
+    (
+        4, 'DEMO0011', '20506676267',
+        'ADMINISTRACION Y GERENCIA EN MINERIA Y CONSTRUCCION SOCIEDAD ANONIMA CERRADA - ADGEMINCO SAC',
+        'ADMINISTRACION Y GERENCIA EN MINERIA Y CONSTRUCCION SOCIEDAD ANONIMA CERRADA - ADGEMINCO SAC',
+        'CAL. FERMIN TANGUIS 145 URB. SANTA CATALINA LA VICTORIA LIMA LIMA', '150115',
+        1355, 'juan perez garcia', '12334455',
+        'sonctaco@com.com', '+519355633',
+        'postgres', 5432, 'sigre_demo_11', 'sigre_demo_11',
+        'yFCuwRUctUtz53Obcx0pXUqLq8TdehUrYxPqVzE4bzu/6LAt4WuAZ5ZAdsnHTL9z4gijBsKMVUhd9umE', '1', '1'
     )
 ON CONFLICT (id) DO UPDATE SET
     codigo = EXCLUDED.codigo,
@@ -57,6 +72,7 @@ ON CONFLICT (id) DO UPDATE SET
     db_name = EXCLUDED.db_name,
     db_user = EXCLUDED.db_user,
     db_password_encrypted = EXCLUDED.db_password_encrypted,
+    flag_demo = EXCLUDED.flag_demo,
     flag_estado = EXCLUDED.flag_estado,
     modificado_en = NOW();
 
@@ -85,57 +101,65 @@ INSERT INTO auth.usuario (
     id, username, email, password, nombres, apellidos, nombre_completo,
     dos_factor_habilitado, bloqueado, intentos_fallidos, bloqueado_hasta,
     ultimo_login_en, flag_estado, flag_admin_sistema, fec_creacion, fec_modificacion,
-    created_by, updated_by
+    created_by, updated_by, numero_documento, flag_demo
 )
 VALUES
     (1, 'admin', 'admin@sigre.pe',
      '$2a$10$karJCVQAcp6sbMLl0jM3EusmCqW3FbODb9D73DBhaOETMgf3C6kTC',
      'ADMINISTRADOR', 'SISTEMA', 'ADMINISTRADOR SISTEMA',
      FALSE, FALSE, 0, NULL, NULL, '1', '1',
-     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-15T01:50:58.156Z'::timestamptz, 1, 1),
+     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-15T01:50:58.156Z'::timestamptz, 1, 1, NULL, '0'),
 
     (2, 'work', 'work@sigre.pe',
      '$2a$10$V3dIARuAlB5lOG8Ry72ohO63y7NYaEcYV3gKueXQMo80CUDy3e1Ni',
      'WORK', 'SYSTEM', 'WORK SYSTEM',
      FALSE, FALSE, 0, NULL, NULL, '1', '1',
-     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-15T01:50:58.156Z'::timestamptz, 1, 1),
+     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-15T01:50:58.156Z'::timestamptz, 1, 1, NULL, '0'),
 
     (3, 'jramirez', 'jramirez@npssac.com.pe',
      '$2a$10$gDrLsvJmekAkuiqZX7XIy.K4zI1FtRjsO2sf6A..rZgUK/i7izjty',
      'JHONNY ALEXANDER', 'RAMIREZ CHIROQUE', 'JHONN RAMIREZ CHIROQUE',
      FALSE, FALSE, 0, NULL, '2026-06-16T23:26:04.063Z'::timestamptz, '1', '1',
-     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-16T23:26:03.806Z'::timestamptz, 1, 1),
+     '2026-04-11T21:15:52.928Z'::timestamptz, '2026-06-16T23:26:03.806Z'::timestamptz, 1, 1, NULL, '0'),
 
     -- Capacitación Blue Coast S.A.C. — contraseña temporal: Capacitacion2026!
     (4, 'anamaria.calderon', 'anamaria.calderon@bluecoastsac.com',
      '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
      'ANA MARIA', 'CALDERON CURAY', 'ANA MARIA CALDERON CURAY',
      FALSE, FALSE, 0, NULL, NULL, '1', '0',
-     NOW(), NOW(), 1, 1),
+     NOW(), NOW(), 1, 1, NULL, '0'),
 
     (5, 'angela.pena', 'angela.pena@bluecoastsac.com',
      '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
      'SANTOS ANGELA', 'PENA ESTRADA', 'SANTOS ANGELA PENA ESTRADA',
      FALSE, FALSE, 0, NULL, NULL, '1', '0',
-     NOW(), NOW(), 1, 1),
+     NOW(), NOW(), 1, 1, NULL, '0'),
 
     (6, 'produccion', 'produccion@bluecoastsac.com',
      '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
      'CEDRIS BERNABE', 'VASQUEZ ARICA', 'CEDRIS BERNABE VASQUEZ ARICA',
      FALSE, FALSE, 0, NULL, NULL, '1', '0',
-     NOW(), NOW(), 1, 1),
+     NOW(), NOW(), 1, 1, NULL, '0'),
 
     (7, 'rodolfo.camino', 'rodolfo.camino@bluecoastsac.com',
      '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
      'RODOLFO HORACIO', 'CAMINO CALLE', 'RODOLFO HORACIO CAMINO CALLE',
      FALSE, FALSE, 0, NULL, NULL, '1', '0',
-     NOW(), NOW(), 1, 1),
+     NOW(), NOW(), 1, 1, NULL, '0'),
 
     (8, 'javier.camino', 'javier.camino@bluecoastsac.com',
      '$2b$10$a3YqG3QrS7pzuWFkTJf0wOPBK//c6YLiBhDy1iyVV5bVCnaf.595y',
      'FRANCISCO JAVIER', 'CAMINO CALLE', 'FRANCISCO JAVIER CAMINO CALLE',
      FALSE, FALSE, 0, NULL, NULL, '1', '0',
-     NOW(), NOW(), 1, 1)
+     NOW(), NOW(), 1, 1, NULL, '0'),
+
+    -- ADGEMINCO SAC (empresa id=4, DEMO0011) — usuario admin real creado por el registro-demo
+    (9, 'jpepere', 'jperez@gmai.com',
+     '$2a$10$/7pCWLyVeS0punsiuWqVh.PE/FMuRCty6d2M1anoSpzfS3M4Dc.IG',
+     'juan', 'perez garcia', 'juan perez garcia',
+     FALSE, FALSE, 0, NULL, NULL, '1', '0',
+     '2026-07-17T19:20:11.232689-05:00'::timestamptz, '2026-07-17T19:20:11.232689-05:00'::timestamptz, 1, 1,
+     '82655314', '1')
 ON CONFLICT (id) DO UPDATE SET
     username = EXCLUDED.username,
     email = EXCLUDED.email,
@@ -153,7 +177,9 @@ ON CONFLICT (id) DO UPDATE SET
     fec_creacion = EXCLUDED.fec_creacion,
     fec_modificacion = EXCLUDED.fec_modificacion,
     created_by = EXCLUDED.created_by,
-    updated_by = EXCLUDED.updated_by;
+    updated_by = EXCLUDED.updated_by,
+    numero_documento = EXCLUDED.numero_documento,
+    flag_demo = EXCLUDED.flag_demo;
 
 SELECT setval(pg_get_serial_sequence('auth.usuario', 'id'), (SELECT COALESCE(MAX(id), 1) FROM auth.usuario), TRUE);
 
@@ -663,6 +689,15 @@ SELECT u.id, 3, '1', NOW()
 FROM auth.usuario u
 WHERE u.flag_estado = '1'
   AND u.id IN (4, 5, 6, 7, 8)
+ON CONFLICT (usuario_id, empresa_id) DO UPDATE SET
+    flag_estado = '1';
+
+-- jpepere (id=9) → ADGEMINCO SAC (id=4), su empresa de registro-demo.
+INSERT INTO auth.usuario_empresa (usuario_id, empresa_id, flag_estado, fec_creacion)
+SELECT u.id, 4, '1', '2026-07-17T19:20:11.232689-05:00'::timestamptz
+FROM auth.usuario u
+WHERE u.flag_estado = '1'
+  AND u.id = 9
 ON CONFLICT (usuario_id, empresa_id) DO UPDATE SET
     flag_estado = '1';
 
