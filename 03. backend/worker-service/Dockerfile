@@ -14,6 +14,10 @@ FROM eclipse-temurin:17-jre-jammy
 
 WORKDIR /app
 
+# Copiar el JAR ANTES de apt-get: con DOCKER_BUILDKIT=0 (legacy) el stage
+# builder puede desaparecer si apt tarda mucho (red lenta / security.ubuntu.com).
+COPY --from=builder /app/worker-service/target/worker-service-*.jar app.jar
+
 RUN apt-get update && apt-get install -y \
     curl \
     tzdata \
@@ -21,8 +25,6 @@ RUN apt-get update && apt-get install -y \
     && echo "America/Lima" > /etc/timezone \
     && dpkg-reconfigure -f noninteractive tzdata \
     && rm -rf /var/lib/apt/lists/*
-
-COPY --from=builder /app/worker-service/target/worker-service-*.jar app.jar
 
 RUN addgroup --system spring && adduser --system spring --ingroup spring
 USER spring:spring
