@@ -6,21 +6,31 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import pe.com.hermes.appmobile.BuildConfig
 import pe.com.hermes.appmobile.R
 import pe.com.hermes.appmobile.data.repository.AuthRepository
 import pe.com.hermes.appmobile.databinding.ActivityLoginBinding
 import pe.com.hermes.appmobile.ui.empresa.SeleccionEmpresaActivity
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity
+import pe.com.hermes.appmobile.util.ConnectivityChecker
 import pe.com.hermes.appmobile.util.app
 import pe.com.hermes.appmobile.util.toast
 
 /** Pantalla de ingreso. El login SIEMPRE devuelve un token temporal (ver AuthServiceImpl.login) —
- * la selección de empresa/sucursal ocurre siempre después, nunca se salta. */
+ * la selección de empresa/sucursal ocurre siempre después, nunca se salta (a diferencia de
+ * FastSales, cuya pantalla de login muestra tambien la ultima empresa cacheada: aqui no aplica
+ * porque el listado real de empresas del usuario solo se conoce autenticado). */
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var authRepository: AuthRepository
+    private var monitoreoJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,22 +39,62 @@ class LoginActivity : AppCompatActivity() {
 
         authRepository = AuthRepository(app.apiClient, app.session)
 
+        binding.tvVersion.text = "Versión: ${BuildConfig.VERSION_NAME}"
+
         binding.btnLogin.setOnClickListener { intentarLogin() }
-        binding.btnServidor.setOnClickListener { mostrarServidorDefault() }
+        binding.btnCambiarServidor.setOnClickListener { mostrarServidorDefault() }
+        binding.tvServidorNombre.setOnClickListener { mostrarServidorDefault() }
     }
 
     override fun onResume() {
         super.onResume()
-        actualizarBotonServidor()
+        actualizarServidorInfo()
+        iniciarMonitoreoConexion()
     }
 
-    private fun actualizarBotonServidor() {
+    override fun onPause() {
+        super.onPause()
+        monitoreoJob?.cancel()
+    }
+
+    private fun actualizarServidorInfo() {
         val default = app.config.obtenerDefault()
-        binding.btnServidor.text = if (default != null) "Servidor: ${default.nombre}" else "Servidor: (sin configurar)"
+        binding.tvServidorNombre.text = default?.nombre ?: "(sin configurar)"
+    }
+
+    /** Ping periodico al servidor por defecto mientras el Login esta visible — equivalente al
+     * badge "Conectado (Xms)" y a iniciarMonitoreoConexion() de FastSales. */
+    private fun iniciarMonitoreoConexion() {
+        monitoreoJob?.cancel()
+        monitoreoJob = lifecycleScope.launch {
+            while (isActive) {
+                actualizarBadgeConexion()
+                delay(8000L)
+            }
+        }
+    }
+
+    private suspend fun actualizarBadgeConexion() {
+        val default = app.config.obtenerDefault()
+        if (default == null) {
+            binding.tvBadgeConexion.text = "Sin servidor"
+            binding.badgeConexion.setBackgroundResource(R.drawable.bg_badge_neutral)
+            return
+        }
+        binding.tvBadgeConexion.text = "Verificando…"
+        binding.badgeConexion.setBackgroundResource(R.drawable.bg_badge_neutral)
+        val resultado = withContext(Dispatchers.IO) { ConnectivityChecker.probar(default) }
+        if (resultado.conectado) {
+            binding.tvBadgeConexion.text = "Conectado (${resultado.latenciaMs}ms)"
+            binding.badgeConexion.setBackgroundResource(R.drawable.bg_badge_success)
+        } else {
+            binding.tvBadgeConexion.text = "Sin conexión"
+            binding.badgeConexion.setBackgroundResource(R.drawable.bg_badge_danger)
+        }
     }
 
     /** Equivalente a ImplServerRemote.dialogServerDefault() de FastSales: info de solo lectura
-     * del servidor activo + botón para ir al listado completo. */
+     * del servidor activo + botón para ir al listado completo (donde se añaden/editan perfiles). */
     private fun mostrarServidorDefault() {
         if (app.config.listarServidores().isEmpty()) {
             irAListadoServidores()

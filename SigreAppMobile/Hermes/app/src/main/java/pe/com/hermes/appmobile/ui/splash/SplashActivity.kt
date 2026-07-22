@@ -36,8 +36,8 @@ class SplashActivity : AppCompatActivity() {
 
             if (default != null) {
                 binding.tvEstado.text = "Verificando conexión con ${default.nombre}…"
-                val conectado = withContext(Dispatchers.IO) { ConnectivityChecker.probar(default) }
-                binding.tvEstado.text = if (conectado) "Conectado" else "Sin conexión — continuando…"
+                val resultado = withContext(Dispatchers.IO) { ConnectivityChecker.probar(default) }
+                binding.tvEstado.text = if (resultado.conectado) "Conectado (${resultado.latenciaMs} ms)" else "Sin conexión — continuando…"
             } else {
                 binding.tvEstado.text = "Sin servidor configurado"
             }

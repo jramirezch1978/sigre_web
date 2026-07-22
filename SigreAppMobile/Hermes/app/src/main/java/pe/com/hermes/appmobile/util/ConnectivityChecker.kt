@@ -9,25 +9,28 @@ import java.net.Socket
  * ValidarServerTask de FastSales (que hacía ping al webservice SOAP). No depende de
  * ningún endpoint HTTP concreto, solo abre/cierra un socket con timeout corto: sirve
  * tanto para validar un servidor recién tipeado (aún sin guardar) como el que ya está
- * configurado como default.
+ * configurado como default, y para el badge de latencia en tiempo real del Login.
  */
 object ConnectivityChecker {
 
     private const val TIMEOUT_MS = 2500
 
+    data class Resultado(val conectado: Boolean, val latenciaMs: Long?)
+
     /** Bloqueante — llamar siempre desde Dispatchers.IO. */
-    fun probar(hostIp: String, port: String): Boolean {
-        val puerto = port.toIntOrNull() ?: return false
-        if (hostIp.isBlank()) return false
+    fun probar(hostIp: String, port: String): Resultado {
+        val puerto = port.toIntOrNull() ?: return Resultado(false, null)
+        if (hostIp.isBlank()) return Resultado(false, null)
+        val inicio = System.currentTimeMillis()
         return try {
             Socket().use { socket ->
                 socket.connect(InetSocketAddress(hostIp, puerto), TIMEOUT_MS)
-                true
+                Resultado(true, System.currentTimeMillis() - inicio)
             }
         } catch (_: Exception) {
-            false
+            Resultado(false, null)
         }
     }
 
-    fun probar(server: ServerProfile): Boolean = probar(server.hostIp, server.port)
+    fun probar(server: ServerProfile): Resultado = probar(server.hostIp, server.port)
 }

@@ -122,12 +122,12 @@ class ServidorListActivity : AppCompatActivity() {
             btnProbarConexion.isEnabled = false
 
             lifecycleScope.launch {
-                val conectado = withContext(Dispatchers.IO) { ConnectivityChecker.probar(hostIp, port) }
+                val resultado = withContext(Dispatchers.IO) { ConnectivityChecker.probar(hostIp, port) }
                 progressProbarConexion.visibility = android.view.View.GONE
                 btnProbarConexion.isEnabled = true
-                if (conectado) {
+                if (resultado.conectado) {
                     tvResultadoConexion.setTextColor(Color.parseColor("#2E7D32"))
-                    tvResultadoConexion.text = "✓ Conectado"
+                    tvResultadoConexion.text = "✓ Conectado (${resultado.latenciaMs} ms)"
                 } else {
                     tvResultadoConexion.setTextColor(Color.parseColor("#C62828"))
                     tvResultadoConexion.text = "✗ Sin conexión"
