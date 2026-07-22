@@ -3,6 +3,7 @@ package com.sigre.seguridad.service;
 import com.sigre.common.util.Constants;
 import com.sigre.common.util.EmailListParser;
 import com.sigre.seguridad.dto.EmpresaRegistroEmailDto;
+import com.sigre.seguridad.dto.TenantDisponibilidadDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,7 +14,10 @@ import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
 
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -24,6 +28,8 @@ public class EmailService {
     private final JdbcTemplate jdbcTemplate;
 
     private static final String FROM = "no-reply@npssac.com.pe";
+    private static final DateTimeFormatter FMT_FECHA =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss XXX").withLocale(Locale.forLanguageTag("es-PE"));
 
     /** Copia (CC) fija de todos los correos. Configurable en YAML (app.notificacion.email.cc). */
     @org.springframework.beans.factory.annotation.Value("${app.notificacion.email.cc:}")
@@ -168,6 +174,191 @@ public class EmailService {
                 enviarHtml(destinatario, subject, body);
             }
         }
+    }
+
+    /**
+     * Resumen profesional a soporte cuando, al arrancar el monitoreo (worker),
+     * todas las BDs tenant están activas.
+     */
+    @Async
+    public void enviarResumenTenantsArranque(List<TenantDisponibilidadDto> tenants) {
+        List<String> soporte = correosSoporte();
+        if (soporte.isEmpty()) {
+            log.warn("No se envió resumen de arranque de tenants: listado SOPORTE vacío");
+            return;
+        }
+        if (tenants == null || tenants.isEmpty()) {
+            return;
+        }
+        String fecha = OffsetDateTime.now().format(FMT_FECHA);
+        int total = tenants.size();
+        String filas = buildFilasEstadoTenants(tenants);
+        String subject = "SIGRE ERP — Monitoreo: " + total + " tenant(s) activo(s)";
+        String body = """
+                <!DOCTYPE html>
+                <html lang="es">
+                <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+                <body style="margin:0;padding:0;background:#eef2f6;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#2a3f54;">
+                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="background:#eef2f6;padding:24px 12px;">
+                    <tr><td align="center">
+                      <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(42,63,84,0.12);">
+                        <tr>
+                          <td style="background:#1b5e20;padding:28px 32px;">
+                            <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a5d6a7;margin-bottom:8px;">SIGRE ERP · Soporte</div>
+                            <h1 style="margin:0;font-size:22px;font-weight:600;color:#ffffff;">Tenants operativos</h1>
+                            <p style="margin:10px 0 0;color:#c8e6c9;font-size:14px;line-height:1.5;">
+                              El monitoreo del worker-service confirmó que todas las bases de datos de clientes están activos.
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:24px 32px 8px;">
+                            <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#526273;">
+                              Fecha de verificación: <strong>%s</strong><br>
+                              Total de empresas activas: <strong>%d</strong>
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:8px 32px 24px;">
+                            <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="border:1px solid #e4e9f0;border-radius:6px;overflow:hidden;">
+                              <tr style="background:#f8fafc;">
+                                <td style="padding:12px 14px;font-size:11px;font-weight:700;color:#73879c;text-transform:uppercase;">Empresa</td>
+                                <td style="padding:12px 14px;font-size:11px;font-weight:700;color:#73879c;text-transform:uppercase;">Base de datos</td>
+                                <td style="padding:12px 14px;font-size:11px;font-weight:700;color:#73879c;text-transform:uppercase;">Host</td>
+                                <td style="padding:12px 14px;font-size:11px;font-weight:700;color:#73879c;text-transform:uppercase;text-align:right;">Estado</td>
+                              </tr>
+                              %s
+                            </table>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="background:#f8fafc;padding:18px 32px;border-top:1px solid #e4e9f0;">
+                            <p style="margin:0;font-size:11px;color:#95a5a6;line-height:1.5;">
+                              Aviso automático del monitoreo de tenants (worker-service → seguridad-service).<br>
+                              Destinatarios: listado SOPORTE / EMAILS. No responda a este correo.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td></tr>
+                  </table>
+                </body>
+                </html>
+                """.formatted(escapeHtml(fecha), total, filas);
+        for (String to : soporte) {
+            enviarHtml(to, subject, body);
+        }
+    }
+
+    /**
+     * Alerta a soporte cuando la BD de un cliente deja de responder (arranque o monitoreo).
+     */
+    @Async
+    public void enviarAlertaDesconexionTenant(TenantDisponibilidadDto tenant) {
+        List<String> soporte = correosSoporte();
+        if (soporte.isEmpty()) {
+            log.warn("No se envió alerta de desconexión de tenant: listado SOPORTE vacío");
+            return;
+        }
+        if (tenant == null) {
+            return;
+        }
+        String fecha = OffsetDateTime.now().format(FMT_FECHA);
+        String hostPuerto = nz(tenant.dbHost()) + ":" + tenant.dbPort();
+        String subject = "SIGRE ERP — ALERTA: BD tenant no disponible — " + nz(tenant.razonSocial());
+        String body = """
+                <!DOCTYPE html>
+                <html lang="es">
+                <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+                <body style="margin:0;padding:0;background:#eef2f6;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#2a3f54;">
+                  <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="background:#eef2f6;padding:24px 12px;">
+                    <tr><td align="center">
+                      <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(42,63,84,0.12);">
+                        <tr>
+                          <td style="background:#b71c1c;padding:28px 32px;">
+                            <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#ffcdd2;margin-bottom:8px;">SIGRE ERP · Soporte</div>
+                            <h1 style="margin:0;font-size:22px;font-weight:600;color:#ffffff;">Desconexión de base de datos</h1>
+                            <p style="margin:10px 0 0;color:#ffcdd2;font-size:14px;line-height:1.5;">
+                              El monitoreo detectó que la BD de un cliente no responde.
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:28px 32px;">
+                            <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#526273;">
+                              Detectado: <strong>%s</strong>
+                            </p>
+                            <table role="presentation" width="100%%" cellspacing="0" cellpadding="0" style="background:#fff8f8;border:1px solid #ffcdd2;border-radius:6px;">
+                              <tr>
+                                <td style="padding:14px 18px;border-bottom:1px solid #ffebee;font-size:12px;font-weight:600;color:#73879c;width:38%%;">Empresa</td>
+                                <td style="padding:14px 18px;border-bottom:1px solid #ffebee;font-size:14px;font-weight:600;color:#2a3f54;">%s</td>
+                              </tr>
+                              <tr>
+                                <td style="padding:14px 18px;border-bottom:1px solid #ffebee;font-size:12px;font-weight:600;color:#73879c;">Base de datos</td>
+                                <td style="padding:14px 18px;border-bottom:1px solid #ffebee;font-size:14px;font-family:monospace;color:#2a3f54;">%s</td>
+                              </tr>
+                              <tr>
+                                <td style="padding:14px 18px;border-bottom:1px solid #ffebee;font-size:12px;font-weight:600;color:#73879c;">Host / puerto</td>
+                                <td style="padding:14px 18px;border-bottom:1px solid #ffebee;font-size:14px;font-family:monospace;color:#2a3f54;">%s</td>
+                              </tr>
+                              <tr>
+                                <td style="padding:14px 18px;font-size:12px;font-weight:600;color:#73879c;">Estado</td>
+                                <td style="padding:14px 18px;font-size:14px;font-weight:700;color:#b71c1c;">NO DISPONIBLE</td>
+                              </tr>
+                            </table>
+                            <p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#73879c;">
+                              Verifique conectividad, servicio PostgreSQL y credenciales del tenant. El monitoreo reintentará periódicamente.
+                            </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="background:#f8fafc;padding:18px 32px;border-top:1px solid #e4e9f0;">
+                            <p style="margin:0;font-size:11px;color:#95a5a6;line-height:1.5;">
+                              Alerta automática del monitoreo de tenants. Destinatarios: listado SOPORTE / EMAILS.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td></tr>
+                  </table>
+                </body>
+                </html>
+                """.formatted(
+                escapeHtml(fecha),
+                escapeHtml(nz(tenant.razonSocial())),
+                escapeHtml(nz(tenant.dbName())),
+                escapeHtml(hostPuerto));
+        for (String to : soporte) {
+            enviarHtml(to, subject, body);
+        }
+    }
+
+    private String buildFilasEstadoTenants(List<TenantDisponibilidadDto> tenants) {
+        StringBuilder html = new StringBuilder();
+        boolean alt = false;
+        for (TenantDisponibilidadDto t : tenants) {
+            String bg = alt ? "#fafbfc" : "#ffffff";
+            alt = !alt;
+            String estadoColor = t.disponible() ? "#1b5e20" : "#b71c1c";
+            String estadoTxt = t.disponible() ? "ACTIVO" : "CAÍDO";
+            String host = nz(t.dbHost()) + ":" + t.dbPort();
+            html.append("""
+                    <tr style="background:%s;">
+                      <td style="padding:12px 14px;font-size:13px;color:#2a3f54;border-top:1px solid #eef2f6;">%s</td>
+                      <td style="padding:12px 14px;font-size:12px;font-family:monospace;color:#526273;border-top:1px solid #eef2f6;">%s</td>
+                      <td style="padding:12px 14px;font-size:12px;font-family:monospace;color:#526273;border-top:1px solid #eef2f6;">%s</td>
+                      <td style="padding:12px 14px;font-size:12px;font-weight:700;color:%s;text-align:right;border-top:1px solid #eef2f6;">%s</td>
+                    </tr>
+                    """.formatted(
+                    bg,
+                    escapeHtml(nz(t.razonSocial())),
+                    escapeHtml(nz(t.dbName())),
+                    escapeHtml(host),
+                    estadoColor,
+                    estadoTxt));
+        }
+        return html.toString();
     }
 
     private String buildRegistroEmpresaHtml(EmpresaRegistroEmailDto d) {

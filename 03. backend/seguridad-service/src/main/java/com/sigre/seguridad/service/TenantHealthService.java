@@ -1,5 +1,6 @@
 package com.sigre.seguridad.service;
 
+import com.sigre.seguridad.dto.TenantDisponibilidadDto;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -15,13 +17,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Detecta cuándo la BD de un tenant vuelve a estar en línea (transición caído→disponible)
- * y avisa por correo a los administradores de esa empresa. Nadie vigilaba esto antes: el
- * panel "Sesiones BD" del admin solo muestrea bajo demanda (cuando alguien abre la pantalla).
- *
- * El estado "último conocido" se guarda en memoria (no en BD): un reinicio del servicio
- * pierde el historial y simplemente vuelve a tomar una foto base sin enviar correo en el
- * primer chequeo tras reiniciar, para no spamear si el tenant ya estaba en línea de antes.
+ * Monitoreo de disponibilidad de BDs tenant.
+ * <ul>
+ *   <li>Arranque (worker): avisa a cada empresa si su BD está online y, si todas
+ *       están activas, envía resumen profesional a soporte (SOPORTE/EMAILS).</li>
+ *   <li>Periódico (cada 30 min): notifica recuperación a la empresa y desconexión a soporte.</li>
+ * </ul>
  */
 @Slf4j
 @Service
@@ -47,16 +48,64 @@ public class TenantHealthService {
 
     private record TenantDato(long id, String razonSocial, String dbName, String dbHost, int dbPort, String correoContacto) {}
 
-    /** Revisa todos los tenants activos; envía correo a correo_contacto + todos los usuarios de los que acaban de volver en línea. */
+    /**
+     * Chequeo de arranque: establece baseline, notifica a cada tenant online y,
+     * si todos están activos, envía resumen a soporte. Si hay caídos, alerta a soporte.
+     */
+    public void verificarArranqueYNotificar() {
+        List<TenantDato> tenants = listarTenantsActivos();
+        if (tenants.isEmpty()) {
+            log.warn("[tenant-health] Arranque: no hay empresas activas para monitorear");
+            return;
+        }
+
+        List<TenantDisponibilidadDto> resultados = new ArrayList<>();
+        for (TenantDato t : tenants) {
+            boolean enLinea = probarConexion(t);
+            ultimoEstadoConocido.put(t.id(), enLinea);
+            resultados.add(new TenantDisponibilidadDto(
+                    t.id(), t.razonSocial(), t.dbName(), t.dbHost(), t.dbPort(), enLinea));
+            if (enLinea) {
+                emailService.enviarBaseDatosDisponible(
+                        correosNotificacion(t), t.razonSocial(), t.dbName());
+            }
+        }
+
+        boolean todosActivos = resultados.stream().allMatch(TenantDisponibilidadDto::disponible);
+        if (todosActivos) {
+            log.info("[tenant-health] Arranque: {} tenants activos — notificando a soporte", resultados.size());
+            emailService.enviarResumenTenantsArranque(resultados);
+        } else {
+            List<TenantDisponibilidadDto> caidos = resultados.stream()
+                    .filter(r -> !r.disponible())
+                    .toList();
+            log.warn("[tenant-health] Arranque: {}/{} tenants sin BD disponible", caidos.size(), resultados.size());
+            for (TenantDisponibilidadDto c : caidos) {
+                emailService.enviarAlertaDesconexionTenant(c);
+            }
+        }
+    }
+
+    /**
+     * Chequeo periódico: recuperación → correo a usuarios de la empresa;
+     * desconexión (online→offline) → alerta a soporte.
+     */
     public void verificarYNotificar() {
         for (TenantDato t : listarTenantsActivos()) {
             boolean enLinea = probarConexion(t);
             Boolean anterior = ultimoEstadoConocido.put(t.id(), enLinea);
+
             boolean transicionAOnline = enLinea && anterior != null && !anterior;
             if (transicionAOnline) {
                 log.info("[tenant-health] '{}' volvió a estar en línea", t.razonSocial());
-                List<String> destinatarios = correosNotificacion(t);
-                emailService.enviarBaseDatosDisponible(destinatarios, t.razonSocial(), t.dbName());
+                emailService.enviarBaseDatosDisponible(correosNotificacion(t), t.razonSocial(), t.dbName());
+            }
+
+            boolean transicionAOffline = !enLinea && anterior != null && anterior;
+            if (transicionAOffline) {
+                log.warn("[tenant-health] '{}' dejó de estar disponible", t.razonSocial());
+                emailService.enviarAlertaDesconexionTenant(new TenantDisponibilidadDto(
+                        t.id(), t.razonSocial(), t.dbName(), t.dbHost(), t.dbPort(), false));
             }
         }
     }
@@ -97,11 +146,6 @@ public class TenantHealthService {
         }
     }
 
-    /**
-     * Destinatarios del aviso: correo_contacto de la empresa (si tiene) + el correo de
-     * TODOS los usuarios activos asociados a ella (no solo administradores) — a pedido
-     * explícito, para que se entere cualquiera con cuenta en esa empresa.
-     */
     private List<String> correosNotificacion(TenantDato t) {
         Set<String> destinatarios = new LinkedHashSet<>();
         if (t.correoContacto() != null && !t.correoContacto().isBlank()) {

@@ -1,6 +1,7 @@
 package com.sigre.worker.controller;
 
 import com.sigre.worker.service.LicenciaWorker;
+import com.sigre.worker.service.TenantHealthWorker;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,7 @@ import java.util.Map;
 /**
  * API SOLO DE LECTURA del worker. No expone disparo manual de los jobs (corren
  * automáticos por @Scheduled); solo permite consultar el avance/estado de los
- * procesos en segundo plano (hoy: licencias demo).
+ * procesos en segundo plano (licencias demo y salud de tenants).
  */
 @RestController
 @RequestMapping("/api/worker")
@@ -21,10 +22,24 @@ public class WorkerEstadoController {
 
     private final JdbcTemplate security;
     private final LicenciaWorker worker;
+    private final TenantHealthWorker tenantHealthWorker;
 
-    public WorkerEstadoController(JdbcTemplate securityJdbcTemplate, LicenciaWorker worker) {
+    public WorkerEstadoController(
+            JdbcTemplate securityJdbcTemplate,
+            LicenciaWorker worker,
+            TenantHealthWorker tenantHealthWorker) {
         this.security = securityJdbcTemplate;
         this.worker = worker;
+        this.tenantHealthWorker = tenantHealthWorker;
+    }
+
+    /** Últimas corridas del monitoreo de BDs tenant. */
+    @GetMapping("/tenants/salud")
+    public Map<String, Object> estadoSaludTenants() {
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("ultimaCorridaArranque", tenantHealthWorker.getUltimaCorridaArranque());
+        r.put("ultimaCorridaPeriodica", tenantHealthWorker.getUltimaCorridaPeriodica());
+        return r;
     }
 
     /** Resumen del job de licencias: últimas corridas + conteos por estado. */
