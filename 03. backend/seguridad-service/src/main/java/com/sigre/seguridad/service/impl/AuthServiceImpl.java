@@ -13,6 +13,7 @@ import com.sigre.seguridad.entity.master.EmpresaMaster;
 import com.sigre.seguridad.repository.EmpresaMasterRepository;
 import com.sigre.seguridad.repository.UsuarioRepository;
 import com.sigre.seguridad.service.AuthService;
+import com.sigre.seguridad.service.DispositivoService;
 import com.sigre.seguridad.service.EmailService;
 import com.sigre.seguridad.service.TenantConnectionService;
 import com.sigre.seguridad.service.LogAccesoService;
@@ -57,6 +58,7 @@ public class AuthServiceImpl implements AuthService {
     private final TokensSessionService tokensSessionService;
     private final LogAccesoService logAccesoService;
     private final TurnstileVerificationService turnstileVerificationService;
+    private final DispositivoService dispositivoService;
 
     @Value("${app.jwt.access-token-expiration:900000}")
     private long tempTokenExpiration;
@@ -79,6 +81,7 @@ public class AuthServiceImpl implements AuthService {
             TokensSessionService tokensSessionService,
             LogAccesoService logAccesoService,
             TurnstileVerificationService turnstileVerificationService,
+            DispositivoService dispositivoService,
             DataSource dataSource) {
         this.usuarioRepository = usuarioRepository;
         this.empresaMasterRepository = empresaMasterRepository;
@@ -91,6 +94,7 @@ public class AuthServiceImpl implements AuthService {
         this.tokensSessionService = tokensSessionService;
         this.logAccesoService = logAccesoService;
         this.turnstileVerificationService = turnstileVerificationService;
+        this.dispositivoService = dispositivoService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -107,6 +111,32 @@ public class AuthServiceImpl implements AuthService {
         log.info("[DEV-LOGIN] Autenticación sin Turnstile: email={} ip={}",
                 request.getEmail(), request.getIpAddress());
         return doLogin(request);
+    }
+
+    @Override
+    @Transactional
+    public LoginResponse loginMobile(LoginRequest request) {
+        String nroRegistro = request.getNroRegistroDispositivo();
+        if (nroRegistro == null || nroRegistro.isBlank()) {
+            throw new BusinessException(
+                    "Dispositivo no registrado. Registre el equipo antes de iniciar sesión.",
+                    HttpStatus.FORBIDDEN, "DISPOSITIVO_NO_REGISTRADO");
+        }
+        DispositivoService.DispositivoRow dispositivo = dispositivoService.buscarPorNroRegistro(nroRegistro)
+                .orElseThrow(() -> new BusinessException(
+                        "Dispositivo no reconocido. Registre el equipo nuevamente.",
+                        HttpStatus.FORBIDDEN, "DISPOSITIVO_NO_REGISTRADO"));
+        if (!dispositivo.autorizado()) {
+            throw new BusinessException(
+                    "Este equipo no está autorizado para usar la aplicación. Contacte al administrador.",
+                    HttpStatus.FORBIDDEN, "DISPOSITIVO_NO_AUTORIZADO");
+        }
+
+        log.info("[LOGIN-MOBILE] Autenticación sin Turnstile vía dispositivo autorizado: email={} dispositivo={}",
+                request.getEmail(), nroRegistro);
+        LoginResponse response = doLogin(request);
+        dispositivoService.registrarLogin(dispositivo.id(), response.getUserId());
+        return response;
     }
 
     private LoginResponse doLogin(LoginRequest request) {

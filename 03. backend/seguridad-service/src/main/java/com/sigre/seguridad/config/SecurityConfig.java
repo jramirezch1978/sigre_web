@@ -36,6 +36,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/login/dev",
+                                "/api/auth/login/mobile",
+                                "/api/auth/dispositivo/registrar",
                                 "/api/auth/seleccionar-empresa",
                                 "/api/auth/refresh",
                                 "/api/auth/recuperar/**",

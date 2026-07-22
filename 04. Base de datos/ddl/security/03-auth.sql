@@ -302,6 +302,31 @@ CREATE TABLE auth.tokens_session (
 CREATE UNIQUE INDEX uq_tokens_session_activa_triple ON auth.tokens_session (usuario_id, empresa_id, sucursal_id)
     WHERE flag_estado = '1';
 
+-- Dispositivos moviles registrados (apps nativas tipo Hermes): permite loguear sin
+-- Cloudflare Turnstile (/api/auth/login/mobile) porque el equipo ya se identifico y
+-- fue autorizado antes. flag_autorizado nace en '1' (autorizado) y un admin lo puede
+-- pasar a '0' desde /admin si el equipo se pierde o se quiere revocar.
+CREATE TABLE auth.dispositivo (
+    id BIGSERIAL PRIMARY KEY,
+    device_id VARCHAR(120) NOT NULL UNIQUE,
+    nro_registro VARCHAR(30) NOT NULL UNIQUE,
+    imei VARCHAR(50),
+    fabricante VARCHAR(100),
+    modelo VARCHAR(100),
+    nombre_dispositivo VARCHAR(200),
+    software VARCHAR(100),
+    usuario_id BIGINT REFERENCES auth.usuario(id),
+    flag_autorizado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_autorizado IN ('0', '1')),
+    fec_registro TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    fec_ultimo_login TIMESTAMPTZ,
+    fec_creacion TIMESTAMPTZ DEFAULT NOW(),
+    fec_modificacion TIMESTAMPTZ,
+    created_by BIGINT,
+    updated_by BIGINT
+);
+
+CREATE INDEX ix_dispositivo_nro_registro ON auth.dispositivo (nro_registro);
+
 CREATE TABLE auth.codigo_recuperacion (
     id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL REFERENCES auth.usuario(id),

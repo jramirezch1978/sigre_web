@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.sigre.seguridad.dto.*;
 import com.sigre.seguridad.service.AuthService;
+import com.sigre.seguridad.service.DispositivoService;
 import com.sigre.common.dto.ApiResponse;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.security.JwtTokenProvider;
@@ -19,6 +20,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final DispositivoService dispositivoService;
 
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -33,6 +35,26 @@ public class AuthController {
     @PostMapping("/login/dev")
     public ApiResponse<LoginResponse> loginDev(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.ok(authService.loginDev(request), "Login dev exitoso");
+    }
+
+    /**
+     * Login para apps móviles nativas (Hermes, etc.) — sin Cloudflare Turnstile.
+     * Requiere que {@code nroRegistroDispositivo} corresponda a un dispositivo ya dado de
+     * alta con POST /dispositivo/registrar y autorizado (ver /admin/dispositivos).
+     */
+    @PostMapping("/login/mobile")
+    public ApiResponse<LoginResponse> loginMobile(@Valid @RequestBody LoginRequest request) {
+        return ApiResponse.ok(authService.loginMobile(request), "Login exitoso");
+    }
+
+    /**
+     * Alta (o re-consulta idempotente si el deviceId ya existe) de un dispositivo móvil.
+     * Nace autorizado (flag_autorizado='1'); un admin puede revocarlo desde /admin/dispositivos.
+     */
+    @PostMapping("/dispositivo/registrar")
+    public ApiResponse<DispositivoRegistradoResponse> registrarDispositivo(
+            @Valid @RequestBody RegistrarDispositivoRequest request) {
+        return ApiResponse.ok(dispositivoService.registrar(request), "Dispositivo registrado");
     }
 
     @GetMapping("/empresas")

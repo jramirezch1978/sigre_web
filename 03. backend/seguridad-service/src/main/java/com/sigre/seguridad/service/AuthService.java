@@ -14,6 +14,13 @@ public interface AuthService {
      */
     LoginResponse loginDev(LoginRequest request);
 
+    /**
+     * Login para apps móviles nativas (sin Cloudflare Turnstile, que es un widget web):
+     * en su lugar exige que {@code request.getNroRegistroDispositivo()} corresponda a un
+     * dispositivo ya registrado y autorizado en {@code auth.dispositivo}.
+     */
+    LoginResponse loginMobile(LoginRequest request);
+
     List<EmpresaUsuarioDto> listarEmpresas(Long usuarioId);
 
     LoginResponse seleccionarEmpresa(Long usuarioId, SeleccionEmpresaRequest request);

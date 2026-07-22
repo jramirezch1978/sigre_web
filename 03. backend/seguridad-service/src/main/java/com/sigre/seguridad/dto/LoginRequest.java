@@ -47,4 +47,8 @@ public class LoginRequest {
     /** Token emitido por Cloudflare Turnstile en el login ERP (opcional si backend no exige captcha). */
     @Size(max = 4096, message = "Token Turnstile demasiado largo")
     private String turnstileToken;
+
+    /** Nro de registro de auth.dispositivo — requerido solo en /api/auth/login/mobile. */
+    @Size(max = 30, message = "Número de registro de dispositivo inválido")
+    private String nroRegistroDispositivo;
 }
