@@ -125,6 +125,38 @@ public class EmailService {
         enviarHtml(destinatario, subject, body);
     }
 
+    /**
+     * Aviso a los administradores de la empresa de que su BD tenant volvió a estar en
+     * línea (detectado por TenantHealthService/worker tras una caída). Uno por
+     * destinatario (no se exponen los correos de los demás admins entre sí).
+     */
+    @Async
+    public void enviarBaseDatosDisponible(java.util.List<String> destinatarios, String razonSocial, String dbName) {
+        if (destinatarios == null || destinatarios.isEmpty()) {
+            log.warn("No se envió aviso de BD disponible para '{}': sin administradores con correo.", razonSocial);
+            return;
+        }
+        String subject = "SIGRE ERP - Base de datos disponible";
+        String body = """
+                <html><body style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;color:#2a3f54;">
+                  <div style="background:#2a3f54;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;">
+                    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a7b1c2;">SIGRE ERP</div>
+                    <h1 style="margin:6px 0 0;font-size:22px;">Base de datos disponible</h1>
+                  </div>
+                  <div style="padding:28px;background:#f5f7fa;border-radius:0 0 8px 8px;">
+                    <p>Estimado administrador de <strong>%s</strong>,</p>
+                    <p>Le informamos que la base de datos de su empresa (<code>%s</code>) ya se encuentra <strong>en línea</strong> y disponible para su uso.</p>
+                    <p style="color:#888;font-size:12px;margin-top:20px;">Este es un aviso automático generado por el sistema de monitoreo de SIGRE ERP.</p>
+                  </div>
+                </body></html>
+                """.formatted(safe(razonSocial), safe(dbName));
+        for (String destinatario : destinatarios) {
+            if (destinatario != null && !destinatario.isBlank()) {
+                enviarHtml(destinatario, subject, body);
+            }
+        }
+    }
+
     private String buildRegistroEmpresaHtml(EmpresaRegistroEmailDto d) {
         return """
                 <!DOCTYPE html>
