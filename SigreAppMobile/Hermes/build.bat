@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableDelayedExpansion
 
 REM ============================================================
 REM   COMPILACION - HERMES (SIGRE Logistica, Android nativo)
@@ -79,6 +79,26 @@ set "PATH=%JAVA_HOME%\bin;%ORIGINAL_PATH%"
 
 echo Verificando Java...
 java -version
+echo.
+
+REM Mostrar version actual (como FastSales build.bat)
+set "VERSION_FILE=%~dp0app\version.properties"
+if exist "%VERSION_FILE%" (
+    set "VER_CODE="
+    set "VER_MAJOR="
+    set "VER_MINOR="
+    set "VER_PATCH="
+    for /f "usebackq tokens=1,* delims== eol=#" %%A in ("%VERSION_FILE%") do (
+        if /i "%%A"=="VERSION_CODE" set "VER_CODE=%%B"
+        if /i "%%A"=="VERSION_MAJOR" set "VER_MAJOR=%%B"
+        if /i "%%A"=="VERSION_MINOR" set "VER_MINOR=%%B"
+        if /i "%%A"=="VERSION_PATCH" set "VER_PATCH=%%B"
+    )
+    echo [OK] Version a compilar: !VER_MAJOR!.!VER_MINOR!.!VER_PATCH! ^(code !VER_CODE!^)
+    echo      Tras release exitoso se incrementa MINOR y CODE ^(igual FastSales^).
+) else (
+    echo [ADVERTENCIA] No se encontro app\version.properties
+)
 echo.
 
 REM NOTA: se invoca ".\gradlew.bat" (no "gradlew.bat" a secas) porque en

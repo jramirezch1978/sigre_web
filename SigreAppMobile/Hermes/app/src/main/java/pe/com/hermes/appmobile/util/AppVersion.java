@@ -15,16 +15,21 @@ public final class AppVersion {
 
     public static String etiqueta(Context context) {
         String name = BuildConfig.VERSION_NAME;
+        int code = BuildConfig.VERSION_CODE;
         try {
-            name = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0)
-                    .versionName;
+            android.content.pm.PackageInfo info = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0);
+            if (info.versionName != null && !info.versionName.isBlank()) {
+                name = info.versionName;
+            }
+            code = (int) info.getLongVersionCode();
         } catch (PackageManager.NameNotFoundException ignored) {
             // Fallback a BuildConfig.
         }
         if (name == null || name.isBlank()) {
             name = "—";
         }
-        return "Version: " + name;
+        // FastSales muestra solo versionName; aquí el code facilita ver cada build.
+        return "Version: " + name + " (" + code + ")";
     }
 }

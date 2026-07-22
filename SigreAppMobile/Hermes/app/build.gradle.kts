@@ -39,7 +39,8 @@ fun incrementVersion() {
     val patch = props.getProperty("VERSION_PATCH", "0")
     props["VERSION_CODE"] = code.toString()
     props["VERSION_MINOR"] = minor.toString()
-    versionPropsFile.writer().use { props.store(it, "Hermes version") }
+    versionPropsFile.writer().use { props.store(it, null) }
+    // FastSales: tras el build queda MAJOR.(MINOR+1).PATCH y CODE+1
     println("Version incrementada: $major.$minor.$patch (codigo: $code)")
 }
 
@@ -129,15 +130,22 @@ dependencies {
 }
 
 tasks.register("incrementVersionTask") {
+    group = "versioning"
+    description = "Incrementa VERSION_CODE y VERSION_MINOR (esquema FastSales)"
     doLast { incrementVersion() }
 }
 
-// Igual que FastSales: incrementar una sola vez aunque corran assembleRelease + bundleRelease.
-gradle.taskGraph.whenReady {
-    val hasAssemble = allTasks.any { it.name == "assembleRelease" }
-    val hasBundle = allTasks.any { it.name == "bundleRelease" }
-    when {
-        hasAssemble -> tasks.named("assembleRelease").configure { finalizedBy("incrementVersionTask") }
-        hasBundle -> tasks.named("bundleRelease").configure { finalizedBy("incrementVersionTask") }
+// Mismo enganche que FastSales (tasks.whenTaskAdded): el whenReady anterior NO
+// ejecutaba incrementVersionTask (no aparecía en el grafo) y la app quedaba en 1.0.0.
+tasks.whenTaskAdded {
+    if (name == "assembleRelease") {
+        finalizedBy("incrementVersionTask")
+    }
+    if (name == "bundleRelease") {
+        // Si también hay assembleRelease, solo incrementa una vez (tras el APK).
+        if (!gradle.taskGraph.hasTask(":app:assembleRelease")
+                && !gradle.taskGraph.hasTask("assembleRelease")) {
+            finalizedBy("incrementVersionTask")
+        }
     }
 }
