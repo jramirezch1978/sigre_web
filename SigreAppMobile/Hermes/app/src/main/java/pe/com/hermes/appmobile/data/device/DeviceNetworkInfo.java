@@ -14,15 +14,18 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.regex.Pattern;
 
 /**
- * Recolecta IP privada/pública e IMEI del equipo (equivalente práctico a UTIL.getDeviceIPAddress
- * de FastSales + resolución de IP pública vía servicio externo).
+ * Recolecta IP privada/pública (solo IPv4) e IMEI.
  * Debe ejecutarse fuera del hilo UI (usa red).
  */
 public final class DeviceNetworkInfo {
 
     private static final int TIMEOUT_MS = 4_000;
+    /** IPv4: 0.0.0.0 … 255.255.255.255 (máx. 15 caracteres). */
+    private static final Pattern IPV4 = Pattern.compile(
+            "^(?:(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$");
 
     public final String ipPrivada;
     public final String ipPublica;
@@ -47,7 +50,7 @@ public final class DeviceNetworkInfo {
         if (fromInterfaces != null) {
             return fromInterfaces;
         }
-        return ipDesdeWifi(context);
+        return soloIpv4(ipDesdeWifi(context));
     }
 
     private static String ipDesdeInterfaces() {
@@ -61,12 +64,13 @@ public final class DeviceNetworkInfo {
                     continue;
                 }
                 for (InetAddress address : Collections.list(nif.getInetAddresses())) {
+                    if (!(address instanceof Inet4Address)) {
+                        continue;
+                    }
                     if (address.isLoopbackAddress() || address.isLinkLocalAddress()) {
                         continue;
                     }
-                    if (address instanceof Inet4Address) {
-                        return address.getHostAddress();
-                    }
+                    return soloIpv4(address.getHostAddress());
                 }
             }
         } catch (Exception ignored) {
@@ -93,10 +97,11 @@ public final class DeviceNetworkInfo {
         }
     }
 
+    /** api4.ipify.org responde siempre IPv4. */
     private static String obtenerIpPublica() {
         HttpURLConnection conn = null;
         try {
-            URL url = new URL("https://api.ipify.org");
+            URL url = new URL("https://api4.ipify.org");
             conn = (HttpURLConnection) url.openConnection();
             conn.setConnectTimeout(TIMEOUT_MS);
             conn.setReadTimeout(TIMEOUT_MS);
@@ -109,10 +114,7 @@ public final class DeviceNetworkInfo {
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                 String line = reader.readLine();
-                if (line == null || line.isBlank()) {
-                    return null;
-                }
-                return line.trim();
+                return soloIpv4(line);
             }
         } catch (Exception ignored) {
             return null;
@@ -121,6 +123,17 @@ public final class DeviceNetworkInfo {
                 conn.disconnect();
             }
         }
+    }
+
+    private static String soloIpv4(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String ip = value.trim();
+        if (ip.contains(":") || ip.length() > 15 || !IPV4.matcher(ip).matches()) {
+            return null;
+        }
+        return ip;
     }
 
     @SuppressWarnings("deprecation")

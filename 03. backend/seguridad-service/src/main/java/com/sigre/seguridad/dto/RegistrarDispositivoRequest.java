@@ -29,9 +29,11 @@ public class RegistrarDispositivoRequest {
     @Size(max = 200, message = "Máximo 200 caracteres")
     private String software;
 
-    @Size(max = 64, message = "Máximo 64 caracteres")
+    /** Solo IPv4 (ej. 192.168.1.10). Máx. 15 caracteres. */
+    @Size(max = 15, message = "IP pública IPv4 inválida (máx. 15)")
     private String ipPublica;
 
-    @Size(max = 64, message = "Máximo 64 caracteres")
+    /** Solo IPv4 (ej. 10.0.0.5). Máx. 15 caracteres. */
+    @Size(max = 15, message = "IP privada IPv4 inválida (máx. 15)")
     private String ipPrivada;
 }

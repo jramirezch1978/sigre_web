@@ -9,6 +9,7 @@ import com.sigre.seguridad.dto.*;
 import com.sigre.seguridad.service.AuthService;
 import com.sigre.seguridad.service.DispositivoService;
 import com.sigre.seguridad.service.HealthPingService;
+import com.sigre.seguridad.util.Ipv4;
 import com.sigre.common.dto.ApiResponse;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.security.JwtTokenProvider;
@@ -58,23 +59,30 @@ public class AuthController {
     public ApiResponse<DispositivoRegistradoResponse> registrarDispositivo(
             @Valid @RequestBody RegistrarDispositivoRequest request,
             HttpServletRequest httpRequest) {
-        // Si el cliente no pudo resolver la IP pública, usar la vista por el gateway/proxy.
-        if (request.getIpPublica() == null || request.getIpPublica().isBlank()) {
-            request.setIpPublica(resolveClientIp(httpRequest));
+        // Solo IPv4. Si el cliente no envió una pública válida, tomar la del gateway/proxy (si es v4).
+        request.setIpPublica(Ipv4.normalizeOrNull(request.getIpPublica()));
+        request.setIpPrivada(Ipv4.normalizeOrNull(request.getIpPrivada()));
+        if (request.getIpPublica() == null) {
+            request.setIpPublica(resolveClientIpv4(httpRequest));
         }
         return ApiResponse.ok(dispositivoService.registrar(request), "Dispositivo registrado");
     }
 
-    private static String resolveClientIp(HttpServletRequest request) {
+    private static String resolveClientIpv4(HttpServletRequest request) {
         String forwardedFor = request.getHeader("X-Forwarded-For");
         if (forwardedFor != null && !forwardedFor.isBlank()) {
-            return forwardedFor.split(",")[0].trim();
+            for (String part : forwardedFor.split(",")) {
+                String ipv4 = Ipv4.normalizeOrNull(part);
+                if (ipv4 != null) {
+                    return ipv4;
+                }
+            }
         }
-        String realIp = request.getHeader("X-Real-IP");
-        if (realIp != null && !realIp.isBlank()) {
-            return realIp.trim();
+        String realIp = Ipv4.normalizeOrNull(request.getHeader("X-Real-IP"));
+        if (realIp != null) {
+            return realIp;
         }
-        return request.getRemoteAddr();
+        return Ipv4.normalizeOrNull(request.getRemoteAddr());
     }
 
     /**

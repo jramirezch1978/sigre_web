@@ -9,6 +9,7 @@ import com.sigre.seguridad.dto.DispositivoRegistradoResponse;
 import com.sigre.seguridad.dto.RegistrarDispositivoRequest;
 import com.sigre.seguridad.dto.seguridad.DispositivoAdminDto;
 import com.sigre.seguridad.dto.seguridad.DispositivoLoginDto;
+import com.sigre.seguridad.util.Ipv4;
 import com.sigre.common.exception.BusinessException;
 
 import java.time.OffsetDateTime;
@@ -79,7 +80,7 @@ public class DispositivoService {
                     WHERE id = ?
                     """,
                     req.getNombreDispositivo(), req.getFabricante(), req.getModelo(),
-                    blankToNull(req.getIpPublica()), blankToNull(req.getIpPrivada()), id);
+                    Ipv4.normalizeOrNull(req.getIpPublica()), Ipv4.normalizeOrNull(req.getIpPrivada()), id);
             return id;
         }
 
@@ -92,7 +93,7 @@ public class DispositivoService {
                 """,
                 Long.class,
                 req.getDeviceId(), req.getNombreDispositivo(), req.getFabricante(), req.getModelo(),
-                blankToNull(req.getIpPublica()), blankToNull(req.getIpPrivada()));
+                Ipv4.normalizeOrNull(req.getIpPublica()), Ipv4.normalizeOrNull(req.getIpPrivada()));
     }
 
     private boolean esAutorizado(long dispositivoId) {
@@ -130,7 +131,7 @@ public class DispositivoService {
                     modelo = COALESCE(?, modelo)
                 WHERE nro_registro = ?
                 """,
-                blankToNull(req.getIpPublica()), blankToNull(req.getIpPrivada()),
+                Ipv4.normalizeOrNull(req.getIpPublica()), Ipv4.normalizeOrNull(req.getIpPrivada()),
                 blankToNull(req.getImei()), blankToNull(req.getSoftware()),
                 blankToNull(req.getNombreDispositivo()), blankToNull(req.getFabricante()),
                 blankToNull(req.getModelo()), nroRegistro);
@@ -147,7 +148,7 @@ public class DispositivoService {
                 """,
                 nroRegistro, dispositivoId, req.getDeviceId(), req.getImei(), req.getSoftware(),
                 req.getNombreDispositivo(), req.getFabricante(), req.getModelo(),
-                blankToNull(req.getIpPublica()), blankToNull(req.getIpPrivada()));
+                Ipv4.normalizeOrNull(req.getIpPublica()), Ipv4.normalizeOrNull(req.getIpPrivada()));
         return nroRegistro;
     }
 
