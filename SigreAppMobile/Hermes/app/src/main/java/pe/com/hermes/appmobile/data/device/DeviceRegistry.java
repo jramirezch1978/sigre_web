@@ -33,7 +33,15 @@ public class DeviceRegistry {
     }
 
     public boolean isAutorizado() {
-        return prefs.getBoolean(KEY_AUTORIZADO, true);
+        if (getNroRegistro() == null) {
+            return false;
+        }
+        return prefs.getBoolean(KEY_AUTORIZADO, false);
+    }
+
+    /** Registrado en backend y con flag_autorizado activo. */
+    public boolean isDispositivoListo() {
+        return getNroRegistro() != null && isAutorizado();
     }
 
     public void guardar(String nroRegistro, boolean autorizado) {

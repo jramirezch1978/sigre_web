@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import pe.com.hermes.appmobile.BuildConfig;
 import pe.com.hermes.appmobile.R;
 import pe.com.hermes.appmobile.data.config.ServerProfile;
+import pe.com.hermes.appmobile.data.device.DeviceRegistry;
 import pe.com.hermes.appmobile.data.remote.dto.DispositivoRegistradoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
 import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
@@ -51,12 +52,15 @@ public class LoginActivity extends AppCompatActivity {
         binding.btnCambiarServidor.setOnClickListener(v -> mostrarServidorDefault());
         binding.tvServidorNombre.setOnClickListener(v -> mostrarServidorDefault());
         binding.btnRefrescarServidor.setOnClickListener(v -> refrescarServidorYSesion());
+
+        aplicarEstadoDispositivo();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         actualizarServidorInfo();
+        aplicarEstadoDispositivo();
         iniciarMonitoreoConexion();
     }
 
@@ -194,24 +198,28 @@ public class LoginActivity extends AppCompatActivity {
             public void onSuccess(DispositivoRegistradoResponse data) {
                 mostrarCargandoRefrescar(false);
                 AppUtils.app(LoginActivity.this).getDeviceRegistry().guardar(data.nroRegistro, data.autorizado);
+                aplicarEstadoDispositivo();
                 if (!data.autorizado) {
-                    AppUtils.toast(LoginActivity.this, "Este equipo no está autorizado para conectarse.");
+                    AppUtils.toast(LoginActivity.this, getString(R.string.login_dispositivo_no_autorizado));
                 } else {
-                    AppUtils.toast(LoginActivity.this, "Perfiles actualizados y nueva sesión registrada.");
+                    AppUtils.toast(LoginActivity.this, "Perfiles actualizados y dispositivo revalidado.");
                 }
             }
 
             @Override
             public void onError(String mensaje) {
                 mostrarCargandoRefrescar(false);
-                AppUtils.toast(LoginActivity.this, "No se pudo registrar una nueva sesión. Verifique su conexión.");
+                AppUtils.toast(LoginActivity.this, getString(R.string.splash_error_registro));
             }
         });
     }
 
-    private void mostrarCargandoRefrescar(boolean cargando) {
-        binding.progressRefrescarServidor.setVisibility(cargando ? View.VISIBLE : View.GONE);
-        binding.btnRefrescarServidor.setEnabled(!cargando);
+    /** El registro ocurre en SplashActivity; aqui solo reflejamos si el equipo puede ingresar. */
+    private void aplicarEstadoDispositivo() {
+        boolean listo = AppUtils.app(this).getDeviceRegistry().isDispositivoListo();
+        binding.btnLogin.setEnabled(listo);
+        binding.etUsuario.setEnabled(listo);
+        binding.etClave.setEnabled(listo);
     }
 
     private void intentarLogin() {
@@ -228,34 +236,21 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        mostrarCargando(true);
-        String nroRegistro = AppUtils.app(this).getDeviceRegistry().getNroRegistro();
-        if (nroRegistro == null) {
-            // Splash no pudo registrar el equipo (sin red en ese momento) - reintenta ahora mismo.
-            registrarDispositivoYLuegoLogin(usuario, clave);
+        DeviceRegistry registry = AppUtils.app(this).getDeviceRegistry();
+        if (!registry.isDispositivoListo()) {
+            AppUtils.toast(this, registry.getNroRegistro() == null
+                    ? getString(R.string.login_dispositivo_no_listo)
+                    : getString(R.string.login_dispositivo_no_autorizado));
             return;
         }
-        ejecutarLogin(usuario, clave, nroRegistro);
+
+        mostrarCargando(true);
+        ejecutarLogin(usuario, clave, registry.getNroRegistro());
     }
 
-    private void registrarDispositivoYLuegoLogin(String usuario, String clave) {
-        String deviceId = AppUtils.app(this).getDeviceRegistry().obtenerDeviceId(this);
-        RegistrarDispositivoRequest request = new RegistrarDispositivoRequest(
-                deviceId, Build.MANUFACTURER, Build.MODEL, Build.MANUFACTURER + " " + Build.MODEL,
-                "Android " + Build.VERSION.RELEASE);
-        authRepository.registrarDispositivo(request, new ResultCallback<DispositivoRegistradoResponse>() {
-            @Override
-            public void onSuccess(DispositivoRegistradoResponse data) {
-                AppUtils.app(LoginActivity.this).getDeviceRegistry().guardar(data.nroRegistro, data.autorizado);
-                ejecutarLogin(usuario, clave, data.nroRegistro);
-            }
-
-            @Override
-            public void onError(String mensaje) {
-                mostrarCargando(false);
-                AppUtils.toast(LoginActivity.this, "No se pudo registrar el dispositivo. Verifique su conexión.");
-            }
-        });
+    private void mostrarCargandoRefrescar(boolean cargando) {
+        binding.progressRefrescarServidor.setVisibility(cargando ? View.VISIBLE : View.GONE);
+        binding.btnRefrescarServidor.setEnabled(!cargando);
     }
 
     private void ejecutarLogin(String usuario, String clave, String nroRegistro) {
