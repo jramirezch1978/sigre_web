@@ -42,4 +42,14 @@ public final class Constants {
     public static final String ACCION_ELIMINAR = "ELIMINAR";
     public static final String ACCION_APROBAR = "APROBAR";
     public static final String ACCION_ANULAR = "ANULAR";
+
+    /**
+     * Destinatarios de soporte SIGRE (TO de alertas operativas).
+     * Fuente canónica también en BD security: config.configuracion (SOPORTE / EMAILS).
+     * Env / YAML: {@code NOTIFICACION_EMAIL_SOPORTE} / {@code app.notificacion.email.soporte}.
+     */
+    public static final String NOTIFICACION_EMAIL_SOPORTE_DEFAULT =
+            "jramirez@npssac.com.pe,jhonnyaramirezch@gmail.com";
+    public static final String CONFIG_MODULO_SOPORTE = "SOPORTE";
+    public static final String CONFIG_PARAM_EMAILS = "EMAILS";
 }

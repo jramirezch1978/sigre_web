@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import com.sigre.seguridad.dto.DispositivoRegistradoResponse;
 import com.sigre.seguridad.dto.RegistrarDispositivoRequest;
 import com.sigre.seguridad.dto.seguridad.DispositivoAdminDto;
@@ -15,6 +17,7 @@ import com.sigre.common.exception.BusinessException;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Dispositivos móviles — modelo alineado a SIGRE:
@@ -32,8 +35,11 @@ public class DispositivoService {
     private static final String NUMERADOR_DISPOSITIVO = "DISPOSITIVO";
 
     private final JdbcTemplate jdbcTemplate;
+    private final EmailService emailService;
 
     public record DispositivoRow(long id, String deviceId, boolean autorizado) {}
+
+    private record UpsertResult(long id, boolean creado) {}
 
     /**
      * Alta del maestro por {@code device_id} + apertura/reutilización de sesión abierta
@@ -41,11 +47,12 @@ public class DispositivoService {
      * <p>
      * Si ya hay una sesión sin {@code fec_logout} para ese equipo, reutiliza su
      * {@code nro_registro}; si no, emite uno nuevo vía numerador.
+     * Solo cuando se inserta un dispositivo nuevo se notifica a soporte por correo.
      */
     @Transactional
     public DispositivoRegistradoResponse registrar(RegistrarDispositivoRequest req) {
-        long dispositivoId = upsertDispositivo(req);
-        boolean autorizado = esAutorizado(dispositivoId);
+        UpsertResult upsert = upsertDispositivo(req);
+        boolean autorizado = esAutorizado(upsert.id());
 
         Optional<String> nroAbierto = buscarNroSesionAbierta(req.getDeviceId());
         String nroRegistro = nroAbierto
@@ -53,7 +60,11 @@ public class DispositivoService {
                     actualizarIpsSesion(nro, req);
                     return nro;
                 })
-                .orElseGet(() -> abrirSesion(dispositivoId, req));
+                .orElseGet(() -> abrirSesion(upsert.id(), req));
+
+        if (upsert.creado()) {
+            notificarNuevoDispositivoTrasCommit(req, nroRegistro, autorizado);
+        }
 
         return DispositivoRegistradoResponse.builder()
                 .nroRegistro(nroRegistro)
@@ -61,7 +72,35 @@ public class DispositivoService {
                 .build();
     }
 
-    private long upsertDispositivo(RegistrarDispositivoRequest req) {
+    private void notificarNuevoDispositivoTrasCommit(
+            RegistrarDispositivoRequest req, String nroRegistro, boolean autorizado) {
+        Runnable enviar = () -> emailService.enviarAlertaNuevoDispositivo(
+                req.getDeviceId(),
+                nroRegistro,
+                req.getNombreDispositivo(),
+                req.getFabricante(),
+                req.getModelo(),
+                req.getSoftware(),
+                req.getImei(),
+                Ipv4.normalizeOrNull(req.getIpPublica()),
+                Ipv4.normalizeOrNull(req.getIpPrivada()),
+                autorizado);
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            AtomicBoolean done = new AtomicBoolean(false);
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    if (done.compareAndSet(false, true)) {
+                        enviar.run();
+                    }
+                }
+            });
+        } else {
+            enviar.run();
+        }
+    }
+
+    private UpsertResult upsertDispositivo(RegistrarDispositivoRequest req) {
         List<Long> ids = jdbcTemplate.query(
                 "SELECT id FROM auth.dispositivo WHERE device_id = ?",
                 (rs, rowNum) -> rs.getLong("id"),
@@ -81,10 +120,10 @@ public class DispositivoService {
                     """,
                     req.getNombreDispositivo(), req.getFabricante(), req.getModelo(),
                     Ipv4.normalizeOrNull(req.getIpPublica()), Ipv4.normalizeOrNull(req.getIpPrivada()), id);
-            return id;
+            return new UpsertResult(id, false);
         }
 
-        return jdbcTemplate.queryForObject(
+        Long id = jdbcTemplate.queryForObject(
                 """
                 INSERT INTO auth.dispositivo
                     (device_id, nombre_dispositivo, fabricante, modelo, ip_publica, ip_privada, flag_autorizado)
@@ -94,6 +133,7 @@ public class DispositivoService {
                 Long.class,
                 req.getDeviceId(), req.getNombreDispositivo(), req.getFabricante(), req.getModelo(),
                 Ipv4.normalizeOrNull(req.getIpPublica()), Ipv4.normalizeOrNull(req.getIpPrivada()));
+        return new UpsertResult(id, true);
     }
 
     private boolean esAutorizado(long dispositivoId) {

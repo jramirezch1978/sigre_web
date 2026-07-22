@@ -4444,6 +4444,21 @@ ON CONFLICT (codigo) DO UPDATE SET
 
 COMMIT;
 
+-- TX: Parametros SOPORTE (listado de correos compartido por microservicios)
+BEGIN;
+
+INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable)
+VALUES
+    ('SOPORTE', 'EMAILS', 'TEXT',
+     'jramirez@npssac.com.pe,jhonnyaramirezch@gmail.com', TRUE)
+ON CONFLICT (modulo, parametro) DO UPDATE SET
+    tipo_dato = EXCLUDED.tipo_dato,
+    valor_texto = EXCLUDED.valor_texto,
+    editable = EXCLUDED.editable,
+    modificado_en = NOW();
+
+COMMIT;
+
 -- TX: Parametros SUNAT (config.configuracion — BD security)
 BEGIN;
 

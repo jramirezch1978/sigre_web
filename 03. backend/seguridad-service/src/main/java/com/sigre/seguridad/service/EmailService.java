@@ -1,15 +1,19 @@
 package com.sigre.seguridad.service;
 
+import com.sigre.common.util.Constants;
+import com.sigre.common.util.EmailListParser;
 import com.sigre.seguridad.dto.EmpresaRegistroEmailDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -17,12 +21,21 @@ import jakarta.mail.internet.MimeMessage;
 public class EmailService {
 
     private final JavaMailSender mailSender;
+    private final JdbcTemplate jdbcTemplate;
 
     private static final String FROM = "no-reply@npssac.com.pe";
 
     /** Copia (CC) fija de todos los correos. Configurable en YAML (app.notificacion.email.cc). */
     @org.springframework.beans.factory.annotation.Value("${app.notificacion.email.cc:}")
     private String copiaFija;
+
+    /**
+     * Destinatarios TO de alertas de soporte. Preferencia: BD config.SOPORTE/EMAILS,
+     * fallback YAML {@code app.notificacion.email.soporte}.
+     */
+    @org.springframework.beans.factory.annotation.Value(
+            "${app.notificacion.email.soporte:" + Constants.NOTIFICACION_EMAIL_SOPORTE_DEFAULT + "}")
+    private String emailsSoporteYaml;
 
     @Async
     public void enviarCodigoRecuperacion(String destinatario, String codigo) {
@@ -290,6 +303,90 @@ public class EmailService {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toArray(String[]::new);
+    }
+
+    /**
+     * Alerta a soporte cuando se da de alta un dispositivo móvil nuevo (auth.dispositivo).
+     * Destinatarios: listado SOPORTE (BD o YAML).
+     */
+    @Async
+    public void enviarAlertaNuevoDispositivo(
+            String deviceId,
+            String nroRegistro,
+            String nombreDispositivo,
+            String fabricante,
+            String modelo,
+            String software,
+            String imei,
+            String ipPublica,
+            String ipPrivada,
+            boolean autorizado) {
+        List<String> soporte = correosSoporte();
+        if (soporte.isEmpty()) {
+            log.warn("No se envió alerta de nuevo dispositivo: listado SOPORTE vacío");
+            return;
+        }
+        String subject = "SIGRE - Nuevo dispositivo móvil registrado";
+        String body = """
+                <html><body style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;color:#2a3f54;">
+                  <div style="background:#2a3f54;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;">
+                    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a7b1c2;">SIGRE ERP</div>
+                    <h1 style="margin:6px 0 0;font-size:22px;">Nuevo dispositivo móvil</h1>
+                  </div>
+                  <div style="padding:28px;background:#f5f7fa;border-radius:0 0 8px 8px;">
+                    <p>Se registró un <strong>nuevo dispositivo</strong> en <code>auth.dispositivo</code>.</p>
+                    <table style="width:100%%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:8px;overflow:hidden;">
+                      <tr><td style="padding:10px 14px;color:#64748b;">Device ID</td><td style="padding:10px 14px;text-align:right;font-weight:600;font-family:monospace;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">Nro. sesión</td><td style="padding:10px 14px;text-align:right;font-weight:600;font-family:monospace;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">Nombre</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">Fabricante</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">Modelo</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">Software</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">IMEI</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">IP pública</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">IP privada</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">Autorizado</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                    </table>
+                    <p style="color:#888;font-size:12px;margin-top:20px;">Aviso automático de seguridad SIGRE. Revise /admin/dispositivos si debe revocar el equipo.</p>
+                  </div>
+                </body></html>
+                """.formatted(
+                escapeHtml(nz(deviceId)),
+                escapeHtml(nz(nroRegistro)),
+                escapeHtml(nz(nombreDispositivo)),
+                escapeHtml(nz(fabricante)),
+                escapeHtml(nz(modelo)),
+                escapeHtml(nz(software)),
+                escapeHtml(nz(imei)),
+                escapeHtml(nz(ipPublica)),
+                escapeHtml(nz(ipPrivada)),
+                autorizado ? "Sí" : "No");
+        for (String to : soporte) {
+            enviarHtml(to, subject, body);
+        }
+    }
+
+    /** Listado de soporte: BD config.SOPORTE/EMAILS, si no YAML/default. */
+    public List<String> correosSoporte() {
+        try {
+            String fromDb = jdbcTemplate.queryForObject(
+                    "SELECT config.fn_get_parametro_txt(?, ?, ?)",
+                    String.class,
+                    Constants.CONFIG_MODULO_SOPORTE,
+                    Constants.CONFIG_PARAM_EMAILS,
+                    Constants.NOTIFICACION_EMAIL_SOPORTE_DEFAULT);
+            List<String> parsed = EmailListParser.parse(fromDb);
+            if (!parsed.isEmpty()) {
+                return parsed;
+            }
+        } catch (Exception ex) {
+            log.warn("No se pudo leer SOPORTE/EMAILS de config: {}", ex.getMessage());
+        }
+        return EmailListParser.parseOrDefault(emailsSoporteYaml, Constants.NOTIFICACION_EMAIL_SOPORTE_DEFAULT);
+    }
+
+    private static String nz(String value) {
+        return (value == null || value.isBlank()) ? "—" : value.trim();
     }
 
     @Async
