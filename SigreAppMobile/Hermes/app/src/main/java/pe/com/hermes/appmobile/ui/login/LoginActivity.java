@@ -2,8 +2,11 @@ package pe.com.hermes.appmobile.ui.login;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,8 +30,8 @@ import pe.com.hermes.appmobile.data.remote.dto.SucursalDto;
 import pe.com.hermes.appmobile.data.repository.AuthRepository;
 import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.databinding.ActivityLoginBinding;
+import pe.com.hermes.appmobile.ui.common.SeleccionOpcionAdapter;
 import pe.com.hermes.appmobile.ui.common.SimpleItem;
-import pe.com.hermes.appmobile.ui.common.SimpleListAdapter;
 import pe.com.hermes.appmobile.ui.menu.MenuActivity;
 import pe.com.hermes.appmobile.ui.ping.PingMonitorDialog;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
@@ -50,10 +53,13 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
     private ConnectionMonitor connectionMonitor;
 
     private AlertDialog dialogSeleccion;
-    private SimpleListAdapter adapterSeleccion;
+    private SeleccionOpcionAdapter adapterSeleccion;
     private ProgressBar progressSeleccion;
-    private TextView tvVacioSeleccion;
+    private View grupoVacioSeleccion;
+    private TextView tvVacioMensaje;
     private TextView tvTituloDialog;
+    private TextView tvSubtituloDialog;
+    private TextView tvPasoDialog;
 
     private List<EmpresaUsuarioDto> empresas = Collections.emptyList();
     private EmpresaUsuarioDto empresaElegida;
@@ -285,7 +291,10 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                 pingHistory.clear();
                 empresaElegida = null;
                 empresas = Collections.emptyList();
-                mostrarDialogSeleccion(getString(R.string.empresa_titulo));
+                mostrarDialogSeleccion(
+                        getString(R.string.empresa_titulo),
+                        getString(R.string.seleccion_empresa_ayuda),
+                        getString(R.string.seleccion_paso_empresa));
                 cargarEmpresas();
             }
 
@@ -297,10 +306,16 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
         });
     }
 
-    private void mostrarDialogSeleccion(String titulo) {
+    private void mostrarDialogSeleccion(String titulo, String ayuda, String paso) {
         if (dialogSeleccion != null && dialogSeleccion.isShowing()) {
             if (tvTituloDialog != null) {
                 tvTituloDialog.setText(titulo);
+            }
+            if (tvSubtituloDialog != null) {
+                tvSubtituloDialog.setText(ayuda);
+            }
+            if (tvPasoDialog != null) {
+                tvPasoDialog.setText(paso);
             }
             if (adapterSeleccion != null) {
                 adapterSeleccion.actualizar(Collections.emptyList());
@@ -311,16 +326,21 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
 
         View view = getLayoutInflater().inflate(R.layout.dialog_seleccion_lista, null);
         tvTituloDialog = view.findViewById(R.id.tvTituloDialog);
+        tvSubtituloDialog = view.findViewById(R.id.tvSubtituloDialog);
+        tvPasoDialog = view.findViewById(R.id.tvPasoDialog);
         progressSeleccion = view.findViewById(R.id.progressSeleccion);
-        tvVacioSeleccion = view.findViewById(R.id.tvVacioSeleccion);
+        grupoVacioSeleccion = view.findViewById(R.id.tvVacioSeleccion);
+        tvVacioMensaje = view.findViewById(R.id.tvVacioMensaje);
         RecyclerView recycler = view.findViewById(R.id.recyclerSeleccion);
 
         tvTituloDialog.setText(titulo);
+        tvSubtituloDialog.setText(ayuda);
+        tvPasoDialog.setText(paso);
         recycler.setLayoutManager(new LinearLayoutManager(this));
-        adapterSeleccion = new SimpleListAdapter(this::onItemSeleccionClick);
+        adapterSeleccion = new SeleccionOpcionAdapter(this::onItemSeleccionClick);
         recycler.setAdapter(adapterSeleccion);
 
-        dialogSeleccion = new AlertDialog.Builder(this)
+        dialogSeleccion = new AlertDialog.Builder(this, R.style.Theme_Hermes_DialogSeleccion)
                 .setView(view)
                 .setCancelable(true)
                 .setOnCancelListener(d -> cancelarSeleccionYReiniciarLogin())
@@ -328,6 +348,13 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
 
         view.findViewById(R.id.btnCancelarSeleccion).setOnClickListener(v -> cancelarSeleccionYReiniciarLogin());
         dialogSeleccion.show();
+
+        Window window = dialogSeleccion.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            int ancho = (int) (getResources().getDisplayMetrics().widthPixels * 0.92f);
+            window.setLayout(ancho, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
         setEstadoDialog(true, false, null);
     }
 
@@ -335,11 +362,11 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
         if (progressSeleccion != null) {
             progressSeleccion.setVisibility(cargando ? View.VISIBLE : View.GONE);
         }
-        if (tvVacioSeleccion != null) {
-            tvVacioSeleccion.setVisibility(!cargando && vacio ? View.VISIBLE : View.GONE);
-            if (mensajeVacio != null) {
-                tvVacioSeleccion.setText(mensajeVacio);
-            }
+        if (grupoVacioSeleccion != null) {
+            grupoVacioSeleccion.setVisibility(!cargando && vacio ? View.VISIBLE : View.GONE);
+        }
+        if (tvVacioMensaje != null && mensajeVacio != null) {
+            tvVacioMensaje.setText(mensajeVacio);
         }
     }
 
@@ -379,7 +406,10 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                     String titulo = e.razonSocial != null
                             ? e.razonSocial
                             : (e.codigo != null ? e.codigo : "Empresa " + e.empresaId);
-                    items.add(new SimpleItem(e.empresaId, titulo, e.ruc));
+                    String sub = e.ruc != null && !e.ruc.isBlank()
+                            ? e.ruc
+                            : (e.codigo != null ? e.codigo : null);
+                    items.add(new SimpleItem(e.empresaId, titulo, sub));
                 }
                 if (adapterSeleccion != null) {
                     adapterSeleccion.actualizar(items);
@@ -402,7 +432,10 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
     }
 
     private void cargarSucursales(EmpresaUsuarioDto empresa) {
-        mostrarDialogSeleccion(getString(R.string.empresa_sucursal_titulo));
+        mostrarDialogSeleccion(
+                getString(R.string.empresa_sucursal_titulo),
+                getString(R.string.seleccion_sucursal_ayuda),
+                getString(R.string.seleccion_paso_sucursal));
         setEstadoDialog(true, false, null);
         authRepository.listarSucursales(empresa.empresaId, new ResultCallback<List<SucursalDto>>() {
             @Override
@@ -566,8 +599,11 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
         }
         adapterSeleccion = null;
         progressSeleccion = null;
-        tvVacioSeleccion = null;
+        grupoVacioSeleccion = null;
+        tvVacioMensaje = null;
         tvTituloDialog = null;
+        tvSubtituloDialog = null;
+        tvPasoDialog = null;
     }
 
     private void mostrarCargando(boolean cargando) {
