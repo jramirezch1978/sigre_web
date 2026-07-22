@@ -122,6 +122,20 @@ public class AuthController {
         return ApiResponse.ok(empresas, "Empresas del usuario");
     }
 
+    /**
+     * Sucursales del usuario para la empresa (token temporal permitido).
+     * El login móvil/web debe usar este endpoint — no {@code /core/.../mias} —
+     * para resolver el tenant con la misma BD security que listó las empresas.
+     */
+    @GetMapping("/empresas/{empresaId}/sucursales")
+    public ApiResponse<List<SucursalDto>> listarSucursalesDelUsuario(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Long empresaId) {
+        Long userId = extractAndValidateToken(authHeader, true);
+        List<SucursalDto> data = authService.listarSucursalesDelUsuario(userId, empresaId);
+        return ApiResponse.ok(data, "Sucursales asignadas al usuario");
+    }
+
     @PostMapping("/seleccionar-empresa")
     public ApiResponse<LoginResponse> seleccionarEmpresa(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
