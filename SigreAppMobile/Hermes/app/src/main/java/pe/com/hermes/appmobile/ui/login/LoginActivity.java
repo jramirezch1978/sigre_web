@@ -34,12 +34,14 @@ import pe.com.hermes.appmobile.ui.ping.PingMonitorDialog;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
 import pe.com.hermes.appmobile.util.AppVersion;
+import pe.com.hermes.appmobile.util.PlayAppUpdateHelper;
 import pe.com.hermes.common.util.AsyncRunner;
 
 /**
  * Login completo en una sola ventana: credenciales → modal empresa → modal sucursal.
  * Si se cancela cualquiera de los dos modales, se limpian inputs, muere la sesión JWT
  * y se registra un nuevo inicio de sesión de dispositivo (nuevo nro_registro).
+ * Antes del login consulta Google Play por actualizaciones (igual que FastSales).
  */
 public class LoginActivity extends AppCompatActivity implements ConnectionMonitor.Listener {
 
@@ -47,6 +49,7 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
     private AuthRepository authRepository;
     private final PingHistoryStore pingHistory = new PingHistoryStore();
     private ConnectionMonitor connectionMonitor;
+    private PlayAppUpdateHelper playAppUpdateHelper;
 
     private AlertDialog dialogSeleccion;
     private SimpleListAdapter adapterSeleccion;
@@ -57,6 +60,8 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
     private List<EmpresaUsuarioDto> empresas = Collections.emptyList();
     private EmpresaUsuarioDto empresaElegida;
     private boolean cancelandoSeleccion;
+    /** false hasta terminar (o fallar) la consulta de actualización en Play. */
+    private boolean updateCheckListo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +80,15 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
         binding.btnRefrescarServidor.setOnClickListener(v -> refrescarServidorYSesion());
         binding.badgeConexion.setOnClickListener(v -> mostrarDiagnosticoConexion());
 
+        // Igual FastSales: bloquear login hasta consultar Play Update.
+        updateCheckListo = false;
+        aplicarEstadoDispositivo();
+        playAppUpdateHelper = new PlayAppUpdateHelper(this, this::continuarTrasVerificarActualizacion);
+        playAppUpdateHelper.checkOnStartup();
+    }
+
+    private void continuarTrasVerificarActualizacion() {
+        updateCheckListo = true;
         aplicarEstadoDispositivo();
     }
 
@@ -84,12 +98,32 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
         actualizarServidorInfo();
         aplicarEstadoDispositivo();
         iniciarMonitoreoConexion();
+        if (playAppUpdateHelper != null) {
+            playAppUpdateHelper.resumeIfNeeded();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         detenerMonitoreoConexion();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (playAppUpdateHelper != null) {
+            playAppUpdateHelper.onActivityResult(requestCode, resultCode);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (playAppUpdateHelper != null) {
+            playAppUpdateHelper.unregister();
+            playAppUpdateHelper = null;
+        }
+        super.onDestroy();
     }
 
     private void actualizarServidorInfo() {
@@ -233,10 +267,10 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
 
     private void aplicarEstadoDispositivo() {
         DeviceRegistry registry = AppUtils.app(this).getDeviceRegistry();
-        boolean listo = registry.isDispositivoListo();
-        binding.btnLogin.setEnabled(listo && !cancelandoSeleccion);
-        binding.etUsuario.setEnabled(listo);
-        binding.etClave.setEnabled(listo);
+        boolean listo = updateCheckListo && registry.isDispositivoListo() && !cancelandoSeleccion;
+        binding.btnLogin.setEnabled(listo);
+        binding.etUsuario.setEnabled(updateCheckListo && registry.isDispositivoListo());
+        binding.etClave.setEnabled(updateCheckListo && registry.isDispositivoListo());
         String nro = registry.getNroRegistro();
         if (nro != null && !nro.isBlank()) {
             binding.tvNroRegistro.setText(getString(R.string.login_nro_registro, nro));
