@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ToastController } from '@ionic/angular';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
@@ -77,7 +77,7 @@ export class AdminEmpresasComponent extends AdminTablaPageBase<EmpresaAdminDto> 
       ruc: ['', [Validators.required, Validators.pattern(/^\d{11}$/)]],
       nombreComercial: ['', [Validators.maxLength(200)]],
       correoContacto: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
-      celular: ['', [Validators.maxLength(30)]],
+      celular: ['', [Validators.maxLength(30), AdminEmpresasComponent.validarTelefono]],
       direccion: ['', [Validators.maxLength(300)]],
       distritoId: [null],
       represLegal: ['', [Validators.maxLength(200)]],
@@ -92,7 +92,7 @@ export class AdminEmpresasComponent extends AdminTablaPageBase<EmpresaAdminDto> 
       representanteLegal: ['', [Validators.maxLength(200)]],
       dniRepresentanteLegal: ['', [Validators.maxLength(20)]],
       correoContacto: ['', [Validators.maxLength(150)]],
-      telefonoContacto: ['', [Validators.maxLength(30)]],
+      telefonoContacto: ['', [Validators.maxLength(30), AdminEmpresasComponent.validarTelefono]],
     });
     this.cargarDepartamentos();
     this.cargar();
@@ -281,6 +281,14 @@ export class AdminEmpresasComponent extends AdminTablaPageBase<EmpresaAdminDto> 
       },
       error: async (err: any) => await this.presentError(err?.error?.message ?? 'No se pudo guardar.'),
     });
+  }
+
+  /** Opcional, pero si viene con datos debe tener entre 7 y 12 dígitos (evita valores incompletos como "999"). */
+  private static validarTelefono(control: AbstractControl): ValidationErrors | null {
+    const raw = (control.value ?? '').toString().trim();
+    if (!raw) return null;
+    const digitos = raw.replace(/\D/g, '');
+    return digitos.length >= 7 && digitos.length <= 12 ? null : { telefonoIncompleto: true };
   }
 
   private trimOrUndef(s: string | null | undefined): string | undefined {

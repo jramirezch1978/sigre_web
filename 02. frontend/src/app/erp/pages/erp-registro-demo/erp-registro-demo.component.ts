@@ -338,6 +338,13 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
       this.error = 'Debe subir el logo de la empresa.';
       return false;
     }
+    if (this.empresa.telefonoContacto && this.empresa.telefonoContacto.trim()) {
+      const digitos = this.empresa.telefonoContacto.replace(/\D/g, '');
+      if (digitos.length < 7 || digitos.length > 12) {
+        this.error = 'Ingrese un teléfono/celular válido (7 a 12 dígitos).';
+        return false;
+      }
+    }
     return true;
   }
 
