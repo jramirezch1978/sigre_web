@@ -2,6 +2,7 @@ package pe.com.hermes.appmobile.ui.login;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -11,8 +12,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import pe.com.hermes.appmobile.BuildConfig;
 import pe.com.hermes.appmobile.R;
 import pe.com.hermes.appmobile.data.config.ServerProfile;
+import pe.com.hermes.appmobile.data.remote.dto.DispositivoRegistradoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
+import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
 import pe.com.hermes.appmobile.data.repository.AuthRepository;
+import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.databinding.ActivityLoginBinding;
 import pe.com.hermes.appmobile.ui.empresa.SeleccionEmpresaActivity;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
@@ -169,7 +173,37 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         mostrarCargando(true);
-        authRepository.login(usuario, clave, new pe.com.hermes.appmobile.data.repository.ResultCallback<LoginResponse>() {
+        String nroRegistro = AppUtils.app(this).getDeviceRegistry().getNroRegistro();
+        if (nroRegistro == null) {
+            // Splash no pudo registrar el equipo (sin red en ese momento) - reintenta ahora mismo.
+            registrarDispositivoYLuegoLogin(usuario, clave);
+            return;
+        }
+        ejecutarLogin(usuario, clave, nroRegistro);
+    }
+
+    private void registrarDispositivoYLuegoLogin(String usuario, String clave) {
+        String deviceId = AppUtils.app(this).getDeviceRegistry().obtenerDeviceId(this);
+        RegistrarDispositivoRequest request = new RegistrarDispositivoRequest(
+                deviceId, Build.MANUFACTURER, Build.MODEL, Build.MANUFACTURER + " " + Build.MODEL,
+                "Android " + Build.VERSION.RELEASE);
+        authRepository.registrarDispositivo(request, new ResultCallback<DispositivoRegistradoResponse>() {
+            @Override
+            public void onSuccess(DispositivoRegistradoResponse data) {
+                AppUtils.app(LoginActivity.this).getDeviceRegistry().guardar(data.nroRegistro, data.autorizado);
+                ejecutarLogin(usuario, clave, data.nroRegistro);
+            }
+
+            @Override
+            public void onError(String mensaje) {
+                mostrarCargando(false);
+                AppUtils.toast(LoginActivity.this, "No se pudo registrar el dispositivo. Verifique su conexión.");
+            }
+        });
+    }
+
+    private void ejecutarLogin(String usuario, String clave, String nroRegistro) {
+        authRepository.login(usuario, clave, nroRegistro, new ResultCallback<LoginResponse>() {
             @Override
             public void onSuccess(LoginResponse data) {
                 mostrarCargando(false);

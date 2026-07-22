@@ -12,6 +12,8 @@ public class LoginRequest {
     public String browser = "Hermes Android";
     public String sistemaOperativo = "Android";
     public String deviceName;
+    /** Nro de registro devuelto por /auth/dispositivo/registrar — requerido por /auth/login/mobile. */
+    public String nroRegistroDispositivo;
 
     public LoginRequest(String email, String encryptedPassword, String passwordHash) {
         this.email = email;

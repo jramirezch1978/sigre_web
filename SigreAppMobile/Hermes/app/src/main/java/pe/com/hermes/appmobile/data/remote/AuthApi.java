@@ -2,11 +2,13 @@ package pe.com.hermes.appmobile.data.remote;
 
 import java.util.List;
 import pe.com.hermes.appmobile.data.remote.dto.ApiResponse;
+import pe.com.hermes.appmobile.data.remote.dto.DispositivoRegistradoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.EmpresaUsuarioDto;
 import pe.com.hermes.appmobile.data.remote.dto.LoginRequest;
 import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
 import pe.com.hermes.appmobile.data.remote.dto.RefreshTokenRequest;
 import pe.com.hermes.appmobile.data.remote.dto.RefreshTokenResponse;
+import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SeleccionEmpresaRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SucursalDto;
 import retrofit2.Call;
@@ -20,6 +22,13 @@ public interface AuthApi {
 
     @POST("auth/login")
     Call<ApiResponse<LoginResponse>> login(@Body LoginRequest request);
+
+    /** Igual que /auth/login pero sin Turnstile — exige un dispositivo ya registrado y autorizado. */
+    @POST("auth/login/mobile")
+    Call<ApiResponse<LoginResponse>> loginMobile(@Body LoginRequest request);
+
+    @POST("auth/dispositivo/registrar")
+    Call<ApiResponse<DispositivoRegistradoResponse>> registrarDispositivo(@Body RegistrarDispositivoRequest request);
 
     @GET("auth/empresas")
     Call<ApiResponse<List<EmpresaUsuarioDto>>> listarEmpresas();

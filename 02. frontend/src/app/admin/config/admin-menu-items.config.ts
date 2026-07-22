@@ -30,6 +30,7 @@ export const ADMIN_MENU_ITEMS: AdminMenuItem[] = [
   { label: 'Grupos de usuario', route: '/admin/grupos-usuario', description: 'Grupos de usuario', iconMaterial: 'groups', iconIon: 'people-circle-outline' },
   { label: 'Sucursales', route: '/admin/sucursales', description: 'Sucursales de empresa', iconMaterial: 'storefront', iconIon: 'storefront-outline' },
   { label: 'Usuarios x Sucursal', route: '/admin/usuarios-sucursales', description: 'Asignar usuarios a sucursales', iconMaterial: 'account_tree', iconIon: 'git-network-outline' },
+  { label: 'Dispositivos', route: '/admin/dispositivos', description: 'Dispositivos móviles registrados (Hermes)', iconMaterial: 'devices', iconIon: 'hardware-chip-outline' },
   { label: 'Versiones', route: '/admin/versiones', description: 'Versiones desplegadas', iconMaterial: 'info', iconIon: 'information-circle-outline' },
   { label: 'Licencias', route: '/admin/licencias', description: 'Licencias de empresas', iconMaterial: 'workspace_premium', iconIon: 'ribbon-outline', soloTipoSales: ['LICENSING', 'SALES'] },
 ];

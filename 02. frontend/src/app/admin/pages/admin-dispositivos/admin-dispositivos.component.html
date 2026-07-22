@@ -1,0 +1,72 @@
+<div class="admin-page ion-padding admin-page--fluid">
+  <div class="admin-page__head">
+    <div>
+      <h1 class="admin-page__title">Dispositivos</h1>
+      <p class="admin-page__subtitle">Dispositivos móviles registrados desde la app Hermes. Un dispositivo revocado no podrá iniciar sesión.</p>
+    </div>
+  </div>
+
+  <ion-searchbar [(ngModel)]="filtro" placeholder="Buscar dispositivo, usuario..." animated="true" class="admin-search"></ion-searchbar>
+
+  @if (loading) {
+    <div class="admin-center"><ion-spinner name="crescent"></ion-spinner></div>
+  }
+
+  @if (!loading) {
+    <div class="admin-table-wrapper">
+      <table class="admin-table admin-table--plain">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nro. registro</th>
+            <th>Dispositivo</th>
+            <th>Fabricante / modelo</th>
+            <th>Software</th>
+            <th>Último usuario</th>
+            <th>Último login</th>
+            <th>Estado</th>
+            <th class="admin-acciones-col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of registrosPagina; track d.id) {
+            <tr>
+              <td>{{ d.id }}</td>
+              <td><code>{{ d.nroRegistro }}</code></td>
+              <td>{{ d.nombreDispositivo ?? '—' }}</td>
+              <td>{{ d.fabricante ?? '—' }} / {{ d.modelo ?? '—' }}</td>
+              <td>{{ d.software ?? '—' }}</td>
+              <td>{{ d.usuarioNombre ?? '—' }}</td>
+              <td>{{ d.fecUltimoLogin ? (d.fecUltimoLogin | date:'dd/MM/yyyy HH:mm') : '—' }}</td>
+              <td>
+                @if (d.autorizado) {
+                  <span class="badge-estado badge-activo">Autorizado</span>
+                } @else {
+                  <span class="badge-estado badge-inactivo">Revocado</span>
+                }
+              </td>
+              <td class="admin-acciones-col">
+                <div class="admin-acciones-wrap">
+                  @if (d.autorizado) {
+                    <ion-button fill="clear" size="small" class="admin-acciones-btn" color="warning" title="Revocar"
+                      (click)="confirmarCambioAutorizacion(d, false)">
+                      <ion-icon slot="icon-only" name="ban-outline"></ion-icon>
+                    </ion-button>
+                  } @else {
+                    <ion-button fill="clear" size="small" class="admin-acciones-btn" color="success" title="Autorizar"
+                      (click)="confirmarCambioAutorizacion(d, true)">
+                      <ion-icon slot="icon-only" name="checkmark-circle-outline"></ion-icon>
+                    </ion-button>
+                  }
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="9" class="empty-msg">No hay dispositivos registrados.</td></tr>
+          }
+        </tbody>
+      </table>
+      <app-admin-paginacion [base]="this" />
+    </div>
+  }
+</div>

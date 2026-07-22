@@ -5,9 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import pe.com.hermes.appmobile.data.remote.ApiClient;
 import pe.com.hermes.appmobile.data.remote.dto.ApiResponse;
+import pe.com.hermes.appmobile.data.remote.dto.DispositivoRegistradoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.EmpresaUsuarioDto;
 import pe.com.hermes.appmobile.data.remote.dto.LoginRequest;
 import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
+import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SeleccionEmpresaRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SucursalDto;
 import pe.com.hermes.appmobile.data.session.SessionManager;
@@ -26,12 +28,19 @@ public class AuthRepository {
         this.session = session;
     }
 
-    public void login(String email, String password, ResultCallback<LoginResponse> callback) {
+    /**
+     * @param nroRegistroDispositivo nro de registro del equipo (ver DeviceRegistry) — el
+     *                               backend usa /login/mobile (sin Turnstile) si viene informado,
+     *                               y exige que el dispositivo este registrado Y autorizado.
+     */
+    public void login(String email, String password, String nroRegistroDispositivo, ResultCallback<LoginResponse> callback) {
         // El backend real (AesEncryptor.decryptAndVerify) exige la contraseña cifrada AES-256-CTR
         // + su SHA-256 de verificacion, igual que el frontend Angular (CryptoService) - nunca texto plano.
         String encryptedPassword = PasswordCrypto.encrypt(password);
         String passwordHash = PasswordCrypto.sha256Hex(password);
-        apiClient.getAuthApi().login(new LoginRequest(email, encryptedPassword, passwordHash)).enqueue(new Callback<ApiResponse<LoginResponse>>() {
+        LoginRequest request = new LoginRequest(email, encryptedPassword, passwordHash);
+        request.nroRegistroDispositivo = nroRegistroDispositivo;
+        apiClient.getAuthApi().loginMobile(request).enqueue(new Callback<ApiResponse<LoginResponse>>() {
             @Override
             public void onResponse(Call<ApiResponse<LoginResponse>> call, Response<ApiResponse<LoginResponse>> response) {
                 ApiResponse<LoginResponse> body = response.body();
@@ -45,6 +54,25 @@ public class AuthRepository {
 
             @Override
             public void onFailure(Call<ApiResponse<LoginResponse>> call, Throwable t) {
+                callback.onError(mensajeRed(t));
+            }
+        });
+    }
+
+    public void registrarDispositivo(RegistrarDispositivoRequest request, ResultCallback<DispositivoRegistradoResponse> callback) {
+        apiClient.getAuthApi().registrarDispositivo(request).enqueue(new Callback<ApiResponse<DispositivoRegistradoResponse>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<DispositivoRegistradoResponse>> call, Response<ApiResponse<DispositivoRegistradoResponse>> response) {
+                ApiResponse<DispositivoRegistradoResponse> body = response.body();
+                if (!response.isSuccessful() || body == null || !body.success || body.data == null) {
+                    callback.onError(mensajeError(response, "No se pudo registrar el dispositivo"));
+                    return;
+                }
+                callback.onSuccess(body.data);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<DispositivoRegistradoResponse>> call, Throwable t) {
                 callback.onError(mensajeRed(t));
             }
         });

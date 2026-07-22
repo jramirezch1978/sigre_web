@@ -16,6 +16,7 @@ import { AdminEdicionesComponent } from './pages/admin-ediciones/admin-ediciones
 import { AdminLicenciasComponent } from './pages/admin-licencias/admin-licencias.component';
 import { AdminSucursalesComponent } from './pages/admin-sucursales/admin-sucursales.component';
 import { AdminUsuarioSucursalesComponent } from './pages/admin-usuario-sucursales/admin-usuario-sucursales.component';
+import { AdminDispositivosComponent } from './pages/admin-dispositivos/admin-dispositivos.component';
 import { AdminLoginComponent } from './pages/admin-login/admin-login.component';
 import { AdminCuentaComponent } from './pages/admin-cuenta/admin-cuenta.component';
 import { adminZoneGuard } from './guards/admin-zone.guard';
@@ -51,6 +52,7 @@ const routes: Routes = [
       { path: 'versiones', component: AdminVersionesComponent, canActivate: [adminOperativeSessionGuard] },
       { path: 'sucursales', component: AdminSucursalesComponent, canActivate: [adminZoneGuard] },
       { path: 'usuarios-sucursales', component: AdminUsuarioSucursalesComponent, canActivate: [adminZoneGuard] },
+      { path: 'dispositivos', component: AdminDispositivosComponent, canActivate: [adminOperativeSessionGuard] },
       {
         path: 'perfil',
         component: AdminCuentaComponent,

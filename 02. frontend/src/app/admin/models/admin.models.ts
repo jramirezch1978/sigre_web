@@ -137,6 +137,23 @@ export interface EmpresaAdminDto {
   activo?: boolean;
 }
 
+/** GET /auth/seguridad/admin/dispositivos — dispositivos móviles registrados (Hermes). */
+export interface DispositivoAdminDto {
+  id: number;
+  deviceId: string;
+  nroRegistro: string;
+  imei?: string;
+  fabricante?: string;
+  modelo?: string;
+  nombreDispositivo?: string;
+  software?: string;
+  autorizado: boolean;
+  usuarioId?: number;
+  usuarioNombre?: string;
+  fecRegistro?: string;
+  fecUltimoLogin?: string;
+}
+
 /** Payload PUT /auth/seguridad/empresas/{id} */
 export interface EmpresaAdminUpdatePayload {
   razonSocial: string;

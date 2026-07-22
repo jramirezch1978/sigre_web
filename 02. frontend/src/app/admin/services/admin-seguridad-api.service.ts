@@ -6,7 +6,8 @@ import {
   ModuloDto, OpcionMenuDto, AccionDto, RolDto,
   RolUsuarioDto, RolOpcionMenuDto, RolOpcionAccionDto,
   UsuarioAdminDto, AdminDashboardTelemetry, EmpresaAdminDto,
-  EmpresaAdminUpdatePayload, GrupoUsuarioDto, GrupoUsuarioMiembroDto, EdicionErpDto
+  EmpresaAdminUpdatePayload, GrupoUsuarioDto, GrupoUsuarioMiembroDto, EdicionErpDto,
+  DispositivoAdminDto
 } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
@@ -18,6 +19,23 @@ export class AdminSeguridadApiService extends AbstractAuthenticatedApiService {
   getDashboardTelemetry(): Observable<ApiResponse<AdminDashboardTelemetry>> {
     return this.http.get<ApiResponse<AdminDashboardTelemetry>>(
       this.buildUrl('/auth/seguridad/admin/dashboard-telemetry'),
+      { headers: this.bearerHeaders() }
+    );
+  }
+
+  // ── Dispositivos móviles (Hermes) ──
+
+  listarDispositivos(): Observable<ApiResponse<DispositivoAdminDto[]>> {
+    return this.http.get<ApiResponse<DispositivoAdminDto[]>>(
+      this.buildUrl('/auth/seguridad/admin/dispositivos'),
+      { headers: this.bearerHeaders() }
+    );
+  }
+
+  actualizarAutorizacionDispositivo(id: number, autorizado: boolean): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(
+      this.buildUrl(`/auth/seguridad/admin/dispositivos/${id}/autorizacion`),
+      { autorizado },
       { headers: this.bearerHeaders() }
     );
   }
