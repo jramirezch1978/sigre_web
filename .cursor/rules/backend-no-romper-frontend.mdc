@@ -1,0 +1,42 @@
+---
+description: Cambios de backend deben no romper el frontend web (además del móvil)
+alwaysApply: true
+---
+
+# Backend: no romper el frontend
+
+Este producto **no es solo móvil**. Cualquier cambio en APIs/backend debe validarse también contra el **frontend Angular** (`02. frontend`), no solo Hermes.
+
+## Antes de cambiar un endpoint o contrato
+
+1. Buscar consumidores en:
+   - `02. frontend/src/app/**` (auth, admin, ERP, services)
+   - `SigreAppMobile/Hermes/**` (si aplica)
+2. Preferir **extender** (campos opcionales, endpoints nuevos) antes de renombrar/quitar.
+3. Si un path o DTO debe cambiar:
+   - Actualizar el frontend en el **mismo cambio** (o no hacer el breaking change).
+   - No dejar el web apuntando a un endpoint eliminado/movido.
+
+## Reglas de diseño
+
+- Login web sigue en `/auth/login` (con Turnstile). Login móvil es `/auth/login/mobile` — no mezclar ni romper el web.
+- Sucursales del tenant viven en **core-service** (`/core/empresas/.../sucursales/...`), no en seguridad.
+- Empresas del login: `/auth/empresas` (seguridad). No mover contratos compartidos sin revisar `auth.service.ts` y pantallas de selección.
+
+## Checklist obligatorio al tocar backend
+
+- [ ] ¿Qué pantallas/servicios del frontend llaman este API?
+- [ ] ¿El path, método y shape JSON siguen compatibles?
+- [ ] Si hubo breaking change: ¿frontend actualizado y listo para deploy?
+- [ ] ¿Hace falta redeploy de frontend además del microservicio?
+
+## Al entregar
+
+Si el cambio afecta frontend, indicar también:
+
+```bat
+cd e:\Work\sigre_web
+.\deploy.bat frontend --force
+```
+
+(además del/los microservicios tocados). El agente **no** ejecuta `deploy.bat`.
