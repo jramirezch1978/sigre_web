@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.sigre.seguridad.dto.*;
 import com.sigre.seguridad.service.AuthService;
 import com.sigre.seguridad.service.DispositivoService;
+import com.sigre.seguridad.service.HealthPingService;
 import com.sigre.common.dto.ApiResponse;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.security.JwtTokenProvider;
@@ -21,6 +22,7 @@ public class AuthController {
     private final AuthService authService;
     private final JwtTokenProvider jwtTokenProvider;
     private final DispositivoService dispositivoService;
+    private final HealthPingService healthPingService;
 
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -55,6 +57,16 @@ public class AuthController {
     public ApiResponse<DispositivoRegistradoResponse> registrarDispositivo(
             @Valid @RequestBody RegistrarDispositivoRequest request) {
         return ApiResponse.ok(dispositivoService.registrar(request), "Dispositivo registrado");
+    }
+
+    /**
+     * Ping público para apps móviles (Hermes) — equivalente REST de SOAP {@code ImplHealth.ping}.
+     * Devuelve tiempos de conexión y query a la BD security; la latencia total la mide el cliente.
+     */
+    @GetMapping("/health/ping")
+    public ApiResponse<HealthPingResponse> healthPing() {
+        HealthPingResponse ping = healthPingService.ping();
+        return ApiResponse.ok(ping, ping.isOk() ? "pong" : "ping fallido");
     }
 
     @GetMapping("/empresas")

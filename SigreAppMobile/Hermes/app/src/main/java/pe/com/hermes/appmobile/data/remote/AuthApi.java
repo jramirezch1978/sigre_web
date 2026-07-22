@@ -4,6 +4,7 @@ import java.util.List;
 import pe.com.hermes.appmobile.data.remote.dto.ApiResponse;
 import pe.com.hermes.appmobile.data.remote.dto.DispositivoRegistradoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.EmpresaUsuarioDto;
+import pe.com.hermes.appmobile.data.remote.dto.HealthPingResponse;
 import pe.com.hermes.appmobile.data.remote.dto.LoginRequest;
 import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
 import pe.com.hermes.appmobile.data.remote.dto.RefreshTokenRequest;
@@ -29,6 +30,10 @@ public interface AuthApi {
 
     @POST("auth/dispositivo/registrar")
     Call<ApiResponse<DispositivoRegistradoResponse>> registrarDispositivo(@Body RegistrarDispositivoRequest request);
+
+    /** Ping público: latencia BD (conexión + SELECT 1). La latencia total la mide el cliente. */
+    @GET("auth/health/ping")
+    Call<ApiResponse<HealthPingResponse>> healthPing();
 
     @GET("auth/empresas")
     Call<ApiResponse<List<EmpresaUsuarioDto>>> listarEmpresas();
