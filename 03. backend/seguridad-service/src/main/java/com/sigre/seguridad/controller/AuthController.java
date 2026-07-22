@@ -68,6 +68,25 @@ public class AuthController {
         return ApiResponse.ok(dispositivoService.registrar(request), "Dispositivo registrado");
     }
 
+    /**
+     * Cierra la sesión abierta del dispositivo y abre otra (nuevo nro_registro).
+     * Usado al cancelar empresa/sucursal en el login móvil.
+     */
+    @PostMapping("/dispositivo/renovar-sesion")
+    public ApiResponse<DispositivoRegistradoResponse> renovarSesionDispositivo(
+            @Valid @RequestBody RegistrarDispositivoRequest request,
+            @RequestParam(value = "nroRegistroActual", required = false) String nroRegistroActual,
+            HttpServletRequest httpRequest) {
+        request.setIpPublica(Ipv4.normalizeOrNull(request.getIpPublica()));
+        request.setIpPrivada(Ipv4.normalizeOrNull(request.getIpPrivada()));
+        if (request.getIpPublica() == null) {
+            request.setIpPublica(resolveClientIpv4(httpRequest));
+        }
+        return ApiResponse.ok(
+                dispositivoService.renovarSesion(request, nroRegistroActual),
+                "Sesión de dispositivo renovada");
+    }
+
     private static String resolveClientIpv4(HttpServletRequest request) {
         String forwardedFor = request.getHeader("X-Forwarded-For");
         if (forwardedFor != null && !forwardedFor.isBlank()) {

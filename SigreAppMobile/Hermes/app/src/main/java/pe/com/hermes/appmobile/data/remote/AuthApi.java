@@ -17,6 +17,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /** Espejo de com.sigre.seguridad.controller.AuthController (base ya incluye /api/auth via ApiClient). */
 public interface AuthApi {
@@ -30,6 +31,12 @@ public interface AuthApi {
 
     @POST("auth/dispositivo/registrar")
     Call<ApiResponse<DispositivoRegistradoResponse>> registrarDispositivo(@Body RegistrarDispositivoRequest request);
+
+    /** Cierra la sesión abierta del dispositivo y abre otra (nuevo nro_registro). */
+    @POST("auth/dispositivo/renovar-sesion")
+    Call<ApiResponse<DispositivoRegistradoResponse>> renovarSesionDispositivo(
+            @Body RegistrarDispositivoRequest request,
+            @Query("nroRegistroActual") String nroRegistroActual);
 
     /** Ping público: latencia BD (conexión + SELECT 1). La latencia total la mide el cliente. */
     @GET("auth/health/ping")

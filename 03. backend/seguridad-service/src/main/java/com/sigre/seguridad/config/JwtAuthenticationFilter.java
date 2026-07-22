@@ -48,6 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if ("/api/auth/refresh".equals(path)) return true;
         if ("/api/auth/health/ping".equals(path)) return true;
         if ("/api/auth/dispositivo/registrar".equals(path)) return true;
+        if ("/api/auth/dispositivo/renovar-sesion".equals(path)) return true;
         if ("/api/auth/login/mobile".equals(path)) return true;
         return PUBLIC_PATHS.stream().anyMatch(p -> path.startsWith(p) || path.equals(p.replace("/", "")));
     }

@@ -264,6 +264,27 @@ public class DispositivoService {
                 nroRegistro);
     }
 
+    /**
+     * Cierra la sesión abierta del dispositivo (por nro o por device_id) y abre una nueva.
+     * Usado cuando el usuario cancela empresa/sucursal en login: la sesión anterior “murió”.
+     */
+    @Transactional
+    public DispositivoRegistradoResponse renovarSesion(RegistrarDispositivoRequest req, String nroRegistroActual) {
+        if (nroRegistroActual != null && !nroRegistroActual.isBlank()) {
+            registrarLogout(nroRegistroActual.trim());
+        }
+        if (req.getDeviceId() != null && !req.getDeviceId().isBlank()) {
+            jdbcTemplate.update(
+                    """
+                    UPDATE auth.dispositivo_login
+                    SET fec_logout = NOW()
+                    WHERE device_id = ? AND fec_logout IS NULL
+                    """,
+                    req.getDeviceId());
+        }
+        return registrar(req);
+    }
+
     public List<DispositivoLoginDto> listarLogins(long dispositivoId) {
         return jdbcTemplate.query(
                 """

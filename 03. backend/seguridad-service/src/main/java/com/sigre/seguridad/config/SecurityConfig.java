@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 "/api/auth/login/dev",
                                 "/api/auth/login/mobile",
                                 "/api/auth/dispositivo/registrar",
+                                "/api/auth/dispositivo/renovar-sesion",
                                 "/api/auth/health/ping",
                                 "/api/auth/seleccionar-empresa",
                                 "/api/auth/refresh",

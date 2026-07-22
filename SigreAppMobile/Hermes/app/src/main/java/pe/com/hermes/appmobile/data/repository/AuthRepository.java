@@ -78,6 +78,33 @@ public class AuthRepository {
         });
     }
 
+    /** Cierra la sesión de dispositivo actual y abre una nueva (nuevo nro_registro). */
+    public void renovarSesionDispositivo(
+            RegistrarDispositivoRequest request,
+            String nroRegistroActual,
+            ResultCallback<DispositivoRegistradoResponse> callback) {
+        apiClient.getAuthApi()
+                .renovarSesionDispositivo(request, nroRegistroActual)
+                .enqueue(new Callback<ApiResponse<DispositivoRegistradoResponse>>() {
+                    @Override
+                    public void onResponse(
+                            Call<ApiResponse<DispositivoRegistradoResponse>> call,
+                            Response<ApiResponse<DispositivoRegistradoResponse>> response) {
+                        ApiResponse<DispositivoRegistradoResponse> body = response.body();
+                        if (!response.isSuccessful() || body == null || !body.success || body.data == null) {
+                            callback.onError(mensajeError(response, "No se pudo renovar la sesión del dispositivo"));
+                            return;
+                        }
+                        callback.onSuccess(body.data);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<DispositivoRegistradoResponse>> call, Throwable t) {
+                        callback.onError(mensajeRed(t));
+                    }
+                });
+    }
+
     public void listarEmpresas(ResultCallback<List<EmpresaUsuarioDto>> callback) {
         apiClient.getAuthApi().listarEmpresas().enqueue(new Callback<ApiResponse<List<EmpresaUsuarioDto>>>() {
             @Override
