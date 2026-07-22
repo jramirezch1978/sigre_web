@@ -1,5 +1,6 @@
 package pe.com.hermes.appmobile.data.repository;
 
+import com.google.gson.Gson;
 import java.util.Collections;
 import java.util.List;
 import pe.com.hermes.appmobile.data.remote.ApiClient;
@@ -10,6 +11,7 @@ import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
 import pe.com.hermes.appmobile.data.remote.dto.SeleccionEmpresaRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SucursalDto;
 import pe.com.hermes.appmobile.data.session.SessionManager;
+import pe.com.hermes.appmobile.util.PasswordCrypto;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -25,12 +27,16 @@ public class AuthRepository {
     }
 
     public void login(String email, String password, ResultCallback<LoginResponse> callback) {
-        apiClient.getAuthApi().login(new LoginRequest(email, password)).enqueue(new Callback<ApiResponse<LoginResponse>>() {
+        // El backend real (AesEncryptor.decryptAndVerify) exige la contraseña cifrada AES-256-CTR
+        // + su SHA-256 de verificacion, igual que el frontend Angular (CryptoService) - nunca texto plano.
+        String encryptedPassword = PasswordCrypto.encrypt(password);
+        String passwordHash = PasswordCrypto.sha256Hex(password);
+        apiClient.getAuthApi().login(new LoginRequest(email, encryptedPassword, passwordHash)).enqueue(new Callback<ApiResponse<LoginResponse>>() {
             @Override
             public void onResponse(Call<ApiResponse<LoginResponse>> call, Response<ApiResponse<LoginResponse>> response) {
                 ApiResponse<LoginResponse> body = response.body();
                 if (!response.isSuccessful() || body == null || !body.success || body.data == null) {
-                    callback.onError(mensajeError(body, "No se pudo iniciar sesión"));
+                    callback.onError(mensajeError(response, "No se pudo iniciar sesión"));
                     return;
                 }
                 guardarSesionParcial(body.data);
@@ -50,7 +56,7 @@ public class AuthRepository {
             public void onResponse(Call<ApiResponse<List<EmpresaUsuarioDto>>> call, Response<ApiResponse<List<EmpresaUsuarioDto>>> response) {
                 ApiResponse<List<EmpresaUsuarioDto>> body = response.body();
                 if (!response.isSuccessful() || body == null || !body.success) {
-                    callback.onError(mensajeError(body, "No se pudieron cargar las empresas"));
+                    callback.onError(mensajeError(response, "No se pudieron cargar las empresas"));
                     return;
                 }
                 callback.onSuccess(body.data != null ? body.data : Collections.emptyList());
@@ -69,7 +75,7 @@ public class AuthRepository {
             public void onResponse(Call<ApiResponse<List<SucursalDto>>> call, Response<ApiResponse<List<SucursalDto>>> response) {
                 ApiResponse<List<SucursalDto>> body = response.body();
                 if (!response.isSuccessful() || body == null || !body.success) {
-                    callback.onError(mensajeError(body, "No se pudieron cargar las sucursales"));
+                    callback.onError(mensajeError(response, "No se pudieron cargar las sucursales"));
                     return;
                 }
                 callback.onSuccess(body.data != null ? body.data : Collections.emptyList());
@@ -89,7 +95,7 @@ public class AuthRepository {
                     public void onResponse(Call<ApiResponse<LoginResponse>> call, Response<ApiResponse<LoginResponse>> response) {
                         ApiResponse<LoginResponse> body = response.body();
                         if (!response.isSuccessful() || body == null || !body.success || body.data == null) {
-                            callback.onError(mensajeError(body, "No se pudo completar el acceso"));
+                            callback.onError(mensajeError(response, "No se pudo completar el acceso"));
                             return;
                         }
                         guardarSesionParcial(body.data);
@@ -135,8 +141,26 @@ public class AuthRepository {
         }
     }
 
-    private static String mensajeError(ApiResponse<?> body, String porDefecto) {
-        return body != null && body.message != null ? body.message : porDefecto;
+    /**
+     * Retrofit solo llena response.body() en 2xx; el mensaje real de error de negocio
+     * (ej. "Credenciales inválidas", "Complete la verificación de seguridad (Turnstile)")
+     * viaja en errorBody() y antes se descartaba siempre, mostrando el mensaje generico
+     * por defecto sin importar la causa real.
+     */
+    private static String mensajeError(Response<?> response, String porDefecto) {
+        ApiResponse<?> body = (ApiResponse<?>) response.body();
+        if (body != null && body.message != null && !body.message.isEmpty()) return body.message;
+
+        if (response.errorBody() != null) {
+            try {
+                String raw = response.errorBody().string();
+                ApiResponse<?> error = new Gson().fromJson(raw, ApiResponse.class);
+                if (error != null && error.message != null && !error.message.isEmpty()) return error.message;
+            } catch (Exception ignored) {
+                // Cuerpo de error no es JSON parseable (ej. HTML de un proxy) - usar el mensaje por defecto.
+            }
+        }
+        return porDefecto;
     }
 
     private static String mensajeRed(Throwable t) {
