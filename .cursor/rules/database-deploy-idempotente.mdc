@@ -1,0 +1,30 @@
+---
+description: No crear patches SQL; database-deploy.bat es idempotente
+alwaysApply: true
+---
+
+# Base de datos — sin scripts patch
+
+`database-deploy.bat` (modos `create-security`, `create-template`, `create`, `insert`, etc.) es **idempotente** (DROP/CREATE o upserts seguros).
+
+## Obligatorio
+
+- Cambios de esquema o seed: editar solo los SQL canónicos en `04. Base de datos/ddl/` (security, tenant, seed).
+- Desplegar con `database-deploy.bat create-security` / `create-template` / `create` / `insert` según corresponda.
+- **No** crear `patches/`, `alter-*.sql`, ni nuevos modos `patch-*` en `database-deploy.bat` para cambios de DDL/seed.
+
+## Incorrecto
+
+```bat
+REM ❌ No inventar scripts incremental/patch para security o template
+.\database-deploy.bat patch-security-dispositivo
+```
+
+## Correcto
+
+```bat
+REM ✅ El DDL/seed ya incluye el cambio; reejecutar el modo canónico
+.\database-deploy.bat create-security --force
+```
+
+Excepción: modos `patch-bluecoast` / `patch-cantabria` ya existentes para datos de tenant concretos; no extender ese patrón a DDL general.
