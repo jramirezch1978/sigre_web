@@ -17,6 +17,7 @@ import pe.com.hermes.appmobile.ui.login.LoginActivity;
 import pe.com.hermes.appmobile.ui.menu.MenuActivity;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
+import pe.com.hermes.appmobile.util.AppVersion;
 import pe.com.hermes.appmobile.util.ConnectivityChecker;
 import pe.com.hermes.common.util.AsyncRunner;
 
@@ -39,6 +40,7 @@ public class SplashActivity extends AppCompatActivity {
         binding = ActivitySplashBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        binding.tvVersion.setText(AppVersion.etiqueta(this));
         binding.btnReintentar.setOnClickListener(v -> iniciarValidacion());
         binding.btnConfigurarServidor.setOnClickListener(v ->
                 startActivity(new Intent(this, ServidorListActivity.class)));

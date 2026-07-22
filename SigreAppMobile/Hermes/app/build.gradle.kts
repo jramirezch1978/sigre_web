@@ -4,9 +4,48 @@ plugins {
     id("com.android.application")
 }
 
+// ------------------------------------------------------------
+// Versionado — mismo esquema que FastSales (version.properties):
+//   VERSION_MAJOR.VERSION_MINOR.VERSION_PATCH  → versionName
+//   VERSION_CODE                               → versionCode
+// Tras assembleRelease / bundleRelease se incrementan CODE + MINOR.
+// ------------------------------------------------------------
+fun readVersionInfo(): Pair<Int, String> {
+    val versionPropsFile = file("version.properties")
+    val props = Properties()
+    if (versionPropsFile.canRead()) {
+        versionPropsFile.inputStream().use { props.load(it) }
+    } else {
+        props["VERSION_CODE"] = "1"
+        props["VERSION_MAJOR"] = "1"
+        props["VERSION_MINOR"] = "0"
+        props["VERSION_PATCH"] = "0"
+        versionPropsFile.writer().use { props.store(it, "Hermes version") }
+    }
+    val code = props.getProperty("VERSION_CODE", "1").toInt()
+    val major = props.getProperty("VERSION_MAJOR", "1")
+    val minor = props.getProperty("VERSION_MINOR", "0")
+    val patch = props.getProperty("VERSION_PATCH", "0")
+    return code to "$major.$minor.$patch"
+}
+
+fun incrementVersion() {
+    val versionPropsFile = file("version.properties")
+    val props = Properties()
+    versionPropsFile.inputStream().use { props.load(it) }
+    val code = props.getProperty("VERSION_CODE", "1").toInt() + 1
+    val major = props.getProperty("VERSION_MAJOR", "1")
+    val minor = props.getProperty("VERSION_MINOR", "0").toInt() + 1
+    val patch = props.getProperty("VERSION_PATCH", "0")
+    props["VERSION_CODE"] = code.toString()
+    props["VERSION_MINOR"] = minor.toString()
+    versionPropsFile.writer().use { props.store(it, "Hermes version") }
+    println("Version incrementada: $major.$minor.$patch (codigo: $code)")
+}
+
+val (appVersionCode, appVersionName) = readVersionInfo()
+
 // Firma de release: credenciales en keystore.properties (raiz del proyecto, git-ignorado).
-// Si el archivo no existe (ej. checkout limpio sin el keystore local), el release
-// queda sin firmar en vez de fallar el build - solo `debug` sigue funcionando siempre.
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
 val tieneFirmaRelease = keystorePropertiesFile.exists()
@@ -23,8 +62,8 @@ android {
         // 26+ (Android 8.0) requerido por el icono adaptativo (mipmap-anydpi-v26).
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -87,4 +126,18 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+}
+
+tasks.register("incrementVersionTask") {
+    doLast { incrementVersion() }
+}
+
+// Igual que FastSales: incrementar una sola vez aunque corran assembleRelease + bundleRelease.
+gradle.taskGraph.whenReady {
+    val hasAssemble = allTasks.any { it.name == "assembleRelease" }
+    val hasBundle = allTasks.any { it.name == "bundleRelease" }
+    when {
+        hasAssemble -> tasks.named("assembleRelease").configure { finalizedBy("incrementVersionTask") }
+        hasBundle -> tasks.named("bundleRelease").configure { finalizedBy("incrementVersionTask") }
+    }
 }

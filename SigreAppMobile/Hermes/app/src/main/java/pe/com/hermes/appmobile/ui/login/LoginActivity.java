@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import pe.com.hermes.appmobile.BuildConfig;
 import pe.com.hermes.appmobile.R;
 import pe.com.hermes.appmobile.data.config.ServerProfile;
 import pe.com.hermes.appmobile.data.device.DeviceRegistry;
@@ -24,6 +23,7 @@ import pe.com.hermes.appmobile.ui.empresa.SeleccionEmpresaActivity;
 import pe.com.hermes.appmobile.ui.ping.PingMonitorDialog;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
+import pe.com.hermes.appmobile.util.AppVersion;
 
 /** Pantalla de ingreso. El login SIEMPRE devuelve un token temporal (ver AuthServiceImpl.login) —
  * la seleccion de empresa/sucursal ocurre siempre despues, nunca se salta (a diferencia de
@@ -45,7 +45,7 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
         authRepository = new AuthRepository(AppUtils.app(this).getApiClient(), AppUtils.app(this).getSession());
         connectionMonitor = new ConnectionMonitor(AppUtils.app(this).getApiClient(), pingHistory, this);
 
-        binding.tvVersion.setText("Versión: " + BuildConfig.VERSION_NAME);
+        binding.tvVersion.setText(AppVersion.etiqueta(this));
 
         binding.btnLogin.setOnClickListener(v -> intentarLogin());
         binding.btnCambiarServidor.setOnClickListener(v -> mostrarServidorDefault());
