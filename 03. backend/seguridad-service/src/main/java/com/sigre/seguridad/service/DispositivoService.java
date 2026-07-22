@@ -54,10 +54,10 @@ public class DispositivoService {
         UpsertResult upsert = upsertDispositivo(req);
         boolean autorizado = esAutorizado(upsert.id());
 
-        Optional<String> nroAbierto = buscarNroSesionAbierta(req.getDeviceId());
+        Optional<String> nroAbierto = buscarNroSesionAbierta(upsert.id());
         String nroRegistro = nroAbierto
                 .map(nro -> {
-                    actualizarIpsSesion(nro, req);
+                    actualizarDatosSesion(nro, req);
                     return nro;
                 })
                 .orElseGet(() -> abrirSesion(upsert.id(), req));
@@ -144,37 +144,33 @@ public class DispositivoService {
         return "1".equals(flag);
     }
 
-    private Optional<String> buscarNroSesionAbierta(String deviceId) {
+    private Optional<String> buscarNroSesionAbierta(long dispositivoId) {
         List<String> rows = jdbcTemplate.query(
                 """
                 SELECT nro_registro
                 FROM auth.dispositivo_login
-                WHERE device_id = ? AND fec_logout IS NULL
+                WHERE dispositivo_id = ? AND fec_logout IS NULL
                 ORDER BY fec_registro DESC
                 LIMIT 1
                 """,
                 (rs, rowNum) -> rs.getString("nro_registro"),
-                deviceId);
+                dispositivoId);
         return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
     }
 
-    private void actualizarIpsSesion(String nroRegistro, RegistrarDispositivoRequest req) {
+    /** Actualiza solo datos de sesión (IPs / IMEI / software); identidad queda en el maestro. */
+    private void actualizarDatosSesion(String nroRegistro, RegistrarDispositivoRequest req) {
         jdbcTemplate.update(
                 """
                 UPDATE auth.dispositivo_login
                 SET ip_publica = COALESCE(?, ip_publica),
                     ip_privada = COALESCE(?, ip_privada),
                     imei = COALESCE(?, imei),
-                    software = COALESCE(?, software),
-                    nombre_dispositivo = COALESCE(?, nombre_dispositivo),
-                    fabricante = COALESCE(?, fabricante),
-                    modelo = COALESCE(?, modelo)
+                    software = COALESCE(?, software)
                 WHERE nro_registro = ?
                 """,
                 Ipv4.normalizeOrNull(req.getIpPublica()), Ipv4.normalizeOrNull(req.getIpPrivada()),
-                blankToNull(req.getImei()), blankToNull(req.getSoftware()),
-                blankToNull(req.getNombreDispositivo()), blankToNull(req.getFabricante()),
-                blankToNull(req.getModelo()), nroRegistro);
+                blankToNull(req.getImei()), blankToNull(req.getSoftware()), nroRegistro);
     }
 
     private String abrirSesion(long dispositivoId, RegistrarDispositivoRequest req) {
@@ -182,12 +178,10 @@ public class DispositivoService {
         jdbcTemplate.update(
                 """
                 INSERT INTO auth.dispositivo_login
-                    (nro_registro, dispositivo_id, device_id, imei, software,
-                     nombre_dispositivo, fabricante, modelo, ip_publica, ip_privada, fec_registro)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                    (nro_registro, dispositivo_id, imei, software, ip_publica, ip_privada, fec_registro)
+                VALUES (?, ?, ?, ?, ?, ?, NOW())
                 """,
-                nroRegistro, dispositivoId, req.getDeviceId(), req.getImei(), req.getSoftware(),
-                req.getNombreDispositivo(), req.getFabricante(), req.getModelo(),
+                nroRegistro, dispositivoId, req.getImei(), req.getSoftware(),
                 Ipv4.normalizeOrNull(req.getIpPublica()), Ipv4.normalizeOrNull(req.getIpPrivada()));
         return nroRegistro;
     }
@@ -276,9 +270,12 @@ public class DispositivoService {
         if (req.getDeviceId() != null && !req.getDeviceId().isBlank()) {
             jdbcTemplate.update(
                     """
-                    UPDATE auth.dispositivo_login
+                    UPDATE auth.dispositivo_login dl
                     SET fec_logout = NOW()
-                    WHERE device_id = ? AND fec_logout IS NULL
+                    FROM auth.dispositivo d
+                    WHERE d.id = dl.dispositivo_id
+                      AND d.device_id = ?
+                      AND dl.fec_logout IS NULL
                     """,
                     req.getDeviceId());
         }

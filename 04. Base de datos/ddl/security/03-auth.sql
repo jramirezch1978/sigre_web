@@ -335,33 +335,27 @@ COMMENT ON TABLE auth.dispositivo IS
 
 -- Sesiones de dispositivo (SIGRE SEG_LOGIN_DEVICE):
 -- nro_registro = config.fn_siguiente_numerador('DISPOSITIVO') → DM##########
--- Se crea en POST /dispositivo/registrar; login/logout actualizan fec_login / fec_logout.
+-- Identidad del equipo vive en auth.dispositivo (JOIN por dispositivo_id).
+-- Aquí solo foto de sesión: imei, software, IPs, usuario y fechas.
 CREATE TABLE auth.dispositivo_login (
     nro_registro VARCHAR(15) PRIMARY KEY,
     dispositivo_id BIGINT NOT NULL REFERENCES auth.dispositivo(id),
-    device_id VARCHAR(200) NOT NULL,
     imei VARCHAR(200),
     software VARCHAR(200),
-    nombre_dispositivo VARCHAR(200),
-    fabricante VARCHAR(200),
-    modelo VARCHAR(200),
     ip_publica VARCHAR(15),
     ip_privada VARCHAR(15),
     usuario_id BIGINT REFERENCES auth.usuario(id),
     fec_login TIMESTAMPTZ,
     fec_logout TIMESTAMPTZ,
-    fec_registro TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_dispositivo_login_device
-        FOREIGN KEY (device_id) REFERENCES auth.dispositivo(device_id)
+    fec_registro TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 COMMENT ON TABLE auth.dispositivo_login IS
-    'Sesiones de dispositivos moviles (SIGRE SEG_LOGIN_DEVICE). PK = nro_registro autonumerico.';
+    'Sesiones de dispositivos moviles (SIGRE SEG_LOGIN_DEVICE). PK = nro_registro. Sin duplicar device_id/nombre/fabricante/modelo del maestro.';
 
 CREATE INDEX ix_dispositivo_login_dispositivo ON auth.dispositivo_login (dispositivo_id, fec_registro DESC);
-CREATE INDEX ix_dispositivo_login_device ON auth.dispositivo_login (device_id, fec_registro DESC);
 CREATE INDEX ix_dispositivo_login_usuario ON auth.dispositivo_login (usuario_id);
-CREATE INDEX ix_dispositivo_login_abierta ON auth.dispositivo_login (device_id)
+CREATE INDEX ix_dispositivo_login_abierta ON auth.dispositivo_login (dispositivo_id)
     WHERE fec_logout IS NULL;
 
 CREATE TABLE auth.codigo_recuperacion (
