@@ -1,7 +1,19 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+}
+
+// Firma de release: credenciales en keystore.properties (raiz del proyecto, git-ignorado).
+// Si el archivo no existe (ej. checkout limpio sin el keystore local), el release
+// queda sin firmar en vez de fallar el build - solo `debug` sigue funcionando siempre.
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties()
+val tieneFirmaRelease = keystorePropertiesFile.exists()
+if (tieneFirmaRelease) {
+    keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
 
 android {
@@ -22,10 +34,24 @@ android {
         // no aquí — es un archivo real dentro de la app, editable en runtime desde Login.
     }
 
+    signingConfigs {
+        if (tieneFirmaRelease) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (tieneFirmaRelease) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 

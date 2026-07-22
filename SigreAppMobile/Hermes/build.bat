@@ -59,10 +59,10 @@ if not "%TARGET%"=="debug" if not "%TARGET%"=="release" if not "%TARGET%"=="clea
     echo ERROR: Parametro invalido. Uso:
     echo   build.bat           - Compila APK debug ^(instalable directo, sin firma^)
     echo   build.bat debug     - Igual que sin parametro
-    echo   build.bat release   - Compila APK+AAB release ^(sin firma configurada aun^)
+    echo   build.bat release   - Compila APK+AAB release firmados ^(requiere keystore.properties^)
     echo   build.bat clean     - Limpia el build ^(gradlew clean^)
     echo.
-    pause
+    if not defined SIGRE_NESTED pause
     exit /b 1
 )
 
@@ -71,7 +71,7 @@ set "JDK17=C:\Program Files\Java\jdk-17"
 if not exist "%JDK17%\bin\java.exe" (
     echo ERROR: No se encontro JDK 17 en "%JDK17%".
     echo Ajusta la variable JDK17 en este script si esta en otra ruta.
-    pause
+    if not defined SIGRE_NESTED pause
     exit /b 1
 )
 set "JAVA_HOME=%JDK17%"
@@ -103,16 +103,18 @@ if "%TARGET%"=="debug" (
 )
 
 if "%TARGET%"=="release" (
-    echo [*] Compilando APK+AAB release...
+    echo [*] Compilando APK+AAB release firmados...
     echo ------------------------------------------------------------
-    echo NOTA: aun no hay signingConfig de release configurado en
-    echo app\build.gradle.kts ^(sin keystore^) - el artefacto sale sin firmar.
-    echo.
+    if not exist "%~dp0keystore.properties" (
+        echo ERROR: No se encontro keystore.properties en "%~dp0".
+        echo El release debe salir firmado - genera/copia el keystore antes de continuar.
+        goto :build_failed
+    )
     call .\gradlew.bat assembleRelease bundleRelease
     if errorlevel 1 goto :build_failed
     echo.
-    echo [OK] Release compilado exitosamente
-    echo   app\build\outputs\apk\release\app-release-unsigned.apk
+    echo [OK] Release compilado y firmado exitosamente
+    echo   app\build\outputs\apk\release\app-release.apk
     echo   app\build\outputs\bundle\release\app-release.aab
     goto :restore_env
 )
@@ -136,5 +138,5 @@ echo   COMPILACION COMPLETADA
 echo ============================================================
 echo.
 echo Variables de entorno restauradas.
-pause
+if not defined SIGRE_NESTED pause
 endlocal
