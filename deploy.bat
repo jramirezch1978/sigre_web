@@ -425,18 +425,66 @@ call :cleanupLocalImage
 exit /b 0
 
 :transferImage
+REM Transferencia a cronos:
+REM   1) docker save local -> .tar
+REM   2) scp del .tar al host (progreso visible; mas fiable que docker context load)
+REM   3) ssh docker load en el servidor (lectura local en cronos, rapida)
+REM Antes se usaba "docker --context cronos load -i tar", que sube ~200MB por el
+REM API Docker-over-SSH sin progreso y se ve "colgado"; con 2 deploys en paralelo
+REM compiten por el mismo tunel SSH y puede tardar decenas de minutos.
 set "DEPLOY_LOG=!DEPLOY_LOG_DIR!\deploy-transfer-!SVC!-!DEPLOY_LOG_TS!.log"
 set "TAR=%TEMP%\sigre-!SVC!-!DEPLOY_LOG_TS!.tar"
+set "REMOTE_TAR=/tmp/sigre-!SVC!-!DEPLOY_LOG_TS!.tar"
+set "TRANSFER_LOCK=%TEMP%\sigre-deploy-transfer.lock"
 echo %CYAN%[TRANSFER]%RESET% !IMAGE! -^> cronos
+
+REM Lock obsoleto (>45 min): deploy anterior cortado con Ctrl+C.
+REM OJO: no usar parentesis ")" dentro de bloques IF — rompen el parser de cmd
+REM (sintoma tipico: error '"LOY_LOG" no se reconoce...').
+set "LOCK_STATE=NONE"
+if exist "!TRANSFER_LOCK!" for /f "usebackq delims=" %%a in (`powershell -NoProfile -Command "$f=Get-Item -LiteralPath '%TEMP%\sigre-deploy-transfer.lock' -ErrorAction SilentlyContinue; if ($null -eq $f) { 'NONE' } elseif ($f.LastWriteTime -lt (Get-Date).AddMinutes(-45)) { 'STALE' } else { 'LIVE' }"`) do set "LOCK_STATE=%%a"
+if /i "!LOCK_STATE!"=="STALE" (
+    echo %YELLOW%[TRANSFER]%RESET% Lock obsoleto; se libera.
+    del /f /q "!TRANSFER_LOCK!" >nul 2>&1
+    set "LOCK_STATE=NONE"
+)
+if /i "!LOCK_STATE!"=="LIVE" (
+    echo %YELLOW%[TRANSFER]%RESET% Otra transferencia ocupa el enlace a cronos. Esperando...
+    echo %YELLOW%[TRANSFER]%RESET% Tip: no lances 2 deploy.bat en paralelo hacia cronos.
+)
+:transfer_wait_lock
+if exist "!TRANSFER_LOCK!" (
+    timeout /t 5 /nobreak >nul
+    goto transfer_wait_lock
+)
+> "!TRANSFER_LOCK!" echo !SVC!
+
+echo %CYAN%[TRANSFER]%RESET% 1/3 docker save local...
 docker --context %DOCKER_CTX_BUILD% save !IMAGE! -o "!TAR!" >> "!DEPLOY_LOG!" 2>&1
 if errorlevel 1 (
     echo %RED%[ERROR]%RESET% docker save fallo. Ver: !DEPLOY_LOG!
+    if exist "!TRANSFER_LOCK!" del /f /q "!TRANSFER_LOCK!" >nul 2>&1
     exit /b 1
 )
-call :useRemoteContext || exit /b 1
-docker --context %DOCKER_CTX% load -i "!TAR!" >> "!DEPLOY_LOG!" 2>&1
+set "TAR_MB=?"
+for /f "usebackq delims=" %%s in (`powershell -NoProfile -Command "[math]::Round((Get-Item -LiteralPath '!TAR!').Length/1MB,1)"`) do set "TAR_MB=%%s"
+echo %GREEN%[TRANSFER]%RESET% Imagen empaquetada: !TAR_MB! MB
+
+echo %CYAN%[TRANSFER]%RESET% 2/3 scp !TAR_MB! MB -^> %SSH_USER%@%SSH_HOST% ...
+scp -o ConnectTimeout=20 -o ServerAliveInterval=30 -o ServerAliveCountMax=120 "!TAR!" "%SSH_USER%@%SSH_HOST%:!REMOTE_TAR!" >> "!DEPLOY_LOG!" 2>&1
+if errorlevel 1 (
+    echo %RED%[ERROR]%RESET% scp a cronos fallo. Ver: !DEPLOY_LOG!
+    if exist "!TAR!" del /f /q "!TAR!" >nul 2>&1
+    if exist "!TRANSFER_LOCK!" del /f /q "!TRANSFER_LOCK!" >nul 2>&1
+    exit /b 1
+)
+echo %GREEN%[TRANSFER]%RESET% Archivo en cronos: !REMOTE_TAR!
+
+echo %CYAN%[TRANSFER]%RESET% 3/3 docker load en cronos...
+ssh -o ConnectTimeout=20 -o ServerAliveInterval=30 -o ServerAliveCountMax=120 %SSH_USER%@%SSH_HOST% "docker load -i !REMOTE_TAR! && rm -f !REMOTE_TAR!" >> "!DEPLOY_LOG!" 2>&1
 set "LOAD_ERR=!errorlevel!"
 if exist "!TAR!" del /f /q "!TAR!" >nul 2>&1
+if exist "!TRANSFER_LOCK!" del /f /q "!TRANSFER_LOCK!" >nul 2>&1
 if !LOAD_ERR! neq 0 (
     echo %RED%[ERROR]%RESET% docker load en cronos fallo. Ver: !DEPLOY_LOG!
     exit /b 1
@@ -460,13 +508,9 @@ REM Elimina TODAS las imagenes no usadas por ningun contenedor en cronos + build
 call :useRemoteContext >nul 2>&1
 if errorlevel 1 exit /b 0
 echo %CYAN%[CRONOS CLEANUP]%RESET% Eliminando imagenes sin uso en cronos...
-for /f "delims=" %%r in ('docker --context %DOCKER_CTX% image prune -a -f 2^>^&1') do (
-    if not "%%r"=="" echo %GREEN%  %%r%RESET%
-)
+docker --context %DOCKER_CTX% image prune -a -f
 echo %CYAN%[CRONOS CLEANUP]%RESET% Eliminando build cache en cronos...
-for /f "tokens=1,2 delims=	" %%a in ('docker --context %DOCKER_CTX% builder prune -f 2^>^&1 ^| findstr /i "Total"') do (
-    echo %GREEN%  Total liberado: %%b%RESET%
-)
+docker --context %DOCKER_CTX% builder prune -f
 exit /b 0
 
 :retagLegacyImagesOnCronos
