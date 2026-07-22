@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    tools:context=".Activities.Asistencia.AsistenciaComedorActivity">
+
+    <!-- Barra de titulo del SIGRE -->
+    <LinearLayout style="@style/TitleBar"
+        android:id="@+id/llSegmento01"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView style="@style/TitleBarLogo"
+            android:contentDescription="@string/lblDescripcionLogo"
+            android:src="@drawable/title_logo"
+            android:layout_width="120dp"/>
+
+        <ImageView style="@style/TitleBarSeparator"
+            android:contentDescription="@string/lblSeparador"/>
+
+        <TextView style="@style/TitleBarText" />
+
+        <TextView
+            android:id="@+id/tvOrigen"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Org [XX]"
+            android:textColor="@android:color/white"
+            android:textSize="20sp"
+            android:fontFamily="Arial"
+            android:gravity="center_vertical" />
+
+        <ImageButton style="@style/TitleBarAction"
+            android:contentDescription="@string/lblDescripcionAbout"
+            android:src="@drawable/title_about"
+            android:id="@+id/ibAbout"/>
+
+        <ImageButton style="@style/TitleBarAction"
+            android:contentDescription="@string/lblDescripcionSearch"
+            android:src="@drawable/title_search"/>
+    </LinearLayout>
+
+    <!-- ScrollView principal para todo el contenido -->
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@+id/llSegmento01"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <!-- Info Empresa encima del reloj (pequeña) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="4dp"
+                android:background="#E3F2FD"
+                android:layout_marginBottom="4dp">
+
+                <ImageView
+                    android:id="@+id/ivLogoEmpresa"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="6dp"
+                    android:scaleType="fitCenter"
+                    android:background="@android:color/white"
+                    android:padding="2dp"
+                    android:contentDescription="Logo Empresa"/>
+
+                <TextView
+                    android:id="@+id/tvNombreEmpresa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EMPRESA SAC"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="#1976D2"
+                    android:maxLines="1"
+                    android:ellipsize="end"/>
+            </LinearLayout>
+
+            <!-- Card de Reloj Digital Sincronizado con Servidor -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="6dp"
+                app:cardElevation="3dp"
+                android:background="#FFFFFF">
+
+                <LinearLayout
+                    android:id="@+id/llSegmento02"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp"
+                    android:background="#FFFFFF">
+
+                    <!-- Título con indicador de conexión -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="4dp">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:src="@android:drawable/ic_menu_recent_history"
+                            android:tint="#1976D2"
+                            android:layout_marginEnd="6dp"
+                            tools:ignore="ContentDescription" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="RELOJ DEL SERVIDOR"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:textColor="#757575"
+                            android:letterSpacing="0.05"/>
+
+                        <!-- Indicador de conexión -->
+                        <ImageView
+                            android:id="@+id/ivConnectionStatus"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:src="@android:drawable/presence_online"
+                            android:tint="#4CAF50"
+                            tools:ignore="ContentDescription" />
+                    </LinearLayout>
+
+                    <!-- Reloj Digital - Fecha y Hora en una sola línea -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tvServerDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="31/10/2025"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#212121"
+                            android:fontFamily="monospace"
+                            android:layout_marginEnd="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvServerTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="11:13:10 AM"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#1976D2"
+                            android:fontFamily="monospace"/>
+                    </LinearLayout>
+
+                    <!-- Texto informativo: fuente de la hora -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Hora servidor DB Oracle 11gR2"
+                        android:textSize="10sp"
+                        android:textColor="#BDBDBD"
+                        android:gravity="end"
+                        android:layout_marginTop="1dp"
+                        android:layout_marginEnd="6dp"
+                        android:alpha="0.7"
+                        android:fontFamily="sans-serif-light"
+                        android:letterSpacing="0.02"/>
+
+                    <!-- Campos ocultos para compatibilidad -->
+                    <EditText
+                        android:id="@+id/etFechaMovimiento"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone"/>
+
+                    <ImageButton
+                        android:id="@+id/ibFechaMovimiento"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone"
+                        tools:ignore="ContentDescription" />
+
+                    <EditText
+                        android:id="@+id/etHoraMovimiento"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone"/>
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Card de Tipo de Movimiento (NUEVO DISEÑO) -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:id="@+id/llSegmento03"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/tvTipoMovimiento"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⏱️ Tipo de Movimiento"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#424242"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Botón para seleccionar tipo de movimiento -->
+                    <Button
+                        android:id="@+id/btnSeleccionarTipoMovimiento"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="📋 SELECCIONAR TIPO DE MOVIMIENTO"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:textColor="@android:color/white"
+                        android:background="@drawable/boton_rectangular"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- TextView para mostrar la selección actual -->
+                    <LinearLayout
+                        android:id="@+id/llTipoMovimientoSeleccionado"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:padding="12dp"
+                        android:background="#E3F2FD"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_info_details"
+                            android:tint="#1976D2"
+                            android:layout_marginEnd="8dp"
+                            android:contentDescription="Info"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tipo seleccionado:"
+                                android:textSize="12sp"
+                                android:textColor="#757575"/>
+
+                            <TextView
+                                android:id="@+id/tvTipoMovimientoSeleccionado"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Ninguno"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="#1976D2"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Botones de Acción -->
+                    <LinearLayout
+                        android:id="@+id/llSegmento04"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:layout_marginTop="12dp">
+
+                        <Button
+                            android:id="@+id/btnRegistrar"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:text="COMENZAR REGISTRO"
+                            android:textStyle="bold"
+                            android:paddingTop="14dp"
+                            android:paddingBottom="14dp"
+                            android:layout_marginEnd="8dp"
+                            android:textColor="@android:color/white"
+                            android:background="@drawable/boton_rectangular"/>
+
+                        <Button
+                            android:id="@+id/btnSalir"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="SALIR"
+                            android:textStyle="bold"
+                            android:paddingStart="24dp"
+                            android:paddingEnd="24dp"
+                            android:paddingTop="14dp"
+                            android:paddingBottom="14dp"
+                            android:textColor="@android:color/white"
+                            android:background="@drawable/boton_rectangular"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Card de Lectura PDA (DESTACADO - OPTIMIZADO PARA PDA) -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="#1976D2">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <!-- Título -->
+                    <TextView
+                        android:id="@+id/tvTexto01"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="📱 LECTURA PDA - ESCANEAR QR"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        android:layout_marginBottom="8dp"/>
+
+                    <!-- Input de Lectura -->
+                    <LinearLayout
+                        android:id="@+id/llSegmento05"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:background="@android:color/white"
+                        android:padding="6dp"
+                        android:elevation="4dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📷"
+                            android:textSize="24sp"
+                            android:layout_marginEnd="6dp"/>
+
+                        <EditText
+                            android:id="@+id/etLecturaPDA"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:singleLine="true"
+                            android:hint="Listo para escanear..."
+                            android:textColorHint="#9E9E9E"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="#212121"
+                            android:background="@null"
+                            android:inputType="textLongMessage"
+                            android:importantForAutofill="no"/>
+
+                        <Button
+                            android:id="@+id/btnLeerCodigo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="LEER"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:layout_marginStart="4dp"
+                            android:textColor="@android:color/white"
+                            android:background="@drawable/boton_rectangular"/>
+                    </LinearLayout>
+
+                    <!-- Instrucciones -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="✓ El cursor está listo para recibir la lectura del escáner"
+                        android:textSize="11sp"
+                        android:textStyle="italic"
+                        android:textColor="#E3F2FD"
+                        android:layout_marginTop="6dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Card de Tabla de Asistencia -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Título de la Tabla -->
+                    <TextView
+                        android:id="@+id/tvTituloTablaAsistencia"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="📋 CONSULTA DE ASISTENCIA (0)"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:padding="16dp"
+                        android:background="#1976D2"
+                        android:textColor="@android:color/white"/>
+
+                    <!-- NestedScrollView para la tabla (VERTICAL) -->
+                    <androidx.core.widget.NestedScrollView
+                        android:id="@+id/nestedScrollViewAsistencia"
+                        android:layout_width="match_parent"
+                        android:layout_height="400dp"
+                        android:background="#FAFAFA"
+                        android:scrollbars="vertical"
+                        android:fillViewport="false">
+
+                        <HorizontalScrollView
+                            android:id="@+id/horizontalScrollView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="horizontal"
+                            android:fillViewport="false">
+
+                            <TableLayout
+                                android:id="@+id/tblAsistencia"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:padding="8dp"
+                                android:stretchColumns="1">
+                            </TableLayout>
+                        </HorizontalScrollView>
+                    </androidx.core.widget.NestedScrollView>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

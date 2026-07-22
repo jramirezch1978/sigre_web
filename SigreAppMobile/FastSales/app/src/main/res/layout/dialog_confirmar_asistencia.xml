@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="16dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="6dp">
+
+    <RelativeLayout
+        android:id="@+id/llDialogContenedor"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F5F5F5">
+
+        <!-- Banner de Estado (CESADO/INACTIVO) - Fijo arriba -->
+        <LinearLayout
+            android:id="@+id/llBannerEstado"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:orientation="horizontal"
+            android:background="#F44336"
+            android:padding="8dp"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@android:drawable/ic_dialog_alert"
+                android:layout_marginEnd="6dp"
+                android:tint="@android:color/white"
+                android:contentDescription="Advertencia"/>
+
+            <TextView
+                android:id="@+id/tvEstadoTrabajador"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TRABAJADOR CESADO"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"/>
+
+        </LinearLayout>
+
+        <!-- Header - Fijo debajo del banner -->
+        <LinearLayout
+            android:id="@+id/llHeaderAsistencia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/llBannerEstado"
+            android:background="#1976D2"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp">
+
+            <TextView
+                android:id="@+id/tvTitulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Confirmar Asistencia"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Verifique los datos del trabajador antes de registrar"
+                android:textColor="#E3F2FD"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Foto del Trabajador - Fija -->
+        <ImageView
+            android:id="@+id/ivFotoTrabajador"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_below="@id/llHeaderAsistencia"
+            android:scaleType="fitCenter"
+            android:background="@android:color/darker_gray"
+            android:padding="6dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="Foto del trabajador"/>
+
+        <!-- Empresa - Logo y Nombre - Fijo -->
+        <LinearLayout
+            android:id="@+id/llEmpresaInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ivFotoTrabajador"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="10dp"
+            android:background="#EEEEEE">
+
+            <ImageView
+                android:id="@+id/ivLogoEmpresaTrabajador"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="8dp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/white"
+                android:padding="3dp"
+                android:contentDescription="Logo Empresa"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Empresa:"
+                    android:textSize="10sp"
+                    android:textColor="#757575"/>
+
+                <TextView
+                    android:id="@+id/tvNombreEmpresaTrabajador"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EMPRESA SAC"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="#212121"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ScrollView SOLO para datos personales (sin márgenes) -->
+        <ScrollView
+            android:id="@+id/scrollViewDatos"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/llEmpresaInfo"
+            android:layout_above="@id/llBotones"
+            android:fillViewport="false"
+            android:scrollbars="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
+
+                <!-- Código del Trabajador -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="CÓDIGO:"
+                    android:textStyle="bold"
+                    android:textColor="#1565C0"
+                    android:textSize="13sp"
+                    android:letterSpacing="0.05"/>
+
+                <TextView
+                    android:id="@+id/tvCodigoTrabajador"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="20000001"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:textStyle="bold"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="10dp"/>
+
+                <!-- Apellidos -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="APELLIDOS:"
+                    android:textStyle="bold"
+                    android:textColor="#1565C0"
+                    android:textSize="13sp"
+                    android:letterSpacing="0.05"/>
+
+                <TextView
+                    android:id="@+id/tvApellidos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ZAMORA LAGOS"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:textStyle="bold"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="10dp"/>
+
+                <!-- Nombres -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="NOMBRE(S):"
+                    android:textStyle="bold"
+                    android:textColor="#1565C0"
+                    android:textSize="13sp"
+                    android:letterSpacing="0.05"/>
+
+                <TextView
+                    android:id="@+id/tvNombres"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="VICTOR"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:textStyle="bold"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="10dp"/>
+
+                <!-- Identificación (Tipo + Número en una sola línea) -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="IDENTIFICACIÓN:"
+                    android:textStyle="bold"
+                    android:textColor="#1565C0"
+                    android:textSize="13sp"
+                    android:letterSpacing="0.05"/>
+
+                <TextView
+                    android:id="@+id/tvIdentificacion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="DNI 12345678"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="10dp"/>
+
+                <!-- Ocultos para compatibilidad -->
+                <TextView
+                    android:id="@+id/tvTipoDocumento"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/tvNumeroDocumento"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"/>
+
+                <!-- Fecha de Nacimiento -->
+                <TextView
+                    android:id="@+id/tvLabelFechaNacimiento"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="FECHA DE NACIMIENTO:"
+                    android:textStyle="bold"
+                    android:textColor="#1565C0"
+                    android:textSize="13sp"
+                    android:letterSpacing="0.05"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/tvFechaNacimiento"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="12/11/1990"
+                    android:textSize="16sp"
+                    android:textColor="#212121"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="10dp"
+                    android:visibility="gone"/>
+
+                <!-- Fecha de Cese -->
+                <TextView
+                    android:id="@+id/tvLabelFechaCese"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="FECHA DE CESE:"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="#D32F2F"
+                    android:letterSpacing="0.05"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/tvFechaCese"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="01/01/2024"
+                    android:textSize="16sp"
+                    android:textColor="#D32F2F"
+                    android:textStyle="bold"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="10dp"
+                    android:visibility="gone"/>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <LinearLayout
+            android:id="@+id/llBotones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@android:color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <Button
+                android:id="@+id/btnCancelar"
+                style="@style/PedidoButton.Muted"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="Cancelar" />
+
+            <Button
+                android:id="@+id/btnConfirmar"
+                style="@style/PedidoButton.Success"
+                android:layout_width="0dp"
+                android:layout_marginEnd="0dp"
+                android:layout_weight="1"
+                android:text="Confirmar" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

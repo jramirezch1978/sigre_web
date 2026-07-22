@@ -1,0 +1,245 @@
+apply plugin: 'com.android.application'
+
+// Función para leer la versión actual
+def getVersionInfo() {
+    def versionPropsFile = file('version.properties')
+    
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        
+        def code = versionProps['VERSION_CODE'].toInteger()
+        def major = versionProps['VERSION_MAJOR'].toInteger()
+        def minor = versionProps['VERSION_MINOR'].toInteger()
+        def patch = versionProps['VERSION_PATCH'].toInteger()
+        
+        return [
+            versionCode: code,
+            versionName: "${major}.${minor}.${patch}"
+        ]
+    } else {
+        // Crear archivo si no existe
+        def versionProps = new Properties()
+        versionProps['VERSION_CODE'] = '267'
+        versionProps['VERSION_MAJOR'] = '2'
+        versionProps['VERSION_MINOR'] = '67'
+        versionProps['VERSION_PATCH'] = '00'
+        versionProps.store(versionPropsFile.newWriter(), null)
+        
+        return [
+            versionCode: 267,
+            versionName: "2.67.00"
+        ]
+    }
+}
+
+// Función para incrementar la versión
+def incrementVersion() {
+    def versionPropsFile = file('version.properties')
+    def Properties versionProps = new Properties()
+    versionProps.load(new FileInputStream(versionPropsFile))
+    
+    def code = versionProps['VERSION_CODE'].toInteger()
+    def major = versionProps['VERSION_MAJOR'].toInteger()
+    def minor = versionProps['VERSION_MINOR'].toInteger()
+    def patch = versionProps['VERSION_PATCH'].toInteger()
+    
+    // Incrementar versión
+    code++
+    minor++
+    
+    // Guardar nueva versión
+    versionProps['VERSION_CODE'] = code.toString()
+    versionProps['VERSION_MINOR'] = minor.toString()
+    versionProps.store(versionPropsFile.newWriter(), null)
+    
+    println "✅ Versión incrementada: ${major}.${minor}.${patch} (código: ${code})"
+}
+
+// Obtener versión actual (sin incrementar)
+def versionInfo = getVersionInfo()
+
+android {
+    signingConfigs {
+        FastSales {
+            keyAlias 'FastSales'
+            keyPassword 'fastsales'
+            storeFile file('../Signed_APK')
+            storePassword 'fastsales'
+        }
+    }
+    compileSdk 35
+    defaultConfig {
+        applicationId "pe.com.sytco.fastsales"
+        multiDexEnabled true
+        minSdk 21
+        targetSdk 35
+        versionName versionInfo.versionName
+        versionCode versionInfo.versionCode
+        vectorDrawables.useSupportLibrary = true
+        
+        // Cambiar nombre de salida (sin versión en el nombre)
+        setProperty("archivesBaseName", "AppSIGRE")
+    }
+    buildTypes {
+        release {
+            // R8: Play Console — optimización de memoria/rendimiento
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.FastSales
+        }
+        debug {
+            debuggable false
+        }
+    }
+    
+    // Renombrar archivos de salida (sin versión en el nombre del archivo)
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            if (variant.buildType.name == 'release') {
+                outputFileName = "AppSIGRE.apk"
+            }
+        }
+    }
+    
+    lintOptions {
+        disable "ResourceType"
+        checkReleaseBuilds false
+        disable 'MissingTranslation'
+        abortOnError false
+    }
+    productFlavors {
+    }
+    namespace 'pe.com.sytco.fastsales'
+    buildFeatures {
+        viewBinding true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+buildscript {
+    repositories {
+        // Gradle 4.1 and higher include support for Google's Maven repo using
+        // the google() method. And you need to include this repo to download
+        // Android plugin 3.0.0 or higher.
+        jcenter()
+        google()
+        mavenCentral()
+
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.6.0'
+        classpath 'com.jakewharton:butterknife:10.0.0'
+        classpath 'com.google.gms:google-services:4.3.10'
+
+    }
+}
+
+// ksoap2.jar trae org.xmlpull que choca con el Android SDK en R8.
+// Se genera un jar sin esas clases (Android ya provee XmlPullParser).
+tasks.register('stripKsoapJar', Jar) {
+    from(zipTree("$projectDir/libs/ksoap2.jar")) {
+        exclude 'org/xmlpull/**'
+    }
+    archiveFileName.set('ksoap2-noxmlpull.jar')
+    destinationDirectory.set(layout.buildDirectory.dir('stripped-libs'))
+}
+tasks.named('preBuild').configure { dependsOn('stripKsoapJar') }
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'], exclude: ['ksoap2.jar'])
+    implementation files("$buildDir/stripped-libs/ksoap2-noxmlpull.jar")
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+    implementation 'com.google.android.material:material:1.10.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.activity:activity:1.9.3'
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.drawerlayout:drawerlayout:1.2.0'
+    implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    testImplementation 'junit:junit:4.13.2'
+    implementation 'com.android.support.constraint:constraint-layout:28.0.0'
+
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
+
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.weiwangcn.betterspinner:library-material:1.1.0'
+    //implementation 'org.jetbrains:annotations-java5:15.0'
+
+    implementation 'com.github.d-max:spots-dialog:0.7@aar'
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+    implementation 'com.google.android.play:app-update:2.1.0'
+    implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
+}
+
+// Directorio de destino para los archivos generados (ruta relativa desde app/)
+def outputDir = file('../../APK')
+
+// Tarea para copiar el APK generado
+tasks.register('copyApkToOutput', Copy) {
+    from("${buildDir}/outputs/apk/release") {
+        include '**/*.apk'
+    }
+    into outputDir
+    rename { filename ->
+        'AppSIGRE.apk'
+    }
+    
+    doFirst {
+        // Crear directorio si no existe
+        outputDir.mkdirs()
+        println "Copiando APK a: ${outputDir.absolutePath}"
+    }
+    
+    doLast {
+        println "✅ APK copiado exitosamente como AppSIGRE.apk"
+    }
+}
+
+// Tarea para copiar el AAB generado
+tasks.register('copyAabToOutput', Copy) {
+    from("${buildDir}/outputs/bundle/release") {
+        include '**/*.aab'
+    }
+    into outputDir
+    rename { filename ->
+        'AppSIGRE.aab'
+    }
+    
+    doFirst {
+        outputDir.mkdirs()
+        println "Copiando AAB a: ${outputDir.absolutePath}"
+    }
+    
+    doLast {
+        println "✅ AAB copiado exitosamente como AppSIGRE.aab"
+    }
+}
+
+// Tarea para incrementar la versión
+tasks.register('incrementVersionTask') {
+    doLast {
+        incrementVersion()
+    }
+}
+
+// Hacer que assembleRelease ejecute copyApkToOutput y luego incremente la versión
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleRelease') {
+        task.finalizedBy('copyApkToOutput')
+        task.finalizedBy('incrementVersionTask')
+    }
+    if (task.name == 'bundleRelease') {
+        task.finalizedBy('copyAabToOutput')
+        // Solo incrementar si no se ejecutó assembleRelease antes
+        if (!gradle.taskGraph.hasTask(':app:assembleRelease')) {
+            task.finalizedBy('incrementVersionTask')
+        }
+    }
+}

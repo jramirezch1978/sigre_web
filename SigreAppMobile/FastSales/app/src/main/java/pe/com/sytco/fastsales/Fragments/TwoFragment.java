@@ -1,0 +1,35 @@
+package pe.com.sytco.fastsales.Fragments;
+
+
+/**
+ * Created by jramirez on 23/04/2016.
+ */
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.fragment.app.Fragment;
+
+import pe.com.sytco.fastsales.R;
+
+public class TwoFragment extends Fragment {
+
+    public TwoFragment() {
+        // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_two, container, false);
+    }
+
+}
