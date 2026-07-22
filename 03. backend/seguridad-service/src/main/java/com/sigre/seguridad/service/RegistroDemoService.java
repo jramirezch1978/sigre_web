@@ -14,6 +14,7 @@ import com.sigre.seguridad.dto.RegistroDemoRequest.UsuarioDemo;
 import com.sigre.seguridad.dto.seguridad.UbigeoLookupDto;
 import com.sigre.seguridad.repository.EmpresaMasterRepository;
 import com.sigre.seguridad.repository.UsuarioRepository;
+import com.sigre.seguridad.support.LogoCodec;
 import com.sigre.common.exception.BusinessException;
 
 import java.util.ArrayList;
@@ -88,6 +89,8 @@ public class RegistroDemoService {
             }
         }
 
+        byte[] logoBytes = LogoCodec.decodeRequired(emp.getLogo());
+
         Long empresaCodigo = empresaRepository.nextEmpresaCodigo();
         String codigoEmpresa = String.format("DEMO%04d", empresaCodigo);
         String dbName = DEMO_DB_PREFIX + empresaCodigo;
@@ -96,16 +99,16 @@ public class RegistroDemoService {
         Long empresaId = jdbcTemplate.queryForObject("""
                 INSERT INTO master.empresa (codigo, ruc, razon_social, nombre_comercial,
                     direccion_fiscal, ubigeo, distrito_id, representante_legal, dni_representante_legal,
-                    correo_contacto, telefono_contacto,
+                    correo_contacto, telefono_contacto, logo,
                     db_host, db_port, db_name, db_user, db_password_encrypted,
                     flag_demo, flag_estado)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '1', '1')
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '1', '1')
                 RETURNING id
                 """, Long.class,
                 codigoEmpresa, emp.getRuc(), emp.getRazonSocial(), emp.getNombreComercial(),
                 emp.getDireccionFiscal(), emp.getUbigeo(), distritoId,
                 emp.getRepresentanteLegal(), emp.getDniRepresentanteLegal(),
-                emp.getCorreoContacto(), emp.getTelefonoContacto(),
+                emp.getCorreoContacto(), emp.getTelefonoContacto(), logoBytes,
                 defaultDbHost, defaultDbPort, dbName, DEMO_DB_USER, DEMO_DB_PASS_ENCRYPTED);
 
         List<Long> userIds = new ArrayList<>();

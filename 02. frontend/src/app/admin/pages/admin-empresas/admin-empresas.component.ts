@@ -67,6 +67,9 @@ export class AdminEmpresasComponent extends AdminTablaPageBase<EmpresaAdminDto> 
 
   enviandoCorreoBienvenidaId: number | null = null;
 
+  logoPreviewNueva: string | null = null;
+  logoErrorNueva: string | null = null;
+
   ngOnInit(): void {
     this.formNueva = this.fb.group({
       sigla: ['', [Validators.required, Validators.maxLength(50)]],
@@ -79,6 +82,7 @@ export class AdminEmpresasComponent extends AdminTablaPageBase<EmpresaAdminDto> 
       distritoId: [null],
       represLegal: ['', [Validators.maxLength(200)]],
       dniRepresLegal: ['', [Validators.maxLength(20)]],
+      logo: [null, [Validators.required]],
     });
     this.formEditar = this.fb.group({
       razonSocial: ['', [Validators.required, Validators.maxLength(200)]],
@@ -131,13 +135,43 @@ export class AdminEmpresasComponent extends AdminTablaPageBase<EmpresaAdminDto> 
       distritoId: null,
       represLegal: '',
       dniRepresLegal: '',
+      logo: null,
     });
     this.selectedDepartamentoNueva = null;
     this.selectedProvinciaNueva = null;
     this.provinciasNueva = [];
     this.distritosNueva = [];
+    this.logoPreviewNueva = null;
+    this.logoErrorNueva = null;
     this.guardandoNueva = false;
     this.mostrandoNueva = true;
+  }
+
+  onLogoSeleccionadoNueva(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.logoErrorNueva = null;
+    if (!file) {
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      this.logoErrorNueva = 'El logo debe ser una imagen (PNG, JPG, etc.).';
+      input.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.logoErrorNueva = 'El logo no debe superar 5 MB.';
+      input.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      this.logoPreviewNueva = base64;
+      this.formNueva.get('logo')?.setValue(base64);
+      this.formNueva.get('logo')?.markAsTouched();
+    };
+    reader.readAsDataURL(file);
   }
 
   cerrarNueva(): void {
@@ -176,6 +210,7 @@ export class AdminEmpresasComponent extends AdminTablaPageBase<EmpresaAdminDto> 
       celular: this.trimOrUndef(v.celular),
       represLegal: this.trimOrUndef(v.represLegal),
       dniRepresLegal: this.trimOrUndef(v.dniRepresLegal),
+      logo: v.logo,
       flagReplicacion: '1',
       flagCntrlCd: '0',
     }).subscribe({

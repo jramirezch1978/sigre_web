@@ -103,6 +103,7 @@ public class ProvisionEmpresaRequest {
     @JsonAlias({"CIU_COD_DISTR"})
     private String ciuCodDistr;
 
+    @NotBlank(message = "El logo de la empresa es obligatorio")
     @JsonAlias({"LOGO"})
     private String logo;
 

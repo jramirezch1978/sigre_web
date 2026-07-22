@@ -32,6 +32,7 @@ interface RegistroDemoRequest {
     correoContacto: string;
     telefonoContacto: string;
     correoResponsableLicencia: string;
+    logo: string;
   };
   adminUser: {
     username: string;
@@ -90,7 +91,11 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
     correoResponsableLicencia: '',
     estadoSunat: '',
     condicionSunat: '',
+    logo: '',
   };
+
+  logoPreview: string | null = null;
+  logoError = '';
 
   adminUser: UsuarioDemo = {
     username: '',
@@ -211,6 +216,32 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
     this.empresa.dniRepresentanteLegal = (value ?? '').replace(/\D/g, '').slice(0, 8);
   }
 
+  onLogoSeleccionado(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.logoError = '';
+    if (!file) {
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      this.logoError = 'El logo debe ser una imagen (PNG, JPG, etc.).';
+      input.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.logoError = 'El logo no debe superar 5 MB.';
+      input.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      this.logoPreview = base64;
+      this.empresa.logo = base64;
+    };
+    reader.readAsDataURL(file);
+  }
+
   private consultarRucSunat(ruc: string): void {
     this.rucConsultaSub?.unsubscribe();
     this.consultandoRuc = true;
@@ -303,6 +334,10 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
       this.error = 'Ingrese un correo de contacto válido.';
       return false;
     }
+    if (!this.empresa.logo) {
+      this.error = 'Debe subir el logo de la empresa.';
+      return false;
+    }
     return true;
   }
 
@@ -351,6 +386,7 @@ export class ErpRegistroDemoComponent implements OnInit, OnDestroy {
         correoContacto: this.empresa.correoContacto,
         telefonoContacto: this.empresa.telefonoContacto,
         correoResponsableLicencia: this.empresa.correoResponsableLicencia,
+        logo: this.empresa.logo,
       },
       adminUser: { ...this.adminUser },
       usuariosAdicionales: this.usuariosAdicionales.filter(u => u.username.trim()),

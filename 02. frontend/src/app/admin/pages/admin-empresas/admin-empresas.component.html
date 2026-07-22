@@ -153,6 +153,22 @@
             </ion-item>
           </div>
 
+          <div class="form-row">
+            <div class="form-field full-row">
+              <label class="form-field__label">Logo de la empresa <span class="req">*</span></label>
+              <input type="file" accept="image/*" (change)="onLogoSeleccionadoNueva($event)" />
+              @if (logoPreviewNueva) {
+                <img [src]="logoPreviewNueva" alt="Vista previa del logo" class="logo-preview" />
+              }
+              @if (logoErrorNueva) {
+                <p class="field-error">{{ logoErrorNueva }}</p>
+              }
+              @if (!logoErrorNueva && formNueva.get('logo')?.touched && formNueva.get('logo')?.invalid) {
+                <p class="field-error">El logo de la empresa es obligatorio.</p>
+              }
+            </div>
+          </div>
+
           <div class="form-panel">
             <h4 class="form-panel__title">
               <ion-icon name="person-outline"></ion-icon>

@@ -59,6 +59,10 @@ public class RegistroDemoRequest {
         @Size(max = 30)
         private String telefonoContacto;
 
+        /** Logo de la empresa en base64 (con o sin prefijo data-URL). Obligatorio. */
+        @NotBlank(message = "El logo de la empresa es obligatorio")
+        private String logo;
+
         /** Correo del responsable de la licencia (avisos de renovación). Si va vacío se usa el de contacto. */
         @Size(max = 150)
         private String correoResponsableLicencia;

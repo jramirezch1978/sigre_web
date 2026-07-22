@@ -24,6 +24,7 @@ import com.sigre.seguridad.dto.RecreateEmpresaResponse;
 import com.sigre.seguridad.entity.master.EmpresaMaster;
 import com.sigre.seguridad.dto.seguridad.UbigeoResumenDto;
 import com.sigre.seguridad.repository.EmpresaMasterRepository;
+import com.sigre.seguridad.support.LogoCodec;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.util.AesEncryptor;
 
@@ -672,6 +673,7 @@ public class TenantProvisioningService {
                 .dniRepresentanteLegal(trimOrNull(req.getDniRepresLegal()))
                 .correoContacto(trimOrNull(firstNonBlank(req.getCorreoContacto(), req.getEmail())))
                 .telefonoContacto(trimOrNull(telefono))
+                .logo(LogoCodec.decodeRequired(req.getLogo()))
                 .dbHost(host)
                 .dbPort(port)
                 .dbName(dbName)
