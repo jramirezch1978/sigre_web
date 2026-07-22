@@ -25,13 +25,13 @@ import com.sigre.seguridad.entity.master.EmpresaMaster;
 import com.sigre.seguridad.dto.seguridad.UbigeoResumenDto;
 import com.sigre.seguridad.repository.EmpresaMasterRepository;
 import com.sigre.seguridad.support.LogoCodec;
+import com.sigre.seguridad.support.TenantSlug;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.util.AesEncryptor;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.text.Normalizer;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -856,20 +856,7 @@ public class TenantProvisioningService {
     }
 
     private String resolveTenantSlug(ProvisionEmpresaRequest req) {
-        return sanitizeSlug(req.getSigla());
-    }
-
-    private static String sanitizeSlug(String raw) {
-        String s = Normalizer.normalize(raw.trim(), Normalizer.Form.NFD).replaceAll("\\p{M}", "");
-        s = s.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "_");
-        s = s.replaceAll("_+", "_").replaceAll("^_+|_+$", "");
-        if (s.isEmpty()) {
-            throw new BusinessException("La sigla no produce un identificador de BD válido tras normalizar", HttpStatus.BAD_REQUEST, "TENANT_SLUG_VACIO");
-        }
-        if (s.length() > 44) {
-            s = s.substring(0, 44).replaceAll("_+$", "");
-        }
-        return s;
+        return TenantSlug.sanitize(req.getSigla());
     }
 
     private static String firstNonBlank(String... values) {

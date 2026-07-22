@@ -15,6 +15,7 @@ import com.sigre.seguridad.dto.seguridad.UbigeoLookupDto;
 import com.sigre.seguridad.repository.EmpresaMasterRepository;
 import com.sigre.seguridad.repository.UsuarioRepository;
 import com.sigre.seguridad.support.LogoCodec;
+import com.sigre.seguridad.support.TenantSlug;
 import com.sigre.common.exception.BusinessException;
 
 import java.util.ArrayList;
@@ -27,9 +28,10 @@ import java.util.Map;
 public class RegistroDemoService {
 
     private static final int MAX_USUARIOS_DEMO = 5;
-    private static final String DEMO_DB_PREFIX = "sigre_demo_";
-    private static final String DEMO_DB_USER = "sigre_demo";
-    private static final String DEMO_DB_PASS_ENCRYPTED = "DEMO_NO_DB";
+    // Placeholders hasta que provisionarBaseDatosDemo() (llamado por el controller tras el alta)
+    // cree el rol Postgres real y sobreescriba db_user/db_password_encrypted.
+    private static final String DB_USER_PENDIENTE = "pendiente_provision";
+    private static final String DB_PASS_ENCRYPTED_PENDIENTE = "PENDIENTE_PROVISION";
 
     // Mismo default que TenantProvisioningService (host real del contenedor Postgres, no
     // "localhost" hardcodeado) — antes este servicio dejaba el host de la fila de master.empresa
@@ -40,6 +42,14 @@ public class RegistroDemoService {
 
     @Value("${app.tenant.default-db-port:5432}")
     private int defaultDbPort;
+
+    // Mismo prefijo/convencion que TenantProvisioningService (sigre_emp_<sigla>): antes el
+    // registro demo usaba "sigre_demo_<correlativo>", una BD que no se podia asociar a la
+    // empresa por su nombre y que quedaba "pegada" para siempre si el cliente pasaba a ser
+    // real (ver ADGEMINCO SAC / DEMO0011, resuelto manualmente porque ya no se puede renombrar
+    // una BD fisica existente). Las altas demo NUEVAS ya nacen con el nombre definitivo.
+    @Value("${app.tenant.db-name-prefix:sigre_emp_}")
+    private String dbNamePrefix;
 
     private final JdbcTemplate jdbcTemplate;
     private final PasswordEncoder passwordEncoder;
@@ -91,9 +101,13 @@ public class RegistroDemoService {
 
         byte[] logoBytes = LogoCodec.decodeRequired(emp.getLogo());
 
+        // Mismo correlativo T0000001, T0000002... que el alta normal (TenantProvisioningService):
+        // antes el registro demo usaba su propio formato "DEMO%04d" sobre el MISMO correlativo
+        // compartido (master.seq_empresa_codigo), asi que el numero ya continuaba bien - solo el
+        // formato del codigo (y el nombre de BD) divergia del resto de empresas.
         Long empresaCodigo = empresaRepository.nextEmpresaCodigo();
-        String codigoEmpresa = String.format("DEMO%04d", empresaCodigo);
-        String dbName = DEMO_DB_PREFIX + empresaCodigo;
+        String codigoEmpresa = String.format("T%07d", empresaCodigo);
+        String dbName = generarNombreBdUnico(emp);
         Long distritoId = resolverDistritoId(emp);
 
         Long empresaId = jdbcTemplate.queryForObject("""
@@ -109,7 +123,7 @@ public class RegistroDemoService {
                 emp.getDireccionFiscal(), emp.getUbigeo(), distritoId,
                 emp.getRepresentanteLegal(), emp.getDniRepresentanteLegal(),
                 emp.getCorreoContacto(), emp.getTelefonoContacto(), logoBytes,
-                defaultDbHost, defaultDbPort, dbName, DEMO_DB_USER, DEMO_DB_PASS_ENCRYPTED);
+                defaultDbHost, defaultDbPort, dbName, DB_USER_PENDIENTE, DB_PASS_ENCRYPTED_PENDIENTE);
 
         List<Long> userIds = new ArrayList<>();
 
@@ -255,6 +269,25 @@ public class RegistroDemoService {
         if (n == null || n == 0) {
             throw new BusinessException("No tiene acceso a esta empresa.", HttpStatus.FORBIDDEN);
         }
+    }
+
+    /**
+     * Deriva el slug de BD (sigre_emp_&lt;slug&gt;) del nombre comercial (o razon social si no hay
+     * comercial) — el registro demo publico no pide una "sigla" explicita como el alta admin.
+     * Ante colision (nombres parecidos entre distintas altas demo) agrega un sufijo numerico.
+     */
+    private String generarNombreBdUnico(EmpresaDemo emp) {
+        String base = emp.getNombreComercial() != null && !emp.getNombreComercial().isBlank()
+                ? emp.getNombreComercial()
+                : emp.getRazonSocial();
+        String slug = TenantSlug.sanitize(base);
+        String dbName = dbNamePrefix + slug;
+        int sufijo = 2;
+        while (empresaRepository.existsByDbName(dbName)) {
+            dbName = dbNamePrefix + slug + "_" + sufijo;
+            sufijo++;
+        }
+        return dbName;
     }
 
     private Long resolverDistritoId(EmpresaDemo emp) {

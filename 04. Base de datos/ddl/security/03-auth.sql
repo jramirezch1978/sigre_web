@@ -327,6 +327,19 @@ CREATE TABLE auth.dispositivo (
 
 CREATE INDEX ix_dispositivo_nro_registro ON auth.dispositivo (nro_registro);
 
+-- Historial de inicios de sesion por dispositivo (equivalente a registerLogin de FastSales):
+-- auth.dispositivo.fec_ultimo_login solo guarda el ULTIMO login: esta tabla guarda TODOS,
+-- uno por fila, para poder auditar cuando y con que usuario se conecto cada equipo.
+CREATE TABLE auth.dispositivo_login (
+    id BIGSERIAL PRIMARY KEY,
+    dispositivo_id BIGINT NOT NULL REFERENCES auth.dispositivo(id),
+    usuario_id BIGINT REFERENCES auth.usuario(id),
+    fec_login TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX ix_dispositivo_login_dispositivo ON auth.dispositivo_login (dispositivo_id, fec_login DESC);
+CREATE INDEX ix_dispositivo_login_usuario ON auth.dispositivo_login (usuario_id);
+
 CREATE TABLE auth.codigo_recuperacion (
     id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL REFERENCES auth.usuario(id),
