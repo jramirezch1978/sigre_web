@@ -40,15 +40,20 @@ public class DispositivoService {
             return existentes.get(0);
         }
 
+        // nro_registro es UNIQUE NOT NULL: se inserta un temporal unico por device_id y
+        // luego se reemplaza por DM##########. Antes faltaba un placeholder (8 columnas /
+        // 7 valores) y Postgres lanzaba DataIntegrityViolation → mensaje generico de
+        // "conflicto con los datos" en el splash de Hermes.
+        String nroTemporal = "TMP-" + req.getDeviceId();
         long id = jdbcTemplate.queryForObject(
                 """
                 INSERT INTO auth.dispositivo
                     (device_id, nro_registro, imei, fabricante, modelo, nombre_dispositivo, software, flag_autorizado)
-                VALUES (?, '', ?, ?, ?, ?, '1')
+                VALUES (?, ?, ?, ?, ?, ?, ?, '1')
                 RETURNING id
                 """,
                 Long.class,
-                req.getDeviceId(), req.getImei(), req.getFabricante(),
+                req.getDeviceId(), nroTemporal, req.getImei(), req.getFabricante(),
                 req.getModelo(), req.getNombreDispositivo(), req.getSoftware());
 
         String nroRegistro = "DM" + String.format("%010d", id);
