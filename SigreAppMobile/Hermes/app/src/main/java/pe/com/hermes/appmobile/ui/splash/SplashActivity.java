@@ -22,17 +22,22 @@ import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
 import pe.com.hermes.appmobile.util.AppVersion;
 import pe.com.hermes.appmobile.util.ConnectivityChecker;
+import pe.com.hermes.appmobile.util.PlayAppUpdateHelper;
 import pe.com.hermes.common.util.AsyncRunner;
 
 /**
- * Pantalla de inicio — equivalente al bloque previo al login de FastSales
- * (permisos + validar servidor + registrar dispositivo antes de credenciales).
+ * Pantalla de inicio: permisos → Google Play Update → servidor → registro dispositivo → login/menú.
+ * <p>
+ * Actualización Play: aviso si hay 1–3 revisiones de atraso; si hay 4+ (ej. 268→276),
+ * diálogo obligatorio con Aceptar y descarga/instalación inmediata.
  */
 public class SplashActivity extends AppCompatActivity {
 
     private ActivitySplashBinding binding;
+    private PlayAppUpdateHelper playAppUpdateHelper;
     private boolean registrando;
     private boolean permisosSolicitados;
+    private boolean updateCheckHecho;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +52,7 @@ public class SplashActivity extends AppCompatActivity {
 
         binding.tvEstado.setText(R.string.splash_solicitando_permisos);
         if (DevicePermissions.solicitarSiFalta(this)) {
-            iniciarValidacion();
+            verificarActualizacionPlay();
         } else {
             permisosSolicitados = true;
         }
@@ -59,19 +64,51 @@ public class SplashActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == DevicePermissions.REQUEST_CODE && permisosSolicitados) {
             permisosSolicitados = false;
-            iniciarValidacion();
+            verificarActualizacionPlay();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (binding.grupoAcciones.getVisibility() == View.VISIBLE
+        if (playAppUpdateHelper != null) {
+            playAppUpdateHelper.resumeIfNeeded();
+        }
+        if (updateCheckHecho
+                && binding.grupoAcciones.getVisibility() == View.VISIBLE
                 && binding.btnConfigurarServidor.getVisibility() == View.VISIBLE
                 && !registrando
                 && !permisosSolicitados) {
             iniciarValidacion();
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (playAppUpdateHelper != null) {
+            playAppUpdateHelper.onActivityResult(requestCode, resultCode);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (playAppUpdateHelper != null) {
+            playAppUpdateHelper.unregister();
+            playAppUpdateHelper = null;
+        }
+        super.onDestroy();
+    }
+
+    /** Primero Play Update; si no hay bloqueo, sigue con servidor/dispositivo. */
+    private void verificarActualizacionPlay() {
+        binding.tvEstado.setText(R.string.splash_verificando_actualizacion);
+        ocultarAcciones();
+        playAppUpdateHelper = new PlayAppUpdateHelper(this, () -> {
+            updateCheckHecho = true;
+            iniciarValidacion();
+        });
+        playAppUpdateHelper.checkOnStartup();
     }
 
     private void iniciarValidacion() {
@@ -121,7 +158,6 @@ public class SplashActivity extends AppCompatActivity {
         );
     }
 
-    /** Recolecta IPs/IMEI en background y registra/revalida el dispositivo. */
     private void registrarDispositivo() {
         registrando = true;
         binding.tvEstado.setText(R.string.splash_registrando_dispositivo);

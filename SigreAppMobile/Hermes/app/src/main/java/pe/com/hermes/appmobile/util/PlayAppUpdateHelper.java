@@ -24,10 +24,11 @@ import com.google.android.play.core.install.model.UpdateAvailability;
 import pe.com.hermes.appmobile.R;
 
 /**
- * Comprueba actualizaciones en Google Play al abrir el login (igual que FastSales).
+ * Comprueba actualizaciones en Google Play en el splash (arranque).
  * <ul>
- *   <li>1–3 revisiones (versionCode) atrás → aviso opcional (flexible).</li>
- *   <li>{@link #FORCE_BEHIND_THRESHOLD}+ revisiones atrás → actualización obligatoria (inmediata).</li>
+ *   <li>Ej. app 268 y Play 269/270 (1–3 revisiones) → aviso opcional.</li>
+ *   <li>Ej. app 268 y Play 276 ({@link #FORCE_BEHIND_THRESHOLD}+ revisiones) →
+ *       diálogo obligatorio con Aceptar → descarga e instalación inmediata.</li>
  * </ul>
  * Solo aplica si la app fue instalada desde Play; si no hay info, deja continuar.
  */
@@ -35,7 +36,10 @@ public final class PlayAppUpdateHelper {
 
     private static final String TAG = "PlayAppUpdate";
 
-    /** Diferencia de versionCode a partir de la cual la actualización es obligatoria. */
+    /**
+     * Diferencia de versionCode a partir de la cual la actualización es obligatoria.
+     * Ej.: actual=268 y Play=272 → fuerza; Play=269/270/271 → solo aviso.
+     */
     public static final int FORCE_BEHIND_THRESHOLD = 4;
 
     public static final int REQUEST_UPDATE = 44001;
@@ -171,12 +175,14 @@ public final class PlayAppUpdateHelper {
     }
 
     private void showForceDialog(final AppUpdateInfo info, int behind, int available) {
-        String msg = activity.getString(R.string.update_obligatoria_mensaje, behind, available);
+        String msg = activity.getString(
+                R.string.update_obligatoria_mensaje, behind, available, currentVersionCode());
         new AlertDialog.Builder(activity)
                 .setTitle(R.string.update_obligatoria_titulo)
                 .setMessage(msg)
                 .setCancelable(false)
-                .setPositiveButton(R.string.update_ahora, (dialog, which) -> {
+                .setPositiveButton(R.string.update_aceptar, (dialog, which) -> {
+                    // Aceptar → descarga e instala la versión de Play (inmediata).
                     if (info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
                         startImmediate(info);
                     } else if (info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
