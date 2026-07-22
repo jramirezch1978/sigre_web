@@ -50,6 +50,7 @@ public class LoginActivity extends AppCompatActivity {
         binding.btnLogin.setOnClickListener(v -> intentarLogin());
         binding.btnCambiarServidor.setOnClickListener(v -> mostrarServidorDefault());
         binding.tvServidorNombre.setOnClickListener(v -> mostrarServidorDefault());
+        binding.btnRefrescarServidor.setOnClickListener(v -> refrescarServidorYSesion());
     }
 
     @Override
@@ -156,6 +157,61 @@ public class LoginActivity extends AppCompatActivity {
 
     private void irAListadoServidores() {
         startActivity(new Intent(this, ServidorListActivity.class));
+    }
+
+    /** Boton "refrescar" junto a Servidor (equivalente a btnRefrescar de FastSales): vuelve a
+     * leer del disco el listado de perfiles de conexion (AppConfig lee el archivo en cada
+     * llamada, asi que recoge cualquier alta/edicion hecha en ServidorListActivity), fuerza
+     * crear uno nuevo si no hay ninguno, y registra una nueva sesion de dispositivo contra el
+     * servidor por defecto resultante — no es una sesion de USUARIO, es el registro/renovacion
+     * del dispositivo (nro_registro) igual que ImplSegLoginDevice.registraDevice() en FastSales. */
+    private void refrescarServidorYSesion() {
+        actualizarServidorInfo();
+        actualizarBadgeConexion();
+
+        if (AppUtils.app(this).getConfig().listarServidores().isEmpty()) {
+            AppUtils.toast(this, "No hay perfiles de conexión. Cree uno nuevo.");
+            irAListadoServidores();
+            return;
+        }
+        if (AppUtils.app(this).getConfig().obtenerDefault() == null) {
+            AppUtils.toast(this, "Marque un servidor como predeterminado.");
+            irAListadoServidores();
+            return;
+        }
+
+        registrarNuevaSesionDispositivo();
+    }
+
+    private void registrarNuevaSesionDispositivo() {
+        mostrarCargandoRefrescar(true);
+        String deviceId = AppUtils.app(this).getDeviceRegistry().obtenerDeviceId(this);
+        RegistrarDispositivoRequest request = new RegistrarDispositivoRequest(
+                deviceId, Build.MANUFACTURER, Build.MODEL, Build.MANUFACTURER + " " + Build.MODEL,
+                "Android " + Build.VERSION.RELEASE);
+        authRepository.registrarDispositivo(request, new ResultCallback<DispositivoRegistradoResponse>() {
+            @Override
+            public void onSuccess(DispositivoRegistradoResponse data) {
+                mostrarCargandoRefrescar(false);
+                AppUtils.app(LoginActivity.this).getDeviceRegistry().guardar(data.nroRegistro, data.autorizado);
+                if (!data.autorizado) {
+                    AppUtils.toast(LoginActivity.this, "Este equipo no está autorizado para conectarse.");
+                } else {
+                    AppUtils.toast(LoginActivity.this, "Perfiles actualizados y nueva sesión registrada.");
+                }
+            }
+
+            @Override
+            public void onError(String mensaje) {
+                mostrarCargandoRefrescar(false);
+                AppUtils.toast(LoginActivity.this, "No se pudo registrar una nueva sesión. Verifique su conexión.");
+            }
+        });
+    }
+
+    private void mostrarCargandoRefrescar(boolean cargando) {
+        binding.progressRefrescarServidor.setVisibility(cargando ? View.VISIBLE : View.GONE);
+        binding.btnRefrescarServidor.setEnabled(!cargando);
     }
 
     private void intentarLogin() {
