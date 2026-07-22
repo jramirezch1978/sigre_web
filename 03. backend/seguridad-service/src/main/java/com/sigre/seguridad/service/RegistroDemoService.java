@@ -2,6 +2,7 @@ package com.sigre.seguridad.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,11 +26,19 @@ import java.util.Map;
 public class RegistroDemoService {
 
     private static final int MAX_USUARIOS_DEMO = 5;
-    private static final String DEMO_DB_HOST = "localhost";
-    private static final int DEMO_DB_PORT = 5432;
     private static final String DEMO_DB_PREFIX = "sigre_demo_";
     private static final String DEMO_DB_USER = "sigre_demo";
     private static final String DEMO_DB_PASS_ENCRYPTED = "DEMO_NO_DB";
+
+    // Mismo default que TenantProvisioningService (host real del contenedor Postgres, no
+    // "localhost" hardcodeado) — antes este servicio dejaba el host de la fila de master.empresa
+    // apuntando a localhost para siempre, aunque provisionarBaseDatosDemo() sí actualizaba
+    // db_user/db_password_encrypted (ver bug ADGEMINCO SAC, DEMO0011).
+    @Value("${app.tenant.default-db-host:postgres}")
+    private String defaultDbHost;
+
+    @Value("${app.tenant.default-db-port:5432}")
+    private int defaultDbPort;
 
     private final JdbcTemplate jdbcTemplate;
     private final PasswordEncoder passwordEncoder;
@@ -97,7 +106,7 @@ public class RegistroDemoService {
                 emp.getDireccionFiscal(), emp.getUbigeo(), distritoId,
                 emp.getRepresentanteLegal(), emp.getDniRepresentanteLegal(),
                 emp.getCorreoContacto(), emp.getTelefonoContacto(),
-                DEMO_DB_HOST, DEMO_DB_PORT, dbName, DEMO_DB_USER, DEMO_DB_PASS_ENCRYPTED);
+                defaultDbHost, defaultDbPort, dbName, DEMO_DB_USER, DEMO_DB_PASS_ENCRYPTED);
 
         List<Long> userIds = new ArrayList<>();
 
