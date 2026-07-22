@@ -32,6 +32,9 @@ INSERT INTO master.empresa (
     db_name, db_user, db_password_encrypted, flag_demo, flag_estado
 )
 VALUES
+    -- distrito_id va NULL aqui: master.distrito se carga mas abajo en este mismo seed.
+    -- Al final se enlaza por ubigeo (= master.distrito.codigo). No hardcodear IDs de una
+    -- BD ya poblada (p.ej. 1371/1355): en create-security fresco esos ids no existen.
     (
         2, 'T0000009', '20504595863', 'PESQUERA CANTABRIA S.A.', 'CANTABRIA',
         'CALLE AMADOR MERINO REYNA 339 INT 501 - SAN ISIDRO - LIMA', '010101',
@@ -43,7 +46,7 @@ VALUES
     (
         3, 'T0000010', '20609837340', 'BLUE COAST S.A.C.', 'BLUE COAST S.A.C.',
         'AV. RIVERA NAVARRETE NRO. 2801 DPTO. 1606', '150131',
-        1371, 'Francisco Camino Rivera', '12345678',
+        NULL, 'Francisco Camino Rivera', '12345678',
         'javier.camino@bluecoastsac.com', '+51 994 076 286',
         'postgres', 5432, 'sigre_emp_bluecoast', 'bluecoast',
         'Jkke6fZxOXE+EiGVEMuHwwl9BmrvptRoExA7QX5swBCmcYyErg==', '0', '1'
@@ -53,7 +56,7 @@ VALUES
         'ADMINISTRACION Y GERENCIA EN MINERIA Y CONSTRUCCION SOCIEDAD ANONIMA CERRADA - ADGEMINCO SAC',
         'ADMINISTRACION Y GERENCIA EN MINERIA Y CONSTRUCCION SOCIEDAD ANONIMA CERRADA - ADGEMINCO SAC',
         'CAL. FERMIN TANGUIS 145 URB. SANTA CATALINA LA VICTORIA LIMA LIMA', '150115',
-        1355, 'juan perez garcia', '12334455',
+        NULL, 'juan perez garcia', '12334455',
         'sonctaco@com.com', '+519355633',
         'postgres', 5432, 'sigre_demo_11', 'sigre_demo_11',
         'yFCuwRUctUtz53Obcx0pXUqLq8TdehUrYxPqVzE4bzu/6LAt4WuAZ5ZAdsnHTL9z4gijBsKMVUhd9umE', '0', '1'
@@ -4431,11 +4434,12 @@ JOIN master.provincia p ON p.codigo = (
 );
 
 -- Enlace distrito_id por ubigeo (FK disponible tras cargar master.distrito).
-UPDATE master.empresa
+UPDATE master.empresa e
 SET distrito_id = d.id
 FROM master.distrito d
-WHERE master.empresa.id = 3
-  AND d.codigo = '150131';
+WHERE e.ubigeo IS NOT NULL
+  AND TRIM(e.ubigeo) <> ''
+  AND d.codigo = TRIM(e.ubigeo);
 
 -- TX: Parámetros SUNAT (config.configuracion — BD security)
 INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable)
