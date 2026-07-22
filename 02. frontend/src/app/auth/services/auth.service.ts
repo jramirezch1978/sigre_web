@@ -239,11 +239,9 @@ export class AuthService {
     );
   }
 
-  /** Sucursales asignadas al usuario para la empresa (ms-core-maestros). */
+  /** Sucursales asignadas al usuario para la empresa (core-service / tenant). */
   listarSucursales(empresaId: number): Observable<any> {
-    // Login (token temporal): seguridad-service, misma BD master que /auth/empresas.
-    // Evita fallos "No existe empresa con id X" al ir a core-service antes de seleccionar empresa.
-    return this.http.get(`${this.baseUrl}/auth/empresas/${empresaId}/sucursales`, {
+    return this.http.get(`${this.baseUrl}/core/empresas/${empresaId}/sucursales/mias`, {
       headers: this.authHeaders()
     });
   }

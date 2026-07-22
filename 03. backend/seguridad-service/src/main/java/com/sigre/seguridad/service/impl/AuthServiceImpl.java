@@ -203,61 +203,6 @@ public class AuthServiceImpl implements AuthService {
         );
     }
 
-    /**
-     * Lista sucursales del usuario en el tenant. Corre en seguridad-service (misma BD master
-     * que /auth/empresas) para no depender de core-service durante el login temporal.
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public List<SucursalDto> listarSucursalesDelUsuario(Long usuarioId, Long empresaId) {
-        Integer asignada = jdbcTemplate.queryForObject(
-                """
-                SELECT COUNT(*)::int FROM auth.usuario_empresa
-                WHERE usuario_id = ? AND empresa_id = ? AND flag_estado = '1'
-                """,
-                Integer.class, usuarioId, empresaId);
-        if (asignada == null || asignada == 0) {
-            throw new BusinessException(
-                    "No tiene acceso a la empresa indicada",
-                    HttpStatus.FORBIDDEN,
-                    "EMPRESA_NO_ASIGNADA");
-        }
-
-        TenantConnectionInfoResponse conn = tenantConnectionService.getTenantConnection(empresaId);
-        List<SucursalDto> out = new ArrayList<>();
-        String sql = """
-                SELECT s.id, s.codigo, s.nombre, s.direccion, s.ciudad
-                FROM auth.usuario_sucursal us
-                INNER JOIN auth.sucursal s ON s.id = us.sucursal_id
-                WHERE us.usuario_id = ? AND us.flag_estado = '1' AND s.flag_estado = '1'
-                ORDER BY s.nombre
-                """;
-        try (Connection c = DriverManager.getConnection(conn.getJdbcUrl(), conn.getUsername(), conn.getPassword());
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setLong(1, usuarioId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    out.add(SucursalDto.builder()
-                            .id(rs.getLong("id"))
-                            .codigo(rs.getString("codigo"))
-                            .nombre(rs.getString("nombre"))
-                            .direccion(rs.getString("direccion"))
-                            .ciudad(rs.getString("ciudad"))
-                            .build());
-                }
-            }
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.warn("listarSucursalesDelUsuario usuario={} empresa={}: {}", usuarioId, empresaId, e.getMessage());
-            throw new BusinessException(
-                    "No se pudieron cargar las sucursales: " + e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "SUCURSALES_ERROR");
-        }
-        return out;
-    }
-
     @Override
     @Transactional
     public Long authenticateCredentialsForSeleccionEmpresa(SeleccionEmpresaRequest request) {

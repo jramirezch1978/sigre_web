@@ -45,8 +45,8 @@ public interface AuthApi {
     @GET("auth/empresas")
     Call<ApiResponse<List<EmpresaUsuarioDto>>> listarEmpresas();
 
-    /** Sucursales vía seguridad-service (token temporal OK). No usar /core/.../mias en login. */
-    @GET("auth/empresas/{empresaId}/sucursales")
+    /** Sucursales del tenant (core-service). Requiere Bearer token (temporal OK). */
+    @GET("core/empresas/{empresaId}/sucursales/mias")
     Call<ApiResponse<List<SucursalDto>>> listarSucursales(@Path("empresaId") long empresaId);
 
     @POST("auth/seleccionar-empresa")

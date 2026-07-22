@@ -23,12 +23,6 @@ public interface AuthService {
 
     List<EmpresaUsuarioDto> listarEmpresas(Long usuarioId);
 
-    /**
-     * Sucursales asignadas al usuario en el tenant de la empresa (token temporal OK).
-     * Usado en el flujo de login móvil/web antes de {@code /seleccionar-empresa}.
-     */
-    List<SucursalDto> listarSucursalesDelUsuario(Long usuarioId, Long empresaId);
-
     LoginResponse seleccionarEmpresa(Long usuarioId, SeleccionEmpresaRequest request);
 
     /**
