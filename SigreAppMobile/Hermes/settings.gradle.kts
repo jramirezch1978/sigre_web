@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Hermes"
 include(":app")
+include(":common-ui")

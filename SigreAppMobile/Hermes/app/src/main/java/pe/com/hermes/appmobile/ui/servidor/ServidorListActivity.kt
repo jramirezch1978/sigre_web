@@ -24,7 +24,8 @@ import pe.com.hermes.appmobile.ui.common.SimpleItem
 import pe.com.hermes.appmobile.ui.common.SimpleListAdapter
 import pe.com.hermes.appmobile.util.ConnectivityChecker
 import pe.com.hermes.appmobile.util.app
-import pe.com.hermes.appmobile.util.toast
+import pe.com.hermes.common.ui.ConfirmDialog
+import pe.com.hermes.common.ui.MessageBox
 
 /**
  * Listado de servidores remotos — equivalente a ServerRemoteActivity de FastSales:
@@ -190,18 +191,17 @@ class ServidorListActivity : AppCompatActivity() {
             servidores.none { it.flagDefault } -> "No ha marcado ningún servidor como predeterminado. ¿Desea guardar de todas maneras?"
             else -> "¿Desea guardar los cambios realizados?"
         }
-        AlertDialog.Builder(this)
-            .setTitle("Confirmación de grabación")
-            .setMessage(mensaje)
-            .setCancelable(false)
-            .setPositiveButton("Sí") { dialog, _ ->
+        ConfirmDialog.mostrar(
+            context = this,
+            titulo = "Confirmación de grabación",
+            mensaje = mensaje,
+            cancelable = false,
+            onSi = {
                 app.config.guardarServidores(servidores)
                 hayCambios = false
-                toast("Servidores guardados")
-                dialog.dismiss()
-            }
-            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-            .show()
+                MessageBox.exito(this, "Servidores guardados correctamente.")
+            },
+        )
     }
 
     private fun confirmarCierre() {
@@ -209,13 +209,15 @@ class ServidorListActivity : AppCompatActivity() {
             cerrar()
             return
         }
-        AlertDialog.Builder(this)
-            .setTitle("Confirmación")
-            .setMessage("Hay modificaciones pendientes de grabar, ¿desea salir sin guardar?")
-            .setCancelable(false)
-            .setPositiveButton("Salir") { dialog, _ -> dialog.dismiss(); cerrar() }
-            .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-            .show()
+        ConfirmDialog.mostrar(
+            context = this,
+            titulo = "Confirmación",
+            mensaje = "Hay modificaciones pendientes de grabar, ¿desea salir sin guardar?",
+            textoSi = "Salir",
+            textoNo = "Cancelar",
+            cancelable = false,
+            onSi = { cerrar() },
+        )
     }
 
     private fun cerrar() {

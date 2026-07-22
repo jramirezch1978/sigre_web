@@ -4,6 +4,7 @@ import android.app.Application
 import pe.com.hermes.appmobile.data.config.AppConfig
 import pe.com.hermes.appmobile.data.remote.ApiClient
 import pe.com.hermes.appmobile.data.session.SessionManager
+import pe.com.hermes.common.ui.EdgeToEdgeHelper
 
 /**
  * Application singleton — expone la sesión (token, empresa, sucursal), la configuración
@@ -25,5 +26,9 @@ class SigreApplication : Application() {
         session = SessionManager(this)
         config = AppConfig(this)
         apiClient = ApiClient(config, session)
+
+        // Edge-to-edge obligatorio desde Android 15 (targetSdk 35) — desde la libreria
+        // reutilizable common-ui, se aplica a todas las Activities automaticamente.
+        EdgeToEdgeHelper.registrarGlobal(this)
     }
 }
