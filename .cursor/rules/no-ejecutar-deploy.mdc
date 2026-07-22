@@ -1,0 +1,35 @@
+---
+description: Prohibido ejecutar deploy.bat; solo el usuario despliega microservicios
+alwaysApply: true
+---
+
+# No ejecutar deploy.bat
+
+El agente **NUNCA** debe ejecutar `deploy.bat` ni ningún despliegue de microservicios/frontend/config-server.
+
+## Motivo
+
+El deploy tarda mucho en una sola sesión. El usuario lo ejecuta él mismo, a menudo en varios CMD en paralelo, para ahorrar tiempo.
+
+## Qué sí puede hacer el agente
+
+- Subir cambios al repositorio (commit/push) cuando corresponda.
+- Compilar el APK móvil (`SigreAppMobile\build_all.bat` o `Hermes\build.bat`) si hace falta.
+- Indicar al usuario los comandos `.bat` de despliegue para que los ejecute él.
+
+## Qué no debe hacer
+
+- Ejecutar `.\deploy.bat ...` (con o sin `--force`).
+- Ejecutar `docker compose up/build/restart` orientado a desplegar servicios en cronos/VM.
+- Lanzar deploys “por ayuda” aunque el cambio sea de backend/frontend.
+
+## Al terminar un cambio que requiera deploy
+
+Entregar solo los comandos, por ejemplo:
+
+```bat
+cd e:\Work\sigre_web
+.\deploy.bat seguridad-service --force
+```
+
+No ejecutarlos.
