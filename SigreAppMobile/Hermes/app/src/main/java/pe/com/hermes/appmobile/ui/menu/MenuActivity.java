@@ -7,7 +7,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import java.util.Arrays;
 import pe.com.hermes.appmobile.R;
+import pe.com.hermes.appmobile.data.device.DeviceRegistrationFactory;
+import pe.com.hermes.appmobile.data.remote.dto.DispositivoRegistradoResponse;
+import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
 import pe.com.hermes.appmobile.data.repository.AuthRepository;
+import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.data.session.SessionManager;
 import pe.com.hermes.appmobile.databinding.ActivityMenuBinding;
 import pe.com.hermes.appmobile.ui.almacen.AlmacenOpcionesActivity;
@@ -16,6 +20,7 @@ import pe.com.hermes.appmobile.ui.common.SimpleListAdapter;
 import pe.com.hermes.appmobile.ui.compras.ComprasOpcionesActivity;
 import pe.com.hermes.appmobile.ui.login.LoginActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
+import pe.com.hermes.common.util.AsyncRunner;
 
 /** Menú principal. Avatar superior izquierdo abre opciones de cuenta (incl. cerrar sesión). */
 public class MenuActivity extends AppCompatActivity {
@@ -24,12 +29,16 @@ public class MenuActivity extends AppCompatActivity {
     private static final long ID_COMPRAS = 2L;
 
     private ActivityMenuBinding binding;
+    private AuthRepository authRepository;
+    private boolean cerrandoSesion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMenuBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        authRepository = new AuthRepository(AppUtils.app(this).getApiClient(), AppUtils.app(this).getSession());
 
         SessionManager session = AppUtils.app(this).getSession();
         String empresaNombre = session.getEmpresaNombre();
@@ -58,6 +67,9 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void mostrarMenuUsuario() {
+        if (cerrandoSesion) {
+            return;
+        }
         PopupMenu popup = new PopupMenu(this, binding.btnAvatarUsuario);
         popup.getMenuInflater().inflate(R.menu.menu_usuario, popup.getMenu());
         popup.setOnMenuItemClickListener(item -> {
@@ -70,14 +82,57 @@ public class MenuActivity extends AppCompatActivity {
         popup.show();
     }
 
+    /**
+     * Cierra JWT y la sesión de dispositivo (fec_logout), abre un nuevo nro_registro
+     * y vuelve al login — igual que cancelar empresa/sucursal.
+     */
     private void cerrarSesion() {
-        new AuthRepository(AppUtils.app(this).getApiClient(), AppUtils.app(this).getSession())
-                .logout(() -> {
-                    Intent intent = new Intent(MenuActivity.this, LoginActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                });
+        if (cerrandoSesion) {
+            return;
+        }
+        cerrandoSesion = true;
+        String nroActual = AppUtils.app(this).getDeviceRegistry().getNroRegistro();
+        authRepository.logout(() -> renovarSesionDispositivoTrasLogout(nroActual));
+    }
+
+    private void renovarSesionDispositivoTrasLogout(String nroActual) {
+        AsyncRunner.ejecutar(
+                () -> DeviceRegistrationFactory.crear(this),
+                new AsyncRunner.OnResultado<RegistrarDispositivoRequest>() {
+                    @Override
+                    public void onExito(RegistrarDispositivoRequest request) {
+                        enviarRenovacionYSalir(request, nroActual);
+                    }
+
+                    @Override
+                    public void onError(Exception error) {
+                        enviarRenovacionYSalir(DeviceRegistrationFactory.crear(MenuActivity.this), nroActual);
+                    }
+                }
+        );
+    }
+
+    private void enviarRenovacionYSalir(RegistrarDispositivoRequest request, String nroActual) {
+        authRepository.renovarSesionDispositivo(request, nroActual, new ResultCallback<DispositivoRegistradoResponse>() {
+            @Override
+            public void onSuccess(DispositivoRegistradoResponse data) {
+                AppUtils.app(MenuActivity.this).getDeviceRegistry().guardar(data.nroRegistro, data.autorizado);
+                irALogin();
+            }
+
+            @Override
+            public void onError(String mensaje) {
+                // Si falla renovar, al menos ir al login; el splash/refresco puede abrir otra sesión.
+                irALogin();
+            }
+        });
+    }
+
+    private void irALogin() {
+        Intent intent = new Intent(MenuActivity.this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private static String formatearSubtitulo(String empresa, String sucursal) {
