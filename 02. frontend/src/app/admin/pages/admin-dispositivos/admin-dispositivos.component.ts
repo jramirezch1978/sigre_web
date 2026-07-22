@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { AdminSeguridadApiService } from '../../services/admin-seguridad-api.service';
-import { DispositivoAdminDto } from '../../models/admin.models';
+import { DispositivoAdminDto, DispositivoLoginDto } from '../../models/admin.models';
 import { TablaColumna } from '../../../erp/shared/models/api-page.model';
 import { AdminTablaPageBase } from '../../shared/admin-tabla-page-base';
 import { SigreModalService } from '@sigre-common';
@@ -30,6 +30,11 @@ export class AdminDispositivosComponent extends AdminTablaPageBase<DispositivoAd
   dispositivos: DispositivoAdminDto[] = [];
   loading = true;
   filtro = '';
+
+  mostrandoHistorial = false;
+  dispositivoHistorial: DispositivoAdminDto | null = null;
+  historial: DispositivoLoginDto[] = [];
+  loadingHistorial = false;
 
   ngOnInit(): void {
     this.cargar();
@@ -81,6 +86,29 @@ export class AdminDispositivosComponent extends AdminTablaPageBase<DispositivoAd
       },
       error: async (err: any) => await this.presentError(err?.error?.message ?? 'No se pudo cambiar la autorización.'),
     });
+  }
+
+  abrirHistorial(d: DispositivoAdminDto): void {
+    this.dispositivoHistorial = d;
+    this.mostrandoHistorial = true;
+    this.loadingHistorial = true;
+    this.historial = [];
+    this.api.listarLoginsDispositivo(d.id).subscribe({
+      next: res => {
+        this.loadingHistorial = false;
+        this.historial = res.data ?? [];
+      },
+      error: async () => {
+        this.loadingHistorial = false;
+        await this.presentError('No se pudo cargar el historial de inicios de sesión.');
+      },
+    });
+  }
+
+  cerrarHistorial(): void {
+    this.mostrandoHistorial = false;
+    this.dispositivoHistorial = null;
+    this.historial = [];
   }
 
   private escapeHtmlLite(s: string): string {

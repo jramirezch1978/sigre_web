@@ -7,7 +7,7 @@ import {
   RolUsuarioDto, RolOpcionMenuDto, RolOpcionAccionDto,
   UsuarioAdminDto, AdminDashboardTelemetry, EmpresaAdminDto,
   EmpresaAdminUpdatePayload, GrupoUsuarioDto, GrupoUsuarioMiembroDto, EdicionErpDto,
-  DispositivoAdminDto
+  DispositivoAdminDto, DispositivoLoginDto
 } from '../models/admin.models';
 import { environment } from '../../../environments/environment';
 
@@ -36,6 +36,13 @@ export class AdminSeguridadApiService extends AbstractAuthenticatedApiService {
     return this.http.put<ApiResponse<void>>(
       this.buildUrl(`/auth/seguridad/admin/dispositivos/${id}/autorizacion`),
       { autorizado },
+      { headers: this.bearerHeaders() }
+    );
+  }
+
+  listarLoginsDispositivo(id: number): Observable<ApiResponse<DispositivoLoginDto[]>> {
+    return this.http.get<ApiResponse<DispositivoLoginDto[]>>(
+      this.buildUrl(`/auth/seguridad/admin/dispositivos/${id}/logins`),
       { headers: this.bearerHeaders() }
     );
   }

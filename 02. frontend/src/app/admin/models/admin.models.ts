@@ -154,6 +154,13 @@ export interface DispositivoAdminDto {
   fecUltimoLogin?: string;
 }
 
+export interface DispositivoLoginDto {
+  id: number;
+  usuarioId?: number;
+  usuarioNombre?: string;
+  fecLogin: string;
+}
+
 /** Payload PUT /auth/seguridad/empresas/{id} */
 export interface EmpresaAdminUpdatePayload {
   razonSocial: string;

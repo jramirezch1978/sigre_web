@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sigre.seguridad.dto.DispositivoRegistradoResponse;
 import com.sigre.seguridad.dto.RegistrarDispositivoRequest;
 import com.sigre.seguridad.dto.seguridad.DispositivoAdminDto;
+import com.sigre.seguridad.dto.seguridad.DispositivoLoginDto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -67,10 +68,39 @@ public class DispositivoService {
         return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
     }
 
+    /**
+     * Registra un inicio de sesión del dispositivo: actualiza el "último login" en
+     * auth.dispositivo (lectura rápida) Y agrega una fila en auth.dispositivo_login
+     * (historial completo) — equivalente a registerLogin() de FastSales.
+     */
+    @Transactional
     public void registrarLogin(long dispositivoId, Long usuarioId) {
+        OffsetDateTime ahora = OffsetDateTime.now();
         jdbcTemplate.update(
                 "UPDATE auth.dispositivo SET usuario_id = ?, fec_ultimo_login = ? WHERE id = ?",
-                usuarioId, OffsetDateTime.now(), dispositivoId);
+                usuarioId, ahora, dispositivoId);
+        jdbcTemplate.update(
+                "INSERT INTO auth.dispositivo_login (dispositivo_id, usuario_id, fec_login) VALUES (?, ?, ?)",
+                dispositivoId, usuarioId, ahora);
+    }
+
+    /** Historial completo de logins de un dispositivo (más reciente primero), para el admin. */
+    public List<DispositivoLoginDto> listarLogins(long dispositivoId) {
+        return jdbcTemplate.query(
+                """
+                SELECT dl.id, dl.usuario_id, u.nombre_completo AS usuario_nombre, dl.fec_login
+                FROM auth.dispositivo_login dl
+                LEFT JOIN auth.usuario u ON u.id = dl.usuario_id
+                WHERE dl.dispositivo_id = ?
+                ORDER BY dl.fec_login DESC
+                """,
+                (rs, rowNum) -> DispositivoLoginDto.builder()
+                        .id(rs.getLong("id"))
+                        .usuarioId(rs.getObject("usuario_id") != null ? rs.getLong("usuario_id") : null)
+                        .usuarioNombre(rs.getString("usuario_nombre"))
+                        .fecLogin(rs.getObject("fec_login", OffsetDateTime.class))
+                        .build(),
+                dispositivoId);
     }
 
     public List<DispositivoAdminDto> listar() {

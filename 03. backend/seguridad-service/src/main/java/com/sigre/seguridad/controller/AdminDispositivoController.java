@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import com.sigre.seguridad.dto.seguridad.ActualizarAutorizacionDispositivoRequest;
 import com.sigre.seguridad.dto.seguridad.DispositivoAdminDto;
+import com.sigre.seguridad.dto.seguridad.DispositivoLoginDto;
 import com.sigre.seguridad.service.DispositivoService;
 import com.sigre.seguridad.service.SeguridadService;
 import com.sigre.seguridad.support.SeguridadContextHelper;
@@ -41,5 +42,14 @@ public class AdminDispositivoController {
         seguridadService.requireAdminSistema(uid);
         dispositivoService.actualizarAutorizacion(id, request.isAutorizado());
         return ApiResponse.ok(null, request.isAutorizado() ? "Dispositivo autorizado" : "Dispositivo revocado");
+    }
+
+    @GetMapping("/{id}/logins")
+    public ApiResponse<List<DispositivoLoginDto>> listarLogins(
+            @RequestHeader("Authorization") String auth,
+            @PathVariable long id) {
+        long uid = contextHelper.requireUserIdDefinitivo(auth);
+        seguridadService.requireAdminSistema(uid);
+        return ApiResponse.ok(dispositivoService.listarLogins(id), "Historial de inicios de sesión");
     }
 }
