@@ -1,6 +1,7 @@
 package com.sigre.seguridad.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +9,7 @@ import com.sigre.seguridad.dto.DispositivoRegistradoResponse;
 import com.sigre.seguridad.dto.RegistrarDispositivoRequest;
 import com.sigre.seguridad.dto.seguridad.DispositivoAdminDto;
 import com.sigre.seguridad.dto.seguridad.DispositivoLoginDto;
+import com.sigre.common.exception.BusinessException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -17,10 +19,18 @@ import java.util.Optional;
  * Dispositivos móviles registrados (Hermes u otras apps nativas): permite loguear
  * vía /api/auth/login/mobile sin Cloudflare Turnstile, porque el equipo ya se
  * identificó una vez y quedó marcado como autorizado (o no) en {@code auth.dispositivo}.
+ *
+ * <ul>
+ *   <li>{@code auth.dispositivo} — maestro del equipo ({@code nro_registro} vía
+ *       {@code config.fn_siguiente_numerador('DISPOSITIVO')}).</li>
+ *   <li>{@code auth.dispositivo_login} — historial de sesiones (cada login mobile).</li>
+ * </ul>
  */
 @Service
 @RequiredArgsConstructor
 public class DispositivoService {
+
+    private static final String NUMERADOR_DISPOSITIVO = "DISPOSITIVO";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -40,29 +50,45 @@ public class DispositivoService {
             return existentes.get(0);
         }
 
-        // nro_registro es UNIQUE NOT NULL: se inserta un temporal unico por device_id y
-        // luego se reemplaza por DM##########. Antes faltaba un placeholder (8 columnas /
-        // 7 valores) y Postgres lanzaba DataIntegrityViolation → mensaje generico de
-        // "conflicto con los datos" en el splash de Hermes.
-        String nroTemporal = "TMP-" + req.getDeviceId();
-        long id = jdbcTemplate.queryForObject(
+        String nroRegistro = siguienteNroRegistro();
+
+        jdbcTemplate.update(
                 """
                 INSERT INTO auth.dispositivo
                     (device_id, nro_registro, imei, fabricante, modelo, nombre_dispositivo, software, flag_autorizado)
                 VALUES (?, ?, ?, ?, ?, ?, ?, '1')
-                RETURNING id
                 """,
-                Long.class,
-                req.getDeviceId(), nroTemporal, req.getImei(), req.getFabricante(),
+                req.getDeviceId(), nroRegistro, req.getImei(), req.getFabricante(),
                 req.getModelo(), req.getNombreDispositivo(), req.getSoftware());
-
-        String nroRegistro = "DM" + String.format("%010d", id);
-        jdbcTemplate.update("UPDATE auth.dispositivo SET nro_registro = ? WHERE id = ?", nroRegistro, id);
 
         return DispositivoRegistradoResponse.builder()
                 .nroRegistro(nroRegistro)
                 .autorizado(true)
                 .build();
+    }
+
+    /** Correlativo DM########## desde config.numerador (FOR UPDATE implícito en el UPDATE de la función). */
+    private String siguienteNroRegistro() {
+        try {
+            String nro = jdbcTemplate.queryForObject(
+                    "SELECT config.fn_siguiente_numerador(?)",
+                    String.class,
+                    NUMERADOR_DISPOSITIVO);
+            if (nro == null || nro.isBlank()) {
+                throw new BusinessException(
+                        "No se pudo obtener el número de registro del dispositivo",
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "NUMERADOR_DISPOSITIVO_VACIO");
+            }
+            return nro;
+        } catch (BusinessException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new BusinessException(
+                    "Numerador DISPOSITIVO no disponible. Ejecute create-security / seed de security.",
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "NUMERADOR_DISPOSITIVO_NO_CONFIGURADO");
+        }
     }
 
     public Optional<DispositivoRow> buscarPorNroRegistro(String nroRegistro) {

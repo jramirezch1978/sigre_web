@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import pe.com.hermes.appmobile.R;
 import pe.com.hermes.appmobile.data.config.ServerProfile;
@@ -131,7 +132,12 @@ public class SplashActivity extends AppCompatActivity {
                     mostrarError(getString(R.string.splash_dispositivo_no_autorizado), false);
                     return;
                 }
-                binding.tvEstado.setText(R.string.splash_dispositivo_ok);
+                String nro = data.nroRegistro != null ? data.nroRegistro : "";
+                binding.tvEstado.setText(getString(R.string.splash_dispositivo_ok_nro, nro));
+                Toast.makeText(
+                        SplashActivity.this,
+                        getString(R.string.splash_dispositivo_ok_nro, nro),
+                        Toast.LENGTH_LONG).show();
                 navegar();
             }
 

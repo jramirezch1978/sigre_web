@@ -306,6 +306,7 @@ CREATE UNIQUE INDEX uq_tokens_session_activa_triple ON auth.tokens_session (usua
 -- Cloudflare Turnstile (/api/auth/login/mobile) porque el equipo ya se identifico y
 -- fue autorizado antes. flag_autorizado nace en '1' (autorizado) y un admin lo puede
 -- pasar a '0' desde /admin si el equipo se pierde o se quiere revocar.
+-- nro_registro: correlativo via config.fn_siguiente_numerador('DISPOSITIVO') → DM##########.
 CREATE TABLE auth.dispositivo (
     id BIGSERIAL PRIMARY KEY,
     device_id VARCHAR(120) NOT NULL UNIQUE,
@@ -327,15 +328,21 @@ CREATE TABLE auth.dispositivo (
 
 CREATE INDEX ix_dispositivo_nro_registro ON auth.dispositivo (nro_registro);
 
--- Historial de inicios de sesion por dispositivo (equivalente a registerLogin de FastSales):
--- auth.dispositivo.fec_ultimo_login solo guarda el ULTIMO login: esta tabla guarda TODOS,
--- uno por fila, para poder auditar cuando y con que usuario se conecto cada equipo.
+COMMENT ON TABLE auth.dispositivo IS
+    'Maestro de equipos moviles. nro_registro sale de config.numerador DISPOSITIVO; flag_autorizado default 1.';
+
+-- Sesiones / inicios de sesion por dispositivo (equivalente a registerLogin de FastSales):
+-- auth.dispositivo.fec_ultimo_login solo guarda el ULTIMO login; esta tabla guarda TODOS,
+-- uno por fila (dispositivo + usuario + fecha), al llamar /auth/login/mobile.
 CREATE TABLE auth.dispositivo_login (
     id BIGSERIAL PRIMARY KEY,
     dispositivo_id BIGINT NOT NULL REFERENCES auth.dispositivo(id),
     usuario_id BIGINT REFERENCES auth.usuario(id),
     fec_login TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+COMMENT ON TABLE auth.dispositivo_login IS
+    'Historial de sesiones de dispositivos (cada login mobile = 1 fila).';
 
 CREATE INDEX ix_dispositivo_login_dispositivo ON auth.dispositivo_login (dispositivo_id, fec_login DESC);
 CREATE INDEX ix_dispositivo_login_usuario ON auth.dispositivo_login (usuario_id);

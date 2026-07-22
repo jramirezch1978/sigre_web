@@ -17,14 +17,18 @@ CREATE SCHEMA IF NOT EXISTS config;
 --
 --   configuracion (sin dependencias)
 --   config_traduccion (sin dependencias)
+--   numerador (sin dependencias) — correlativos de security (p.ej. nro_registro dispositivo)
 --
 -- ORDEN DE DROP (sin dependencias entre ellas, orden libre):
 --   1. config_traduccion
 --   2. configuracion
+--   3. numerador
 -- ============================================================
 
+DROP FUNCTION IF EXISTS config.fn_siguiente_numerador(VARCHAR);
 DROP TABLE IF EXISTS config.config_traduccion CASCADE;
 DROP TABLE IF EXISTS config.configuracion CASCADE;
+DROP TABLE IF EXISTS config.numerador CASCADE;
 
 -- ============================================================
 -- SECCIÓN 2: CREATE (crear tablas, constraints e índices)
@@ -56,12 +60,31 @@ CREATE TABLE config.config_traduccion (
     UNIQUE (idioma, clave)
 );
 
+-- Correlativos de la BD security (espejo simplificado de core.numerador del tenant).
+-- Usado p.ej. para auth.dispositivo.nro_registro (codigo='DISPOSITIVO', serie='DM').
+CREATE TABLE config.numerador (
+    id BIGSERIAL PRIMARY KEY,
+    codigo VARCHAR(30) NOT NULL,
+    nombre VARCHAR(120) NOT NULL,
+    serie VARCHAR(10),
+    ultimo_numero BIGINT NOT NULL DEFAULT 0 CHECK (ultimo_numero >= 0),
+    longitud INTEGER NOT NULL DEFAULT 10 CHECK (longitud BETWEEN 1 AND 20),
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
+    fec_creacion TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    fec_modificacion TIMESTAMPTZ,
+    CONSTRAINT uq_config_numerador_codigo UNIQUE (codigo)
+);
+
+COMMENT ON TABLE config.numerador IS
+    'Autonumericos de security. ultimo_numero = ultimo emitido; fn_siguiente_numerador incrementa y formatea serie+padding.';
+
 -- ============================================================
 -- SECCIÓN 3: ÍNDICES
 -- ============================================================
 
 CREATE INDEX IX_CONFIGURACION_01 ON config.configuracion (modulo);
 CREATE INDEX IX_CONFIG_TRADUCCION_01 ON config.config_traduccion (idioma, modulo);
+CREATE INDEX IX_CONFIG_NUMERADOR_01 ON config.numerador (flag_estado);
 
 -- ============================================================
 -- Funciones de acceso a config.configuracion (BD security).
@@ -264,3 +287,39 @@ COMMENT ON FUNCTION config.fn_set_parametro_dec(VARCHAR, VARCHAR, NUMERIC)
     IS 'Upsert de parámetro DECIMAL en config.configuracion (atómico por modulo+parametro).';
 COMMENT ON FUNCTION config.fn_set_parametro_bool(VARCHAR, VARCHAR, BOOLEAN)
     IS 'Upsert de parámetro BOOLEAN en config.configuracion (atómico por modulo+parametro).';
+
+-- ============================================================
+-- Autonumerico: incrementa ultimo_numero con bloqueo de fila y
+-- retorna serie + numero padded (ej. DISPOSITIVO → DM0000000001).
+-- ============================================================
+CREATE OR REPLACE FUNCTION config.fn_siguiente_numerador(p_codigo VARCHAR(30))
+RETURNS VARCHAR
+LANGUAGE plpgsql VOLATILE AS $$
+DECLARE
+    v_serie     VARCHAR(10);
+    v_longitud  INTEGER;
+    v_numero    BIGINT;
+BEGIN
+    IF p_codigo IS NULL OR TRIM(p_codigo) = '' THEN
+        RAISE EXCEPTION 'Codigo de numerador requerido';
+    END IF;
+
+    UPDATE config.numerador
+    SET ultimo_numero = ultimo_numero + 1,
+        fec_modificacion = NOW()
+    WHERE codigo = UPPER(TRIM(p_codigo))
+      AND flag_estado = '1'
+    RETURNING COALESCE(serie, ''), longitud, ultimo_numero
+    INTO v_serie, v_longitud, v_numero;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Numerador % no existe o esta inactivo', UPPER(TRIM(p_codigo));
+    END IF;
+
+    RETURN v_serie || lpad(v_numero::text, v_longitud, '0');
+END;
+$$;
+
+COMMENT ON FUNCTION config.fn_siguiente_numerador(VARCHAR)
+    IS 'Obtiene el siguiente correlativo de config.numerador (UPDATE+1 con bloqueo de fila). Formato: serie + numero padded.';
+

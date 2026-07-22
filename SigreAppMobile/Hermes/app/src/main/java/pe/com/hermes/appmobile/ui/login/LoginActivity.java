@@ -185,7 +185,9 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                 if (!data.autorizado) {
                     AppUtils.toast(LoginActivity.this, getString(R.string.login_dispositivo_no_autorizado));
                 } else {
-                    AppUtils.toast(LoginActivity.this, "Perfiles actualizados y dispositivo revalidado.");
+                    String nro = data.nroRegistro != null ? data.nroRegistro : "";
+                    AppUtils.toast(LoginActivity.this,
+                            getString(R.string.splash_dispositivo_ok_nro, nro));
                 }
             }
 
@@ -198,10 +200,17 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
     }
 
     private void aplicarEstadoDispositivo() {
-        boolean listo = AppUtils.app(this).getDeviceRegistry().isDispositivoListo();
+        DeviceRegistry registry = AppUtils.app(this).getDeviceRegistry();
+        boolean listo = registry.isDispositivoListo();
         binding.btnLogin.setEnabled(listo);
         binding.etUsuario.setEnabled(listo);
         binding.etClave.setEnabled(listo);
+        String nro = registry.getNroRegistro();
+        if (nro != null && !nro.isBlank()) {
+            binding.tvNroRegistro.setText(getString(R.string.login_nro_registro, nro));
+        } else {
+            binding.tvNroRegistro.setText(R.string.login_nro_registro_pendiente);
+        }
     }
 
     private void intentarLogin() {

@@ -4436,6 +4436,20 @@ DO UPDATE SET permitido = EXCLUDED.permitido, flag_estado = '1';
 
 COMMIT;
 
+-- TX: Numerador de dispositivos moviles (config.numerador — BD security)
+BEGIN;
+
+INSERT INTO config.numerador (codigo, nombre, serie, ultimo_numero, longitud, flag_estado)
+VALUES ('DISPOSITIVO', 'Dispositivos móviles (Hermes / apps nativas)', 'DM', 0, 10, '1')
+ON CONFLICT (codigo) DO UPDATE SET
+    nombre = EXCLUDED.nombre,
+    serie = EXCLUDED.serie,
+    longitud = EXCLUDED.longitud,
+    flag_estado = EXCLUDED.flag_estado,
+    fec_modificacion = NOW();
+
+COMMIT;
+
 -- TX: Parametros SUNAT (config.configuracion — BD security)
 BEGIN;
 
