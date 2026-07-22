@@ -5,19 +5,18 @@ import lombok.Builder;
 import lombok.Getter;
 import java.time.OffsetDateTime;
 
-/** Fila del listado de dispositivos móviles en /admin. */
+/** Fila del listado de dispositivos móviles en /admin (maestro DEVICE_MOBILE). */
 @Getter
 @Builder
 @AllArgsConstructor
 public class DispositivoAdminDto {
     private long id;
     private String deviceId;
-    private String nroRegistro;
-    private String imei;
+    /** Última sesión emitida (informativo); el nro real vive en dispositivo_login. */
+    private String ultimoNroRegistro;
     private String fabricante;
     private String modelo;
     private String nombreDispositivo;
-    private String software;
     private boolean autorizado;
     private Long usuarioId;
     private String usuarioNombre;

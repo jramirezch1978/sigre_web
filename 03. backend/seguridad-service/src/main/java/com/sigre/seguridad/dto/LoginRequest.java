@@ -48,7 +48,7 @@ public class LoginRequest {
     @Size(max = 4096, message = "Token Turnstile demasiado largo")
     private String turnstileToken;
 
-    /** Nro de registro de auth.dispositivo — requerido solo en /api/auth/login/mobile. */
+    /** Nro de sesión (auth.dispositivo_login.nro_registro) — requerido en /api/auth/login/mobile. */
     @Size(max = 30, message = "Número de registro de dispositivo inválido")
     private String nroRegistroDispositivo;
 }

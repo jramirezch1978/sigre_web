@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-/** Respuesta del alta/consulta de dispositivo: el nro de registro que el cliente debe reenviar en cada login. */
+/** Respuesta del alta de dispositivo: nro de sesión (SEG_LOGIN_DEVICE) que el cliente reenvía en cada login. */
 @Getter
 @Builder
 @AllArgsConstructor

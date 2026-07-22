@@ -94,6 +94,7 @@ if /I "!MODE!"=="clone" set "DBDEPLOY_SCOPE=clone"
 if /I "!MODE!"=="patch-bluecoast" set "DBDEPLOY_SCOPE=patch-bluecoast"
 if /I "!MODE!"=="patch-cantabria" set "DBDEPLOY_SCOPE=patch-cantabria"
 if /I "!MODE!"=="patch-security-numerador" set "DBDEPLOY_SCOPE=patch-security-numerador"
+if /I "!MODE!"=="patch-security-dispositivo" set "DBDEPLOY_SCOPE=patch-security-dispositivo"
 if /I "!MODE!"=="delete" set "DBDEPLOY_SCOPE=delete"
 if /I "!MODE!"=="delete-dev" set "DBDEPLOY_SCOPE=delete-dev"
 if /I "!MODE!"=="tenant-grants" set "DBDEPLOY_SCOPE=tenant-grants"
@@ -118,6 +119,7 @@ if /I "!MODE!"=="clone" goto :route_clone
 if /I "!MODE!"=="patch-bluecoast" goto :route_patch_bluecoast
 if /I "!MODE!"=="patch-cantabria" goto :route_patch_cantabria
 if /I "!MODE!"=="patch-security-numerador" goto :route_patch_security_numerador
+if /I "!MODE!"=="patch-security-dispositivo" goto :route_patch_security_dispositivo
 if /I "!MODE!"=="delete" goto :route_delete
 if /I "!MODE!"=="delete-dev" goto :route_delete_dev
 if /I "!MODE!"=="tenant-grants" goto :route_tenant_grants
@@ -181,6 +183,11 @@ goto :done
 :route_patch_security_numerador
 call :check_host_docker_ddl || goto :fail
 call :do_patch_security_numerador || goto :fail
+goto :done
+
+:route_patch_security_dispositivo
+call :check_host_docker_ddl || goto :fail
+call :do_patch_security_dispositivo || goto :fail
 goto :done
 
 :route_delete
@@ -550,6 +557,23 @@ set "PGDATABASE=!SAVED_PGDATABASE!"
 echo ^>^> patch-security-numerador: OK
 exit /b 0
 
+:do_patch_security_dispositivo
+echo.
+echo ^>^> Modo: patch-security-dispositivo ^(sigre_security: DEVICE_MOBILE + SEG_LOGIN_DEVICE^)
+set "SAVED_PGDATABASE=!PGDATABASE!"
+set "PGDATABASE=!PGSECURITY!"
+call :run_sql "security/patches/01-config-numerador-dispositivo.sql" || (
+    set "PGDATABASE=!SAVED_PGDATABASE!"
+    exit /b 1
+)
+call :run_sql "security/patches/02-dispositivo-sesion-como-sigre.sql" || (
+    set "PGDATABASE=!SAVED_PGDATABASE!"
+    exit /b 1
+)
+set "PGDATABASE=!SAVED_PGDATABASE!"
+echo ^>^> patch-security-dispositivo: OK
+exit /b 0
+
 :is_protected_db
 set "PDB=%~1"
 powershell -NoProfile -Command "$d=$env:PDB.Trim().ToLower(); $x=@('postgres','template0','template1','sigre_security','sigre_template','sonarqube','db-sigre-web'); if($x -contains $d){exit 1}; exit 0"
@@ -649,6 +673,7 @@ echo   %~nx0 clone ^<empresa^>
 echo   %~nx0 patch-bluecoast           Sucursales + usuarios Blue Coast en sigre_emp_bluecoast
 echo   %~nx0 patch-cantabria           Restaura 4 sucursales en sigre_emp_cantabria
 echo   %~nx0 patch-security-numerador  config.numerador + fn + seed DISPOSITIVO en sigre_security
+echo   %~nx0 patch-security-dispositivo  auth.dispositivo + dispositivo_login como SIGRE
 echo   %~nx0 delete ^<nombre_bd^>
 echo   %~nx0 delete-dev              BDs que terminan en _dev
 echo   %~nx0 tenant-grants ^<bd^> ^<rol^>

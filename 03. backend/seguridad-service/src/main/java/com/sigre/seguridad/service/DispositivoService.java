@@ -16,15 +16,13 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Dispositivos móviles registrados (Hermes u otras apps nativas): permite loguear
- * vía /api/auth/login/mobile sin Cloudflare Turnstile, porque el equipo ya se
- * identificó una vez y quedó marcado como autorizado (o no) en {@code auth.dispositivo}.
- *
+ * Dispositivos móviles — modelo alineado a SIGRE:
  * <ul>
- *   <li>{@code auth.dispositivo} — maestro del equipo ({@code nro_registro} vía
- *       {@code config.fn_siguiente_numerador('DISPOSITIVO')}).</li>
- *   <li>{@code auth.dispositivo_login} — historial de sesiones (cada login mobile).</li>
+ *   <li>{@code auth.dispositivo} ≈ {@code DEVICE_MOBILE}: maestro del equipo (sin nro_registro).</li>
+ *   <li>{@code auth.dispositivo_login} ≈ {@code SEG_LOGIN_DEVICE}: sesiones con
+ *       {@code nro_registro} autonumérico ({@code config.fn_siguiente_numerador('DISPOSITIVO')}).</li>
  * </ul>
+ * Un mismo equipo puede tener muchas sesiones; el correlativo vive en la sesión.
  */
 @Service
 @RequiredArgsConstructor
@@ -34,40 +32,96 @@ public class DispositivoService {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public record DispositivoRow(long id, boolean autorizado) {}
+    public record DispositivoRow(long id, String deviceId, boolean autorizado) {}
 
-    /** Alta idempotente por device_id: si ya existe, devuelve su nro_registro/autorizacion actuales. */
+    /**
+     * Alta del maestro por {@code device_id} + apertura/reutilización de sesión abierta
+     * (como {@code registraDevice} de FastSales / SIGRE).
+     * <p>
+     * Si ya hay una sesión sin {@code fec_logout} para ese equipo, reutiliza su
+     * {@code nro_registro}; si no, emite uno nuevo vía numerador.
+     */
     @Transactional
     public DispositivoRegistradoResponse registrar(RegistrarDispositivoRequest req) {
-        List<DispositivoRegistradoResponse> existentes = jdbcTemplate.query(
-                "SELECT nro_registro, flag_autorizado FROM auth.dispositivo WHERE device_id = ?",
-                (rs, rowNum) -> DispositivoRegistradoResponse.builder()
-                        .nroRegistro(rs.getString("nro_registro"))
-                        .autorizado("1".equals(rs.getString("flag_autorizado")))
-                        .build(),
-                req.getDeviceId());
-        if (!existentes.isEmpty()) {
-            return existentes.get(0);
-        }
+        long dispositivoId = upsertDispositivo(req);
+        boolean autorizado = esAutorizado(dispositivoId);
 
-        String nroRegistro = siguienteNroRegistro();
-
-        jdbcTemplate.update(
-                """
-                INSERT INTO auth.dispositivo
-                    (device_id, nro_registro, imei, fabricante, modelo, nombre_dispositivo, software, flag_autorizado)
-                VALUES (?, ?, ?, ?, ?, ?, ?, '1')
-                """,
-                req.getDeviceId(), nroRegistro, req.getImei(), req.getFabricante(),
-                req.getModelo(), req.getNombreDispositivo(), req.getSoftware());
+        Optional<String> nroAbierto = buscarNroSesionAbierta(req.getDeviceId());
+        String nroRegistro = nroAbierto.orElseGet(() -> abrirSesion(dispositivoId, req));
 
         return DispositivoRegistradoResponse.builder()
                 .nroRegistro(nroRegistro)
-                .autorizado(true)
+                .autorizado(autorizado)
                 .build();
     }
 
-    /** Correlativo DM########## desde config.numerador (FOR UPDATE implícito en el UPDATE de la función). */
+    private long upsertDispositivo(RegistrarDispositivoRequest req) {
+        List<Long> ids = jdbcTemplate.query(
+                "SELECT id FROM auth.dispositivo WHERE device_id = ?",
+                (rs, rowNum) -> rs.getLong("id"),
+                req.getDeviceId());
+        if (!ids.isEmpty()) {
+            long id = ids.get(0);
+            jdbcTemplate.update(
+                    """
+                    UPDATE auth.dispositivo
+                    SET nombre_dispositivo = ?,
+                        fabricante = ?,
+                        modelo = ?,
+                        fec_modificacion = NOW()
+                    WHERE id = ?
+                    """,
+                    req.getNombreDispositivo(), req.getFabricante(), req.getModelo(), id);
+            return id;
+        }
+
+        return jdbcTemplate.queryForObject(
+                """
+                INSERT INTO auth.dispositivo
+                    (device_id, nombre_dispositivo, fabricante, modelo, flag_autorizado)
+                VALUES (?, ?, ?, ?, '1')
+                RETURNING id
+                """,
+                Long.class,
+                req.getDeviceId(), req.getNombreDispositivo(), req.getFabricante(), req.getModelo());
+    }
+
+    private boolean esAutorizado(long dispositivoId) {
+        String flag = jdbcTemplate.queryForObject(
+                "SELECT flag_autorizado FROM auth.dispositivo WHERE id = ?",
+                String.class,
+                dispositivoId);
+        return "1".equals(flag);
+    }
+
+    private Optional<String> buscarNroSesionAbierta(String deviceId) {
+        List<String> rows = jdbcTemplate.query(
+                """
+                SELECT nro_registro
+                FROM auth.dispositivo_login
+                WHERE device_id = ? AND fec_logout IS NULL
+                ORDER BY fec_registro DESC
+                LIMIT 1
+                """,
+                (rs, rowNum) -> rs.getString("nro_registro"),
+                deviceId);
+        return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
+    }
+
+    private String abrirSesion(long dispositivoId, RegistrarDispositivoRequest req) {
+        String nroRegistro = siguienteNroRegistro();
+        jdbcTemplate.update(
+                """
+                INSERT INTO auth.dispositivo_login
+                    (nro_registro, dispositivo_id, device_id, imei, software,
+                     nombre_dispositivo, fabricante, modelo, fec_registro)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                """,
+                nroRegistro, dispositivoId, req.getDeviceId(), req.getImei(), req.getSoftware(),
+                req.getNombreDispositivo(), req.getFabricante(), req.getModelo());
+        return nroRegistro;
+    }
+
     private String siguienteNroRegistro() {
         try {
             String nro = jdbcTemplate.queryForObject(
@@ -76,7 +130,7 @@ public class DispositivoService {
                     NUMERADOR_DISPOSITIVO);
             if (nro == null || nro.isBlank()) {
                 throw new BusinessException(
-                        "No se pudo obtener el número de registro del dispositivo",
+                        "No se pudo obtener el número de registro de la sesión del dispositivo",
                         HttpStatus.INTERNAL_SERVER_ERROR,
                         "NUMERADOR_DISPOSITIVO_VACIO");
             }
@@ -85,51 +139,88 @@ public class DispositivoService {
             throw ex;
         } catch (Exception ex) {
             throw new BusinessException(
-                    "Numerador DISPOSITIVO no disponible. Ejecute create-security / seed de security.",
+                    "Numerador DISPOSITIVO no disponible. Ejecute patch-security-numerador / create-security.",
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "NUMERADOR_DISPOSITIVO_NO_CONFIGURADO");
         }
     }
 
+    /**
+     * Resuelve la sesión ({@code nro_registro}) y el estado de autorización del maestro.
+     */
     public Optional<DispositivoRow> buscarPorNroRegistro(String nroRegistro) {
         List<DispositivoRow> rows = jdbcTemplate.query(
-                "SELECT id, flag_autorizado FROM auth.dispositivo WHERE nro_registro = ?",
-                (rs, rowNum) -> new DispositivoRow(rs.getLong("id"), "1".equals(rs.getString("flag_autorizado"))),
+                """
+                SELECT d.id, d.device_id, d.flag_autorizado
+                FROM auth.dispositivo_login dl
+                INNER JOIN auth.dispositivo d ON d.id = dl.dispositivo_id
+                WHERE dl.nro_registro = ?
+                """,
+                (rs, rowNum) -> new DispositivoRow(
+                        rs.getLong("id"),
+                        rs.getString("device_id"),
+                        "1".equals(rs.getString("flag_autorizado"))),
                 nroRegistro);
         return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
     }
 
     /**
-     * Registra un inicio de sesión del dispositivo: actualiza el "último login" en
-     * auth.dispositivo (lectura rápida) Y agrega una fila en auth.dispositivo_login
-     * (historial completo) — equivalente a registerLogin() de FastSales.
+     * {@code registerLogin} de FastSales: marca usuario + fec_login en la sesión
+     * y actualiza fec_ultimo_login del maestro.
      */
     @Transactional
-    public void registrarLogin(long dispositivoId, Long usuarioId) {
+    public void registrarLogin(String nroRegistro, Long usuarioId) {
         OffsetDateTime ahora = OffsetDateTime.now();
+        int updated = jdbcTemplate.update(
+                """
+                UPDATE auth.dispositivo_login
+                SET usuario_id = ?, fec_login = ?, fec_logout = NULL
+                WHERE nro_registro = ?
+                """,
+                usuarioId, ahora, nroRegistro);
+        if (updated == 0) {
+            throw new BusinessException(
+                    "Sesión de dispositivo no encontrada",
+                    HttpStatus.FORBIDDEN,
+                    "DISPOSITIVO_NO_REGISTRADO");
+        }
         jdbcTemplate.update(
-                "UPDATE auth.dispositivo SET usuario_id = ?, fec_ultimo_login = ? WHERE id = ?",
-                usuarioId, ahora, dispositivoId);
-        jdbcTemplate.update(
-                "INSERT INTO auth.dispositivo_login (dispositivo_id, usuario_id, fec_login) VALUES (?, ?, ?)",
-                dispositivoId, usuarioId, ahora);
+                """
+                UPDATE auth.dispositivo d
+                SET fec_ultimo_login = ?, fec_modificacion = NOW()
+                FROM auth.dispositivo_login dl
+                WHERE dl.nro_registro = ? AND d.id = dl.dispositivo_id
+                """,
+                ahora, nroRegistro);
     }
 
-    /** Historial completo de logins de un dispositivo (más reciente primero), para el admin. */
+    /** Cierra la sesión abierta (equivalente a {@code registerLogout} de FastSales). */
+    @Transactional
+    public void registrarLogout(String nroRegistro) {
+        jdbcTemplate.update(
+                "UPDATE auth.dispositivo_login SET fec_logout = NOW() WHERE nro_registro = ? AND fec_logout IS NULL",
+                nroRegistro);
+    }
+
     public List<DispositivoLoginDto> listarLogins(long dispositivoId) {
         return jdbcTemplate.query(
                 """
-                SELECT dl.id, dl.usuario_id, u.nombre_completo AS usuario_nombre, dl.fec_login
+                SELECT dl.nro_registro, dl.usuario_id, u.nombre_completo AS usuario_nombre,
+                       dl.imei, dl.software, dl.fec_login, dl.fec_logout, dl.fec_registro
                 FROM auth.dispositivo_login dl
                 LEFT JOIN auth.usuario u ON u.id = dl.usuario_id
                 WHERE dl.dispositivo_id = ?
-                ORDER BY dl.fec_login DESC
+                ORDER BY dl.fec_registro DESC
                 """,
                 (rs, rowNum) -> DispositivoLoginDto.builder()
-                        .id(rs.getLong("id"))
+                        .nroRegistro(rs.getString("nro_registro"))
                         .usuarioId(rs.getObject("usuario_id") != null ? rs.getLong("usuario_id") : null)
                         .usuarioNombre(rs.getString("usuario_nombre"))
+                        .imei(rs.getString("imei"))
+                        .software(rs.getString("software"))
                         .fecLogin(rs.getObject("fec_login", OffsetDateTime.class))
+                        .fecLogout(rs.getObject("fec_logout", OffsetDateTime.class))
+                        .fecRegistro(rs.getObject("fec_registro", OffsetDateTime.class))
                         .build(),
                 dispositivoId);
     }
@@ -137,23 +228,33 @@ public class DispositivoService {
     public List<DispositivoAdminDto> listar() {
         return jdbcTemplate.query(
                 """
-                SELECT d.id, d.device_id, d.nro_registro, d.imei, d.fabricante, d.modelo,
-                       d.nombre_dispositivo, d.software, d.flag_autorizado,
-                       d.usuario_id, u.nombre_completo AS usuario_nombre,
-                       d.fec_registro, d.fec_ultimo_login
+                SELECT d.id, d.device_id, d.fabricante, d.modelo, d.nombre_dispositivo,
+                       d.flag_autorizado, d.fec_registro, d.fec_ultimo_login,
+                       u.nombre_completo AS usuario_nombre,
+                       u.id AS usuario_id,
+                       (SELECT dl.nro_registro
+                          FROM auth.dispositivo_login dl
+                         WHERE dl.dispositivo_id = d.id
+                         ORDER BY dl.fec_registro DESC
+                         LIMIT 1) AS ultimo_nro_registro
                 FROM auth.dispositivo d
-                LEFT JOIN auth.usuario u ON u.id = d.usuario_id
+                LEFT JOIN LATERAL (
+                    SELECT dl2.usuario_id
+                    FROM auth.dispositivo_login dl2
+                    WHERE dl2.dispositivo_id = d.id AND dl2.usuario_id IS NOT NULL
+                    ORDER BY COALESCE(dl2.fec_login, dl2.fec_registro) DESC
+                    LIMIT 1
+                ) ult ON TRUE
+                LEFT JOIN auth.usuario u ON u.id = ult.usuario_id
                 ORDER BY d.fec_registro DESC
                 """,
                 (rs, rowNum) -> DispositivoAdminDto.builder()
                         .id(rs.getLong("id"))
                         .deviceId(rs.getString("device_id"))
-                        .nroRegistro(rs.getString("nro_registro"))
-                        .imei(rs.getString("imei"))
+                        .ultimoNroRegistro(rs.getString("ultimo_nro_registro"))
                         .fabricante(rs.getString("fabricante"))
                         .modelo(rs.getString("modelo"))
                         .nombreDispositivo(rs.getString("nombre_dispositivo"))
-                        .software(rs.getString("software"))
                         .autorizado("1".equals(rs.getString("flag_autorizado")))
                         .usuarioId(rs.getObject("usuario_id") != null ? rs.getLong("usuario_id") : null)
                         .usuarioNombre(rs.getString("usuario_nombre"))
@@ -165,7 +266,7 @@ public class DispositivoService {
     @Transactional
     public void actualizarAutorizacion(long id, boolean autorizado) {
         jdbcTemplate.update(
-                "UPDATE auth.dispositivo SET flag_autorizado = ? WHERE id = ?",
+                "UPDATE auth.dispositivo SET flag_autorizado = ?, fec_modificacion = NOW() WHERE id = ?",
                 autorizado ? "1" : "0", id);
     }
 }

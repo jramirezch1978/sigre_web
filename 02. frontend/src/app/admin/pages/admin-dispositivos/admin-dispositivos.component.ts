@@ -58,7 +58,8 @@ export class AdminDispositivosComponent extends AdminTablaPageBase<DispositivoAd
     if (!this.filtro.trim()) return this.dispositivos;
     const q = this.filtro.toLowerCase();
     return this.dispositivos.filter(d =>
-      d.nroRegistro?.toLowerCase().includes(q)
+      d.deviceId?.toLowerCase().includes(q)
+      || d.ultimoNroRegistro?.toLowerCase().includes(q)
       || d.nombreDispositivo?.toLowerCase().includes(q)
       || d.fabricante?.toLowerCase().includes(q)
       || d.modelo?.toLowerCase().includes(q)
@@ -67,7 +68,7 @@ export class AdminDispositivosComponent extends AdminTablaPageBase<DispositivoAd
   }
 
   async confirmarCambioAutorizacion(d: DispositivoAdminDto, autorizar: boolean): Promise<void> {
-    const nombre = this.escapeHtmlLite(d.nombreDispositivo ?? d.nroRegistro);
+    const nombre = this.escapeHtmlLite(d.nombreDispositivo ?? d.deviceId);
     const confirmed = await this.sigreModal.confirm({
       titulo: autorizar ? 'Autorizar dispositivo' : 'Revocar dispositivo',
       mensaje: autorizar

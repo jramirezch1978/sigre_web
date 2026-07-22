@@ -49,6 +49,8 @@ CREATE SCHEMA IF NOT EXISTS auditoria;
 -- ============================================================
 
 DROP TABLE IF EXISTS auth.token_uso_log CASCADE;
+DROP TABLE IF EXISTS auth.dispositivo_login CASCADE;
+DROP TABLE IF EXISTS auth.dispositivo CASCADE;
 DROP TABLE IF EXISTS auth.codigo_recuperacion CASCADE;
 DROP TABLE IF EXISTS auth.notificacion CASCADE;
 DROP TABLE IF EXISTS auth.grupo_usuario_det CASCADE;
@@ -302,50 +304,61 @@ CREATE TABLE auth.tokens_session (
 CREATE UNIQUE INDEX uq_tokens_session_activa_triple ON auth.tokens_session (usuario_id, empresa_id, sucursal_id)
     WHERE flag_estado = '1';
 
--- Dispositivos moviles registrados (apps nativas tipo Hermes): permite loguear sin
--- Cloudflare Turnstile (/api/auth/login/mobile) porque el equipo ya se identifico y
--- fue autorizado antes. flag_autorizado nace en '1' (autorizado) y un admin lo puede
--- pasar a '0' desde /admin si el equipo se pierde o se quiere revocar.
--- nro_registro: correlativo via config.fn_siguiente_numerador('DISPOSITIVO') → DM##########.
+-- ============================================================
+-- Dispositivos moviles — espejo de SIGRE:
+--   DEVICE_MOBILE      → auth.dispositivo       (maestro del equipo, PK business = device_id)
+--   SEG_LOGIN_DEVICE   → auth.dispositivo_login (sesiones; PK = nro_registro autonumerico)
+--
+-- Un dispositivo inicia sesion N veces: el nro_registro vive en la sesion, NO en el maestro.
+-- flag_autorizado (extension SIGRE) nace en '1'; admin puede revocar desde /admin.
+-- ============================================================
 CREATE TABLE auth.dispositivo (
     id BIGSERIAL PRIMARY KEY,
-    device_id VARCHAR(120) NOT NULL UNIQUE,
-    nro_registro VARCHAR(30) NOT NULL UNIQUE,
-    imei VARCHAR(50),
-    fabricante VARCHAR(100),
-    modelo VARCHAR(100),
+    device_id VARCHAR(200) NOT NULL,
     nombre_dispositivo VARCHAR(200),
-    software VARCHAR(100),
-    usuario_id BIGINT REFERENCES auth.usuario(id),
+    fabricante VARCHAR(200),
+    modelo VARCHAR(200),
     flag_autorizado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_autorizado IN ('0', '1')),
     fec_registro TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     fec_ultimo_login TIMESTAMPTZ,
     fec_creacion TIMESTAMPTZ DEFAULT NOW(),
     fec_modificacion TIMESTAMPTZ,
     created_by BIGINT,
-    updated_by BIGINT
+    updated_by BIGINT,
+    CONSTRAINT uq_dispositivo_device_id UNIQUE (device_id)
 );
 
-CREATE INDEX ix_dispositivo_nro_registro ON auth.dispositivo (nro_registro);
-
 COMMENT ON TABLE auth.dispositivo IS
-    'Maestro de equipos moviles. nro_registro sale de config.numerador DISPOSITIVO; flag_autorizado default 1.';
+    'Maestro de equipos moviles (SIGRE DEVICE_MOBILE). Sin nro_registro: ese correlativo es de la sesion.';
 
--- Sesiones / inicios de sesion por dispositivo (equivalente a registerLogin de FastSales):
--- auth.dispositivo.fec_ultimo_login solo guarda el ULTIMO login; esta tabla guarda TODOS,
--- uno por fila (dispositivo + usuario + fecha), al llamar /auth/login/mobile.
+-- Sesiones de dispositivo (SIGRE SEG_LOGIN_DEVICE):
+-- nro_registro = config.fn_siguiente_numerador('DISPOSITIVO') → DM##########
+-- Se crea en POST /dispositivo/registrar; login/logout actualizan fec_login / fec_logout.
 CREATE TABLE auth.dispositivo_login (
-    id BIGSERIAL PRIMARY KEY,
+    nro_registro VARCHAR(15) PRIMARY KEY,
     dispositivo_id BIGINT NOT NULL REFERENCES auth.dispositivo(id),
+    device_id VARCHAR(200) NOT NULL,
+    imei VARCHAR(200),
+    software VARCHAR(200),
+    nombre_dispositivo VARCHAR(200),
+    fabricante VARCHAR(200),
+    modelo VARCHAR(200),
     usuario_id BIGINT REFERENCES auth.usuario(id),
-    fec_login TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    fec_login TIMESTAMPTZ,
+    fec_logout TIMESTAMPTZ,
+    fec_registro TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_dispositivo_login_device
+        FOREIGN KEY (device_id) REFERENCES auth.dispositivo(device_id)
 );
 
 COMMENT ON TABLE auth.dispositivo_login IS
-    'Historial de sesiones de dispositivos (cada login mobile = 1 fila).';
+    'Sesiones de dispositivos moviles (SIGRE SEG_LOGIN_DEVICE). PK = nro_registro autonumerico.';
 
-CREATE INDEX ix_dispositivo_login_dispositivo ON auth.dispositivo_login (dispositivo_id, fec_login DESC);
+CREATE INDEX ix_dispositivo_login_dispositivo ON auth.dispositivo_login (dispositivo_id, fec_registro DESC);
+CREATE INDEX ix_dispositivo_login_device ON auth.dispositivo_login (device_id, fec_registro DESC);
 CREATE INDEX ix_dispositivo_login_usuario ON auth.dispositivo_login (usuario_id);
+CREATE INDEX ix_dispositivo_login_abierta ON auth.dispositivo_login (device_id)
+    WHERE fec_logout IS NULL;
 
 CREATE TABLE auth.codigo_recuperacion (
     id BIGSERIAL PRIMARY KEY,

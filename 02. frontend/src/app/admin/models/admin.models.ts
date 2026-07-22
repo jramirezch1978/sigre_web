@@ -137,16 +137,15 @@ export interface EmpresaAdminDto {
   activo?: boolean;
 }
 
-/** GET /auth/seguridad/admin/dispositivos — dispositivos móviles registrados (Hermes). */
+/** GET /auth/seguridad/admin/dispositivos — maestro DEVICE_MOBILE (sin nro_registro). */
 export interface DispositivoAdminDto {
   id: number;
   deviceId: string;
-  nroRegistro: string;
-  imei?: string;
+  /** Última sesión emitida (informativo). */
+  ultimoNroRegistro?: string;
   fabricante?: string;
   modelo?: string;
   nombreDispositivo?: string;
-  software?: string;
   autorizado: boolean;
   usuarioId?: number;
   usuarioNombre?: string;
@@ -154,11 +153,16 @@ export interface DispositivoAdminDto {
   fecUltimoLogin?: string;
 }
 
+/** Sesión SEG_LOGIN_DEVICE — historial por dispositivo. */
 export interface DispositivoLoginDto {
-  id: number;
+  nroRegistro: string;
   usuarioId?: number;
   usuarioNombre?: string;
-  fecLogin: string;
+  imei?: string;
+  software?: string;
+  fecLogin?: string;
+  fecLogout?: string;
+  fecRegistro: string;
 }
 
 /** Payload PUT /auth/seguridad/empresas/{id} */

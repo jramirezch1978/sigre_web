@@ -132,10 +132,10 @@ public class AuthServiceImpl implements AuthService {
                     HttpStatus.FORBIDDEN, "DISPOSITIVO_NO_AUTORIZADO");
         }
 
-        log.info("[LOGIN-MOBILE] Autenticación sin Turnstile vía dispositivo autorizado: email={} dispositivo={}",
-                request.getEmail(), nroRegistro);
+        log.info("[LOGIN-MOBILE] Autenticación sin Turnstile vía dispositivo autorizado: email={} nroRegistro={} deviceId={}",
+                request.getEmail(), nroRegistro, dispositivo.deviceId());
         LoginResponse response = doLogin(request);
-        dispositivoService.registrarLogin(dispositivo.id(), response.getUserId());
+        dispositivoService.registrarLogin(nroRegistro, response.getUserId());
         return response;
     }
 

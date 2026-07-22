@@ -50,8 +50,8 @@ public class AuthController {
     }
 
     /**
-     * Alta (o re-consulta idempotente si el deviceId ya existe) de un dispositivo móvil.
-     * Nace autorizado (flag_autorizado='1'); un admin puede revocarlo desde /admin/dispositivos.
+     * Alta del maestro (DEVICE_MOBILE) + apertura/reutilización de sesión (SEG_LOGIN_DEVICE).
+     * El nro_registro retornado es de la sesión, no del dispositivo. Nace autorizado.
      */
     @PostMapping("/dispositivo/registrar")
     public ApiResponse<DispositivoRegistradoResponse> registrarDispositivo(

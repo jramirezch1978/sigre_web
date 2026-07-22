@@ -4440,7 +4440,7 @@ COMMIT;
 BEGIN;
 
 INSERT INTO config.numerador (codigo, nombre, serie, ultimo_numero, longitud, flag_estado)
-VALUES ('DISPOSITIVO', 'Dispositivos móviles (Hermes / apps nativas)', 'DM', 0, 10, '1')
+VALUES ('DISPOSITIVO', 'Sesiones de dispositivos móviles (SEG_LOGIN_DEVICE / Hermes)', 'DM', 0, 10, '1')
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,
     serie = EXCLUDED.serie,
