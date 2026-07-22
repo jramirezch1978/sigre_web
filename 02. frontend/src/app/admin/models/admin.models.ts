@@ -146,6 +146,8 @@ export interface DispositivoAdminDto {
   fabricante?: string;
   modelo?: string;
   nombreDispositivo?: string;
+  ipPublica?: string;
+  ipPrivada?: string;
   autorizado: boolean;
   usuarioId?: number;
   usuarioNombre?: string;
@@ -160,6 +162,8 @@ export interface DispositivoLoginDto {
   usuarioNombre?: string;
   imei?: string;
   software?: string;
+  ipPublica?: string;
+  ipPrivada?: string;
   fecLogin?: string;
   fecLogout?: string;
   fecRegistro: string;

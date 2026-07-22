@@ -1,5 +1,6 @@
 package com.sigre.seguridad.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -55,8 +56,25 @@ public class AuthController {
      */
     @PostMapping("/dispositivo/registrar")
     public ApiResponse<DispositivoRegistradoResponse> registrarDispositivo(
-            @Valid @RequestBody RegistrarDispositivoRequest request) {
+            @Valid @RequestBody RegistrarDispositivoRequest request,
+            HttpServletRequest httpRequest) {
+        // Si el cliente no pudo resolver la IP pública, usar la vista por el gateway/proxy.
+        if (request.getIpPublica() == null || request.getIpPublica().isBlank()) {
+            request.setIpPublica(resolveClientIp(httpRequest));
+        }
         return ApiResponse.ok(dispositivoService.registrar(request), "Dispositivo registrado");
+    }
+
+    private static String resolveClientIp(HttpServletRequest request) {
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        if (forwardedFor != null && !forwardedFor.isBlank()) {
+            return forwardedFor.split(",")[0].trim();
+        }
+        String realIp = request.getHeader("X-Real-IP");
+        if (realIp != null && !realIp.isBlank()) {
+            return realIp.trim();
+        }
+        return request.getRemoteAddr();
     }
 
     /**

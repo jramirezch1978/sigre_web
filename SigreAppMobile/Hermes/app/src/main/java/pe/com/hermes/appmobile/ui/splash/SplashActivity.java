@@ -1,13 +1,15 @@
 package pe.com.hermes.appmobile.ui.splash;
 
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import pe.com.hermes.appmobile.R;
 import pe.com.hermes.appmobile.data.config.ServerProfile;
+import pe.com.hermes.appmobile.data.device.DevicePermissions;
+import pe.com.hermes.appmobile.data.device.DeviceRegistrationFactory;
 import pe.com.hermes.appmobile.data.device.DeviceRegistry;
 import pe.com.hermes.appmobile.data.remote.dto.DispositivoRegistradoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
@@ -24,16 +26,13 @@ import pe.com.hermes.common.util.AsyncRunner;
 
 /**
  * Pantalla de inicio — equivalente al bloque previo al login de FastSales
- * (validar servidor + registrar dispositivo antes de mostrar credenciales):
- *   1) Carga la configuración de servidores.
- *   2) Verifica conectividad con el servidor por defecto.
- *   3) Registra/revalida el dispositivo contra POST /auth/dispositivo/registrar.
- *   4) Solo navega si el registro fue exitoso y el equipo está autorizado.
+ * (permisos + validar servidor + registrar dispositivo antes de credenciales).
  */
 public class SplashActivity extends AppCompatActivity {
 
     private ActivitySplashBinding binding;
     private boolean registrando;
+    private boolean permisosSolicitados;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +45,22 @@ public class SplashActivity extends AppCompatActivity {
         binding.btnConfigurarServidor.setOnClickListener(v ->
                 startActivity(new Intent(this, ServidorListActivity.class)));
 
-        iniciarValidacion();
+        binding.tvEstado.setText(R.string.splash_solicitando_permisos);
+        if (DevicePermissions.solicitarSiFalta(this)) {
+            iniciarValidacion();
+        } else {
+            permisosSolicitados = true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == DevicePermissions.REQUEST_CODE && permisosSolicitados) {
+            permisosSolicitados = false;
+            iniciarValidacion();
+        }
     }
 
     @Override
@@ -54,7 +68,8 @@ public class SplashActivity extends AppCompatActivity {
         super.onResume();
         if (binding.grupoAcciones.getVisibility() == View.VISIBLE
                 && binding.btnConfigurarServidor.getVisibility() == View.VISIBLE
-                && !registrando) {
+                && !registrando
+                && !permisosSolicitados) {
             iniciarValidacion();
         }
     }
@@ -106,19 +121,29 @@ public class SplashActivity extends AppCompatActivity {
         );
     }
 
-    /** Siempre llama al backend (idempotente) para obtener nroRegistro y estado de autorización actual. */
+    /** Recolecta IPs/IMEI en background y registra/revalida el dispositivo. */
     private void registrarDispositivo() {
         registrando = true;
         binding.tvEstado.setText(R.string.splash_registrando_dispositivo);
 
-        DeviceRegistry registry = AppUtils.app(this).getDeviceRegistry();
-        RegistrarDispositivoRequest request = new RegistrarDispositivoRequest(
-                registry.obtenerDeviceId(this),
-                Build.MANUFACTURER,
-                Build.MODEL,
-                Build.MANUFACTURER + " " + Build.MODEL,
-                "Android " + Build.VERSION.RELEASE);
+        AsyncRunner.ejecutar(
+                () -> DeviceRegistrationFactory.crear(this),
+                new AsyncRunner.OnResultado<RegistrarDispositivoRequest>() {
+                    @Override
+                    public void onExito(RegistrarDispositivoRequest request) {
+                        enviarRegistro(request);
+                    }
 
+                    @Override
+                    public void onError(Exception error) {
+                        enviarRegistro(DeviceRegistrationFactory.crear(SplashActivity.this));
+                    }
+                }
+        );
+    }
+
+    private void enviarRegistro(RegistrarDispositivoRequest request) {
+        DeviceRegistry registry = AppUtils.app(this).getDeviceRegistry();
         AuthRepository authRepository = new AuthRepository(
                 AppUtils.app(this).getApiClient(),
                 AppUtils.app(this).getSession());

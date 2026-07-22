@@ -2,13 +2,13 @@ package pe.com.hermes.appmobile.ui.login;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import pe.com.hermes.appmobile.R;
 import pe.com.hermes.appmobile.data.config.ServerProfile;
+import pe.com.hermes.appmobile.data.device.DeviceRegistrationFactory;
 import pe.com.hermes.appmobile.data.device.DeviceRegistry;
 import pe.com.hermes.appmobile.data.ping.ConnectionMonitor;
 import pe.com.hermes.appmobile.data.ping.PingHistoryStore;
@@ -24,6 +24,7 @@ import pe.com.hermes.appmobile.ui.ping.PingMonitorDialog;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
 import pe.com.hermes.appmobile.util.AppVersion;
+import pe.com.hermes.common.util.AsyncRunner;
 
 /** Pantalla de ingreso. El login SIEMPRE devuelve un token temporal (ver AuthServiceImpl.login) —
  * la seleccion de empresa/sucursal ocurre siempre despues, nunca se salta (a diferencia de
@@ -172,10 +173,23 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
 
     private void registrarNuevaSesionDispositivo() {
         mostrarCargandoRefrescar(true);
-        String deviceId = AppUtils.app(this).getDeviceRegistry().obtenerDeviceId(this);
-        RegistrarDispositivoRequest request = new RegistrarDispositivoRequest(
-                deviceId, Build.MANUFACTURER, Build.MODEL, Build.MANUFACTURER + " " + Build.MODEL,
-                "Android " + Build.VERSION.RELEASE);
+        AsyncRunner.ejecutar(
+                () -> DeviceRegistrationFactory.crear(this),
+                new AsyncRunner.OnResultado<RegistrarDispositivoRequest>() {
+                    @Override
+                    public void onExito(RegistrarDispositivoRequest request) {
+                        enviarRegistroDispositivo(request);
+                    }
+
+                    @Override
+                    public void onError(Exception error) {
+                        enviarRegistroDispositivo(DeviceRegistrationFactory.crear(LoginActivity.this));
+                    }
+                }
+        );
+    }
+
+    private void enviarRegistroDispositivo(RegistrarDispositivoRequest request) {
         authRepository.registrarDispositivo(request, new ResultCallback<DispositivoRegistradoResponse>() {
             @Override
             public void onSuccess(DispositivoRegistradoResponse data) {

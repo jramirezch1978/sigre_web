@@ -17,6 +17,8 @@ public class DispositivoAdminDto {
     private String fabricante;
     private String modelo;
     private String nombreDispositivo;
+    private String ipPublica;
+    private String ipPrivada;
     private boolean autorizado;
     private Long usuarioId;
     private String usuarioNombre;

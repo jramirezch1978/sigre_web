@@ -63,6 +63,8 @@ export class AdminDispositivosComponent extends AdminTablaPageBase<DispositivoAd
       || d.nombreDispositivo?.toLowerCase().includes(q)
       || d.fabricante?.toLowerCase().includes(q)
       || d.modelo?.toLowerCase().includes(q)
+      || d.ipPublica?.toLowerCase().includes(q)
+      || d.ipPrivada?.toLowerCase().includes(q)
       || d.usuarioNombre?.toLowerCase().includes(q)
     );
   }

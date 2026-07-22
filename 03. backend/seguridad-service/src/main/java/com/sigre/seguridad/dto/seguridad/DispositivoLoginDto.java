@@ -15,6 +15,8 @@ public class DispositivoLoginDto {
     private String usuarioNombre;
     private String imei;
     private String software;
+    private String ipPublica;
+    private String ipPrivada;
     private OffsetDateTime fecLogin;
     private OffsetDateTime fecLogout;
     private OffsetDateTime fecRegistro;

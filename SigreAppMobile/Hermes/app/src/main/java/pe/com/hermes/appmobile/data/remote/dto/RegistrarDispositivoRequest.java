@@ -8,6 +8,8 @@ public class RegistrarDispositivoRequest {
     public String modelo;
     public String nombreDispositivo;
     public String software;
+    public String ipPublica;
+    public String ipPrivada;
 
     public RegistrarDispositivoRequest(String deviceId, String fabricante, String modelo,
                                         String nombreDispositivo, String software) {
