@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -43,9 +45,9 @@ public class TenantHealthService {
         this.emailService = emailService;
     }
 
-    private record TenantDato(long id, String razonSocial, String dbName, String dbHost, int dbPort) {}
+    private record TenantDato(long id, String razonSocial, String dbName, String dbHost, int dbPort, String correoContacto) {}
 
-    /** Revisa todos los tenants activos; envía correo a los admins de los que acaban de volver en línea. */
+    /** Revisa todos los tenants activos; envía correo a correo_contacto + todos los usuarios de los que acaban de volver en línea. */
     public void verificarYNotificar() {
         for (TenantDato t : listarTenantsActivos()) {
             boolean enLinea = probarConexion(t);
@@ -53,8 +55,8 @@ public class TenantHealthService {
             boolean transicionAOnline = enLinea && anterior != null && !anterior;
             if (transicionAOnline) {
                 log.info("[tenant-health] '{}' volvió a estar en línea", t.razonSocial());
-                List<String> admins = correosAdministradores(t.id());
-                emailService.enviarBaseDatosDisponible(admins, t.razonSocial(), t.dbName());
+                List<String> destinatarios = correosNotificacion(t);
+                emailService.enviarBaseDatosDisponible(destinatarios, t.razonSocial(), t.dbName());
             }
         }
     }
@@ -62,7 +64,7 @@ public class TenantHealthService {
     private List<TenantDato> listarTenantsActivos() {
         return jdbcTemplate.query(
                 """
-                SELECT id, razon_social, db_name, db_host, db_port
+                SELECT id, razon_social, db_name, db_host, db_port, correo_contacto
                 FROM master.empresa
                 WHERE flag_estado = '1'
                 ORDER BY id
@@ -72,7 +74,8 @@ public class TenantHealthService {
                         rs.getString("razon_social"),
                         rs.getString("db_name"),
                         rs.getString("db_host"),
-                        rs.getInt("db_port")));
+                        rs.getInt("db_port"),
+                        rs.getString("correo_contacto")));
     }
 
     private boolean probarConexion(TenantDato t) {
@@ -94,18 +97,28 @@ public class TenantHealthService {
         }
     }
 
-    /** Correos de administradores activos de una empresa (mismo criterio que SeguridadService.usuarioEsAdminEmpresa). */
-    private List<String> correosAdministradores(long empresaId) {
+    /**
+     * Destinatarios del aviso: correo_contacto de la empresa (si tiene) + el correo de
+     * TODOS los usuarios activos asociados a ella (no solo administradores) — a pedido
+     * explícito, para que se entere cualquiera con cuenta en esa empresa.
+     */
+    private List<String> correosNotificacion(TenantDato t) {
+        Set<String> destinatarios = new LinkedHashSet<>();
+        if (t.correoContacto() != null && !t.correoContacto().isBlank()) {
+            destinatarios.add(t.correoContacto().trim());
+        }
+        destinatarios.addAll(correosUsuariosDeEmpresa(t.id()));
+        return List.copyOf(destinatarios);
+    }
+
+    private List<String> correosUsuariosDeEmpresa(long empresaId) {
         return jdbcTemplate.queryForList(
                 """
                 SELECT DISTINCT u.email
                 FROM auth.usuario u
-                JOIN auth.rol_usuario ru ON ru.usuario_id = u.id
-                JOIN auth.rol r ON r.id = ru.rol_id
-                WHERE r.empresa_id = ?
-                  AND r.es_admin = TRUE
-                  AND r.flag_estado = '1'
-                  AND ru.flag_estado = '1'
+                JOIN auth.usuario_empresa ue ON ue.usuario_id = u.id
+                WHERE ue.empresa_id = ?
+                  AND ue.flag_estado = '1'
                   AND u.flag_estado = '1'
                   AND u.email IS NOT NULL AND u.email <> ''
                 """,
