@@ -27,4 +27,10 @@ REM ✅ El DDL/seed ya incluye el cambio; reejecutar el modo canónico
 .\database-deploy.bat create-security --force
 ```
 
-Excepción: modos `patch-bluecoast` / `patch-cantabria` ya existentes para datos de tenant concretos; no extender ese patrón a DDL general.
+## Clone
+
+- `clone <empresa>` = **solo** `CREATE DATABASE … TEMPLATE sigre_template` + grants.
+- **Prohibido** ejecutar seeds o scripts específicos (bluecoast/cantabria/etc.) dentro de `clone`.
+- Toda la data del tenant sale de `create-template` (DDL + seed canónico). El clone es copia exacta.
+
+Excepción legado (no usar en flujo normal): `patch-bluecoast` / `patch-cantabria` solo para BD ya existentes; **nunca** engancharlos a `clone`.

@@ -472,27 +472,7 @@ if "!FORCE!"=="1" (
 call :psql_maint_cmd "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '!PGTEMPLATE!' AND pid ^<^> pg_backend_pid();"
 call :psql_maint_cmd "CREATE DATABASE !CLONE_NEWDB! TEMPLATE !PGTEMPLATE! OWNER !PGUSER!;"
 if errorlevel 1 exit /b 1
-echo ^>^> clone: !CLONE_NEWDB! creada
-if /I "!CLONE_NEWDB!"=="sigre_emp_bluecoast" (
-    set "SAVED_PGDATABASE=!PGDATABASE!"
-    set "PGDATABASE=!CLONE_NEWDB!"
-    echo ^>^> Aplicando seed Blue Coast ^(sucursales + usuarios capacitacion^)...
-    call :run_sql "seed/02-carga-inicial-bluecoast-tenant.sql" || (
-        set "PGDATABASE=!SAVED_PGDATABASE!"
-        exit /b 1
-    )
-    set "PGDATABASE=!SAVED_PGDATABASE!"
-)
-if /I "!CLONE_NEWDB!"=="sigre_emp_cantabria" (
-    set "SAVED_PGDATABASE=!PGDATABASE!"
-    set "PGDATABASE=!CLONE_NEWDB!"
-    echo ^>^> Aplicando seed Cantabria ^(4 sucursales operativas^)...
-    call :run_sql "seed/02-carga-inicial-cantabria-tenant.sql" || (
-        set "PGDATABASE=!SAVED_PGDATABASE!"
-        exit /b 1
-    )
-    set "PGDATABASE=!SAVED_PGDATABASE!"
-)
+echo ^>^> clone: !CLONE_NEWDB! creada ^(copia exacta de !PGTEMPLATE!; sin seeds adicionales^)
 set "CLONE_ROLE="
 for /f "delims=" %%a in ('powershell -NoProfile -Command "$s='%~1'; if([string]::IsNullOrWhiteSpace($s)){exit 2}; $s=$s.Trim().ToLower() -replace '[^a-z0-9_]','_'; $s=$s -replace '_+','_'; $s=$s.Trim('_'); Write-Output $s"') do set "CLONE_ROLE=%%a"
 if not defined CLONE_ROLE (
@@ -625,9 +605,9 @@ echo   %~nx0 create-security         Solo !PGSECURITY!
 echo   %~nx0 create-template         Solo !PGTEMPLATE!
 echo   %~nx0 create-asistencia [--force]  Crea BD !PGASISTENCIA_DB! en postgres17 + rol sigre-web
 echo   %~nx0 insert                  Solo seed ^(requiere create previo^)
-echo   %~nx0 clone ^<empresa^>
-echo   %~nx0 patch-bluecoast           Sucursales + usuarios Blue Coast en sigre_emp_bluecoast
-echo   %~nx0 patch-cantabria           Restaura 4 sucursales en sigre_emp_cantabria
+echo   %~nx0 clone ^<empresa^>         Copia exacta de !PGTEMPLATE! ^(sin seeds ni datos extra^)
+echo   %~nx0 patch-bluecoast           ^(opcional/legado^) Ajuste datos Blue Coast en BD ya existente
+echo   %~nx0 patch-cantabria           ^(opcional/legado^) Ajuste sucursales Cantabria en BD ya existente
 echo   %~nx0 delete ^<nombre_bd^>
 echo   %~nx0 delete-dev              BDs que terminan en _dev
 echo   %~nx0 tenant-grants ^<bd^> ^<rol^>

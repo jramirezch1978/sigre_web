@@ -1,8 +1,7 @@
 -- ============================================================
--- SIGRE ERP - Patch tenant BLUE COAST (sigre_emp_bluecoast)
--- NOTA: sigre_template ya incluye sucursales PI/LM y usuarios 4-8 en
---       seed/01-carga-inicial-maestros.sql. Este script es idempotente
---       para BD existentes creadas antes del cambio de plantilla.
+-- SIGRE ERP - Patch LEGADO tenant BLUE COAST (sigre_emp_bluecoast)
+-- NO se ejecuta en clone. Solo vía: database-deploy.bat patch-bluecoast
+-- La data del tenant sale de sigre_template (create-template + seed maestros).
 -- ============================================================
 
 SET client_min_messages TO WARNING;

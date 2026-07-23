@@ -1,7 +1,6 @@
 -- ============================================================
--- SIGRE ERP - Patch tenant PESQUERA CANTABRIA (sigre_emp_cantabria)
--- Restaura las 4 sucursales operativas tras clonar desde sigre_template
--- (plantilla ajustada para Blue Coast: solo PI/LM Sullana-Lima).
+-- SIGRE ERP - Patch LEGADO tenant PESQUERA CANTABRIA (sigre_emp_cantabria)
+-- NO se ejecuta en clone. Solo vía: database-deploy.bat patch-cantabria
 -- Idempotente: UPSERT sucursales + usuario_sucursal.
 -- ============================================================
 
