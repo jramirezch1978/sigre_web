@@ -25,8 +25,7 @@ import pe.com.hermes.appmobile.data.repository.AuthRepository;
 import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.data.session.SessionManager;
 import pe.com.hermes.appmobile.databinding.ActivityMenuBinding;
-import pe.com.hermes.appmobile.ui.almacen.AlmacenOpcionesActivity;
-import pe.com.hermes.appmobile.ui.almacen.movimientos.MovimientosListActivity;
+import pe.com.hermes.appmobile.ui.almacen.AlmacenNavRouter;
 import pe.com.hermes.appmobile.ui.compras.ComprasOpcionesActivity;
 import pe.com.hermes.appmobile.ui.configuracion.ConfiguracionActivity;
 import pe.com.hermes.appmobile.ui.login.LoginActivity;
@@ -200,17 +199,12 @@ public class MenuActivity extends AppCompatActivity {
 
     private void onMenuOpcion(MenuNodo nodo) {
         binding.drawerLayout.closeDrawer(GravityCompat.START);
+        if (AlmacenNavRouter.esOpcionAlmacen(nodo)) {
+            AlmacenNavRouter.abrirDesdeMenu(this, nodo);
+            return;
+        }
         String codigo = nodo.codigo != null ? nodo.codigo.toUpperCase(Locale.ROOT) : "";
         String path = nodo.pathUrl != null ? nodo.pathUrl.toLowerCase(Locale.ROOT) : "";
-
-        if (codigo.contains("ALMACEN") && (codigo.contains("MOVIM") || path.contains("movimiento"))) {
-            startActivity(new Intent(this, MovimientosListActivity.class));
-            return;
-        }
-        if (codigo.startsWith("ALMACEN") || path.contains("/almacen")) {
-            startActivity(new Intent(this, AlmacenOpcionesActivity.class));
-            return;
-        }
         if (codigo.startsWith("COMPRAS") || path.contains("/compras")) {
             startActivity(new Intent(this, ComprasOpcionesActivity.class));
             return;
