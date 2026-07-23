@@ -222,6 +222,11 @@ export class ErpInicioComponent implements OnInit, OnDestroy {
     void this.router.navigate(['/sigre/seguridad-usuarios']);
   }
 
+  irAServicesCloud(): void {
+    this.dropdownActivo = null;
+    void this.router.navigate(['/sigre/services-cloud']);
+  }
+
   /** Click en una opción del menú: si tiene hijos despliega; si es hoja navega a su path_url. */
   navegarOpcion(event: Event, opcion: MenuOpcion): void {
     event.preventDefault();

@@ -56,6 +56,12 @@ export const erpRoutes: Routes = [
           import('./pages/erp-seguridad-usuarios/erp-seguridad-usuarios.component')
             .then(m => m.ErpSeguridadUsuariosComponent),
       },
+      {
+        path: 'services-cloud',
+        loadComponent: () =>
+          import('./pages/erp-services-cloud/erp-services-cloud.component')
+            .then(m => m.ErpServicesCloudComponent),
+      },
       // Cualquier opción del ERP sin ruta desarrollada cae aquí (NO a la landing pública).
       {
         path: '**',

@@ -1,0 +1,101 @@
+<div class="sc-page">
+  <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+    <div class="breadcrumb-title pe-3">Services Cloud</div>
+    <div class="ps-3">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 p-0">
+          <li class="breadcrumb-item">
+            <a routerLink="/sigre/dashboard"><i class="material-icons-outlined fs-6">home</i></a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">Services Cloud</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <section class="sc-hero mb-4">
+    <div class="sc-hero__copy">
+      <p class="sc-hero__eyebrow">SIGRE · Atención y soporte</p>
+      <h1 class="sc-hero__title">Services Cloud</h1>
+      <p class="sc-hero__lead">
+        Mesa de ayuda tipo Service Cloud: tickets, colas, SLA y seguimiento de incidencias
+        para su operación SIGRE.
+      </p>
+      <p class="sc-hero__note">
+        Vista inicial (frontend). El backend y la base de datos dedicada se conectarán en una siguiente etapa.
+      </p>
+    </div>
+    <div class="sc-hero__aside">
+      <i class="material-icons-outlined sc-hero__icon">support_agent</i>
+    </div>
+  </section>
+
+  <div class="row g-3 mb-4">
+    @for (k of kpis; track k.label) {
+      <div class="col-6 col-xl-3">
+        <div class="sc-kpi sc-kpi--{{ k.tono }}">
+          <div class="sc-kpi__icon">
+            <i class="material-icons-outlined">{{ k.icono }}</i>
+          </div>
+          <div>
+            <div class="sc-kpi__valor">{{ k.valor }}</div>
+            <div class="sc-kpi__label">{{ k.label }}</div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="row g-3 mb-4">
+    @for (a of acciones; track a.titulo) {
+      <div class="col-12 col-md-6 col-xl-3">
+        <button type="button" class="sc-accion" [disabled]="a.disabled" title="Próximamente">
+          <i class="material-icons-outlined">{{ a.icono }}</i>
+          <span class="sc-accion__titulo">{{ a.titulo }}</span>
+          <span class="sc-accion__desc">{{ a.desc }}</span>
+        </button>
+      </div>
+    }
+  </div>
+
+  <div class="card rounded-4 sc-tabla-card">
+    <div class="card-body">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <div>
+          <h5 class="mb-1">Tickets recientes</h5>
+          <p class="mb-0 text-secondary small">Datos de demostración — sin persistencia aún</p>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-primary" disabled>Ver todos</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 sc-tabla">
+          <thead>
+            <tr>
+              <th>Ticket</th>
+              <th>Asunto</th>
+              <th>Solicitante</th>
+              <th>Cola</th>
+              <th>Prioridad</th>
+              <th>Estado</th>
+              <th>Actualizado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of tickets; track t.id) {
+              <tr>
+                <td><code class="sc-id">{{ t.id }}</code></td>
+                <td class="sc-asunto">{{ t.asunto }}</td>
+                <td>{{ t.solicitante }}</td>
+                <td>{{ t.cola }}</td>
+                <td><span [class]="clasePrioridad(t.prioridad)">{{ t.prioridad }}</span></td>
+                <td><span [class]="claseEstado(t.estado)">{{ etiquetaEstado(t.estado) }}</span></td>
+                <td class="text-secondary small">{{ t.actualizado }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
