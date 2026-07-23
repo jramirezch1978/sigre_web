@@ -5,10 +5,14 @@ import java.util.Collections;
 import java.util.List;
 import pe.com.hermes.appmobile.data.remote.ApiClient;
 import pe.com.hermes.appmobile.data.remote.dto.ApiResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AuthMeDto;
+import pe.com.hermes.appmobile.data.remote.dto.CodigoEmailResponse;
 import pe.com.hermes.appmobile.data.remote.dto.DispositivoRegistradoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.EmpresaUsuarioDto;
+import pe.com.hermes.appmobile.data.remote.dto.EnviarCodigoEmailRequest;
 import pe.com.hermes.appmobile.data.remote.dto.LoginRequest;
 import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
+import pe.com.hermes.appmobile.data.remote.dto.PerfilUpdateRequest;
 import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SeleccionEmpresaRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SucursalDto;
@@ -162,6 +166,70 @@ public class AuthRepository {
                         callback.onError(mensajeRed(t));
                     }
                 });
+    }
+
+    public void obtenerPerfil(ResultCallback<AuthMeDto> callback) {
+        apiClient.getAuthApi().me().enqueue(new Callback<ApiResponse<AuthMeDto>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<AuthMeDto>> call, Response<ApiResponse<AuthMeDto>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().data != null) {
+                    callback.onSuccess(response.body().data);
+                } else {
+                    callback.onError(mensajeError(response, "No se pudo cargar el perfil"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<AuthMeDto>> call, Throwable t) {
+                callback.onError(mensajeRed(t));
+            }
+        });
+    }
+
+    public void enviarCodigoConfirmacionEmail(String email, ResultCallback<CodigoEmailResponse> callback) {
+        apiClient.getAuthApi()
+                .enviarCodigoConfirmacionEmail(new EnviarCodigoEmailRequest(email))
+                .enqueue(new Callback<ApiResponse<CodigoEmailResponse>>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<CodigoEmailResponse>> call,
+                                           Response<ApiResponse<CodigoEmailResponse>> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().data != null) {
+                            callback.onSuccess(response.body().data);
+                        } else {
+                            callback.onError(mensajeError(response, "No se pudo enviar el código"));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<CodigoEmailResponse>> call, Throwable t) {
+                        callback.onError(mensajeRed(t));
+                    }
+                });
+    }
+
+    public void actualizarPerfil(PerfilUpdateRequest request, ResultCallback<AuthMeDto> callback) {
+        apiClient.getAuthApi().actualizarPerfil(request).enqueue(new Callback<ApiResponse<AuthMeDto>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<AuthMeDto>> call, Response<ApiResponse<AuthMeDto>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().data != null) {
+                    AuthMeDto data = response.body().data;
+                    if (data.nombreCompleto != null) {
+                        session.setNombreCompleto(data.nombreCompleto);
+                    }
+                    if (data.email != null) {
+                        session.setEmail(data.email);
+                    }
+                    callback.onSuccess(data);
+                } else {
+                    callback.onError(mensajeError(response, "No se pudo guardar el perfil"));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<AuthMeDto>> call, Throwable t) {
+                callback.onError(mensajeRed(t));
+            }
+        });
     }
 
     /** Limpia la sesion SIEMPRE (exito o falla de red), avisando cuando el intento termino. */

@@ -13,25 +13,16 @@ import com.sigre.common.exception.BusinessException;
 import com.sigre.common.util.AesEncryptor;
 
 import javax.sql.DataSource;
-import java.security.SecureRandom;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 @Slf4j
 @Service
 public class PasswordRecoveryService {
 
-    private static final int CODIGO_VALIDITY_MINUTES = 5;
-    private static final String MAYUSCULAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final String MINUSCULAS = "abcdefghijkmnopqrstuvwxyz";
-    private static final String NUMEROS = "0123456789";
-
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final AesEncryptor aesEncryptor;
     private final EmailService emailService;
+    private final AuthCodigoService authCodigoService;
     private final JdbcTemplate jdbcTemplate;
 
     public PasswordRecoveryService(
@@ -39,11 +30,13 @@ public class PasswordRecoveryService {
             PasswordEncoder passwordEncoder,
             AesEncryptor aesEncryptor,
             EmailService emailService,
+            AuthCodigoService authCodigoService,
             DataSource dataSource) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.aesEncryptor = aesEncryptor;
         this.emailService = emailService;
+        this.authCodigoService = authCodigoService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -60,60 +53,22 @@ public class PasswordRecoveryService {
     @Transactional
     public void enviarCodigo(String email) {
         Usuario usuario = findUsuarioByEmail(email);
-
-        jdbcTemplate.update(
-                "UPDATE auth.codigo_recuperacion SET usado = TRUE WHERE usuario_id = ? AND usado = FALSE",
-                usuario.getId());
-
-        String codigo = generarCodigo();
-        OffsetDateTime expiraEn = OffsetDateTime.now().plusMinutes(CODIGO_VALIDITY_MINUTES);
-
-        jdbcTemplate.update(
-                """
-                INSERT INTO auth.codigo_recuperacion (usuario_id, codigo, expira_en, usado, fec_creacion)
-                VALUES (?, ?, ?, FALSE, NOW())
-                """,
-                usuario.getId(), codigo, expiraEn);
-
-        emailService.enviarCodigoRecuperacion(usuario.getEmail(), codigo);
-
+        AuthCodigoService.CodigoEmitido emitido = authCodigoService.emitir(
+                usuario.getId(), AuthCodigoService.Proposito.RECUPERACION);
+        emailService.enviarCodigoRecuperacion(usuario.getEmail(), emitido.codigo());
         log.info("Código de recuperación enviado para usuario={}", usuario.getUsername());
     }
 
     @Transactional(readOnly = true)
     public void validarCodigo(String email, String codigo) {
         Usuario usuario = findUsuarioByEmail(email);
-
-        Integer count = jdbcTemplate.queryForObject(
-                """
-                SELECT COUNT(*) FROM auth.codigo_recuperacion
-                WHERE usuario_id = ? AND codigo = ? AND usado = FALSE AND expira_en > NOW()
-                """,
-                Integer.class, usuario.getId(), codigo);
-
-        if (count == null || count == 0) {
-            throw new BusinessException(
-                    "Código inválido o expirado",
-                    HttpStatus.BAD_REQUEST, "CODIGO_INVALIDO");
-        }
+        authCodigoService.validar(usuario.getId(), codigo, AuthCodigoService.Proposito.RECUPERACION);
     }
 
     @Transactional
     public void cambiarPassword(String email, String codigo, String nuevaPasswordEncriptada, String nuevaPasswordHash) {
         Usuario usuario = findUsuarioByEmail(email);
-
-        Integer count = jdbcTemplate.queryForObject(
-                """
-                SELECT COUNT(*) FROM auth.codigo_recuperacion
-                WHERE usuario_id = ? AND codigo = ? AND usado = FALSE AND expira_en > NOW()
-                """,
-                Integer.class, usuario.getId(), codigo);
-
-        if (count == null || count == 0) {
-            throw new BusinessException(
-                    "Código inválido o expirado",
-                    HttpStatus.BAD_REQUEST, "CODIGO_INVALIDO");
-        }
+        authCodigoService.consumir(usuario.getId(), codigo, AuthCodigoService.Proposito.RECUPERACION);
 
         String plainPassword;
         try {
@@ -134,10 +89,6 @@ public class PasswordRecoveryService {
         usuario.setBloqueado(false);
         usuario.setBloqueadoHasta(null);
         usuarioRepository.save(usuario);
-
-        jdbcTemplate.update(
-                "UPDATE auth.codigo_recuperacion SET usado = TRUE WHERE usuario_id = ? AND codigo = ?",
-                usuario.getId(), codigo);
 
         log.info("Contraseña cambiada exitosamente para usuario={}", usuario.getUsername());
     }
@@ -170,32 +121,6 @@ public class PasswordRecoveryService {
                 .orElseThrow(() -> new BusinessException(
                         "No se encontró una cuenta con ese usuario o correo",
                         HttpStatus.NOT_FOUND, "USUARIO_NO_ENCONTRADO"));
-    }
-
-    private String generarCodigo() {
-        SecureRandom random = new SecureRandom();
-        String codigo;
-        do {
-            List<Character> chars = new ArrayList<>(8);
-            for (int i = 0; i < 4; i++)
-                chars.add(NUMEROS.charAt(random.nextInt(NUMEROS.length())));
-            for (int i = 0; i < 2; i++)
-                chars.add(MAYUSCULAS.charAt(random.nextInt(MAYUSCULAS.length())));
-            for (int i = 0; i < 2; i++)
-                chars.add(MINUSCULAS.charAt(random.nextInt(MINUSCULAS.length())));
-            Collections.shuffle(chars, random);
-            StringBuilder sb = new StringBuilder(8);
-            chars.forEach(sb::append);
-            codigo = sb.toString();
-        } while (codigoExiste(codigo));
-        return codigo;
-    }
-
-    private boolean codigoExiste(String codigo) {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM auth.codigo_recuperacion WHERE codigo = ? AND usado = FALSE",
-                Integer.class, codigo);
-        return count != null && count > 0;
     }
 
     private String ocultarEmail(String email) {

@@ -96,6 +96,8 @@ CREATE TABLE auth.usuario (
     flag_demo VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_demo IN ('0', '1')),
     flag_estado VARCHAR(1) NOT NULL DEFAULT '1' CHECK (flag_estado IN ('0', '1')),
     flag_admin_sistema VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_admin_sistema IN ('0', '1')),
+    -- '1' = el usuario confirmó su email con código (mismo mecanismo que recuperación de clave).
+    flag_confirmacion_email VARCHAR(1) NOT NULL DEFAULT '0' CHECK (flag_confirmacion_email IN ('0', '1')),
     tipo_sales VARCHAR(10) CHECK (tipo_sales IN ('LICENSING', 'SALES')),  -- perfil licencias: LICENSING (todo) / SALES (solo renovar); NULL = sin perfil
     fec_creacion TIMESTAMPTZ DEFAULT NOW(),
     fec_modificacion TIMESTAMPTZ,
@@ -362,10 +364,16 @@ CREATE TABLE auth.codigo_recuperacion (
     id BIGSERIAL PRIMARY KEY,
     usuario_id BIGINT NOT NULL REFERENCES auth.usuario(id),
     codigo VARCHAR(8) NOT NULL,
+    -- RECUPERACION = olvido de clave; CONFIRMACION_EMAIL = verificar/cambiar email del perfil.
+    proposito VARCHAR(30) NOT NULL DEFAULT 'RECUPERACION'
+        CHECK (proposito IN ('RECUPERACION', 'CONFIRMACION_EMAIL')),
     expira_en TIMESTAMPTZ NOT NULL,
     usado BOOLEAN NOT NULL DEFAULT FALSE,
     fec_creacion TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX ix_codigo_recuperacion_usuario_proposito
+    ON auth.codigo_recuperacion (usuario_id, proposito, usado, expira_en DESC);
 
 CREATE TABLE auth.log_acceso (
     id BIGSERIAL PRIMARY KEY,

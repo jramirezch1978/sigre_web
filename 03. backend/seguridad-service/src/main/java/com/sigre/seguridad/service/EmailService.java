@@ -45,8 +45,26 @@ public class EmailService {
 
     @Async
     public void enviarCodigoRecuperacion(String destinatario, String codigo) {
-        String subject = "SIGRE - Código de recuperación de contraseña";
+        enviarCodigoGenerico(
+                destinatario,
+                "SIGRE - Código de recuperación de contraseña",
+                "Código de recuperación",
+                "Has solicitado restablecer tu contraseña. Tu código de verificación es:",
+                codigo);
+    }
 
+    @Async
+    public void enviarCodigoConfirmacionEmail(String destinatario, String codigo) {
+        enviarCodigoGenerico(
+                destinatario,
+                "SIGRE - Confirma tu correo electrónico",
+                "Confirmación de correo",
+                "Para confirmar o actualizar tu correo en Hermes/SIGRE, usa este código:",
+                codigo);
+    }
+
+    private void enviarCodigoGenerico(
+            String destinatario, String subject, String titulo, String mensaje, String codigo) {
         String body = """
                 <html>
                 <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -54,18 +72,17 @@ public class EmailService {
                     <h2>SIGRE ERP</h2>
                   </div>
                   <div style="padding: 30px; background: #f5f5f5;">
-                    <h3>Código de recuperación</h3>
-                    <p>Has solicitado restablecer tu contraseña. Tu código de verificación es:</p>
+                    <h3>%s</h3>
+                    <p>%s</p>
                     <div style="text-align: center; margin: 20px 0;">
                       <span style="font-family:'Courier New',Courier,monospace;font-size:28px;font-weight:bold;letter-spacing:6px;background:#fff;padding:15px 30px;border-radius:8px;border:2px solid #1a237e;display:inline-block;">%s</span>
                     </div>
-                    <p>Este código es válido por <strong>5 minutos</strong>.</p>
+                    <p>Este código es válido por <strong>%d minutos</strong>.</p>
                     <p style="color: #888; font-size: 12px;">Si no solicitaste este cambio, ignora este correo.</p>
                   </div>
                 </body>
                 </html>
-                """.formatted(codigo);
-
+                """.formatted(titulo, mensaje, codigo, AuthCodigoService.VALIDEZ_MINUTOS);
         enviarHtml(destinatario, subject, body);
     }
 

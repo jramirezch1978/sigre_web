@@ -24,6 +24,10 @@ public class AuthMeResponse {
     private String nombres;
     private String apellidos;
     private String nombreCompleto;
+    private String numeroDocumento;
+
+    /** true si {@code auth.usuario.flag_confirmacion_email = '1'}. */
+    private Boolean flagConfirmacionEmail;
 
     /** Solo JWT definitivo con sesión en {@code auth.tokens_session}. */
     private Long tokensSessionId;

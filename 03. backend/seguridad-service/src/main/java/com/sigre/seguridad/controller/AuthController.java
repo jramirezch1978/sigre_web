@@ -9,6 +9,7 @@ import com.sigre.seguridad.dto.*;
 import com.sigre.seguridad.service.AuthService;
 import com.sigre.seguridad.service.DispositivoService;
 import com.sigre.seguridad.service.HealthPingService;
+import com.sigre.seguridad.service.PerfilUsuarioService;
 import com.sigre.seguridad.util.Ipv4;
 import com.sigre.common.dto.ApiResponse;
 import com.sigre.common.exception.BusinessException;
@@ -25,6 +26,7 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final DispositivoService dispositivoService;
     private final HealthPingService healthPingService;
+    private final PerfilUsuarioService perfilUsuarioService;
 
     @PostMapping("/login")
     public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -157,7 +159,33 @@ public class AuthController {
                     HttpStatus.UNAUTHORIZED, "TOKEN_REQUERIDO");
         }
         String token = authHeader.substring(7);
-        return ApiResponse.ok(authService.getProfile(token), "Perfil del usuario autenticado");
+        AuthMeResponse perfil = authService.getProfile(token);
+        perfil = perfilUsuarioService.enriquecerDesdeBd(perfil, perfil.getUserId());
+        return ApiResponse.ok(perfil, "Perfil del usuario autenticado");
+    }
+
+    /**
+     * Actualiza datos del propio usuario. Si el email es nuevo/cambió o aún no está
+     * confirmado, exige {@code codigoConfirmacionEmail} (mismo flujo que recuperación).
+     */
+    @PutMapping("/perfil")
+    public ApiResponse<AuthMeResponse> actualizarPerfil(
+            @RequestHeader("Authorization") String authHeader,
+            @Valid @RequestBody PerfilUsuarioUpdateRequest request) {
+        Long userId = extractAndValidateToken(authHeader, false);
+        AuthMeResponse actualizado = perfilUsuarioService.actualizarPerfil(userId, request);
+        return ApiResponse.ok(actualizado, "Perfil actualizado correctamente");
+    }
+
+    /** Envía código al email indicado (confirmación de perfil). Reintento cada 30 s. */
+    @PostMapping("/perfil/email/enviar-codigo")
+    public ApiResponse<CodigoEmailResponse> enviarCodigoConfirmacionEmail(
+            @RequestHeader("Authorization") String authHeader,
+            @Valid @RequestBody EnviarCodigoEmailRequest request) {
+        Long userId = extractAndValidateToken(authHeader, false);
+        CodigoEmailResponse data = perfilUsuarioService.enviarCodigoConfirmacionEmail(
+                userId, request.getEmail());
+        return ApiResponse.ok(data, "Código de confirmación enviado");
     }
 
     private Long extractAndValidateToken(String authHeader, boolean requireTemporal) {

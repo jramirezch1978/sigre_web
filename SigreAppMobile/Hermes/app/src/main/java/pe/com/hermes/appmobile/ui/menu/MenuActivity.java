@@ -18,11 +18,14 @@ import pe.com.hermes.appmobile.ui.almacen.AlmacenOpcionesActivity;
 import pe.com.hermes.appmobile.ui.common.SimpleItem;
 import pe.com.hermes.appmobile.ui.common.SimpleListAdapter;
 import pe.com.hermes.appmobile.ui.compras.ComprasOpcionesActivity;
+import pe.com.hermes.appmobile.ui.configuracion.ConfiguracionActivity;
 import pe.com.hermes.appmobile.ui.login.LoginActivity;
+import pe.com.hermes.appmobile.ui.preferencias.PreferenciasActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
+import pe.com.hermes.common.ui.ConfirmDialog;
 import pe.com.hermes.common.util.AsyncRunner;
 
-/** Menú principal. Avatar superior izquierdo abre opciones de cuenta (incl. cerrar sesión). */
+/** Menú principal. Avatar superior izquierdo abre opciones de cuenta. */
 public class MenuActivity extends AppCompatActivity {
 
     private static final long ID_ALMACEN = 1L;
@@ -66,6 +69,13 @@ public class MenuActivity extends AppCompatActivity {
         ));
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        String nombreUsuario = AppUtils.app(this).getSession().getNombreCompleto();
+        binding.tvAvatarIniciales.setText(inicialesDe(nombreUsuario));
+    }
+
     private void mostrarMenuUsuario() {
         if (cerrandoSesion) {
             return;
@@ -73,13 +83,35 @@ public class MenuActivity extends AppCompatActivity {
         PopupMenu popup = new PopupMenu(this, binding.btnAvatarUsuario);
         popup.getMenuInflater().inflate(R.menu.menu_usuario, popup.getMenu());
         popup.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_cerrar_sesion) {
-                cerrarSesion();
+            int id = item.getItemId();
+            if (id == R.id.action_preferencias) {
+                startActivity(new Intent(this, PreferenciasActivity.class));
+                return true;
+            }
+            if (id == R.id.action_configuracion) {
+                startActivity(new Intent(this, ConfiguracionActivity.class));
+                return true;
+            }
+            if (id == R.id.action_cerrar_sesion) {
+                confirmarCerrarSesion();
                 return true;
             }
             return false;
         });
         popup.show();
+    }
+
+    private void confirmarCerrarSesion() {
+        String nombre = AppUtils.app(this).getSession().getNombreCompleto();
+        if (nombre == null || nombre.trim().isEmpty()) {
+            nombre = "usuario";
+        }
+        ConfirmDialog.mostrar(
+                this,
+                getString(R.string.logout_confirmar_titulo),
+                getString(R.string.logout_confirmar_mensaje, nombre.trim()),
+                true,
+                this::cerrarSesion);
     }
 
     /**
@@ -122,7 +154,6 @@ public class MenuActivity extends AppCompatActivity {
 
             @Override
             public void onError(String mensaje) {
-                // Si falla renovar, al menos ir al login; el splash/refresco puede abrir otra sesión.
                 irALogin();
             }
         });

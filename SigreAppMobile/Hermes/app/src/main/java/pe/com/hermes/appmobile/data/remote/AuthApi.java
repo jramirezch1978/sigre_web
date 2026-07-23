@@ -2,11 +2,15 @@ package pe.com.hermes.appmobile.data.remote;
 
 import java.util.List;
 import pe.com.hermes.appmobile.data.remote.dto.ApiResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AuthMeDto;
+import pe.com.hermes.appmobile.data.remote.dto.CodigoEmailResponse;
 import pe.com.hermes.appmobile.data.remote.dto.DispositivoRegistradoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.EmpresaUsuarioDto;
+import pe.com.hermes.appmobile.data.remote.dto.EnviarCodigoEmailRequest;
 import pe.com.hermes.appmobile.data.remote.dto.HealthPingResponse;
 import pe.com.hermes.appmobile.data.remote.dto.LoginRequest;
 import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
+import pe.com.hermes.appmobile.data.remote.dto.PerfilUpdateRequest;
 import pe.com.hermes.appmobile.data.remote.dto.RefreshTokenRequest;
 import pe.com.hermes.appmobile.data.remote.dto.RefreshTokenResponse;
 import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
@@ -16,6 +20,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -57,4 +62,13 @@ public interface AuthApi {
 
     @POST("auth/logout")
     Call<ApiResponse<Void>> logout();
+
+    @GET("auth/me")
+    Call<ApiResponse<AuthMeDto>> me();
+
+    @PUT("auth/perfil")
+    Call<ApiResponse<AuthMeDto>> actualizarPerfil(@Body PerfilUpdateRequest request);
+
+    @POST("auth/perfil/email/enviar-codigo")
+    Call<ApiResponse<CodigoEmailResponse>> enviarCodigoConfirmacionEmail(@Body EnviarCodigoEmailRequest request);
 }

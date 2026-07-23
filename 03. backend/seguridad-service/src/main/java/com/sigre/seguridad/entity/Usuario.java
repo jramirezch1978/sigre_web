@@ -38,6 +38,13 @@ public class Usuario {
     @Column(name = "nombre_completo", nullable = false, length = 200)
     private String nombreCompleto;
 
+    @Column(name = "numero_documento", length = 20)
+    private String numeroDocumento;
+
+    /** {@code '1'} si el email fue confirmado con código. */
+    @Column(name = "flag_confirmacion_email", nullable = false, length = 1)
+    private String flagConfirmacionEmail = "0";
+
     @Column(name = "dos_factor_habilitado", nullable = false)
     private Boolean dosFactorHabilitado = false;
 
@@ -92,6 +99,9 @@ public class Usuario {
         }
         if (bloqueado == null) {
             bloqueado = false;
+        }
+        if (flagConfirmacionEmail == null || flagConfirmacionEmail.isBlank()) {
+            flagConfirmacionEmail = "0";
         }
         if (nombreCompleto == null) {
             nombreCompleto = nombres + " " + apellidos;
