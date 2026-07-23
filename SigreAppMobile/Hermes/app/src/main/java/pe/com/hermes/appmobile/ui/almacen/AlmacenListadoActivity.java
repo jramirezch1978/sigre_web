@@ -24,7 +24,7 @@ public class AlmacenListadoActivity extends AppCompatActivity {
     private AlmacenRepository repository;
     private SimpleListAdapter adapter;
     private AlmacenVista vista;
-    private boolean abreDetalleMovimiento;
+    private AlmacenRepository.DetalleTipo detalleTipo = AlmacenRepository.DetalleTipo.NINGUNO;
 
     public static Intent intent(Context ctx, String vistaCodigo) {
         return new Intent(ctx, AlmacenListadoActivity.class).putExtra(EXTRA_VISTA_CODIGO, vistaCodigo);
@@ -46,15 +46,17 @@ public class AlmacenListadoActivity extends AppCompatActivity {
 
         repository = new AlmacenRepository(AppUtils.app(this).getApiClient(), AppUtils.app(this).getSession());
 
-        binding.toolbar.setTitle(vista.nombre);
+        String titulo = vista.codigoVentana != null
+                ? "(" + vista.codigoVentana + ") " + vista.nombre
+                : vista.nombre;
+        binding.toolbar.setTitle(titulo);
         binding.toolbar.setNavigationIcon(android.R.drawable.ic_menu_revert);
         binding.toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SimpleListAdapter(item -> {
-            if (abreDetalleMovimiento && item.id > 0) {
-                startActivity(AlmacenDetalleActivity.intentMovimiento(this, item.id, item.titulo));
-            }
+            if (detalleTipo == AlmacenRepository.DetalleTipo.NINGUNO || item.id <= 0) return;
+            startActivity(AlmacenDetalleActivity.intent(this, detalleTipo, item.id, item.titulo));
         });
         binding.recyclerView.setAdapter(adapter);
         binding.swipeRefresh.setOnRefreshListener(this::cargar);
@@ -63,12 +65,12 @@ public class AlmacenListadoActivity extends AppCompatActivity {
 
     private void cargar() {
         mostrarCargando(true);
-        repository.listarPorFuente(vista.fuente, new ResultCallback<AlmacenRepository.ListadoResult>() {
+        repository.listarPorFuente(vista.fuente, new ResultCallback<>() {
             @Override
             public void onSuccess(AlmacenRepository.ListadoResult data) {
                 mostrarCargando(false);
                 binding.swipeRefresh.setRefreshing(false);
-                abreDetalleMovimiento = data.abreDetalleMovimiento;
+                detalleTipo = data.detalleTipo;
                 adapter.actualizar(data.items);
                 mostrarVacio(data.items.isEmpty());
             }

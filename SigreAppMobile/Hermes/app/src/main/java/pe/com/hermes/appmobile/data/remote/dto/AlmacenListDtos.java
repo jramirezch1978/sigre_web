@@ -72,6 +72,7 @@ public final class AlmacenListDtos {
     public static class MotivoTrasladoListItemResponse {
         public long id;
         public String codigo;
+        public String nombre;
         public String descripcion;
         public String flagEstado;
     }
@@ -150,5 +151,116 @@ public final class AlmacenListDtos {
         public String nombre;
         public String descripcion;
         public String flagEstado;
+    }
+
+    public static class AlmacenTipoResponse {
+        public long id;
+        public String codigo;
+        public String nombre;
+        public String libroNombre;
+        public String flagEstado;
+    }
+
+    public static class UbicacionAlmacenResponse {
+        public long id;
+        public Long almacenId;
+        public String almacenCodigo;
+        public String almacenNombre;
+        public String codigo;
+        public String nombre;
+        public String pasillo;
+        public String estante;
+        public String nivel;
+    }
+
+    public static class AlmacenTipoMovResponse {
+        public long id;
+        public Long almacenId;
+        public String almacenCodigo;
+        public String almacenNombre;
+        public Long articuloMovTipoId;
+        public String tipoMov;
+        public String descTipoMov;
+        public String flagEstado;
+    }
+
+    public static class ConversionUnidadResponse {
+        public long id;
+        public String umOrigenCodigo;
+        public String umOrigenNombre;
+        public String umDestinoCodigo;
+        public String umDestinoNombre;
+        public BigDecimal factorConversion;
+        public String flagEstado;
+    }
+
+    public static class NumeradorDocumentoResponse {
+        public String nombreTabla;
+        public Long sucursalId;
+        public String sucursalCodigo;
+        public String sucursalNombre;
+        public Integer ano;
+        public Long ultNro;
+        public String flagEstado;
+    }
+
+    public static class ConfigClaveResponse {
+        public String clave;
+        public String modulo;
+        public String nivel;
+        public String descripcion;
+        public String tipoDato;
+        public String flagEstado;
+    }
+
+    public static class OrdenTrasladoDetalleResponse {
+        public long id;
+        public Long almacenOrigenId;
+        public Long almacenDestinoId;
+        public String numero;
+        public String fecha;
+        public String flagEstado;
+        public String observacion;
+        public List<OrdenTrasladoLineaResponse> lineas;
+    }
+
+    public static class OrdenTrasladoLineaResponse {
+        public long id;
+        public Long articuloId;
+        public String articuloCodigo;
+        public String articuloNombre;
+        public BigDecimal cantidad;
+    }
+
+    public static class InventarioConteoDetalleResponse {
+        public long id;
+        public Long almacenId;
+        public Long articuloId;
+        public String fechaConteo;
+        public Integer nroConteo;
+        public BigDecimal saldoSistema;
+        public BigDecimal cantidadConteo1;
+        public BigDecimal cantidadConteo2;
+        public BigDecimal diferencia;
+        public String flagEstado;
+    }
+
+    public static class IdRequest {
+        public Long id;
+        public String observacion;
+        public String motivo;
+
+        public static IdRequest confirmar(long id) {
+            IdRequest r = new IdRequest();
+            r.id = id;
+            return r;
+        }
+
+        public static IdRequest anular(long id, String motivo) {
+            IdRequest r = new IdRequest();
+            r.id = id;
+            r.motivo = motivo;
+            return r;
+        }
     }
 }

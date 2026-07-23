@@ -3,20 +3,31 @@ package pe.com.hermes.appmobile.data.repository;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import pe.com.hermes.appmobile.data.almacen.AlmacenFuenteDatos;
 import pe.com.hermes.appmobile.data.remote.ApiClient;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.AlmacenMaestroResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.AlmacenTipoMovResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.AlmacenTipoResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.ConfigClaveResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.ConversionUnidadResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.GuiaRemisionListItemResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.IdRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.InventarioConteoDetalleResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.InventarioConteoListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.KardexListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.LotePalletListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.MotivoTrasladoListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.MovimientoDetalleResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.NumeradorDocumentoResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.OrdenTrasladoDetalleResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.OrdenTrasladoListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.SolicitudSalidaListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.StockAFechaListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.StockListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.TipoMovimientoListItemResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.UbicacionAlmacenResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.ValorizacionListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.ApiResponse;
 import pe.com.hermes.appmobile.data.remote.dto.DashboardLogisticoResponse;
@@ -30,13 +41,24 @@ import retrofit2.Response;
 
 public class AlmacenRepository {
 
+    public enum DetalleTipo {
+        NINGUNO,
+        MOVIMIENTO,
+        ORDEN_TRASLADO,
+        TOMA_INVENTARIO
+    }
+
     public static final class ListadoResult {
         public final List<SimpleItem> items;
-        public final boolean abreDetalleMovimiento;
+        public final DetalleTipo detalleTipo;
 
-        public ListadoResult(List<SimpleItem> items, boolean abreDetalleMovimiento) {
+        public ListadoResult(List<SimpleItem> items, DetalleTipo detalleTipo) {
             this.items = items;
-            this.abreDetalleMovimiento = abreDetalleMovimiento;
+            this.detalleTipo = detalleTipo != null ? detalleTipo : DetalleTipo.NINGUNO;
+        }
+
+        public boolean abreDetalle() {
+            return detalleTipo != DetalleTipo.NINGUNO;
         }
     }
 
@@ -49,33 +71,59 @@ public class AlmacenRepository {
     }
 
     public void listarMovimientos(ResultCallback<List<MovimientoListItemResponse>> callback) {
-        listarMovimientos(0, callback);
-    }
-
-    public void listarMovimientos(int page, ResultCallback<List<MovimientoListItemResponse>> callback) {
         Long sucursalId = session.getSucursalId() > 0 ? session.getSucursalId() : null;
-        apiClient.getAlmacenApi().listarMovimientos(sucursalId, page, 50)
+        apiClient.getAlmacenApi().listarMovimientos(sucursalId, 0, 50)
                 .enqueue(pageCallback(callback, "No se pudieron cargar los movimientos"));
     }
 
     public void obtenerMovimiento(long id, ResultCallback<MovimientoDetalleResponse> callback) {
-        apiClient.getAlmacenApi().obtenerMovimiento(id).enqueue(new Callback<ApiResponse<MovimientoDetalleResponse>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<MovimientoDetalleResponse>> call,
-                                   Response<ApiResponse<MovimientoDetalleResponse>> response) {
-                ApiResponse<MovimientoDetalleResponse> body = response.body();
-                if (!response.isSuccessful() || body == null || !body.success || body.data == null) {
-                    callback.onError(body != null && body.message != null ? body.message : "No se pudo cargar el detalle");
-                    return;
-                }
-                callback.onSuccess(body.data);
-            }
+        apiClient.getAlmacenApi().obtenerMovimiento(id).enqueue(entityCallback(callback, "detalle"));
+    }
 
-            @Override
-            public void onFailure(Call<ApiResponse<MovimientoDetalleResponse>> call, Throwable t) {
-                callback.onError(t.getMessage() != null ? t.getMessage() : "Error de red");
-            }
-        });
+    public void confirmarMovimiento(long id, ResultCallback<MovimientoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().confirmarMovimiento(IdRequest.confirmar(id))
+                .enqueue(entityCallback(callback, "confirmar movimiento"));
+    }
+
+    public void anularMovimiento(long id, String motivo, ResultCallback<MovimientoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().anularMovimiento(IdRequest.anular(id, motivo))
+                .enqueue(entityCallback(callback, "anular movimiento"));
+    }
+
+    public void obtenerOrdenTraslado(long id, ResultCallback<OrdenTrasladoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().obtenerOrdenTraslado(id).enqueue(entityCallback(callback, "OTR"));
+    }
+
+    public void aprobarOrdenTraslado(long id, ResultCallback<OrdenTrasladoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().aprobarOrdenTraslado(id).enqueue(entityCallback(callback, "aprobar OTR"));
+    }
+
+    public void rechazarOrdenTraslado(long id, ResultCallback<OrdenTrasladoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().rechazarOrdenTraslado(id).enqueue(entityCallback(callback, "rechazar OTR"));
+    }
+
+    public void cerrarOrdenTraslado(long id, ResultCallback<OrdenTrasladoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().cerrarOrdenTraslado(id).enqueue(entityCallback(callback, "cerrar OTR"));
+    }
+
+    public void anularOrdenTraslado(long id, ResultCallback<OrdenTrasladoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().anularOrdenTraslado(id).enqueue(entityCallback(callback, "anular OTR"));
+    }
+
+    public void obtenerTomaInventario(long id, ResultCallback<InventarioConteoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().obtenerTomaInventario(id).enqueue(entityCallback(callback, "toma inventario"));
+    }
+
+    public void compararTomaInventario(long id, ResultCallback<InventarioConteoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().compararTomaInventario(id).enqueue(entityCallback(callback, "comparar conteo"));
+    }
+
+    public void cerrarTomaInventario(long id, ResultCallback<InventarioConteoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().cerrarTomaInventario(id).enqueue(entityCallback(callback, "cerrar conteo"));
+    }
+
+    public void anularTomaInventario(long id, ResultCallback<InventarioConteoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().anularTomaInventario(id).enqueue(entityCallback(callback, "anular conteo"));
     }
 
     public void listarPorFuente(AlmacenFuenteDatos fuente, ResultCallback<ListadoResult> callback) {
@@ -83,54 +131,38 @@ public class AlmacenRepository {
             case MOVIMIENTOS -> {
                 Long sucursalId = session.getSucursalId() > 0 ? session.getSucursalId() : null;
                 apiClient.getAlmacenApi().listarMovimientos(sucursalId, 0, 80)
-                        .enqueue(new Callback<ApiResponse<PageData<MovimientoListItemResponse>>>() {
-                            @Override
-                            public void onResponse(Call<ApiResponse<PageData<MovimientoListItemResponse>>> call,
-                                                   Response<ApiResponse<PageData<MovimientoListItemResponse>>> response) {
-                                List<MovimientoListItemResponse> data = extractPage(response, callback, "movimientos");
-                                if (data == null) return;
-                                List<SimpleItem> items = new ArrayList<>();
-                                for (MovimientoListItemResponse m : data) {
-                                    items.add(new SimpleItem(
-                                            m.id,
-                                            m.nroVale != null ? m.nroVale : "Movimiento " + m.id,
-                                            nz(m.fechaMov) + " · estado " + nz(m.flagEstado)));
-                                }
-                                callback.onSuccess(new ListadoResult(items, true));
-                            }
-
-                            @Override
-                            public void onFailure(Call<ApiResponse<PageData<MovimientoListItemResponse>>> call, Throwable t) {
-                                callback.onError(msg(t));
-                            }
-                        });
+                        .enqueue(mapPage(callback, DetalleTipo.MOVIMIENTO, (MovimientoListItemResponse m) -> new SimpleItem(
+                                m.id,
+                                m.nroVale != null ? m.nroVale : "Movimiento " + m.id,
+                                nz(m.fechaMov) + " · estado " + nz(m.flagEstado)
+                        ), "movimientos"));
             }
             case ORDENES_TRASLADO -> apiClient.getAlmacenApi().listarOrdenesTraslado(0, 80)
-                    .enqueue(mapPage(callback, false, (OrdenTrasladoListItemResponse o) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.ORDEN_TRASLADO, (OrdenTrasladoListItemResponse o) -> new SimpleItem(
                             o.id,
                             o.numero != null ? o.numero : "OTR " + o.id,
-                            nz(o.fecha) + " · " + nz(o.flagEstado) + " · orig " + o.almacenOrigenId + " → dest " + o.almacenDestinoId
+                            nz(o.fecha) + " · " + nz(o.flagEstado) + " · " + o.almacenOrigenId + " → " + o.almacenDestinoId
                     ), "órdenes de traslado"));
             case TOMAS_INVENTARIO -> apiClient.getAlmacenApi().listarTomasInventario(0, 80)
-                    .enqueue(mapPage(callback, false, (InventarioConteoListItemResponse t) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.TOMA_INVENTARIO, (InventarioConteoListItemResponse t) -> new SimpleItem(
                             t.id,
                             "Conteo #" + (t.nroConteo != null ? t.nroConteo : t.id),
                             nz(t.fechaConteo) + " · art " + t.articuloId + " · " + nz(t.flagEstado)
                     ), "tomas de inventario"));
             case STOCK -> apiClient.getAlmacenApi().listarStock(0, 80)
-                    .enqueue(mapPage(callback, false, (StockListItemResponse s) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (StockListItemResponse s) -> new SimpleItem(
                             s.id,
                             "Art " + s.articuloId + " · Alm " + s.almacenId,
                             "Disp " + s.cantidadDisponible + " · Costo " + s.costoPromedio
                     ), "stock"));
             case KARDEX -> apiClient.getAlmacenApi().listarKardex(0, 80)
-                    .enqueue(mapPage(callback, false, (KardexListItemResponse k) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (KardexListItemResponse k) -> new SimpleItem(
                             k.id,
                             nz(k.articuloCodigo) + " · " + nz(k.articuloNombre),
                             nz(k.fecha) + " · " + nz(k.tipo) + " · cant " + k.cantidad
                     ), "kardex"));
             case DIAGNOSTICO -> apiClient.getAlmacenApi().diagnostico()
-                    .enqueue(new Callback<ApiResponse<List<DashboardLogisticoResponse.DiagnosticoAlmacenDto>>>() {
+                    .enqueue(new Callback<>() {
                         @Override
                         public void onResponse(Call<ApiResponse<List<DashboardLogisticoResponse.DiagnosticoAlmacenDto>>> call,
                                                Response<ApiResponse<List<DashboardLogisticoResponse.DiagnosticoAlmacenDto>>> response) {
@@ -148,7 +180,7 @@ public class AlmacenRepository {
                                         nz(d.almacenCodigo) + " · " + nz(d.almacenNombre),
                                         "Arts " + d.totalArticulos + " · Valor " + d.valorInventario));
                             }
-                            callback.onSuccess(new ListadoResult(items, false));
+                            callback.onSuccess(new ListadoResult(items, DetalleTipo.NINGUNO));
                         }
 
                         @Override
@@ -157,49 +189,70 @@ public class AlmacenRepository {
                         }
                     });
             case VALORIZACION -> apiClient.getAlmacenApi().valorizacion(0, 80)
-                    .enqueue(mapPage(callback, false, (ValorizacionListItemResponse v) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (ValorizacionListItemResponse v) -> new SimpleItem(
                             v.articuloId != null ? v.articuloId : 0L,
                             nz(v.articuloCodigo) + " · " + nz(v.articuloNombre),
                             "Cant " + v.cantidadDisponible + " · Valor " + v.valorTotal
                     ), "valorización"));
             case STOCK_A_FECHA -> apiClient.getAlmacenApi().stockAFecha(0, 80)
-                    .enqueue(mapPage(callback, false, (StockAFechaListItemResponse s) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (StockAFechaListItemResponse s) -> new SimpleItem(
                             s.articuloId != null ? s.articuloId : 0L,
                             nz(s.articuloCodigo) + " · " + nz(s.articuloNombre),
                             "Alm " + s.almacenId + " · Cant " + s.cantidad
                     ), "stock a la fecha"));
             case ALMACENES -> apiClient.getAlmacenApi().listarAlmacenes(0, 80)
-                    .enqueue(mapPage(callback, false, (AlmacenMaestroResponse a) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (AlmacenMaestroResponse a) -> new SimpleItem(
                             a.id,
                             nz(a.codigo) + " · " + nz(a.nombre),
                             nz(a.almacenTipoNombre) + " · " + nz(a.sucursalNombre) + " · " + nz(a.flagEstado)
                     ), "almacenes"));
             case TIPOS_MOVIMIENTO -> apiClient.getAlmacenApi().listarTiposMovimiento(0, 80)
-                    .enqueue(mapPage(callback, false, (TipoMovimientoListItemResponse t) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (TipoMovimientoListItemResponse t) -> new SimpleItem(
                             t.id,
                             nz(t.tipoMov) + " · " + nz(t.descTipoMov),
                             nz(t.flagEstado)
                     ), "tipos de movimiento"));
+            case TIPOS_ALMACEN -> apiClient.getAlmacenApi().listarTiposAlmacen(0, 80)
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (AlmacenTipoResponse t) -> new SimpleItem(
+                            t.id,
+                            nz(t.codigo) + " · " + nz(t.nombre),
+                            nz(t.libroNombre) + " · " + nz(t.flagEstado)
+                    ), "tipos de almacén"));
+            case UBICACIONES -> listarUbicacionesTodas(callback);
+            case TIPOS_MOV_ALMACEN -> listarTiposMovAlmacenTodas(callback);
             case MOTIVOS_TRASLADO -> apiClient.getAlmacenApi().listarMotivosTraslado(0, 80)
-                    .enqueue(mapPage(callback, false, (MotivoTrasladoListItemResponse m) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (MotivoTrasladoListItemResponse m) -> new SimpleItem(
                             m.id,
-                            nz(m.codigo) + " · " + nz(m.descripcion),
+                            nz(m.codigo) + " · " + nz(m.nombre != null ? m.nombre : m.descripcion),
                             nz(m.flagEstado)
                     ), "motivos"));
             case LOTES -> apiClient.getAlmacenApi().listarLotes(0, 80)
-                    .enqueue(mapPage(callback, false, (LotePalletListItemResponse l) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (LotePalletListItemResponse l) -> new SimpleItem(
                             l.id,
                             nz(l.codigo) + " · lote " + nz(l.nroLote),
                             "Art " + l.articuloId + " · Alm " + l.almacenId
                     ), "lotes"));
+            case CONVERSIONES -> apiClient.getCoreApi().listarConversiones(0, 80)
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (ConversionUnidadResponse c) -> new SimpleItem(
+                            c.id,
+                            nz(c.umOrigenCodigo) + " → " + nz(c.umDestinoCodigo),
+                            nz(c.umOrigenNombre) + " / " + nz(c.umDestinoNombre) + " · factor " + c.factorConversion
+                    ), "conversiones"));
+            case NUMERACION_VALES -> apiClient.getCoreApi()
+                    .listarNumeradores("almacen.vale_mov", 0, 80)
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, this::mapNumerador, "numeración vales"));
+            case NUMERACION_OTR -> apiClient.getCoreApi()
+                    .listarNumeradores("almacen.orden_traslado", 0, 80)
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, this::mapNumerador, "numeración OTR"));
+            case PARAMETROS -> listarParametros(callback);
             case GUIAS_REMISION -> apiClient.getAlmacenApi().listarGuias(0, 80)
-                    .enqueue(mapPage(callback, false, (GuiaRemisionListItemResponse g) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (GuiaRemisionListItemResponse g) -> new SimpleItem(
                             g.id,
                             g.numero != null ? g.numero : "Guía " + g.id,
                             nz(g.fecha) + " · " + nz(g.flagEstado)
                     ), "guías"));
             case SOLICITUDES_SALIDA -> apiClient.getAlmacenApi().listarSolicitudesSalida(0, 80)
-                    .enqueue(mapPage(callback, false, (SolicitudSalidaListItemResponse s) -> new SimpleItem(
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (SolicitudSalidaListItemResponse s) -> new SimpleItem(
                             s.id,
                             s.numero != null ? s.numero : "Solicitud " + s.id,
                             nz(s.fecha) + " · " + nz(s.flagEstado)
@@ -220,7 +273,7 @@ public class AlmacenRepository {
             callback.onError("Proceso no soportado");
             return;
         }
-        call.enqueue(new Callback<ApiResponse<Object>>() {
+        call.enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<ApiResponse<Object>> call, Response<ApiResponse<Object>> response) {
                 ApiResponse<Object> body = response.body();
@@ -238,12 +291,183 @@ public class AlmacenRepository {
         });
     }
 
+    private void listarUbicacionesTodas(ResultCallback<ListadoResult> callback) {
+        apiClient.getAlmacenApi().listarAlmacenes(0, 200).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<ApiResponse<PageData<AlmacenMaestroResponse>>> call,
+                                   Response<ApiResponse<PageData<AlmacenMaestroResponse>>> response) {
+                List<AlmacenMaestroResponse> almacenes = extractPage(response, callback, "almacenes");
+                if (almacenes == null) return;
+                if (almacenes.isEmpty()) {
+                    callback.onSuccess(new ListadoResult(List.of(), DetalleTipo.NINGUNO));
+                    return;
+                }
+                List<SimpleItem> acc = Collections.synchronizedList(new ArrayList<>());
+                AtomicInteger pending = new AtomicInteger(almacenes.size());
+                AtomicInteger errors = new AtomicInteger(0);
+                for (AlmacenMaestroResponse a : almacenes) {
+                    apiClient.getAlmacenApi().listarUbicaciones(a.id).enqueue(new Callback<>() {
+                        @Override
+                        public void onResponse(Call<ApiResponse<List<UbicacionAlmacenResponse>>> call,
+                                               Response<ApiResponse<List<UbicacionAlmacenResponse>>> response) {
+                            ApiResponse<List<UbicacionAlmacenResponse>> body = response.body();
+                            if (response.isSuccessful() && body != null && body.success && body.data != null) {
+                                for (UbicacionAlmacenResponse u : body.data) {
+                                    acc.add(new SimpleItem(
+                                            u.id,
+                                            nz(a.codigo) + " · " + nz(u.codigo) + " · " + nz(u.nombre),
+                                            "Pasillo " + nz(u.pasillo) + " / Est " + nz(u.estante) + " / Niv " + nz(u.nivel)
+                                    ));
+                                }
+                            } else {
+                                errors.incrementAndGet();
+                            }
+                            if (pending.decrementAndGet() == 0) {
+                                if (acc.isEmpty() && errors.get() > 0) {
+                                    callback.onError("No se pudieron cargar ubicaciones");
+                                } else {
+                                    callback.onSuccess(new ListadoResult(new ArrayList<>(acc), DetalleTipo.NINGUNO));
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ApiResponse<List<UbicacionAlmacenResponse>>> call, Throwable t) {
+                            errors.incrementAndGet();
+                            if (pending.decrementAndGet() == 0) {
+                                if (acc.isEmpty()) callback.onError(msg(t));
+                                else callback.onSuccess(new ListadoResult(new ArrayList<>(acc), DetalleTipo.NINGUNO));
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<PageData<AlmacenMaestroResponse>>> call, Throwable t) {
+                callback.onError(msg(t));
+            }
+        });
+    }
+
+    private void listarTiposMovAlmacenTodas(ResultCallback<ListadoResult> callback) {
+        apiClient.getAlmacenApi().listarAlmacenes(0, 200).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<ApiResponse<PageData<AlmacenMaestroResponse>>> call,
+                                   Response<ApiResponse<PageData<AlmacenMaestroResponse>>> response) {
+                List<AlmacenMaestroResponse> almacenes = extractPage(response, callback, "almacenes");
+                if (almacenes == null) return;
+                if (almacenes.isEmpty()) {
+                    callback.onSuccess(new ListadoResult(List.of(), DetalleTipo.NINGUNO));
+                    return;
+                }
+                List<SimpleItem> acc = Collections.synchronizedList(new ArrayList<>());
+                AtomicInteger pending = new AtomicInteger(almacenes.size());
+                for (AlmacenMaestroResponse a : almacenes) {
+                    apiClient.getAlmacenApi().listarTiposMovPorAlmacen(a.id, 0, 200).enqueue(new Callback<>() {
+                        @Override
+                        public void onResponse(Call<ApiResponse<PageData<AlmacenTipoMovResponse>>> call,
+                                               Response<ApiResponse<PageData<AlmacenTipoMovResponse>>> response) {
+                            List<AlmacenTipoMovResponse> rows = extractPageQuiet(response);
+                            for (AlmacenTipoMovResponse t : rows) {
+                                acc.add(new SimpleItem(
+                                        t.id,
+                                        nz(a.codigo) + " · " + nz(t.tipoMov),
+                                        nz(t.descTipoMov) + " · " + nz(t.flagEstado)
+                                ));
+                            }
+                            if (pending.decrementAndGet() == 0) {
+                                callback.onSuccess(new ListadoResult(new ArrayList<>(acc), DetalleTipo.NINGUNO));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ApiResponse<PageData<AlmacenTipoMovResponse>>> call, Throwable t) {
+                            if (pending.decrementAndGet() == 0) {
+                                callback.onSuccess(new ListadoResult(new ArrayList<>(acc), DetalleTipo.NINGUNO));
+                            }
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<PageData<AlmacenMaestroResponse>>> call, Throwable t) {
+                callback.onError(msg(t));
+            }
+        });
+    }
+
+    private void listarParametros(ResultCallback<ListadoResult> callback) {
+        apiClient.getCoreApi().listarClavesConfig("ALMACEN", null).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<ConfigClaveResponse>>> call,
+                                   Response<ApiResponse<List<ConfigClaveResponse>>> response) {
+                ApiResponse<List<ConfigClaveResponse>> body = response.body();
+                if (!response.isSuccessful() || body == null || !body.success) {
+                    callback.onError(body != null && body.message != null ? body.message : "No se pudieron cargar parámetros");
+                    return;
+                }
+                List<ConfigClaveResponse> claves = body.data != null ? body.data : List.of();
+                long empresaId = session.getEmpresaId();
+                if (empresaId <= 0 || claves.isEmpty()) {
+                    callback.onSuccess(new ListadoResult(mapClaves(claves, Map.of()), DetalleTipo.NINGUNO));
+                    return;
+                }
+                apiClient.getCoreApi().configEmpresa(empresaId).enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<Map<String, Object>>> call,
+                                           Response<ApiResponse<Map<String, Object>>> response) {
+                        Map<String, Object> valores = Map.of();
+                        ApiResponse<Map<String, Object>> b = response.body();
+                        if (response.isSuccessful() && b != null && b.success && b.data != null) {
+                            valores = b.data;
+                        }
+                        callback.onSuccess(new ListadoResult(mapClaves(claves, valores), DetalleTipo.NINGUNO));
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<Map<String, Object>>> call, Throwable t) {
+                        callback.onSuccess(new ListadoResult(mapClaves(claves, Map.of()), DetalleTipo.NINGUNO));
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<ConfigClaveResponse>>> call, Throwable t) {
+                callback.onError(msg(t));
+            }
+        });
+    }
+
+    private static List<SimpleItem> mapClaves(List<ConfigClaveResponse> claves, Map<String, Object> valores) {
+        List<SimpleItem> items = new ArrayList<>();
+        long i = 1;
+        for (ConfigClaveResponse c : claves) {
+            Object val = valores.get(c.clave);
+            items.add(new SimpleItem(
+                    i++,
+                    nz(c.clave),
+                    nz(c.descripcion) + " · " + (val != null ? String.valueOf(val) : "—")
+            ));
+        }
+        return items;
+    }
+
+    private SimpleItem mapNumerador(NumeradorDocumentoResponse n) {
+        return new SimpleItem(
+                n.sucursalId != null ? n.sucursalId : 0L,
+                nz(n.sucursalCodigo) + " · " + nz(n.sucursalNombre),
+                "Año " + n.ano + " · próximo " + n.ultNro + " · " + nz(n.flagEstado)
+        );
+    }
+
     private interface Mapper<T> {
         SimpleItem map(T row);
     }
 
     private <T> Callback<ApiResponse<PageData<T>>> mapPage(
-            ResultCallback<ListadoResult> callback, boolean detalleMov, Mapper<T> mapper, String label) {
+            ResultCallback<ListadoResult> callback, DetalleTipo tipo, Mapper<T> mapper, String label) {
         return new Callback<>() {
             @Override
             public void onResponse(Call<ApiResponse<PageData<T>>> call, Response<ApiResponse<PageData<T>>> response) {
@@ -251,7 +475,7 @@ public class AlmacenRepository {
                 if (data == null) return;
                 List<SimpleItem> items = new ArrayList<>();
                 for (T row : data) items.add(mapper.map(row));
-                callback.onSuccess(new ListadoResult(items, detalleMov));
+                callback.onSuccess(new ListadoResult(items, tipo));
             }
 
             @Override
@@ -269,6 +493,33 @@ public class AlmacenRepository {
             return null;
         }
         return body.data != null && body.data.content != null ? body.data.content : Collections.emptyList();
+    }
+
+    private <T> List<T> extractPageQuiet(Response<ApiResponse<PageData<T>>> response) {
+        ApiResponse<PageData<T>> body = response.body();
+        if (!response.isSuccessful() || body == null || !body.success || body.data == null || body.data.content == null) {
+            return Collections.emptyList();
+        }
+        return body.data.content;
+    }
+
+    private <T> Callback<ApiResponse<T>> entityCallback(ResultCallback<T> callback, String label) {
+        return new Callback<>() {
+            @Override
+            public void onResponse(Call<ApiResponse<T>> call, Response<ApiResponse<T>> response) {
+                ApiResponse<T> body = response.body();
+                if (!response.isSuccessful() || body == null || !body.success || body.data == null) {
+                    callback.onError(body != null && body.message != null ? body.message : "No se pudo " + label);
+                    return;
+                }
+                callback.onSuccess(body.data);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<T>> call, Throwable t) {
+                callback.onError(msg(t));
+            }
+        };
     }
 
     private <T> Callback<ApiResponse<PageData<T>>> pageCallback(ResultCallback<List<T>> callback, String err) {

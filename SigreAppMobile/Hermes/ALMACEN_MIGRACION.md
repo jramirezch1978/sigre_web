@@ -1,40 +1,30 @@
-# Migración Almacén → Hermes (plan)
+# Migración Almacén → Hermes
 
-## Análisis (sigre_web)
+## Alcance funcional (paridad web “primera versión”)
 
-El ERP web (`02. frontend/.../almacen`) es **config-driven** (`almacen-vistas.config.ts`):
-listados genéricos + diálogos MD para movimientos y OTR. Muchas opciones del menú seed
-tienen `path_url = NULL` (en construcción también en web).
+Catálogo completo **AL001–AL033** (tablas + operaciones + consultas + reportes + procesos):
 
-Backend `almacen-service` ya expone APIs para la mayoría de listados operativos.
+| Grupo | Ventanas | Móvil |
+|-------|----------|--------|
+| Tablas | AL001–AL012 | Listado GET (ubicaciones/tipos-mov-alm agregados; conversiones/numeración/params vía core) |
+| Operaciones | AL013–AL018 | Listado + detalle; acciones confirmar/anular (mov), aprobar/rechazar/cerrar/anular (OTR), comparar/cerrar/anular (inventario) |
+| Consultas | AL019–AL023 | Listado (+ detalle en vistas de movimientos) |
+| Reportes | AL024–AL030 | Listado |
+| Procesos | AL031–AL033 | POST ejecutar |
 
-## Fase 1 — HECHA (esta entrega)
+## Reglas de menú (drawer)
 
-Arquitectura móvil espejo web:
-- `AlmacenVistasCatalog` + `AlmacenNavRouter` (resolución por **path** y por **código ventana AL###**)
-- `AlmacenListadoActivity` (GET paginado)
-- `AlmacenDetalleActivity` (detalle vale)
-- `AlmacenProcesoActivity` (POST procesos)
+- No se cargan opciones desactivadas (`activo = false`).
+- No se cargan hojas sin `pathUrl` / `rutaFrontend`.
+- Navegación: código funcional → `AL###` en codigo/nombre → path → Activity.
 
-### Reglas de menú (drawer)
-- **No** se cargan opciones desactivadas (`activo = false`).
-- **No** se cargan hojas sin `pathUrl` / `rutaFrontend` (ni aunque existan en seed).
-- Secciones/módulos vacíos tras el filtro se podan.
-- Navegación: código funcional → `AL013`… en codigo/nombre → path → Activity.
+## Pendiente (alta/edición tipo wizard web)
 
-## Fase 2 — Alta / edición (siguiente)
-
-- Formulario crear/editar movimiento (wizard líneas)
-- Confirmar / anular vale
-- OTR: aprobar / rechazar / cerrar
-- Inventario: comparar / cerrar conteo
-
-## Fase 3 — Operaciones legacy seed
-
-Despacho simplificado, consignaciones, items no atender, devoluciones operativas,
-ajustes valorización, ingreso masivo — **requieren** path_url + API en web primero.
+- Formulario crear/editar movimiento (líneas) y OTR
+- CRUD completo de tablas maestras (hoy solo lectura)
+- Filtros específicos por vista (tránsito, aprobación pendiente, stock mínimo, etc.)
 
 ## Navegación
 
 Drawer `mi-menu` → `AlmacenNavRouter` → Activity.
-Hub `AlmacenOpcionesActivity` lista grupos y todas las vistas.
+Hub `AlmacenOpcionesActivity` lista grupos y todas las vistas navegables.

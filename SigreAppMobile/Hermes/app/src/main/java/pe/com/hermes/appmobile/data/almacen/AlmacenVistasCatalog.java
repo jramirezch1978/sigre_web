@@ -10,12 +10,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Catálogo Almacén → Activity (por path y por código de ventana AL###).
- * Solo opciones con path real (igual criterio del menú móvil).
+ * Catálogo completo Almacén Hermes = web ({@code almacen-vistas} + {@code almacen-tablas}).
+ * Códigos de ventana AL001–AL033.
  */
 public final class AlmacenVistasCatalog {
 
-    /** AL### aunque vaya tras "_" (p. ej. ALMACEN_OP_MOV_AL013); evita falsos positivos tipo SAL001. */
+    /** AL### aunque vaya tras "_" (p. ej. …_AL013); evita falsos positivos tipo SAL001. */
     private static final Pattern VENTANA = Pattern.compile("(?i)(?<![A-Z0-9])AL\\d{3}(?![0-9])");
 
     private static final List<AlmacenVista> TODAS;
@@ -26,6 +26,33 @@ public final class AlmacenVistasCatalog {
     static {
         List<AlmacenVista> list = new ArrayList<>();
 
+        // Tablas AL001–AL012
+        list.add(v("AL001", "ALMACEN_TABLAS_ALMACEN", "Maestro de almacenes",
+                "/sigre/almacen/tablas/almacenes", AlmacenFuenteDatos.ALMACENES, null, "Tablas"));
+        list.add(v("AL002", "ALMACEN_TABLAS_TIPO_MOV", "Tipos de movimientos de almacenes",
+                "/sigre/almacen/tablas/tipos-movimiento", AlmacenFuenteDatos.TIPOS_MOVIMIENTO, null, "Tablas"));
+        list.add(v("AL003", "ALMACEN_TABLAS_TIPO_ALMACEN", "Tipos de almacén",
+                "/sigre/almacen/tablas/tipos-almacen", AlmacenFuenteDatos.TIPOS_ALMACEN, null, "Tablas"));
+        list.add(v("AL004", "ALMACEN_TABLAS_UBICACION", "Ubicacion de Articulo",
+                "/sigre/almacen/tablas/ubicaciones", AlmacenFuenteDatos.UBICACIONES, null, "Tablas"));
+        list.add(v("AL005", "ALMACEN_TABLAS_MOV_POR_ALM", "Movimientos por almacen",
+                "/sigre/almacen/tablas/movimientos-almacen", AlmacenFuenteDatos.TIPOS_MOV_ALMACEN, null, "Tablas"));
+        list.add(v("AL006", "ALMACEN_TABLAS_POSICIONES", "Posiciones por Almacen",
+                "/sigre/almacen/tablas/posiciones", AlmacenFuenteDatos.UBICACIONES, null, "Tablas"));
+        list.add(v("AL007", "ALMACEN_TABLAS_MOTIVO_TRASL", "Motivos de traslado",
+                "/sigre/almacen/tablas/motivos-traslado", AlmacenFuenteDatos.MOTIVOS_TRASLADO, null, "Tablas"));
+        list.add(v("AL008", "ALMACEN_TABLAS_LOTES", "Ingreso de Lotes",
+                "/sigre/almacen/tablas/lotes", AlmacenFuenteDatos.LOTES, null, "Tablas"));
+        list.add(v("AL009", "ALMACEN_TABLAS_UNID_CONV", "Unidades de Conversión",
+                "/sigre/almacen/tablas/unidades-conversion", AlmacenFuenteDatos.CONVERSIONES, null, "Tablas"));
+        list.add(v("AL010", "ALMACEN_TABLAS_NUM_VALES", "Numeración — Vales",
+                "/sigre/almacen/tablas/numeracion-vales", AlmacenFuenteDatos.NUMERACION_VALES, null, "Tablas"));
+        list.add(v("AL011", "ALMACEN_TABLAS_NUM_OTR", "Numeración — OTR",
+                "/sigre/almacen/tablas/numeracion-otr", AlmacenFuenteDatos.NUMERACION_OTR, null, "Tablas"));
+        list.add(v("AL012", "ALMACEN_TABLAS_PARAMETROS", "Parametros del Sistema",
+                "/sigre/almacen/tablas/parametros", AlmacenFuenteDatos.PARAMETROS, null, "Tablas"));
+
+        // Operaciones AL013–AL018
         list.add(v("AL013", "ALMACEN_OP_MOV_GENERAL", "Movimiento de Almacén — General",
                 "/sigre/almacen/operaciones/movimiento-general", AlmacenFuenteDatos.MOVIMIENTOS, null, "Operaciones"));
         list.add(v("AL014", "ALMACEN_OP_MOV_TRANSITO", "Movimiento de Almacén — Tránsito",
@@ -39,6 +66,7 @@ public final class AlmacenVistasCatalog {
         list.add(v("AL018", "ALMACEN_OP_INV_MONITOR", "Inventarios — Monitor por Conteo",
                 "/sigre/almacen/operaciones/inventario-monitor", AlmacenFuenteDatos.TOMAS_INVENTARIO, null, "Operaciones"));
 
+        // Consultas AL019–AL023
         list.add(v("AL019", "ALMACEN_CONS_MOV_ARTICULO", "Movimientos x artículo",
                 "/sigre/almacen/consultas/movimientos-x-articulo", AlmacenFuenteDatos.KARDEX, null, "Consultas"));
         list.add(v("AL020", "ALMACEN_CONS_MOV_ALMACEN", "Consulta de movimientos de almacén",
@@ -50,6 +78,7 @@ public final class AlmacenVistasCatalog {
         list.add(v("AL023", "ALMACEN_CONS_ESP_ARTICULOS", "Consulta Especializada de Artículos",
                 "/sigre/almacen/consultas/consulta-especializada-articulos", AlmacenFuenteDatos.STOCK, null, "Consultas"));
 
+        // Reportes AL024–AL030
         list.add(v("AL024", "ALMACEN_REP_STOCK_FECHA", "Stock a la fecha",
                 "/sigre/almacen/reportes/stock-fecha", AlmacenFuenteDatos.STOCK_A_FECHA, null, "Reportes"));
         list.add(v("AL025", "ALMACEN_REP_HIST_MOV", "Historial de movimiento",
@@ -65,6 +94,7 @@ public final class AlmacenVistasCatalog {
         list.add(v("AL030", "ALMACEN_REP_TOMA_INV", "Reportes de tomas de inventario",
                 "/sigre/almacen/reportes/reporte-tomas-inventario", AlmacenFuenteDatos.TOMAS_INVENTARIO, null, "Reportes"));
 
+        // Procesos AL031–AL033
         list.add(v("AL031", "ALMACEN_PROC_RECALCULO", "Recálculo de precios promedio",
                 "/sigre/almacen/procesos/recalcular", AlmacenFuenteDatos.PROCESO,
                 "/procesos/recalculo-precios-promedio", "Procesos"));
@@ -75,14 +105,13 @@ public final class AlmacenVistasCatalog {
                 "/sigre/almacen/procesos/actualizacion", AlmacenFuenteDatos.PROCESO,
                 "/procesos/actualizacion-automatica", "Procesos"));
 
-        list.add(v("AL101", "ALMACEN_TAB_ALMACENES", "Maestro de almacenes",
-                "/sigre/almacen/tablas/almacenes", AlmacenFuenteDatos.ALMACENES, null, "Tablas"));
-        list.add(v("AL102", "ALMACEN_TAB_TIPOS_MOV", "Tipos de movimientos",
-                "/sigre/almacen/tablas/tipos-movimiento", AlmacenFuenteDatos.TIPOS_MOVIMIENTO, null, "Tablas"));
-        list.add(v("AL103", "ALMACEN_TAB_MOTIVOS", "Motivos de traslado",
-                "/sigre/almacen/tablas/motivos-traslado", AlmacenFuenteDatos.MOTIVOS_TRASLADO, null, "Tablas"));
-        list.add(v("AL104", "ALMACEN_TAB_LOTES", "Ingreso de lotes",
-                "/sigre/almacen/tablas/lotes", AlmacenFuenteDatos.LOTES, null, "Tablas"));
+        // Alias códigos menú seed (mismo path / ventana)
+        alias(list, "ALMACEN_TAB_ALMACENES", "AL001");
+        alias(list, "ALMACEN_TAB_TIPOS_MOV", "AL002");
+        alias(list, "ALMACEN_TAB_MOTIVOS", "AL007");
+        alias(list, "ALMACEN_TAB_LOTES", "AL008");
+        alias(list, "ALMACEN_OPERACIONES_GENERAL", "AL013");
+        alias(list, "ALMACEN_OPERACIONES_TRANSITO", "AL014");
 
         TODAS = Collections.unmodifiableList(list);
         Map<String, AlmacenVista> byCod = new LinkedHashMap<>();
@@ -109,15 +138,33 @@ public final class AlmacenVistasCatalog {
         return new AlmacenVista(codigo, codigoVentana, nombre, ruta, fuente, procesoPath, grupo);
     }
 
+    /** Registra un segundo código funcional apuntando a la misma vista (por ventana). */
+    private static void alias(List<AlmacenVista> list, String codigoAlias, String codigoVentana) {
+        AlmacenVista base = null;
+        for (AlmacenVista x : list) {
+            if (codigoVentana.equalsIgnoreCase(x.codigoVentana)) {
+                base = x;
+                break;
+            }
+        }
+        if (base != null) {
+            list.add(new AlmacenVista(codigoAlias, base.codigoVentana, base.nombre, base.ruta,
+                    base.fuente, base.procesoPath, base.grupo));
+        }
+    }
+
     public static List<AlmacenVista> todas() {
         return TODAS;
     }
 
-    /** Solo vistas con path y Activity/listado/proceso. */
+    /** Solo vistas con path y listado/proceso (sin duplicados de alias en hub). */
     public static List<AlmacenVista> navegables() {
         List<AlmacenVista> out = new ArrayList<>();
         for (AlmacenVista v : TODAS) {
-            if (v.esNavegable()) out.add(v);
+            if (!v.esNavegable()) continue;
+            // Evitar alias duplicados en hub: solo códigos canónicos
+            if (v.codigo.startsWith("ALMACEN_TAB_") || v.codigo.startsWith("ALMACEN_OPERACIONES_")) continue;
+            out.add(v);
         }
         return out;
     }
@@ -140,10 +187,6 @@ public final class AlmacenVistasCatalog {
         return POR_VENTANA.get(codigoVentana.trim().toUpperCase(Locale.ROOT));
     }
 
-    /**
-     * Resuelve vista desde código menú / path / texto que contenga AL###.
-     * Ej.: {@code ALMACEN_OP_MOV_AL013}, {@code ...AL301...}, path con segmento conocido.
-     */
     public static AlmacenVista resolver(String codigoMenu, String pathUrl, String nombre) {
         AlmacenVista v = porCodigo(codigoMenu);
         if (v != null) return v;
@@ -184,32 +227,6 @@ public final class AlmacenVistasCatalog {
             if (n.endsWith(e.getKey()) || e.getKey().endsWith(n) || n.contains(stripSigre(e.getKey()))) {
                 return e.getValue();
             }
-        }
-        if (n.contains("movimiento-general") || n.contains("movimiento-transito")) {
-            return POR_CODIGO.get("ALMACEN_OP_MOV_GENERAL");
-        }
-        if (n.contains("orden-traslado-aprobacion")) return POR_CODIGO.get("ALMACEN_OP_OTR_APROBACION");
-        if (n.contains("orden-traslado")) return POR_CODIGO.get("ALMACEN_OP_OTR_GENERACION");
-        if (n.contains("inventario-monitor")) return POR_CODIGO.get("ALMACEN_OP_INV_MONITOR");
-        if (n.contains("inventario-conteo")) return POR_CODIGO.get("ALMACEN_OP_INV_CONTEO");
-        if (n.contains("movimientos-x-articulo") || n.contains("historial-movimiento") || n.contains("kardex")) {
-            return POR_CODIGO.get("ALMACEN_CONS_MOV_ARTICULO");
-        }
-        if (n.contains("consulta-especializada") || n.contains("stock-minimo")) {
-            return POR_CODIGO.get("ALMACEN_CONS_ESP_ARTICULOS");
-        }
-        if (n.contains("valorizacion")) return POR_CODIGO.get("ALMACEN_REP_VALORIZACION");
-        if (n.contains("diagnostico")) return POR_CODIGO.get("ALMACEN_REP_DIAG");
-        if (n.contains("stock-fecha") || n.contains("stock-a-fecha")) return POR_CODIGO.get("ALMACEN_REP_STOCK_FECHA");
-        if (n.contains("tablas/almacenes")) return POR_CODIGO.get("ALMACEN_TAB_ALMACENES");
-        if (n.contains("tipos-movimiento")) return POR_CODIGO.get("ALMACEN_TAB_TIPOS_MOV");
-        if (n.contains("motivos-traslado")) return POR_CODIGO.get("ALMACEN_TAB_MOTIVOS");
-        if (n.contains("/lotes")) return POR_CODIGO.get("ALMACEN_TAB_LOTES");
-        if (n.contains("cuadre-stock")) return POR_CODIGO.get("ALMACEN_PROC_CUADRE_STOCK");
-        if (n.contains("actualizacion")) return POR_CODIGO.get("ALMACEN_PROC_ACT_AUTO");
-        if (n.contains("recalcular")) return POR_CODIGO.get("ALMACEN_PROC_RECALCULO");
-        if (n.contains("consulta-movimientos") || n.contains("devoluciones-y-prestamos") || n.contains("despachos")) {
-            return POR_CODIGO.get("ALMACEN_CONS_MOV_ALMACEN");
         }
         return null;
     }
