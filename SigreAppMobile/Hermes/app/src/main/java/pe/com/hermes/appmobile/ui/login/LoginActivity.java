@@ -39,6 +39,7 @@ import pe.com.hermes.appmobile.util.AppUtils;
 import pe.com.hermes.appmobile.util.AppVersion;
 import pe.com.hermes.common.ui.ValidInputHelper;
 import pe.com.hermes.common.util.AsyncRunner;
+import pe.com.hermes.common.validation.InputValidators;
 
 /**
  * Login completo en una sola ventana: credenciales → modal empresa → modal sucursal.
@@ -77,9 +78,9 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
 
         binding.tvVersion.setText(AppVersion.etiqueta(this));
 
-        // Check verde en inputs (mismo patrón FastSales ValidInputHelper)
-        ValidInputHelper.bindTextInputLayout(binding.tilUsuario, ValidInputHelper.notBlank());
-        ValidInputHelper.bindEditText(binding.etClave, ValidInputHelper.minLength(1));
+        // Validación reutilizable (common-ui): usuario/correo + password
+        ValidInputHelper.bindUsuarioOCorreo(binding.tilUsuario);
+        ValidInputHelper.bindPassword(binding.tilClave, 1);
 
         binding.btnLogin.setOnClickListener(v -> intentarLogin());
         binding.btnCambiarServidor.setOnClickListener(v -> mostrarServidorDefault());
@@ -278,6 +279,10 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
 
         if (usuario.isEmpty() || clave.isEmpty()) {
             AppUtils.toast(this, getString(R.string.login_error_campos));
+            return;
+        }
+        if (!InputValidators.usuarioOCorreo().isValid(usuario)) {
+            AppUtils.toast(this, "Usuario o correo inválido");
             return;
         }
         if (AppUtils.app(this).getConfig().obtenerDefault() == null) {

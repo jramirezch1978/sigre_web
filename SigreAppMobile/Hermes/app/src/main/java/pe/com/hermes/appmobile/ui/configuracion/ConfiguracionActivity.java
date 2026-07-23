@@ -16,6 +16,8 @@ import pe.com.hermes.appmobile.databinding.ActivityConfiguracionBinding;
 import pe.com.hermes.appmobile.util.AppUtils;
 import pe.com.hermes.common.ui.ConfirmDialog;
 import pe.com.hermes.common.ui.LoadingDialog;
+import pe.com.hermes.common.ui.ValidInputHelper;
+import pe.com.hermes.common.validation.InputValidators;
 
 /**
  * Perfil del usuario autenticado.
@@ -44,6 +46,7 @@ public class ConfiguracionActivity extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(v -> finish());
         binding.btnGuardar.setOnClickListener(v -> confirmarYGuardar());
         binding.btnReenviar.setOnClickListener(v -> enviarCodigo(true));
+        ValidInputHelper.bindEmail(binding.tilEmail);
 
         cargarPerfil();
     }
@@ -100,6 +103,10 @@ public class ConfiguracionActivity extends AppCompatActivity {
         String email = texto(binding.etEmail);
         if (nombres.isEmpty() || email.isEmpty()) {
             AppUtils.toast(this, getString(R.string.config_error_campos));
+            return;
+        }
+        if (!InputValidators.email().isValid(email)) {
+            AppUtils.toast(this, "Correo electrónico inválido");
             return;
         }
 
