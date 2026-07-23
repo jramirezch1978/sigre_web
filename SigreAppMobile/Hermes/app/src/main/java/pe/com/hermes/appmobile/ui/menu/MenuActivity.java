@@ -26,7 +26,7 @@ import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.data.session.SessionManager;
 import pe.com.hermes.appmobile.databinding.ActivityMenuBinding;
 import pe.com.hermes.appmobile.ui.almacen.AlmacenNavRouter;
-import pe.com.hermes.appmobile.ui.compras.ComprasOpcionesActivity;
+import pe.com.hermes.appmobile.ui.compras.ComprasNavRouter;
 import pe.com.hermes.appmobile.ui.configuracion.ConfiguracionActivity;
 import pe.com.hermes.appmobile.ui.login.LoginActivity;
 import pe.com.hermes.appmobile.ui.preferencias.PreferenciasActivity;
@@ -203,10 +203,8 @@ public class MenuActivity extends AppCompatActivity {
             AlmacenNavRouter.abrirDesdeMenu(this, nodo);
             return;
         }
-        String codigo = nodo.codigo != null ? nodo.codigo.toUpperCase(Locale.ROOT) : "";
-        String path = nodo.pathUrl != null ? nodo.pathUrl.toLowerCase(Locale.ROOT) : "";
-        if (codigo.startsWith("COMPRAS") || path.contains("/compras")) {
-            startActivity(new Intent(this, ComprasOpcionesActivity.class));
+        if (ComprasNavRouter.esOpcionCompras(nodo)) {
+            ComprasNavRouter.abrirDesdeMenu(this, nodo);
             return;
         }
         AppUtils.toast(this, getString(R.string.menu_opcion_en_construccion, nodo.nombre));
