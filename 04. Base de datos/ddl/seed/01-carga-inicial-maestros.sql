@@ -6311,11 +6311,15 @@ WHERE NOT EXISTS (
     SELECT 1 FROM config.configuracion WHERE modulo = 'CORE' AND parametro = 'NUMERADOR_ANTIGUEDAD_ANIOS'
 );
 
--- Clase de artículo = Producto Terminado (usado por dashboard Hermes / reportes PT)
+-- Clase de artículo = Producto Terminado (dashboard Hermes / reportes PT).
+-- Nombre de parámetro UNIVERSAL (sin prefijo de módulo). Lectura vía config.fn_get_parametro_txt.
+DELETE FROM config.configuracion
+ WHERE parametro = 'CLASE_PRODUCTO_TERMINADO' AND modulo <> 'GENERAL';
+
 INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable)
-SELECT 'ALMACEN', 'CLASE_PRODUCTO_TERMINADO', 'TEXT', '01', TRUE
+SELECT 'GENERAL', 'CLASE_PRODUCTO_TERMINADO', 'TEXT', '01', TRUE
 WHERE NOT EXISTS (
-    SELECT 1 FROM config.configuracion WHERE modulo = 'ALMACEN' AND parametro = 'CLASE_PRODUCTO_TERMINADO'
+    SELECT 1 FROM config.configuracion WHERE modulo = 'GENERAL' AND parametro = 'CLASE_PRODUCTO_TERMINADO'
 );
 
 -- ============================================================

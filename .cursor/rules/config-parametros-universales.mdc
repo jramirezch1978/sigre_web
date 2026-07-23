@@ -1,0 +1,31 @@
+---
+description: Parámetros config.configuracion — nombres universales y acceso solo por función
+alwaysApply: true
+---
+
+# Parámetros de configuración (tenant / security)
+
+Tabla: `config.configuracion` (`modulo`, `parametro`, valores tipados).
+
+## Nombres universales
+
+- El campo **`parametro`** es el nombre canónico y **universal**.
+- **Prohibido** incluir el nombre del módulo en el parámetro (`ALMACEN_...`, `COMPRAS_...`, `ALMACEN.CLASE_...`, etc.).
+- Incorrecto: `parametro = 'ALMACEN_CLASE_PRODUCTO_TERMINADO'` o referirse como `ALMACEN.CLASE_PRODUCTO_TERMINADO` como si el módulo formara parte del nombre.
+- Correcto: `parametro = 'CLASE_PRODUCTO_TERMINADO'`.
+- Agrupación opcional en columna `modulo` (`GENERAL`, `CORE`, `COMPRAS`, …). Parámetros de uso transversal → módulo **`GENERAL`**.
+
+## Lectura / escritura obligatoria
+
+- **Nunca** hacer `SELECT`/`UPDATE`/`INSERT` directo a `config.configuracion` desde backend o SQL de negocio.
+- Usar siempre las funciones PostgreSQL:
+  - `config.fn_get_parametro_txt|int|dec|bool(modulo, parametro, default)`
+  - `config.fn_set_parametro_txt|int|dec|bool(...)`
+- En Java: **`com.sigre.common.service.ConfiguracionParametroService`**
+  - Atajo sin módulo → `GENERAL`: `configParam.getTexto("CLASE_PRODUCTO_TERMINADO", "01")`
+  - Con módulo explícito solo si el seed ya lo define así: `getTexto("CORE", "TASA_IGV", ...)`
+
+## Seed
+
+- Alta de parámetros nuevos en scripts seed canónicos (`04. Base de datos/ddl/seed/...`), idempotentes (`WHERE NOT EXISTS` / `ON CONFLICT`).
+- No crear scripts patch sueltos para parámetros.

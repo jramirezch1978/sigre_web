@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Resumen logístico para Hermes / dashboards móviles:
  * valorización por almacén, conteo de vales activos (ingresos/salidas)
- * y stock de producto terminado (clase desde config.ALMACEN.CLASE_PRODUCTO_TERMINADO).
+ * y stock de producto terminado (clase desde parámetro universal CLASE_PRODUCTO_TERMINADO).
  */
 @Data
 @Builder
