@@ -36,11 +36,18 @@ public class DashPtAdapter extends RecyclerView.Adapter<DashPtAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH h, int position) {
         ProductoTerminadoStockDto d = items.get(position);
-        String grupo = d.grupo != null && !d.grupo.isBlank() ? d.grupo + " · " : "";
-        h.tvProducto.setText(grupo + (d.nombre != null ? d.nombre : "—"));
-        h.tvCodigo.setText(d.codigo != null ? d.codigo : "—");
+        h.tvCodigo.setText(texto(d.codigo));
+        h.tvTalla.setText(texto(d.talla));
+        String alm = d.almacenCodigo != null && !d.almacenCodigo.isBlank()
+                ? d.almacenCodigo
+                : d.almacenNombre;
+        h.tvAlmacen.setText(texto(alm));
         BigDecimal c = d.cantidad != null ? d.cantidad : BigDecimal.ZERO;
         h.tvCantidad.setText(qty.format(c));
+    }
+
+    private static String texto(String v) {
+        return v != null && !v.isBlank() ? v.trim() : "—";
     }
 
     @Override
@@ -49,14 +56,16 @@ public class DashPtAdapter extends RecyclerView.Adapter<DashPtAdapter.VH> {
     }
 
     static class VH extends RecyclerView.ViewHolder {
-        final TextView tvProducto;
         final TextView tvCodigo;
+        final TextView tvTalla;
+        final TextView tvAlmacen;
         final TextView tvCantidad;
 
         VH(@NonNull View itemView) {
             super(itemView);
-            tvProducto = itemView.findViewById(R.id.tvProducto);
             tvCodigo = itemView.findViewById(R.id.tvCodigo);
+            tvTalla = itemView.findViewById(R.id.tvTalla);
+            tvAlmacen = itemView.findViewById(R.id.tvAlmacen);
             tvCantidad = itemView.findViewById(R.id.tvCantidad);
         }
     }

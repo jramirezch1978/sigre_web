@@ -28,6 +28,7 @@ public class DashboardLogisticoResponse {
         public String codigo;
         public String nombre;
         public String denominacion;
+        public String talla;
         public String grupo;
         public String almacenCodigo;
         public String almacenNombre;

@@ -363,6 +363,18 @@ CREATE TABLE core.color (
     fec_modificacion    TIMESTAMPTZ
 );
 
+-- Maestro de tallas (legacy ARTICULO_TALLA)
+CREATE TABLE core.articulo_talla (
+    id BIGSERIAL PRIMARY KEY,
+    codigo VARCHAR(10) NOT NULL UNIQUE,
+    nombre VARCHAR(200) NOT NULL,
+    flag_estado VARCHAR(1) NOT NULL DEFAULT '1',
+    created_by          BIGINT,
+    fec_creacion        TIMESTAMPTZ     DEFAULT NOW(),
+    updated_by          BIGINT,
+    fec_modificacion    TIMESTAMPTZ
+);
+
 CREATE TABLE core.articulo (
     id BIGSERIAL PRIMARY KEY,
     codigo VARCHAR(30) NOT NULL UNIQUE,
@@ -372,6 +384,7 @@ CREATE TABLE core.articulo (
     articulo_categ_id BIGINT REFERENCES core.articulo_categ(id),
     articulo_sub_categ_id BIGINT REFERENCES core.articulo_sub_categ(id),
     articulo_clase_id BIGINT REFERENCES core.articulo_clase(id),
+    articulo_talla_id BIGINT REFERENCES core.articulo_talla(id),
     marca_id BIGINT REFERENCES core.marca(id),
     color_id BIGINT REFERENCES core.color(id),
     precio_venta NUMERIC(18, 4),
@@ -386,8 +399,11 @@ CREATE TABLE core.articulo (
     fec_modificacion    TIMESTAMPTZ
 );
 CREATE INDEX IX_ARTICULO_CLASE_ID ON core.articulo (articulo_clase_id);
+CREATE INDEX IX_ARTICULO_TALLA_ID ON core.articulo (articulo_talla_id);
 COMMENT ON COLUMN core.articulo.articulo_clase_id IS
     'FK a core.articulo_clase. Código PT: config.fn_get_parametro_txt(''GENERAL'', ''CLASE_PRODUCTO_TERMINADO'', ''01'').';
+COMMENT ON COLUMN core.articulo.articulo_talla_id IS
+    'FK a core.articulo_talla (talla del artículo).';
 
 CREATE TABLE core.entidad_contribuyente (
     id BIGSERIAL PRIMARY KEY,
@@ -1252,6 +1268,7 @@ CREATE INDEX IX_DETR_BIEN_SERV_02 ON core.detr_bien_serv (codigo_sunat);
 -- ============================================================
 
 CREATE INDEX IX_COLOR_01 ON core.color (flag_estado);
+CREATE INDEX IX_ARTICULO_TALLA_01 ON core.articulo_talla (flag_estado);
 CREATE INDEX IX_ARTICULO_01 ON core.articulo (nombre);
 CREATE INDEX IX_ARTICULO_02 ON core.articulo (articulo_categ_id, flag_estado);
 CREATE INDEX IX_ARTICULO_03 ON core.articulo (color_id);

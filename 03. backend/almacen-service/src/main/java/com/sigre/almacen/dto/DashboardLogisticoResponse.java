@@ -56,6 +56,8 @@ public class DashboardLogisticoResponse {
         private String codigo;
         private String nombre;
         private String denominacion;
+        /** Código/descripción de talla ({@code core.articulo_talla}). */
+        private String talla;
         private String grupo;
         private String almacenCodigo;
         private String almacenNombre;

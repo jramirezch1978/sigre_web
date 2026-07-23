@@ -167,11 +167,19 @@ public class DashboardLogisticoServiceImpl implements DashboardLogisticoService 
     private List<ProductoTerminadoStockItem> listarProductoTerminado(
             JdbcTemplate jdbc, Long sucursalId, String codClase) {
         boolean tieneColumnaClase = tieneColumna(jdbc, "core", "articulo", "articulo_clase_id");
+        boolean tieneTalla = tieneColumna(jdbc, "core", "articulo", "articulo_talla_id");
+        String tallaSelect = tieneTalla
+                ? "COALESCE(NULLIF(TRIM(t.codigo), ''), NULLIF(TRIM(t.nombre), '')) AS talla"
+                : "NULL::text AS talla";
+        String tallaJoin = tieneTalla
+                ? "LEFT JOIN core.articulo_talla t ON t.id = a.articulo_talla_id"
+                : "";
         List<ProductoTerminadoStockItem> porClase = List.of();
         if (tieneColumnaClase) {
             porClase = jdbc.query(
                     """
                     SELECT a.id, a.codigo, a.nombre,
+                           %s,
                            COALESCE(sc.desc_subcateg, c.desc_categ, 'GENERAL') AS grupo,
                            alm.codigo AS alm_cod, alm.nombre AS alm_nom,
                            aa.cantidad_disponible,
@@ -182,12 +190,13 @@ public class DashboardLogisticoServiceImpl implements DashboardLogisticoService 
                       LEFT JOIN core.articulo_clase cl ON cl.id = a.articulo_clase_id
                       LEFT JOIN core.articulo_categ c ON c.id = a.articulo_categ_id
                       LEFT JOIN core.articulo_sub_categ sc ON sc.id = a.articulo_sub_categ_id
+                      %s
                      WHERE aa.cantidad_disponible > 0
                        AND alm.flag_estado = '1'
                        AND cl.cod_clase = ?
                        AND (?::bigint IS NULL OR alm.sucursal_id = ?)
-                     ORDER BY 4, a.codigo, alm.codigo
-                    """,
+                     ORDER BY a.codigo, alm.codigo
+                    """.formatted(tallaSelect, tallaJoin),
                     (rs, i) -> mapPt(rs),
                     codClase, sucursalId, sucursalId);
         }
@@ -198,6 +207,7 @@ public class DashboardLogisticoServiceImpl implements DashboardLogisticoService 
         return jdbc.query(
                 """
                 SELECT a.id, a.codigo, a.nombre,
+                       %s,
                        COALESCE(sc.desc_subcateg, c.desc_categ, 'GENERAL') AS grupo,
                        alm.codigo AS alm_cod, alm.nombre AS alm_nom,
                        aa.cantidad_disponible,
@@ -208,12 +218,13 @@ public class DashboardLogisticoServiceImpl implements DashboardLogisticoService 
                   JOIN almacen.almacen_tipo at ON at.id = alm.almacen_tipo_id
                   LEFT JOIN core.articulo_categ c ON c.id = a.articulo_categ_id
                   LEFT JOIN core.articulo_sub_categ sc ON sc.id = a.articulo_sub_categ_id
+                  %s
                  WHERE aa.cantidad_disponible > 0
                    AND alm.flag_estado = '1'
                    AND at.codigo = 'PT'
                    AND (?::bigint IS NULL OR alm.sucursal_id = ?)
-                 ORDER BY 4, a.codigo, alm.codigo
-                """,
+                 ORDER BY a.codigo, alm.codigo
+                """.formatted(tallaSelect, tallaJoin),
                 (rs, i) -> mapPt(rs),
                 sucursalId, sucursalId);
     }
@@ -226,6 +237,7 @@ public class DashboardLogisticoServiceImpl implements DashboardLogisticoService 
                 .codigo(codigo)
                 .nombre(nombre)
                 .denominacion(codigo)
+                .talla(rs.getString("talla"))
                 .grupo(rs.getString("grupo"))
                 .almacenCodigo(rs.getString("alm_cod"))
                 .almacenNombre(rs.getString("alm_nom"))
