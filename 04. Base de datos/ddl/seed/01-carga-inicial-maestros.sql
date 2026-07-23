@@ -6311,6 +6311,13 @@ WHERE NOT EXISTS (
     SELECT 1 FROM config.configuracion WHERE modulo = 'CORE' AND parametro = 'NUMERADOR_ANTIGUEDAD_ANIOS'
 );
 
+-- Clase de artículo = Producto Terminado (usado por dashboard Hermes / reportes PT)
+INSERT INTO config.configuracion (modulo, parametro, tipo_dato, valor_texto, editable)
+SELECT 'ALMACEN', 'CLASE_PRODUCTO_TERMINADO', 'TEXT', '01', TRUE
+WHERE NOT EXISTS (
+    SELECT 1 FROM config.configuracion WHERE modulo = 'ALMACEN' AND parametro = 'CLASE_PRODUCTO_TERMINADO'
+);
+
 -- ============================================================
 -- TX 8l: rrhh.admin_afp (ADMIN_AFP.json — 6 registros)
 -- ============================================================

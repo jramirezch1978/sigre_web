@@ -371,6 +371,7 @@ CREATE TABLE core.articulo (
     unidad_medida_id BIGINT NOT NULL REFERENCES core.unidad_medida(id),
     articulo_categ_id BIGINT REFERENCES core.articulo_categ(id),
     articulo_sub_categ_id BIGINT REFERENCES core.articulo_sub_categ(id),
+    articulo_clase_id BIGINT REFERENCES core.articulo_clase(id),
     marca_id BIGINT REFERENCES core.marca(id),
     color_id BIGINT REFERENCES core.color(id),
     precio_venta NUMERIC(18, 4),
@@ -384,6 +385,7 @@ CREATE TABLE core.articulo (
     updated_by          BIGINT,
     fec_modificacion    TIMESTAMPTZ
 );
+CREATE INDEX IX_ARTICULO_CLASE_ID ON core.articulo (articulo_clase_id);
 
 CREATE TABLE core.entidad_contribuyente (
     id BIGSERIAL PRIMARY KEY,

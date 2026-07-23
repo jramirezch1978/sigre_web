@@ -112,6 +112,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("androidx.activity:activity:1.9.1")
 
     // Networking — mismo patron que el modulo REST (api/rrhh) de FastSales: Retrofit + OkHttp,

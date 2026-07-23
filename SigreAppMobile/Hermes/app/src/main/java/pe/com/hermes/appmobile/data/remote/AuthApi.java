@@ -10,6 +10,7 @@ import pe.com.hermes.appmobile.data.remote.dto.EnviarCodigoEmailRequest;
 import pe.com.hermes.appmobile.data.remote.dto.HealthPingResponse;
 import pe.com.hermes.appmobile.data.remote.dto.LoginRequest;
 import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
+import pe.com.hermes.appmobile.data.remote.dto.MiMenuResponse;
 import pe.com.hermes.appmobile.data.remote.dto.PerfilUpdateRequest;
 import pe.com.hermes.appmobile.data.remote.dto.RefreshTokenRequest;
 import pe.com.hermes.appmobile.data.remote.dto.RefreshTokenResponse;
@@ -71,4 +72,8 @@ public interface AuthApi {
 
     @POST("auth/perfil/email/enviar-codigo")
     Call<ApiResponse<CodigoEmailResponse>> enviarCodigoConfirmacionEmail(@Body EnviarCodigoEmailRequest request);
+
+    /** Menú efectivo del usuario (mismo del ERP web). */
+    @GET("auth/seguridad/mi-menu")
+    Call<ApiResponse<MiMenuResponse>> miMenu();
 }
