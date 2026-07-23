@@ -10,6 +10,7 @@ import com.sigre.almacen.dto.DashboardLogisticoResponse.ProductoTerminadoStockIt
 import com.sigre.almacen.dto.DiagnosticoAlmacenResponse;
 import com.sigre.almacen.service.DashboardLogisticoService;
 import com.sigre.almacen.service.ReporteAlmacenService;
+import com.sigre.common.config.ConfigParametros;
 import com.sigre.common.service.ConfiguracionParametroService;
 
 import javax.sql.DataSource;
@@ -24,9 +25,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class DashboardLogisticoServiceImpl implements DashboardLogisticoService {
 
-    /** Parámetro universal en config.configuracion (módulo GENERAL). */
-    private static final String PARAM_CLASE_PRODUCTO_TERMINADO = "CLASE_PRODUCTO_TERMINADO";
-    private static final String DEFAULT_CLASE_PT = "01";
     private static final int DIAS_SERIE = 14;
 
     private final DataSource dataSource;
@@ -108,10 +106,12 @@ public class DashboardLogisticoServiceImpl implements DashboardLogisticoService 
     /** Lee vía {@code config.fn_get_parametro_txt} (nunca SELECT directo a la tabla). */
     private String leerClaseProductoTerminado() {
         try {
-            String v = configParam.getTexto(PARAM_CLASE_PRODUCTO_TERMINADO, DEFAULT_CLASE_PT);
-            return v != null && !v.isBlank() ? v.trim() : DEFAULT_CLASE_PT;
+            String v = configParam.getTexto(
+                    ConfigParametros.CLASE_PRODUCTO_TERMINADO,
+                    ConfigParametros.Default.CLASE_PRODUCTO_TERMINADO);
+            return v != null && !v.isBlank() ? v.trim() : ConfigParametros.Default.CLASE_PRODUCTO_TERMINADO;
         } catch (Exception ex) {
-            return DEFAULT_CLASE_PT;
+            return ConfigParametros.Default.CLASE_PRODUCTO_TERMINADO;
         }
     }
 

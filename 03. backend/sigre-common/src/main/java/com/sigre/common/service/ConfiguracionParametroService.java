@@ -1,5 +1,6 @@
 package com.sigre.common.service;
 
+import com.sigre.common.config.ConfigParametros;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +12,8 @@ import java.math.BigDecimal;
  * del tenant), vía las funciones PostgreSQL {@code config.fn_get_parametro_*} y
  * {@code config.fn_set_parametro_*}. Todos los servicios deben usar esta clase para leer/grabar
  * parámetros, en lugar de consultar la tabla directamente.
+ *
+ * <p>Nombres de parámetro: constantes en {@link ConfigParametros} (nunca literales sueltos).
  *
  * <ul>
  *   <li>get*: lee el valor; si el parámetro no existe lo crea con el default y lo retorna.</li>
@@ -24,7 +27,7 @@ import java.math.BigDecimal;
 public class ConfiguracionParametroService {
 
     /** Módulo por defecto cuando no se especifica uno: configuraciones generales. */
-    public static final String MODULO_GENERAL = "GENERAL";
+    public static final String MODULO_GENERAL = ConfigParametros.Modulo.GENERAL;
 
     private final JdbcTemplate jdbcTemplate;
 

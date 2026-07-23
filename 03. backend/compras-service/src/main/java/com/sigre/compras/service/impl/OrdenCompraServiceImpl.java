@@ -25,6 +25,7 @@ import com.sigre.compras.service.OrdenCompraPdfService;
 import com.sigre.compras.service.OrdenCompraService;
 import com.sigre.compras.service.OrdenCompraValidator;
 import com.sigre.compras.spec.OrdenCompraSpecifications;
+import com.sigre.common.config.ConfigParametros;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
 import com.sigre.common.security.TenantContext;
@@ -686,7 +687,7 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
         Boolean flagPercepcion = null;
         BigDecimal percepcionTasa = null;
         if (articulo != null) {
-            percepcionTasa = configParam.getDecimal("CORE", "TASA_PERCEPCION", null);
+            percepcionTasa = configParam.getDecimal(ConfigParametros.Modulo.CORE, ConfigParametros.TASA_PERCEPCION, null);
             flagPercepcion = percepcionTasa != null;
         }
 
@@ -775,7 +776,7 @@ public class OrdenCompraServiceImpl implements OrdenCompraService {
     }
 
     private boolean isAprobacionRequerida() {
-        return configParam.getBooleano("COMPRAS", "COMPRA_APROBACION_OC", false);
+        return configParam.getBooleano(ConfigParametros.Modulo.COMPRAS, ConfigParametros.COMPRA_APROBACION_OC, false);
     }
 
     private String resolverEmailDestino(EnviarProveedorRequest request, Long proveedorId) {

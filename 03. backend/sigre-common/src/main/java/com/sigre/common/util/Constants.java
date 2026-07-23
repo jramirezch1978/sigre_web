@@ -45,11 +45,16 @@ public final class Constants {
 
     /**
      * Destinatarios de soporte SIGRE (TO de alertas operativas).
-     * Fuente canónica también en BD security: config.configuracion (SOPORTE / EMAILS).
+     * Fuente canónica también en BD security: {@link com.sigre.common.config.ConfigParametros.Modulo#SOPORTE}
+     * / {@link com.sigre.common.config.ConfigParametros#EMAILS}.
      * Env / YAML: {@code NOTIFICACION_EMAIL_SOPORTE} / {@code app.notificacion.email.soporte}.
      */
     public static final String NOTIFICACION_EMAIL_SOPORTE_DEFAULT =
             "jramirez@npssac.com.pe,jhonnyaramirezch@gmail.com";
-    public static final String CONFIG_MODULO_SOPORTE = "SOPORTE";
-    public static final String CONFIG_PARAM_EMAILS = "EMAILS";
+    /** @deprecated usar {@link com.sigre.common.config.ConfigParametros.Modulo#SOPORTE} */
+    @Deprecated
+    public static final String CONFIG_MODULO_SOPORTE = com.sigre.common.config.ConfigParametros.Modulo.SOPORTE;
+    /** @deprecated usar {@link com.sigre.common.config.ConfigParametros#EMAILS} */
+    @Deprecated
+    public static final String CONFIG_PARAM_EMAILS = com.sigre.common.config.ConfigParametros.EMAILS;
 }

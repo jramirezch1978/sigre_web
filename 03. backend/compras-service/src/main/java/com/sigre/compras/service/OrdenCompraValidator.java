@@ -11,6 +11,7 @@ import com.sigre.compras.dto.OrdenCompraLineaRequest;
 import com.sigre.compras.entity.DocTipoRef;
 import com.sigre.compras.entity.*;
 import com.sigre.compras.repository.*;
+import com.sigre.common.config.ConfigParametros;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.security.TenantContext;
 import com.sigre.common.service.ConfiguracionParametroService;
@@ -231,7 +232,7 @@ public class OrdenCompraValidator {
     }
 
     public boolean isFondosControlActivo() {
-        return configParam.getBooleano("COMPRAS", "flag_cntrl_fondos", false);
+        return configParam.getBooleano(ConfigParametros.Modulo.COMPRAS, ConfigParametros.FLAG_CNTRL_FONDOS, false);
     }
 
     public void verificarFondosDisponibles(OrdenCompra oc) {

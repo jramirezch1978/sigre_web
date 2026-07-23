@@ -20,6 +20,7 @@ import com.sigre.compras.service.OrdenServicioCalculator;
 import com.sigre.compras.service.OrdenServicioService;
 import com.sigre.compras.service.OrdenServicioValidator;
 import com.sigre.compras.spec.OrdenServicioSpecifications;
+import com.sigre.common.config.ConfigParametros;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
 import com.sigre.common.security.TenantContext;
@@ -595,7 +596,7 @@ public class OrdenServicioServiceImpl implements OrdenServicioService {
         ServicioCatalogo serv = servicioCatalogoRepository.findById(servicioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Servicio", servicioId));
 
-        BigDecimal tasaIgv = configParam.getDecimal("CORE", "TASA_IGV", null);
+        BigDecimal tasaIgv = configParam.getDecimal(ConfigParametros.Modulo.CORE, ConfigParametros.TASA_IGV, null);
 
         return DatosServicioResponse.builder()
                 .servicioId(serv.getId())
@@ -811,7 +812,7 @@ public class OrdenServicioServiceImpl implements OrdenServicioService {
     }
 
     private boolean isAprobacionRequerida() {
-        return configParam.getBooleano("COMPRAS", "COMPRA_APROBACION_OS", true);
+        return configParam.getBooleano(ConfigParametros.Modulo.COMPRAS, ConfigParametros.COMPRA_APROBACION_OS, true);
     }
 
     private String generarNroOs(Long sucursalId, String codOrigen) {

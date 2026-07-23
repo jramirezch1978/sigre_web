@@ -1,5 +1,6 @@
 package com.sigre.seguridad.service;
 
+import com.sigre.common.config.ConfigParametros;
 import com.sigre.common.util.Constants;
 import com.sigre.common.util.EmailListParser;
 import com.sigre.seguridad.dto.EmpresaRegistroEmailDto;
@@ -580,8 +581,8 @@ public class EmailService {
             String fromDb = jdbcTemplate.queryForObject(
                     "SELECT config.fn_get_parametro_txt(?, ?, ?)",
                     String.class,
-                    Constants.CONFIG_MODULO_SOPORTE,
-                    Constants.CONFIG_PARAM_EMAILS,
+                    ConfigParametros.Modulo.SOPORTE,
+                    ConfigParametros.EMAILS,
                     Constants.NOTIFICACION_EMAIL_SOPORTE_DEFAULT);
             List<String> parsed = EmailListParser.parse(fromDb);
             if (!parsed.isEmpty()) {

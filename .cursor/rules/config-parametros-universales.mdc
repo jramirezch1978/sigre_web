@@ -15,6 +15,12 @@ Tabla: `config.configuracion` (`modulo`, `parametro`, valores tipados).
 - Correcto: `parametro = 'CLASE_PRODUCTO_TERMINADO'`.
 - Agrupación opcional en columna `modulo` (`GENERAL`, `CORE`, `COMPRAS`, …). Parámetros de uso transversal → módulo **`GENERAL`**.
 
+## Constantes Java (obligatorio)
+
+- Nombres de parámetro y módulos: **`com.sigre.common.config.ConfigParametros`** (sigre-common).
+- **Prohibido** literales `"CLASE_PRODUCTO_TERMINADO"`, `"TASA_IGV"`, etc. en servicios; usar `ConfigParametros.*`.
+- Parámetro nuevo → agregar constante estática en `ConfigParametros` (+ seed SQL canónico).
+
 ## Lectura / escritura obligatoria
 
 - **Nunca** hacer `SELECT`/`UPDATE`/`INSERT` directo a `config.configuracion` desde backend o SQL de negocio.
@@ -22,8 +28,8 @@ Tabla: `config.configuracion` (`modulo`, `parametro`, valores tipados).
   - `config.fn_get_parametro_txt|int|dec|bool(modulo, parametro, default)`
   - `config.fn_set_parametro_txt|int|dec|bool(...)`
 - En Java: **`com.sigre.common.service.ConfiguracionParametroService`**
-  - Atajo sin módulo → `GENERAL`: `configParam.getTexto("CLASE_PRODUCTO_TERMINADO", "01")`
-  - Con módulo explícito solo si el seed ya lo define así: `getTexto("CORE", "TASA_IGV", ...)`
+  - Atajo sin módulo → `GENERAL`: `configParam.getTexto(ConfigParametros.CLASE_PRODUCTO_TERMINADO, ConfigParametros.Default.CLASE_PRODUCTO_TERMINADO)`
+  - Con módulo: `getTexto(ConfigParametros.Modulo.CORE, ConfigParametros.TASA_IGV, ...)`
 
 ## Seed
 

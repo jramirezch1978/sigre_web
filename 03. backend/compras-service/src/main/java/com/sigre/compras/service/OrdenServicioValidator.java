@@ -13,6 +13,7 @@ import com.sigre.compras.entity.DocTipoRef;
 import com.sigre.compras.entity.OrdenServicio;
 import com.sigre.compras.entity.OrdenServicioDet;
 import com.sigre.compras.repository.*;
+import com.sigre.common.config.ConfigParametros;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.security.TenantContext;
 import com.sigre.common.service.ConfiguracionParametroService;
@@ -212,7 +213,7 @@ public class OrdenServicioValidator {
     }
 
     private boolean isValidaLimiteOs() {
-        return configParam.getBooleano("COMPRAS", "FLAG_VALIDA_LIMITE_OS", false);
+        return configParam.getBooleano(ConfigParametros.Modulo.COMPRAS, ConfigParametros.FLAG_VALIDA_LIMITE_OS, false);
     }
 
     // ── §20 Restricción cencos por usuario ──────────────────────────────────
@@ -238,7 +239,7 @@ public class OrdenServicioValidator {
     }
 
     private boolean isRestriccionCencosActiva() {
-        return configParam.getBooleano("COMPRAS", "flag_restr_cencos_usr", false);
+        return configParam.getBooleano(ConfigParametros.Modulo.COMPRAS, ConfigParametros.FLAG_RESTR_CENCOS_USR, false);
     }
 
     // ── §15 Validaciones de anulación ────────────────────────────────────────
