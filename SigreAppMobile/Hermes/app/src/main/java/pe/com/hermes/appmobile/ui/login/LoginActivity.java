@@ -37,6 +37,7 @@ import pe.com.hermes.appmobile.ui.ping.PingMonitorDialog;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
 import pe.com.hermes.appmobile.util.AppVersion;
+import pe.com.hermes.common.ui.ValidInputHelper;
 import pe.com.hermes.common.util.AsyncRunner;
 
 /**
@@ -76,6 +77,10 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
 
         binding.tvVersion.setText(AppVersion.etiqueta(this));
 
+        // Check verde en inputs (mismo patrón FastSales ValidInputHelper)
+        ValidInputHelper.bindTextInputLayout(binding.tilUsuario, ValidInputHelper.notBlank());
+        ValidInputHelper.bindEditText(binding.etClave, ValidInputHelper.minLength(1));
+
         binding.btnLogin.setOnClickListener(v -> intentarLogin());
         binding.btnCambiarServidor.setOnClickListener(v -> mostrarServidorDefault());
         binding.tvServidorNombre.setOnClickListener(v -> mostrarServidorDefault());
@@ -102,18 +107,35 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
     private void actualizarServidorInfo() {
         ServerProfile def = AppUtils.app(this).getConfig().obtenerDefault();
         binding.tvServidorNombre.setText(def != null ? def.getNombre() : "(sin configurar)");
+        ValidInputHelper.setDisplayValid(binding.tvServidorNombre, def != null);
     }
 
     private void iniciarMonitoreoConexion() {
         detenerMonitoreoConexion();
         if (AppUtils.app(this).getConfig().obtenerDefault() == null) {
-            binding.tvBadgeConexion.setText("Sin servidor");
-            binding.badgeConexion.setBackgroundResource(R.drawable.bg_badge_neutral);
+            mostrarBadgeConexion(false, "Sin servidor", null);
             return;
         }
-        binding.tvBadgeConexion.setText("Verificando…");
-        binding.badgeConexion.setBackgroundResource(R.drawable.bg_badge_neutral);
+        mostrarBadgeConexion(false, "Verificando…", null);
         connectionMonitor.start();
+    }
+
+    private void mostrarBadgeConexion(boolean conectado, String texto, Long latencyMs) {
+        if (conectado) {
+            binding.badgeConexion.setBackgroundResource(R.drawable.badge_connected_bg);
+            binding.ivEstadoConexion.setImageResource(R.drawable.ic_wifi_connected);
+            binding.tvBadgeConexion.setTextColor(Color.parseColor("#4CAF50"));
+            if (latencyMs != null) {
+                binding.tvBadgeConexion.setText("Conectado (" + latencyMs + "ms)");
+            } else {
+                binding.tvBadgeConexion.setText(texto != null ? texto : "Conectado");
+            }
+        } else {
+            binding.badgeConexion.setBackgroundResource(R.drawable.badge_disconnected_bg);
+            binding.ivEstadoConexion.setImageResource(R.drawable.ic_wifi_disconnected);
+            binding.tvBadgeConexion.setTextColor(Color.parseColor("#F44336"));
+            binding.tvBadgeConexion.setText(texto != null ? texto : "Sin conexión");
+        }
     }
 
     private void detenerMonitoreoConexion() {
@@ -124,12 +146,10 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
 
     @Override
     public void onConnectionStatusChanged(boolean connected, Long latencyMs) {
-        if (connected && latencyMs != null) {
-            binding.tvBadgeConexion.setText("Conectado (" + latencyMs + "ms)");
-            binding.badgeConexion.setBackgroundResource(R.drawable.bg_badge_success);
+        if (connected) {
+            mostrarBadgeConexion(true, "Conectado", latencyMs);
         } else {
-            binding.tvBadgeConexion.setText("Sin conexión");
-            binding.badgeConexion.setBackgroundResource(R.drawable.bg_badge_danger);
+            mostrarBadgeConexion(false, "Sin conexión", null);
         }
     }
 

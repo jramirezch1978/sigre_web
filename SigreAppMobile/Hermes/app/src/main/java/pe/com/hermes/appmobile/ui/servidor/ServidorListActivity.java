@@ -29,6 +29,7 @@ import pe.com.hermes.appmobile.util.AppUtils;
 import pe.com.hermes.appmobile.util.ConnectivityChecker;
 import pe.com.hermes.common.ui.ConfirmDialog;
 import pe.com.hermes.common.ui.MessageBox;
+import pe.com.hermes.common.ui.ValidInputHelper;
 import pe.com.hermes.common.util.AsyncRunner;
 
 /**
@@ -115,6 +116,9 @@ public class ServidorListActivity extends AppCompatActivity {
             spProtocolo.setSelection(Math.max(posicion, 0));
             chkFlagDefault.setChecked(existente.isFlagDefault());
         }
+
+        // Check verde en campos del diálogo (FastSales ImplServerRemote + ValidInputHelper.bindTree)
+        ValidInputHelper.bindTree(view);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(view)
