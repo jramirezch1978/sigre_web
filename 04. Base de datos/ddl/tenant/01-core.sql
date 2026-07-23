@@ -386,6 +386,8 @@ CREATE TABLE core.articulo (
     fec_modificacion    TIMESTAMPTZ
 );
 CREATE INDEX IX_ARTICULO_CLASE_ID ON core.articulo (articulo_clase_id);
+COMMENT ON COLUMN core.articulo.articulo_clase_id IS
+    'FK a core.articulo_clase. El código PT se lee de config ALMACEN.CLASE_PRODUCTO_TERMINADO';
 
 CREATE TABLE core.entidad_contribuyente (
     id BIGSERIAL PRIMARY KEY,

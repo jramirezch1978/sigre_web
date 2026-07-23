@@ -14,7 +14,6 @@ REM   database-deploy.bat create-template [--force]
 REM   database-deploy.bat create-asistencia [--force]
 REM   database-deploy.bat insert
 REM   database-deploy.bat clone <empresa> [--force]
-REM   database-deploy.bat patch-dashboard-pt
 REM   database-deploy.bat delete <nombre_bd> [--force]
 REM   database-deploy.bat delete-dev [--force]
 REM   database-deploy.bat tenant-grants <bd> <rol>
@@ -94,7 +93,6 @@ if /I "!MODE!"=="insert" set "DBDEPLOY_SCOPE=insert-template"
 if /I "!MODE!"=="clone" set "DBDEPLOY_SCOPE=clone"
 if /I "!MODE!"=="patch-bluecoast" set "DBDEPLOY_SCOPE=patch-bluecoast"
 if /I "!MODE!"=="patch-cantabria" set "DBDEPLOY_SCOPE=patch-cantabria"
-if /I "!MODE!"=="patch-dashboard-pt" set "DBDEPLOY_SCOPE=patch-dashboard-pt"
 if /I "!MODE!"=="delete" set "DBDEPLOY_SCOPE=delete"
 if /I "!MODE!"=="delete-dev" set "DBDEPLOY_SCOPE=delete-dev"
 if /I "!MODE!"=="tenant-grants" set "DBDEPLOY_SCOPE=tenant-grants"
@@ -118,7 +116,6 @@ if /I "!MODE!"=="insert" goto :route_insert
 if /I "!MODE!"=="clone" goto :route_clone
 if /I "!MODE!"=="patch-bluecoast" goto :route_patch_bluecoast
 if /I "!MODE!"=="patch-cantabria" goto :route_patch_cantabria
-if /I "!MODE!"=="patch-dashboard-pt" goto :route_patch_dashboard_pt
 if /I "!MODE!"=="delete" goto :route_delete
 if /I "!MODE!"=="delete-dev" goto :route_delete_dev
 if /I "!MODE!"=="tenant-grants" goto :route_tenant_grants
@@ -177,11 +174,6 @@ goto :done
 :route_patch_cantabria
 call :check_host_docker_ddl || goto :fail
 call :do_patch_cantabria || goto :fail
-goto :done
-
-:route_patch_dashboard_pt
-call :check_host_docker_ddl || goto :fail
-call :do_patch_dashboard_pt || goto :fail
 goto :done
 
 :route_delete
@@ -387,7 +379,6 @@ call :run_sql "tenant/09-produccion.sql" || exit /b 1
 call :run_sql "tenant/10-auditoria.sql" || exit /b 1
 call :run_sql "tenant/11-auditoria-campos-obligatorios.sql" || exit /b 1
 call :run_sql "tenant/12-funciones-procedimientos.sql" || exit /b 1
-call :run_sql "tenant/13-dashboard-producto-terminado.sql" || exit /b 1
 call :run_sql "99-auditoria-global.sql" || exit /b 1
 call :run_sql "99-auditoria-triggers-fechas.sql" || exit /b 1
 call :run_sql "seed/01-carga-inicial-maestros.sql" || exit /b 1
@@ -518,10 +509,6 @@ echo.
 echo ^>^> Modo: patch-bluecoast ^(sigre_emp_bluecoast^)
 set "SAVED_PGDATABASE=!PGDATABASE!"
 set "PGDATABASE=sigre_emp_bluecoast"
-call :run_sql "tenant/13-dashboard-producto-terminado.sql" || (
-    set "PGDATABASE=!SAVED_PGDATABASE!"
-    exit /b 1
-)
 call :run_sql "seed/02-carga-inicial-bluecoast-tenant.sql" || (
     set "PGDATABASE=!SAVED_PGDATABASE!"
     exit /b 1
@@ -535,33 +522,12 @@ echo.
 echo ^>^> Modo: patch-cantabria ^(sigre_emp_cantabria^)
 set "SAVED_PGDATABASE=!PGDATABASE!"
 set "PGDATABASE=sigre_emp_cantabria"
-call :run_sql "tenant/13-dashboard-producto-terminado.sql" || (
-    set "PGDATABASE=!SAVED_PGDATABASE!"
-    exit /b 1
-)
 call :run_sql "seed/02-carga-inicial-cantabria-tenant.sql" || (
     set "PGDATABASE=!SAVED_PGDATABASE!"
     exit /b 1
 )
 set "PGDATABASE=!SAVED_PGDATABASE!"
 echo ^>^> patch-cantabria: OK
-exit /b 0
-
-:do_patch_dashboard_pt
-echo.
-echo ^>^> Modo: patch-dashboard-pt ^(tenant/13-dashboard-producto-terminado.sql^)
-echo ^>^> Aplica columna articulo_clase_id + param ALMACEN.CLASE_PRODUCTO_TERMINADO
-set "SAVED_PGDATABASE=!PGDATABASE!"
-for %%D in (sigre_template sigre_emp_bluecoast sigre_emp_cantabria) do (
-    echo ^>^> --- %%D ---
-    set "PGDATABASE=%%D"
-    call :run_sql "tenant/13-dashboard-producto-terminado.sql" || (
-        set "PGDATABASE=!SAVED_PGDATABASE!"
-        exit /b 1
-    )
-)
-set "PGDATABASE=!SAVED_PGDATABASE!"
-echo ^>^> patch-dashboard-pt: OK
 exit /b 0
 
 :is_protected_db
@@ -660,9 +626,8 @@ echo   %~nx0 create-template         Solo !PGTEMPLATE!
 echo   %~nx0 create-asistencia [--force]  Crea BD !PGASISTENCIA_DB! en postgres17 + rol sigre-web
 echo   %~nx0 insert                  Solo seed ^(requiere create previo^)
 echo   %~nx0 clone ^<empresa^>
-echo   %~nx0 patch-bluecoast           Sucursales + usuarios Blue Coast + DDL dashboard PT
-echo   %~nx0 patch-cantabria           Sucursales Cantabria + DDL dashboard PT
-echo   %~nx0 patch-dashboard-pt        DDL PT en template/bluecoast/cantabria ^(idempotente^)
+echo   %~nx0 patch-bluecoast           Sucursales + usuarios Blue Coast en sigre_emp_bluecoast
+echo   %~nx0 patch-cantabria           Restaura 4 sucursales en sigre_emp_cantabria
 echo   %~nx0 delete ^<nombre_bd^>
 echo   %~nx0 delete-dev              BDs que terminan en _dev
 echo   %~nx0 tenant-grants ^<bd^> ^<rol^>
