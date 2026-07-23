@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.sigre.almacen.dto.DashboardLogisticoResponse;
+import com.sigre.almacen.dto.DashboardLogisticoResponse.MovimientoDiaItem;
 import com.sigre.almacen.dto.DashboardLogisticoResponse.ProductoTerminadoStockItem;
 import com.sigre.almacen.dto.DiagnosticoAlmacenResponse;
 import com.sigre.almacen.service.DashboardLogisticoService;
@@ -12,13 +13,18 @@ import com.sigre.almacen.service.ReporteAlmacenService;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class DashboardLogisticoServiceImpl implements DashboardLogisticoService {
 
     private static final String DEFAULT_CLASE_PT = "01";
+    private static final int DIAS_SERIE = 14;
 
     private final DataSource dataSource;
     private final ReporteAlmacenService reporteAlmacenService;
@@ -40,16 +46,59 @@ public class DashboardLogisticoServiceImpl implements DashboardLogisticoService 
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         List<ProductoTerminadoStockItem> pt = listarProductoTerminado(jdbc, sucursalId, codClase);
+        List<MovimientoDiaItem> serie = serieMovimientosDiarios(jdbc, sucursalId, DIAS_SERIE);
 
         return DashboardLogisticoResponse.builder()
                 .claseProductoTerminado(codClase)
                 .claseProductoTerminadoDesc(descClase)
-                .totalIngresosActivos(mov.ingresos)
-                .totalSalidasActivos(mov.salidas)
-                .valorInventarioTotal(valorTotal)
-                .valorizacionPorAlmacen(porAlmacen)
-                .productoTerminado(pt)
+                .totalIngresosActivos(mov != null ? mov.ingresos : 0)
+                .totalSalidasActivos(mov != null ? mov.salidas : 0)
+                .valorInventarioTotal(valorTotal != null ? valorTotal : BigDecimal.ZERO)
+                .valorizacionPorAlmacen(porAlmacen != null ? porAlmacen : List.of())
+                .productoTerminado(pt != null ? pt : List.of())
+                .serieMovimientos(serie)
                 .build();
+    }
+
+    /** Últimos {@code dias} con ceros en días sin movimiento. */
+    private List<MovimientoDiaItem> serieMovimientosDiarios(JdbcTemplate jdbc, Long sucursalId, int dias) {
+        LocalDate hasta = LocalDate.now();
+        LocalDate desde = hasta.minusDays(dias - 1L);
+        Map<LocalDate, long[]> porDia = new HashMap<>();
+        try {
+            jdbc.query(
+                    """
+                    SELECT v.fecha_mov AS dia,
+                           COALESCE(SUM(CASE WHEN COALESCE(t.factor_sldo_total, 0) > 0 THEN 1 ELSE 0 END), 0) AS ingresos,
+                           COALESCE(SUM(CASE WHEN COALESCE(t.factor_sldo_total, 0) < 0 THEN 1 ELSE 0 END), 0) AS salidas
+                      FROM almacen.vale_mov v
+                      JOIN almacen.articulo_mov_tipo t ON t.id = v.articulo_mov_tipo_id
+                     WHERE v.flag_estado = '1'
+                       AND v.fecha_mov BETWEEN ? AND ?
+                       AND (?::bigint IS NULL OR v.sucursal_id = ?)
+                     GROUP BY v.fecha_mov
+                    """,
+                    rs -> {
+                        while (rs.next()) {
+                            LocalDate dia = rs.getDate("dia").toLocalDate();
+                            porDia.put(dia, new long[]{rs.getLong("ingresos"), rs.getLong("salidas")});
+                        }
+                        return null;
+                    },
+                    java.sql.Date.valueOf(desde), java.sql.Date.valueOf(hasta), sucursalId, sucursalId);
+        } catch (Exception ignored) {
+            // serie vacía → se rellena con ceros
+        }
+        List<MovimientoDiaItem> out = new ArrayList<>(dias);
+        for (LocalDate d = desde; !d.isAfter(hasta); d = d.plusDays(1)) {
+            long[] v = porDia.get(d);
+            out.add(MovimientoDiaItem.builder()
+                    .fecha(d)
+                    .ingresos(v != null ? v[0] : 0L)
+                    .salidas(v != null ? v[1] : 0L)
+                    .build());
+        }
+        return out;
     }
 
     private String leerClaseProductoTerminado(JdbcTemplate jdbc) {

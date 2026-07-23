@@ -12,6 +12,7 @@ public class DashboardLogisticoResponse {
     public BigDecimal valorInventarioTotal;
     public List<DiagnosticoAlmacenDto> valorizacionPorAlmacen;
     public List<ProductoTerminadoStockDto> productoTerminado;
+    public List<MovimientoDiaDto> serieMovimientos;
 
     public static class DiagnosticoAlmacenDto {
         public long almacenId;
@@ -32,5 +33,12 @@ public class DashboardLogisticoResponse {
         public String almacenNombre;
         public BigDecimal cantidad;
         public BigDecimal valor;
+    }
+
+    public static class MovimientoDiaDto {
+        /** ISO date yyyy-MM-dd (Gson). */
+        public String fecha;
+        public long ingresos;
+        public long salidas;
     }
 }

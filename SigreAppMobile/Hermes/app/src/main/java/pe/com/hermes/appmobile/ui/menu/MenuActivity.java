@@ -83,9 +83,8 @@ public class MenuActivity extends AppCompatActivity {
         binding.recyclerValorizacion.setAdapter(almacenAdapter);
         binding.recyclerPt.setAdapter(ptAdapter);
 
-        setKpi(binding.kpiValor.getRoot(), getString(R.string.dash_kpi_valor), "—");
-        setKpi(binding.kpiIngresos.getRoot(), getString(R.string.dash_kpi_ingresos), "—");
-        setKpi(binding.kpiSalidas.getRoot(), getString(R.string.dash_kpi_salidas), "—");
+        pintarCeros();
+        binding.chartMovimientos.setData(null);
 
         cargarMenuDrawer();
         cargarDashboard();
@@ -147,6 +146,8 @@ public class MenuActivity extends AppCompatActivity {
                         binding.swipeRefresh.setRefreshing(false);
                         ApiResponse<DashboardLogisticoResponse> body = response.body();
                         if (!response.isSuccessful() || body == null || !body.success || body.data == null) {
+                            pintarCeros();
+                            binding.chartMovimientos.setData(null);
                             AppUtils.toast(MenuActivity.this, "No se pudo cargar el dashboard");
                             return;
                         }
@@ -156,21 +157,34 @@ public class MenuActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(Call<ApiResponse<DashboardLogisticoResponse>> call, Throwable t) {
                         binding.swipeRefresh.setRefreshing(false);
+                        pintarCeros();
+                        binding.chartMovimientos.setData(null);
                         AppUtils.toast(MenuActivity.this, "Error de red en dashboard");
                     }
                 });
+    }
+
+    private void pintarCeros() {
+        setKpi(binding.kpiValor.getRoot(), getString(R.string.dash_kpi_valor), money.format(0));
+        setKpi(binding.kpiIngresos.getRoot(), getString(R.string.dash_kpi_ingresos), "0");
+        setKpi(binding.kpiSalidas.getRoot(), getString(R.string.dash_kpi_salidas), "0");
+        almacenAdapter.setItems(List.of());
+        binding.tvValorizacionVacio.setVisibility(View.VISIBLE);
+        ptAdapter.setItems(List.of());
+        binding.tvPtVacio.setVisibility(View.VISIBLE);
+        binding.tvPtClase.setText(getString(R.string.dash_pt_clase, "01", "PRODUCTOS TERMINADOS"));
     }
 
     private void pintarDashboard(DashboardLogisticoResponse d) {
         BigDecimal valor = d.valorInventarioTotal != null ? d.valorInventarioTotal : BigDecimal.ZERO;
         setKpi(binding.kpiValor.getRoot(), getString(R.string.dash_kpi_valor), money.format(valor));
         setKpi(binding.kpiIngresos.getRoot(), getString(R.string.dash_kpi_ingresos),
-                String.valueOf(d.totalIngresosActivos));
+                String.valueOf(Math.max(0, d.totalIngresosActivos)));
         setKpi(binding.kpiSalidas.getRoot(), getString(R.string.dash_kpi_salidas),
-                String.valueOf(d.totalSalidasActivos));
+                String.valueOf(Math.max(0, d.totalSalidasActivos)));
 
         List<DashboardLogisticoResponse.DiagnosticoAlmacenDto> alm = d.valorizacionPorAlmacen;
-        almacenAdapter.setItems(alm);
+        almacenAdapter.setItems(alm != null ? alm : List.of());
         binding.tvValorizacionVacio.setVisibility(alm == null || alm.isEmpty() ? View.VISIBLE : View.GONE);
 
         String clase = d.claseProductoTerminado != null ? d.claseProductoTerminado : "01";
@@ -178,8 +192,10 @@ public class MenuActivity extends AppCompatActivity {
         binding.tvPtClase.setText(getString(R.string.dash_pt_clase, clase, desc));
 
         List<DashboardLogisticoResponse.ProductoTerminadoStockDto> pt = d.productoTerminado;
-        ptAdapter.setItems(pt);
+        ptAdapter.setItems(pt != null ? pt : List.of());
         binding.tvPtVacio.setVisibility(pt == null || pt.isEmpty() ? View.VISIBLE : View.GONE);
+
+        binding.chartMovimientos.setData(d.serieMovimientos);
     }
 
     private void onMenuOpcion(MenuNodo nodo) {

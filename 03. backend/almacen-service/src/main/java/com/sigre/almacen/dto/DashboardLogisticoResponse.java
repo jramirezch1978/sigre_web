@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,20 @@ public class DashboardLogisticoResponse {
 
     @Builder.Default
     private List<ProductoTerminadoStockItem> productoTerminado = new ArrayList<>();
+
+    /** Serie diaria (últimos N días) para gráfico lineal ingresos vs salidas. */
+    @Builder.Default
+    private List<MovimientoDiaItem> serieMovimientos = new ArrayList<>();
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MovimientoDiaItem {
+        private LocalDate fecha;
+        private long ingresos;
+        private long salidas;
+    }
 
     @Data
     @Builder
