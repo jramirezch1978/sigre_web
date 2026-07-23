@@ -94,7 +94,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:padding="16dp"
+                android:padding="@dimen/dash_content_padding"
                 android:fillViewport="true">
 
                 <LinearLayout
@@ -119,6 +119,7 @@
                         android:textSize="12sp" />
 
                     <LinearLayout
+                        android:id="@+id/rowKpis"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="14dp"
@@ -130,7 +131,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginEnd="6dp" />
+                            android:layout_marginEnd="@dimen/dash_kpi_gap" />
 
                         <include
                             android:id="@+id/kpiIngresos"
@@ -138,8 +139,8 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="3dp"
-                            android:layout_marginEnd="3dp" />
+                            android:layout_marginStart="@dimen/dash_kpi_gap"
+                            android:layout_marginEnd="@dimen/dash_kpi_gap" />
 
                         <include
                             android:id="@+id/kpiSalidas"
@@ -147,13 +148,13 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="6dp" />
+                            android:layout_marginStart="@dimen/dash_kpi_gap" />
                     </LinearLayout>
 
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="@dimen/dash_section_gap"
                         app:cardBackgroundColor="@color/sigre_surface"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="2dp"
@@ -185,7 +186,7 @@
                             <pe.com.hermes.appmobile.ui.menu.MovimientosLineChartView
                                 android:id="@+id/chartMovimientos"
                                 android:layout_width="match_parent"
-                                android:layout_height="200dp"
+                                android:layout_height="@dimen/dash_chart_height"
                                 android:layout_marginTop="8dp" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
@@ -193,7 +194,7 @@
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="@dimen/dash_section_gap"
                         app:cardBackgroundColor="@color/sigre_surface"
                         app:cardCornerRadius="12dp"
                         app:cardElevation="2dp"
@@ -236,7 +237,7 @@
                     <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="@dimen/dash_section_gap"
                         android:layout_marginBottom="24dp"
                         app:cardBackgroundColor="@color/sigre_surface"
                         app:cardCornerRadius="12dp"
@@ -267,64 +268,78 @@
                                 android:textColor="@color/sigre_text_secondary"
                                 android:textSize="11sp" />
 
-                            <LinearLayout
+                            <HorizontalScrollView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:orientation="horizontal"
-                                android:paddingBottom="4dp">
+                                android:fillViewport="true"
+                                android:scrollbars="none">
 
-                                <TextView
-                                    android:layout_width="0dp"
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_weight="1.2"
-                                    android:gravity="start"
-                                    android:text="@string/dash_pt_col_codigo"
-                                    android:textColor="@color/sigre_text_secondary"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
+                                    android:minWidth="@dimen/dash_pt_table_min_width"
+                                    android:orientation="vertical">
 
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="0.55"
-                                    android:gravity="start"
-                                    android:text="@string/dash_pt_col_talla"
-                                    android:textColor="@color/sigre_text_secondary"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:paddingBottom="4dp">
 
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="0.85"
-                                    android:gravity="start"
-                                    android:text="@string/dash_pt_col_almacen"
-                                    android:textColor="@color/sigre_text_secondary"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
+                                        <TextView
+                                            android:layout_width="0dp"
+                                            android:layout_height="wrap_content"
+                                            android:layout_weight="1.2"
+                                            android:gravity="start"
+                                            android:text="@string/dash_pt_col_codigo"
+                                            android:textColor="@color/sigre_text_secondary"
+                                            android:textSize="10sp"
+                                            android:textStyle="bold" />
 
-                                <TextView
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="0.55"
-                                    android:gravity="start"
-                                    android:text="@string/dash_pt_col_stock"
-                                    android:textColor="@color/sigre_text_secondary"
-                                    android:textSize="10sp"
-                                    android:textStyle="bold" />
-                            </LinearLayout>
+                                        <TextView
+                                            android:layout_width="0dp"
+                                            android:layout_height="wrap_content"
+                                            android:layout_weight="0.55"
+                                            android:gravity="start"
+                                            android:text="@string/dash_pt_col_talla"
+                                            android:textColor="@color/sigre_text_secondary"
+                                            android:textSize="10sp"
+                                            android:textStyle="bold" />
 
-                            <View
-                                android:layout_width="match_parent"
-                                android:layout_height="1dp"
-                                android:background="@color/login_card_stroke" />
+                                        <TextView
+                                            android:layout_width="0dp"
+                                            android:layout_height="wrap_content"
+                                            android:layout_weight="0.85"
+                                            android:gravity="start"
+                                            android:text="@string/dash_pt_col_almacen"
+                                            android:textColor="@color/sigre_text_secondary"
+                                            android:textSize="10sp"
+                                            android:textStyle="bold" />
 
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/recyclerPt"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:nestedScrollingEnabled="false" />
+                                        <TextView
+                                            android:layout_width="0dp"
+                                            android:layout_height="wrap_content"
+                                            android:layout_weight="0.55"
+                                            android:gravity="start"
+                                            android:text="@string/dash_pt_col_stock"
+                                            android:textColor="@color/sigre_text_secondary"
+                                            android:textSize="10sp"
+                                            android:textStyle="bold" />
+                                    </LinearLayout>
+
+                                    <View
+                                        android:layout_width="match_parent"
+                                        android:layout_height="1dp"
+                                        android:background="@color/login_card_stroke" />
+
+                                    <androidx.recyclerview.widget.RecyclerView
+                                        android:id="@+id/recyclerPt"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:nestedScrollingEnabled="false" />
+                                </LinearLayout>
+                            </HorizontalScrollView>
 
                             <TextView
                                 android:id="@+id/tvPtVacio"
@@ -345,7 +360,7 @@
     <!-- Drawer izquierdo -->
     <LinearLayout
         android:id="@+id/drawerPanel"
-        android:layout_width="300dp"
+        android:layout_width="@dimen/dash_drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:background="@color/sigre_surface"
