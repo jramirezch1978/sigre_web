@@ -17,8 +17,7 @@ import pe.com.hermes.appmobile.ui.common.SimpleItem;
 import pe.com.hermes.appmobile.ui.common.SimpleListAdapter;
 
 /**
- * Hub Almacén: lista todas las vistas migrables (espejo web).
- * Extra opcional {@link #EXTRA_GRUPO} filtra Operaciones/Consultas/Reportes/Procesos/Tablas.
+ * Hub Almacén: solo opciones navegables (con path + Activity registrada AL###).
  */
 public class AlmacenOpcionesActivity extends AppCompatActivity {
 
@@ -47,15 +46,16 @@ public class AlmacenOpcionesActivity extends AppCompatActivity {
 
         List<AlmacenVista> fuente = grupo != null
                 ? AlmacenVistasCatalog.porGrupo(grupo)
-                : AlmacenVistasCatalog.todas();
+                : AlmacenVistasCatalog.navegables();
         vistasVisibles.clear();
         vistasVisibles.addAll(fuente);
 
         List<SimpleItem> items = new ArrayList<>();
         if (grupo == null) {
-            // Primero grupos como accesos rápidos
             Set<String> grupos = new LinkedHashSet<>();
-            for (AlmacenVista v : AlmacenVistasCatalog.todas()) grupos.add(v.grupo);
+            for (AlmacenVista v : AlmacenVistasCatalog.navegables()) {
+                grupos.add(v.grupo);
+            }
             long gid = -1;
             for (String g : grupos) {
                 items.add(new SimpleItem(gid--, "▸ " + g, getString(R.string.almacen_grupo_ayuda)));
@@ -63,10 +63,10 @@ public class AlmacenOpcionesActivity extends AppCompatActivity {
         }
         for (int i = 0; i < vistasVisibles.size(); i++) {
             AlmacenVista v = vistasVisibles.get(i);
-            String estado = v.tieneListado() || v.esProceso()
-                    ? getString(R.string.almacen_estado_disponible)
-                    : getString(R.string.almacen_estado_pendiente);
-            items.add(new SimpleItem(i, v.nombre, v.grupo + " · " + estado));
+            items.add(new SimpleItem(
+                    i,
+                    v.nombre,
+                    v.codigoVentana + " · " + v.grupo));
         }
 
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));

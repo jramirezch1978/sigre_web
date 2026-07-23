@@ -1,23 +1,25 @@
 package pe.com.hermes.appmobile.data.almacen;
 
 /**
- * Vista Almacén alineada a {@code almacen-vistas.config.ts} del ERP web.
- * Si {@link #fuente} es {@link AlmacenFuenteDatos#NONE}, la opción aún no tiene API/UI móvil.
+ * Vista Almacén alineada a {@code almacen-vistas.config.ts}.
+ * {@link #codigoVentana} es el análogo al “id de activity” del ERP (AL013, AL014, …).
  */
 public final class AlmacenVista {
 
+    /** Código funcional (ALMACEN_OP_MOV_GENERAL, …). */
     public final String codigo;
+    /** Código de ventana ERP (AL013…). Usado para resolver menú → Activity. */
+    public final String codigoVentana;
     public final String nombre;
-    /** Ruta FE relativa, ej. {@code /sigre/almacen/operaciones/movimiento-general}. */
     public final String ruta;
     public final AlmacenFuenteDatos fuente;
-    /** Solo procesos: path relativo POST bajo /api/almacen. */
     public final String procesoPath;
     public final String grupo;
 
-    public AlmacenVista(String codigo, String nombre, String ruta, AlmacenFuenteDatos fuente,
-                        String procesoPath, String grupo) {
+    public AlmacenVista(String codigo, String codigoVentana, String nombre, String ruta,
+                        AlmacenFuenteDatos fuente, String procesoPath, String grupo) {
         this.codigo = codigo;
+        this.codigoVentana = codigoVentana;
         this.nombre = nombre;
         this.ruta = ruta;
         this.fuente = fuente;
@@ -31,5 +33,9 @@ public final class AlmacenVista {
 
     public boolean tieneListado() {
         return fuente != AlmacenFuenteDatos.NONE && fuente != AlmacenFuenteDatos.PROCESO;
+    }
+
+    public boolean esNavegable() {
+        return (tieneListado() || esProceso()) && ruta != null && !ruta.isBlank();
     }
 }

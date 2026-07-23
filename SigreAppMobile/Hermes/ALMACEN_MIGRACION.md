@@ -11,16 +11,16 @@ Backend `almacen-service` ya expone APIs para la mayoría de listados operativos
 ## Fase 1 — HECHA (esta entrega)
 
 Arquitectura móvil espejo web:
-- `AlmacenVistasCatalog` + `AlmacenNavRouter`
+- `AlmacenVistasCatalog` + `AlmacenNavRouter` (resolución por **path** y por **código ventana AL###**)
 - `AlmacenListadoActivity` (GET paginado)
 - `AlmacenDetalleActivity` (detalle vale)
 - `AlmacenProcesoActivity` (POST procesos)
-- `AlmacenEnConstruccionActivity` (opciones sin API/UI)
 
-Cubierto con datos reales:
-Operaciones (mov general/tránsito, OTR, inventario), consultas, reportes,
-tablas (almacenes, tipos mov, motivos, lotes), guías/solicitudes salida (listado),
-procesos (recalculo/cuadre/actualización).
+### Reglas de menú (drawer)
+- **No** se cargan opciones desactivadas (`activo = false`).
+- **No** se cargan hojas sin `pathUrl` / `rutaFrontend` (ni aunque existan en seed).
+- Secciones/módulos vacíos tras el filtro se podan.
+- Navegación: código funcional → `AL013`… en codigo/nombre → path → Activity.
 
 ## Fase 2 — Alta / edición (siguiente)
 

@@ -11,8 +11,12 @@ import pe.com.hermes.appmobile.data.remote.dto.MiMenuResponse;
 import pe.com.hermes.appmobile.data.remote.dto.OpcionMenuDto;
 
 /**
- * Transforma {@code GET /auth/seguridad/mi-menu} al árbol de módulos del ERP web
- * ({@code ErpMenuService.transformarAModulos}).
+ * Transforma {@code GET /auth/seguridad/mi-menu} al árbol de módulos del ERP web.
+ * <ul>
+ *   <li>No incluye opciones desactivadas ({@code activo = false}).</li>
+ *   <li>No incluye hojas sin {@code pathUrl} ni {@code rutaFrontend}.</li>
+ *   <li>Poda secciones/módulos que queden vacíos tras el filtro.</li>
+ * </ul>
  */
 public final class MenuTreeBuilder {
 
@@ -49,7 +53,7 @@ public final class MenuTreeBuilder {
         Map<Long, List<MiMenuItemDto>> hijosPorPadre = new HashMap<>();
         for (MiMenuItemDto item : data.items) {
             if (item == null || item.opcionMenu == null) continue;
-            if (item.opcionMenu.activo != null && !item.opcionMenu.activo) continue;
+            if (!esActivo(item.opcionMenu)) continue;
             Long pid = item.opcionMenu.opcionPadreId;
             hijosPorPadre.computeIfAbsent(pid, k -> new ArrayList<>()).add(item);
         }
@@ -62,8 +66,13 @@ public final class MenuTreeBuilder {
 
         for (MiMenuItemDto sec : raices) {
             OpcionMenuDto om = sec.opcionMenu;
-            MenuNodo seccion = new MenuNodo(MenuNodo.Tipo.SECCION, om.id, om.codigo, om.nombre, om.pathUrl);
-            seccion.hijos.addAll(construirHijos(om.id, hijosPorPadre));
+            List<MenuNodo> hijos = construirHijos(om.id, hijosPorPadre);
+            // Sección sin hijos navegables y sin path propio → no pintar
+            if (hijos.isEmpty() && !tienePath(om)) {
+                continue;
+            }
+            MenuNodo seccion = new MenuNodo(MenuNodo.Tipo.SECCION, om.id, om.codigo, om.nombre, resolverPath(om));
+            seccion.hijos.addAll(hijos);
             seccionesPorModulo.computeIfAbsent(om.moduloId, k -> new ArrayList<>()).add(seccion);
             codigoModuloPorId.putIfAbsent(om.moduloId, codigoModuloDesdeSeccion(om.codigo));
         }
@@ -71,19 +80,42 @@ public final class MenuTreeBuilder {
         List<MenuNodo> modulos = new ArrayList<>();
         for (Map.Entry<Long, List<MenuNodo>> e : seccionesPorModulo.entrySet()) {
             String cod = codigoModuloPorId.getOrDefault(e.getKey(), "");
-            // Hermes Logística: solo Almacén y Compras (el resto del ERP no aplica en móvil).
             if (!esModuloHermes(cod)) {
                 continue;
             }
+            List<MenuNodo> secciones = e.getValue();
+            if (secciones.isEmpty()) {
+                continue;
+            }
             MenuNodo mod = new MenuNodo(MenuNodo.Tipo.MODULO, e.getKey(), cod, nombreModulo(cod), null);
-            mod.hijos.addAll(e.getValue());
+            mod.hijos.addAll(secciones);
             modulos.add(mod);
         }
         modulos.sort(Comparator.comparingLong(m -> m.id));
         return modulos;
     }
 
-    /** Módulos permitidos en el drawer de Hermes. */
+    private static boolean esActivo(OpcionMenuDto om) {
+        // null = activo (misma convención que web: solo se omiten activo === false)
+        return om.activo == null || Boolean.TRUE.equals(om.activo);
+    }
+
+    private static boolean tienePath(OpcionMenuDto om) {
+        return (om.pathUrl != null && !om.pathUrl.isBlank())
+                || (om.rutaFrontend != null && !om.rutaFrontend.isBlank());
+    }
+
+    /** Preferir pathUrl; si falta, rutaFrontend. */
+    private static String resolverPath(OpcionMenuDto om) {
+        if (om.pathUrl != null && !om.pathUrl.isBlank()) {
+            return om.pathUrl.trim();
+        }
+        if (om.rutaFrontend != null && !om.rutaFrontend.isBlank()) {
+            return om.rutaFrontend.trim();
+        }
+        return null;
+    }
+
     private static boolean esModuloHermes(String codigoModulo) {
         if (codigoModulo == null) {
             return false;
@@ -98,8 +130,17 @@ public final class MenuTreeBuilder {
         List<MenuNodo> out = new ArrayList<>();
         for (MiMenuItemDto h : hijos) {
             OpcionMenuDto om = h.opcionMenu;
-            MenuNodo n = new MenuNodo(MenuNodo.Tipo.OPCION, om.id, om.codigo, om.nombre, om.pathUrl);
-            n.hijos.addAll(construirHijos(om.id, hijosPorPadre));
+            if (!esActivo(om)) {
+                continue;
+            }
+            List<MenuNodo> nietos = construirHijos(om.id, hijosPorPadre);
+            String path = resolverPath(om);
+            // Hoja sin path → no cargar (aunque exista en seed)
+            if (nietos.isEmpty() && (path == null || path.isBlank())) {
+                continue;
+            }
+            MenuNodo n = new MenuNodo(MenuNodo.Tipo.OPCION, om.id, om.codigo, om.nombre, path);
+            n.hijos.addAll(nietos);
             out.add(n);
         }
         return out;
