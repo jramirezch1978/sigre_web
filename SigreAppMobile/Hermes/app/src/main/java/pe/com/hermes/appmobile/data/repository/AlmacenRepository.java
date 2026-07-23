@@ -1,5 +1,6 @@
 package pe.com.hermes.appmobile.data.repository;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +9,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 import pe.com.hermes.appmobile.data.almacen.AlmacenFuenteDatos;
 import pe.com.hermes.appmobile.data.remote.ApiClient;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.AlmacenMaestroResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenTipoMovAsignarRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenTipoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.ArticuloMovTipoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.ConfigEmpresaSaveRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.ConversionUnidadRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.InventarioConteoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.LotePalletRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.MotivoTrasladoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.MovimientoCabeceraRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.NumeradorDocumentoUpsertRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.OrdenTrasladoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.UbicacionRequest;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.AlmacenTipoMovResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.AlmacenTipoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.ConfigClaveResponse;
@@ -72,8 +86,234 @@ public class AlmacenRepository {
 
     public void listarMovimientos(ResultCallback<List<MovimientoListItemResponse>> callback) {
         Long sucursalId = session.getSucursalId() > 0 ? session.getSucursalId() : null;
-        apiClient.getAlmacenApi().listarMovimientos(sucursalId, 0, 50)
+        apiClient.getAlmacenApi().listarMovimientos(sucursalId, null, 0, 50)
                 .enqueue(pageCallback(callback, "No se pudieron cargar los movimientos"));
+    }
+
+    public void listarPorVista(String codigoVentana, AlmacenFuenteDatos fuente,
+                               ResultCallback<ListadoResult> callback) {
+        String estado = null;
+        if ("AL016".equalsIgnoreCase(codigoVentana)) {
+            estado = "P"; // pendientes aprobación
+        }
+        if (fuente == AlmacenFuenteDatos.MOVIMIENTOS) {
+            Long sucursalId = session.getSucursalId() > 0 ? session.getSucursalId() : null;
+            apiClient.getAlmacenApi().listarMovimientos(sucursalId, estado, 0, 80)
+                    .enqueue(mapPage(callback, DetalleTipo.MOVIMIENTO, (MovimientoListItemResponse m) -> new SimpleItem(
+                            m.id,
+                            m.nroVale != null ? m.nroVale : "Movimiento " + m.id,
+                            nz(m.fechaMov) + " · estado " + nz(m.flagEstado)
+                    ), "movimientos"));
+            return;
+        }
+        if (fuente == AlmacenFuenteDatos.ORDENES_TRASLADO) {
+            apiClient.getAlmacenApi().listarOrdenesTraslado(estado, 0, 80)
+                    .enqueue(mapPage(callback, DetalleTipo.ORDEN_TRASLADO, (OrdenTrasladoListItemResponse o) -> new SimpleItem(
+                            o.id,
+                            o.numero != null ? o.numero : "OTR " + o.id,
+                            nz(o.fecha) + " · " + nz(o.flagEstado) + " · " + o.almacenOrigenId + " → " + o.almacenDestinoId
+                    ), "órdenes de traslado"));
+            return;
+        }
+        listarPorFuente(fuente, callback);
+    }
+
+    public void crearMovimiento(MovimientoCabeceraRequest body, ResultCallback<MovimientoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().crearMovimiento(body).enqueue(entityCallback(callback, "crear movimiento"));
+    }
+
+    public void actualizarMovimiento(long id, MovimientoCabeceraRequest body,
+                                     ResultCallback<MovimientoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().actualizarMovimiento(id, body).enqueue(entityCallback(callback, "actualizar movimiento"));
+    }
+
+    public void crearOrdenTraslado(OrdenTrasladoRequest body, ResultCallback<OrdenTrasladoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().crearOrdenTraslado(body).enqueue(entityCallback(callback, "crear OTR"));
+    }
+
+    public void actualizarOrdenTraslado(long id, OrdenTrasladoRequest body,
+                                        ResultCallback<OrdenTrasladoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().actualizarOrdenTraslado(id, body).enqueue(entityCallback(callback, "actualizar OTR"));
+    }
+
+    public void crearTomaInventario(InventarioConteoRequest body,
+                                    ResultCallback<InventarioConteoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().crearTomaInventario(body).enqueue(entityCallback(callback, "crear conteo"));
+    }
+
+    public void actualizarTomaInventario(long id, InventarioConteoRequest body,
+                                         ResultCallback<InventarioConteoDetalleResponse> callback) {
+        apiClient.getAlmacenApi().actualizarTomaInventario(id, body).enqueue(entityCallback(callback, "actualizar conteo"));
+    }
+
+    public void guardarTabla(AlmacenFuenteDatos fuente, long id, Map<String, String> campos,
+                             ResultCallback<String> callback) {
+        try {
+            Call<?> call = buildTablaCall(fuente, id, campos);
+            if (call == null) {
+                callback.onError("Esta tabla no admite alta/edición en móvil");
+                return;
+            }
+            //noinspection unchecked
+            ((Call<ApiResponse<?>>) call).enqueue(new Callback<>() {
+                @Override
+                public void onResponse(Call<ApiResponse<?>> c, Response<ApiResponse<?>> response) {
+                    ApiResponse<?> body = response.body();
+                    if (!response.isSuccessful() || body == null || !body.success) {
+                        callback.onError(body != null && body.message != null ? body.message : "No se pudo guardar");
+                        return;
+                    }
+                    callback.onSuccess(body.message != null ? body.message : "Guardado");
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<?>> c, Throwable t) {
+                    callback.onError(msg(t));
+                }
+            });
+        } catch (Exception e) {
+            callback.onError(e.getMessage() != null ? e.getMessage() : "Datos inválidos");
+        }
+    }
+
+    private Call<?> buildTablaCall(AlmacenFuenteDatos fuente, long id, Map<String, String> campos) {
+        boolean crear = id <= 0;
+        return switch (fuente) {
+            case ALMACENES -> {
+                AlmacenRequest r = new AlmacenRequest();
+                r.sucursalId = longOr(campos.get("sucursalId"), session.getSucursalId());
+                r.codigo = req(campos, "codigo");
+                r.nombre = req(campos, "nombre");
+                r.almacenTipoId = longOrNull(campos.get("almacenTipoId"));
+                r.flagEstado = orDefault(campos.get("flagEstado"), "1");
+                yield crear ? apiClient.getAlmacenApi().crearAlmacen(r)
+                        : apiClient.getAlmacenApi().actualizarAlmacen(id, r);
+            }
+            case TIPOS_MOVIMIENTO -> {
+                ArticuloMovTipoRequest r = new ArticuloMovTipoRequest();
+                r.tipoMov = req(campos, "tipoMov");
+                r.descTipoMov = req(campos, "descTipoMov");
+                r.flagEstado = orDefault(campos.get("flagEstado"), "1");
+                r.factorSldoTotal = decimalOrNull(campos.get("factorSldoTotal"));
+                yield crear ? apiClient.getAlmacenApi().crearTipoMovimiento(r)
+                        : apiClient.getAlmacenApi().actualizarTipoMovimiento(id, r);
+            }
+            case TIPOS_ALMACEN -> {
+                AlmacenTipoRequest r = new AlmacenTipoRequest();
+                r.codigo = req(campos, "codigo");
+                r.nombre = req(campos, "nombre");
+                r.cntblLibroId = longOrNull(campos.get("cntblLibroId"));
+                r.flagEstado = orDefault(campos.get("flagEstado"), "1");
+                yield crear ? apiClient.getAlmacenApi().crearTipoAlmacen(r)
+                        : apiClient.getAlmacenApi().actualizarTipoAlmacen(id, r);
+            }
+            case UBICACIONES -> {
+                UbicacionRequest r = new UbicacionRequest();
+                r.codigo = req(campos, "codigo");
+                r.nombre = req(campos, "nombre");
+                r.pasillo = campos.get("pasillo");
+                r.estante = campos.get("estante");
+                r.nivel = campos.get("nivel");
+                long almId = longOr(campos.get("almacenId"), 0);
+                if (crear) {
+                    if (almId <= 0) throw new IllegalArgumentException("almacenId requerido");
+                    yield apiClient.getAlmacenApi().crearUbicacion(almId, r);
+                }
+                yield apiClient.getAlmacenApi().actualizarUbicacion(id, r);
+            }
+            case TIPOS_MOV_ALMACEN -> {
+                AlmacenTipoMovAsignarRequest r = new AlmacenTipoMovAsignarRequest();
+                r.articuloMovTipoId = longOr(campos.get("articuloMovTipoId"), 0);
+                long almId = longOr(campos.get("almacenId"), 0);
+                if (almId <= 0 || r.articuloMovTipoId <= 0) {
+                    throw new IllegalArgumentException("almacenId y articuloMovTipoId requeridos");
+                }
+                yield apiClient.getAlmacenApi().asignarTipoMov(almId, r);
+            }
+            case MOTIVOS_TRASLADO -> {
+                MotivoTrasladoRequest r = new MotivoTrasladoRequest();
+                r.codigo = req(campos, "codigo");
+                r.nombre = req(campos, "nombre");
+                r.flagEstado = orDefault(campos.get("flagEstado"), "1");
+                yield crear ? apiClient.getAlmacenApi().crearMotivoTraslado(r)
+                        : apiClient.getAlmacenApi().actualizarMotivoTraslado(id, r);
+            }
+            case LOTES -> {
+                LotePalletRequest r = new LotePalletRequest();
+                r.articuloId = longOr(campos.get("articuloId"), 0);
+                r.nroLote = req(campos, "nroLote");
+                r.fechaProduccion = emptyToNull(campos.get("fechaProduccion"));
+                r.fechaVencimiento = emptyToNull(campos.get("fechaVencimiento"));
+                r.observacion = emptyToNull(campos.get("observacion"));
+                r.flagEstado = orDefault(campos.get("flagEstado"), "1");
+                if (r.articuloId <= 0) throw new IllegalArgumentException("articuloId requerido");
+                yield crear ? apiClient.getAlmacenApi().crearLote(r)
+                        : apiClient.getAlmacenApi().actualizarLote(id, r);
+            }
+            case CONVERSIONES -> {
+                ConversionUnidadRequest r = new ConversionUnidadRequest();
+                r.umOrigenId = longOr(campos.get("umOrigenId"), 0);
+                r.umDestinoId = longOr(campos.get("umDestinoId"), 0);
+                r.factorConversion = decimalOrNull(campos.get("factorConversion"));
+                if (r.umOrigenId <= 0 || r.umDestinoId <= 0 || r.factorConversion == null) {
+                    throw new IllegalArgumentException("UM origen/destino y factor requeridos");
+                }
+                yield crear ? apiClient.getCoreApi().crearConversion(r)
+                        : apiClient.getCoreApi().actualizarConversion(id, r);
+            }
+            case NUMERACION_VALES, NUMERACION_OTR -> {
+                NumeradorDocumentoUpsertRequest r = new NumeradorDocumentoUpsertRequest();
+                r.nombreTabla = fuente == AlmacenFuenteDatos.NUMERACION_VALES
+                        ? "almacen.vale_mov" : "almacen.orden_traslado";
+                r.sucursalId = longOr(campos.get("sucursalId"), session.getSucursalId());
+                r.ano = intOr(campos.get("ano"), java.time.Year.now().getValue());
+                r.ultNro = longOr(campos.get("ultNro"), 1);
+                r.flagEstado = orDefault(campos.get("flagEstado"), "1");
+                yield apiClient.getCoreApi().upsertNumerador(r);
+            }
+            case PARAMETROS -> {
+                ConfigEmpresaSaveRequest r = new ConfigEmpresaSaveRequest();
+                r.empresaId = session.getEmpresaId();
+                String clave = req(campos, "clave");
+                r.valores = Map.of(clave, campos.get("valor") != null ? campos.get("valor") : "");
+                yield apiClient.getCoreApi().guardarConfigEmpresa(r);
+            }
+            default -> null;
+        };
+    }
+
+    private static String req(Map<String, String> m, String k) {
+        String v = m.get(k);
+        if (v == null || v.isBlank()) throw new IllegalArgumentException(k + " requerido");
+        return v.trim();
+    }
+
+    private static String orDefault(String v, String d) {
+        return v != null && !v.isBlank() ? v.trim() : d;
+    }
+
+    private static String emptyToNull(String v) {
+        return v != null && !v.isBlank() ? v.trim() : null;
+    }
+
+    private static long longOr(String v, long d) {
+        try { return v != null && !v.isBlank() ? Long.parseLong(v.trim()) : d; }
+        catch (Exception e) { return d; }
+    }
+
+    private static Long longOrNull(String v) {
+        try { return v != null && !v.isBlank() ? Long.parseLong(v.trim()) : null; }
+        catch (Exception e) { return null; }
+    }
+
+    private static int intOr(String v, int d) {
+        try { return v != null && !v.isBlank() ? Integer.parseInt(v.trim()) : d; }
+        catch (Exception e) { return d; }
+    }
+
+    private static BigDecimal decimalOrNull(String v) {
+        try { return v != null && !v.isBlank() ? new BigDecimal(v.trim()) : null; }
+        catch (Exception e) { return null; }
     }
 
     public void obtenerMovimiento(long id, ResultCallback<MovimientoDetalleResponse> callback) {
@@ -128,21 +368,8 @@ public class AlmacenRepository {
 
     public void listarPorFuente(AlmacenFuenteDatos fuente, ResultCallback<ListadoResult> callback) {
         switch (fuente) {
-            case MOVIMIENTOS -> {
-                Long sucursalId = session.getSucursalId() > 0 ? session.getSucursalId() : null;
-                apiClient.getAlmacenApi().listarMovimientos(sucursalId, 0, 80)
-                        .enqueue(mapPage(callback, DetalleTipo.MOVIMIENTO, (MovimientoListItemResponse m) -> new SimpleItem(
-                                m.id,
-                                m.nroVale != null ? m.nroVale : "Movimiento " + m.id,
-                                nz(m.fechaMov) + " · estado " + nz(m.flagEstado)
-                        ), "movimientos"));
-            }
-            case ORDENES_TRASLADO -> apiClient.getAlmacenApi().listarOrdenesTraslado(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.ORDEN_TRASLADO, (OrdenTrasladoListItemResponse o) -> new SimpleItem(
-                            o.id,
-                            o.numero != null ? o.numero : "OTR " + o.id,
-                            nz(o.fecha) + " · " + nz(o.flagEstado) + " · " + o.almacenOrigenId + " → " + o.almacenDestinoId
-                    ), "órdenes de traslado"));
+            case MOVIMIENTOS -> listarPorVista(null, AlmacenFuenteDatos.MOVIMIENTOS, callback);
+            case ORDENES_TRASLADO -> listarPorVista(null, AlmacenFuenteDatos.ORDENES_TRASLADO, callback);
             case TOMAS_INVENTARIO -> apiClient.getAlmacenApi().listarTomasInventario(0, 80)
                     .enqueue(mapPage(callback, DetalleTipo.TOMA_INVENTARIO, (InventarioConteoListItemResponse t) -> new SimpleItem(
                             t.id,

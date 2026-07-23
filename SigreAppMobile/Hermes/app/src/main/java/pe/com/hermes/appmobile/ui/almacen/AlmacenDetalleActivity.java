@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.math.BigDecimal;
 import java.util.List;
 import pe.com.hermes.appmobile.R;
+import pe.com.hermes.appmobile.data.almacen.AlmacenFuenteDatos;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.InventarioConteoDetalleResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.MovimientoDetalleResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.MovimientoLineaResponse;
@@ -73,7 +74,29 @@ public class AlmacenDetalleActivity extends AppCompatActivity {
         }
 
         repository = new AlmacenRepository(AppUtils.app(this).getApiClient(), AppUtils.app(this).getSession());
+        binding.toolbar.inflateMenu(R.menu.menu_almacen_detalle);
+        binding.toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_editar) {
+                AlmacenFuenteDatos fuente = switch (tipo) {
+                    case MOVIMIENTO -> AlmacenFuenteDatos.MOVIMIENTOS;
+                    case ORDEN_TRASLADO -> AlmacenFuenteDatos.ORDENES_TRASLADO;
+                    case TOMA_INVENTARIO -> AlmacenFuenteDatos.TOMAS_INVENTARIO;
+                    default -> null;
+                };
+                if (fuente != null) {
+                    startActivity(AlmacenDocumentoFormActivity.intent(this, fuente, id));
+                }
+                return true;
+            }
+            return false;
+        });
         cargar();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (repository != null && id > 0) cargar();
     }
 
     private void cargar() {

@@ -1,30 +1,24 @@
 # Migración Almacén → Hermes
 
-## Alcance funcional (paridad web “primera versión”)
+## Estado (paridad operativa móvil)
 
-Catálogo completo **AL001–AL033** (tablas + operaciones + consultas + reportes + procesos):
+Catálogo **AL001–AL033** con:
 
-| Grupo | Ventanas | Móvil |
-|-------|----------|--------|
-| Tablas | AL001–AL012 | Listado GET (ubicaciones/tipos-mov-alm agregados; conversiones/numeración/params vía core) |
-| Operaciones | AL013–AL018 | Listado + detalle; acciones confirmar/anular (mov), aprobar/rechazar/cerrar/anular (OTR), comparar/cerrar/anular (inventario) |
-| Consultas | AL019–AL023 | Listado (+ detalle en vistas de movimientos) |
-| Reportes | AL024–AL030 | Listado |
-| Procesos | AL031–AL033 | POST ejecutar |
+| Capacidad | Cobertura |
+|-----------|-----------|
+| Listado GET | Todas las vistas de listado |
+| Alta / edición tablas | AL001–AL012 (FAB + tap editar) |
+| Alta / edición documentos | Movimientos, OTR, tomas (FAB + menú Editar) |
+| Acciones | Confirmar/anular mov; aprobar/rechazar/cerrar/anular OTR; comparar/cerrar/anular inventario |
+| Procesos POST | AL031–AL033 |
+| Filtro vista | AL016 pendientes (`estado=P`) |
 
-## Reglas de menú (drawer)
+## Reglas de menú
 
-- No se cargan opciones desactivadas (`activo = false`).
-- No se cargan hojas sin `pathUrl` / `rutaFrontend`.
-- Navegación: código funcional → `AL###` en codigo/nombre → path → Activity.
+- Sin opciones desactivadas ni hojas sin path.
+- Navegación por código `AL###` / path.
 
-## Pendiente (alta/edición tipo wizard web)
+## Notas UX móvil
 
-- Formulario crear/editar movimiento (líneas) y OTR
-- CRUD completo de tablas maestras (hoy solo lectura)
-- Filtros específicos por vista (tránsito, aprobación pendiente, stock mínimo, etc.)
-
-## Navegación
-
-Drawer `mi-menu` → `AlmacenNavRouter` → Activity.
-Hub `AlmacenOpcionesActivity` lista grupos y todas las vistas navegables.
+- Selectores web (artículos, almacenes) se capturan por **ID numérico** en formularios.
+- Tipos de movimiento: alta mínima (código, descripción, factor, estado); flags avanzados siguen en web.

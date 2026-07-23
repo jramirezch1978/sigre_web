@@ -21,6 +21,16 @@ import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.StockListItemResp
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.TipoMovimientoListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.UbicacionAlmacenResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.ValorizacionListItemResponse;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenTipoMovAsignarRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenTipoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.ArticuloMovTipoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.InventarioConteoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.LotePalletRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.MotivoTrasladoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.MovimientoCabeceraRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.OrdenTrasladoRequest;
+import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.UbicacionRequest;
 import pe.com.hermes.appmobile.data.remote.dto.DashboardLogisticoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.MovimientoListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.PageData;
@@ -28,21 +38,30 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-/** Cliente Retrofit de almacen-service. */
+/** Cliente Retrofit de almacen-service (lectura + escritura). */
 public interface AlmacenApi {
 
     @GET("almacen/movimientos")
     Call<ApiResponse<PageData<MovimientoListItemResponse>>> listarMovimientos(
             @Query("sucursalId") Long sucursalId,
+            @Query("estado") String estado,
             @Query("page") int page,
             @Query("size") int size
     );
 
     @GET("almacen/movimientos/{id}")
     Call<ApiResponse<MovimientoDetalleResponse>> obtenerMovimiento(@Path("id") long id);
+
+    @POST("almacen/movimientos")
+    Call<ApiResponse<MovimientoDetalleResponse>> crearMovimiento(@Body MovimientoCabeceraRequest body);
+
+    @PUT("almacen/movimientos/{id}")
+    Call<ApiResponse<MovimientoDetalleResponse>> actualizarMovimiento(
+            @Path("id") long id, @Body MovimientoCabeceraRequest body);
 
     @POST("almacen/movimientos/confirmar")
     Call<ApiResponse<MovimientoDetalleResponse>> confirmarMovimiento(@Body IdRequest body);
@@ -55,10 +74,19 @@ public interface AlmacenApi {
 
     @GET("almacen/ordenes-traslado")
     Call<ApiResponse<PageData<OrdenTrasladoListItemResponse>>> listarOrdenesTraslado(
-            @Query("page") int page, @Query("size") int size);
+            @Query("estado") String estado,
+            @Query("page") int page,
+            @Query("size") int size);
 
     @GET("almacen/ordenes-traslado/{id}")
     Call<ApiResponse<OrdenTrasladoDetalleResponse>> obtenerOrdenTraslado(@Path("id") long id);
+
+    @POST("almacen/ordenes-traslado")
+    Call<ApiResponse<OrdenTrasladoDetalleResponse>> crearOrdenTraslado(@Body OrdenTrasladoRequest body);
+
+    @PUT("almacen/ordenes-traslado/{id}")
+    Call<ApiResponse<OrdenTrasladoDetalleResponse>> actualizarOrdenTraslado(
+            @Path("id") long id, @Body OrdenTrasladoRequest body);
 
     @POST("almacen/ordenes-traslado/{id}/aprobar")
     Call<ApiResponse<OrdenTrasladoDetalleResponse>> aprobarOrdenTraslado(@Path("id") long id);
@@ -78,6 +106,13 @@ public interface AlmacenApi {
 
     @GET("almacen/tomas-inventario/{id}")
     Call<ApiResponse<InventarioConteoDetalleResponse>> obtenerTomaInventario(@Path("id") long id);
+
+    @POST("almacen/tomas-inventario")
+    Call<ApiResponse<InventarioConteoDetalleResponse>> crearTomaInventario(@Body InventarioConteoRequest body);
+
+    @PUT("almacen/tomas-inventario/{id}")
+    Call<ApiResponse<InventarioConteoDetalleResponse>> actualizarTomaInventario(
+            @Path("id") long id, @Body InventarioConteoRequest body);
 
     @POST("almacen/tomas-inventario/{id}/comparar")
     Call<ApiResponse<InventarioConteoDetalleResponse>> compararTomaInventario(@Path("id") long id);
@@ -111,8 +146,25 @@ public interface AlmacenApi {
     Call<ApiResponse<PageData<AlmacenMaestroResponse>>> listarAlmacenes(
             @Query("page") int page, @Query("size") int size);
 
+    @GET("almacen/almacenes/{id}")
+    Call<ApiResponse<AlmacenMaestroResponse>> obtenerAlmacen(@Path("id") long id);
+
+    @POST("almacen/almacenes")
+    Call<ApiResponse<AlmacenMaestroResponse>> crearAlmacen(@Body AlmacenRequest body);
+
+    @PUT("almacen/almacenes/{id}")
+    Call<ApiResponse<AlmacenMaestroResponse>> actualizarAlmacen(@Path("id") long id, @Body AlmacenRequest body);
+
     @GET("almacen/almacenes/{almacenId}/ubicaciones")
     Call<ApiResponse<List<UbicacionAlmacenResponse>>> listarUbicaciones(@Path("almacenId") long almacenId);
+
+    @POST("almacen/almacenes/{almacenId}/ubicaciones")
+    Call<ApiResponse<UbicacionAlmacenResponse>> crearUbicacion(
+            @Path("almacenId") long almacenId, @Body UbicacionRequest body);
+
+    @PUT("almacen/ubicaciones/{id}")
+    Call<ApiResponse<UbicacionAlmacenResponse>> actualizarUbicacion(
+            @Path("id") long id, @Body UbicacionRequest body);
 
     @GET("almacen/almacenes/{almacenId}/tipos-movimiento")
     Call<ApiResponse<PageData<AlmacenTipoMovResponse>>> listarTiposMovPorAlmacen(
@@ -120,21 +172,53 @@ public interface AlmacenApi {
             @Query("page") int page,
             @Query("size") int size);
 
+    @POST("almacen/almacenes/{almacenId}/tipos-movimiento")
+    Call<ApiResponse<AlmacenTipoMovResponse>> asignarTipoMov(
+            @Path("almacenId") long almacenId, @Body AlmacenTipoMovAsignarRequest body);
+
     @GET("almacen/almacen-tipos")
     Call<ApiResponse<PageData<AlmacenTipoResponse>>> listarTiposAlmacen(
             @Query("page") int page, @Query("size") int size);
+
+    @POST("almacen/almacen-tipos")
+    Call<ApiResponse<AlmacenTipoResponse>> crearTipoAlmacen(@Body AlmacenTipoRequest body);
+
+    @PUT("almacen/almacen-tipos/{id}")
+    Call<ApiResponse<AlmacenTipoResponse>> actualizarTipoAlmacen(
+            @Path("id") long id, @Body AlmacenTipoRequest body);
 
     @GET("almacen/maestros/tipos-movimiento-catalogo")
     Call<ApiResponse<PageData<TipoMovimientoListItemResponse>>> listarTiposMovimiento(
             @Query("page") int page, @Query("size") int size);
 
+    @POST("almacen/maestros/tipos-movimiento-catalogo")
+    Call<ApiResponse<TipoMovimientoListItemResponse>> crearTipoMovimiento(@Body ArticuloMovTipoRequest body);
+
+    @PUT("almacen/maestros/tipos-movimiento-catalogo/{id}")
+    Call<ApiResponse<TipoMovimientoListItemResponse>> actualizarTipoMovimiento(
+            @Path("id") long id, @Body ArticuloMovTipoRequest body);
+
     @GET("almacen/maestros/motivos-traslado")
     Call<ApiResponse<PageData<MotivoTrasladoListItemResponse>>> listarMotivosTraslado(
             @Query("page") int page, @Query("size") int size);
 
+    @POST("almacen/maestros/motivos-traslado")
+    Call<ApiResponse<MotivoTrasladoListItemResponse>> crearMotivoTraslado(@Body MotivoTrasladoRequest body);
+
+    @PUT("almacen/maestros/motivos-traslado/{id}")
+    Call<ApiResponse<MotivoTrasladoListItemResponse>> actualizarMotivoTraslado(
+            @Path("id") long id, @Body MotivoTrasladoRequest body);
+
     @GET("almacen/lotes-pallets")
     Call<ApiResponse<PageData<LotePalletListItemResponse>>> listarLotes(
             @Query("page") int page, @Query("size") int size);
+
+    @POST("almacen/lotes-pallets")
+    Call<ApiResponse<LotePalletListItemResponse>> crearLote(@Body LotePalletRequest body);
+
+    @PUT("almacen/lotes-pallets/{id}")
+    Call<ApiResponse<LotePalletListItemResponse>> actualizarLote(
+            @Path("id") long id, @Body LotePalletRequest body);
 
     @GET("almacen/guias-remision")
     Call<ApiResponse<PageData<GuiaRemisionListItemResponse>>> listarGuias(
