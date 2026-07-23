@@ -71,12 +71,25 @@ public final class MenuTreeBuilder {
         List<MenuNodo> modulos = new ArrayList<>();
         for (Map.Entry<Long, List<MenuNodo>> e : seccionesPorModulo.entrySet()) {
             String cod = codigoModuloPorId.getOrDefault(e.getKey(), "");
+            // Hermes Logística: solo Almacén y Compras (el resto del ERP no aplica en móvil).
+            if (!esModuloHermes(cod)) {
+                continue;
+            }
             MenuNodo mod = new MenuNodo(MenuNodo.Tipo.MODULO, e.getKey(), cod, nombreModulo(cod), null);
             mod.hijos.addAll(e.getValue());
             modulos.add(mod);
         }
         modulos.sort(Comparator.comparingLong(m -> m.id));
         return modulos;
+    }
+
+    /** Módulos permitidos en el drawer de Hermes. */
+    private static boolean esModuloHermes(String codigoModulo) {
+        if (codigoModulo == null) {
+            return false;
+        }
+        String c = codigoModulo.trim().toUpperCase();
+        return "ALMACEN".equals(c) || "COMPRAS".equals(c);
     }
 
     private static List<MenuNodo> construirHijos(long padreId, Map<Long, List<MiMenuItemDto>> hijosPorPadre) {
