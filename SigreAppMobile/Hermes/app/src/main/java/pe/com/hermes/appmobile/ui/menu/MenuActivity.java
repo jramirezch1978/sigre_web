@@ -59,16 +59,8 @@ public class MenuActivity extends AppCompatActivity {
 
         authRepository = new AuthRepository(AppUtils.app(this).getApiClient(), AppUtils.app(this).getSession());
 
-        SessionManager session = AppUtils.app(this).getSession();
-        String empresaNombre = session.getEmpresaNombre();
-        String sucursalNombre = session.getSucursalNombre();
-        String nombreUsuario = session.getNombreCompleto();
-
         binding.tvMenuTitulo.setText(getString(R.string.menu_titulo));
-        String sub = formatearSubtitulo(empresaNombre, sucursalNombre);
-        binding.tvMenuSubtitulo.setText(sub);
-        binding.tvDrawerSubtitulo.setText(sub);
-        binding.tvAvatarIniciales.setText(inicialesDe(nombreUsuario));
+        refrescarCabeceraSesion();
 
         binding.btnMenu.setOnClickListener(v -> binding.drawerLayout.openDrawer(GravityCompat.START));
         binding.btnAvatarUsuario.setOnClickListener(v -> mostrarMenuUsuario());
@@ -92,7 +84,19 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        binding.tvAvatarIniciales.setText(inicialesDe(AppUtils.app(this).getSession().getNombreCompleto()));
+        refrescarCabeceraSesion();
+    }
+
+    /** Muestra empresa/sucursal/usuario desde la sesión cifrada (paridad frontend). */
+    private void refrescarCabeceraSesion() {
+        SessionManager session = AppUtils.app(this).getSession();
+        String sub = session.etiquetaEmpresaSucursal();
+        if (sub.isEmpty()) {
+            sub = formatearSubtitulo(session.getEmpresaNombre(), session.getSucursalNombre());
+        }
+        binding.tvMenuSubtitulo.setText(sub);
+        binding.tvDrawerSubtitulo.setText(sub);
+        binding.tvAvatarIniciales.setText(inicialesDe(session.getNombreCompleto()));
     }
 
     @Override

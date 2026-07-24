@@ -21,7 +21,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Cliente HTTP central.
  * - baseUrl viene del archivo de configuracion (AppConfig), no de build config ni de la sesion.
- * - Interceptor agrega el Bearer token de la sesion a cada request.
+ * - Interceptor agrega Bearer + X-Empresa-Id / X-Sucursal-Id (paridad AuthInterceptor web).
  * - Authenticator reintenta una vez con /auth/refresh cuando el servidor responde 401.
  */
 public class ApiClient {
@@ -50,12 +50,21 @@ public class ApiClient {
     private Interceptor crearAuthInterceptor() {
         return chain -> {
             Request original = chain.request();
+            Request.Builder builder = original.newBuilder();
             String token = session.getAccessToken();
-            Request request = original;
             if (token != null && !token.trim().isEmpty()) {
-                request = original.newBuilder().header("Authorization", "Bearer " + token).build();
+                builder.header("Authorization", "Bearer " + token);
             }
-            return chain.proceed(request);
+            // Igual que frontend: contexto de negocio en cada API autenticada.
+            long empresaId = session.getEmpresaId();
+            long sucursalId = session.getSucursalId();
+            if (empresaId > 0) {
+                builder.header("X-Empresa-Id", String.valueOf(empresaId));
+            }
+            if (sucursalId > 0) {
+                builder.header("X-Sucursal-Id", String.valueOf(sucursalId));
+            }
+            return chain.proceed(builder.build());
         };
     }
 
@@ -96,10 +105,18 @@ public class ApiClient {
                     : session.getRefreshToken();
             session.guardarTokens(nuevoToken, refresh, false);
 
-            return response.request().newBuilder()
+            Request.Builder retry = response.request().newBuilder()
                     .header("Authorization", "Bearer " + nuevoToken)
-                    .header("Authorization-Retry", "1")
-                    .build();
+                    .header("Authorization-Retry", "1");
+            long empresaId = session.getEmpresaId();
+            long sucursalId = session.getSucursalId();
+            if (empresaId > 0) {
+                retry.header("X-Empresa-Id", String.valueOf(empresaId));
+            }
+            if (sucursalId > 0) {
+                retry.header("X-Sucursal-Id", String.valueOf(sucursalId));
+            }
+            return retry.build();
         } catch (IOException e) {
             return null;
         }

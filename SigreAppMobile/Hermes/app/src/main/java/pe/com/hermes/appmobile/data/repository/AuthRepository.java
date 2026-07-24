@@ -250,17 +250,8 @@ public class AuthRepository {
     }
 
     private void guardarSesionParcial(LoginResponse data) {
-        // Token temporal o definitivo + refresh, siempre en EncryptedSharedPreferences.
-        session.guardarTokens(data.accessToken, data.refreshToken, data.temporal);
-        session.setUserId(data.userId != null ? data.userId : -1);
-        session.setNombreCompleto(data.nombreCompleto);
-        session.setEmail(data.email);
-        if (!data.temporal) {
-            session.setEmpresaId(data.empresaId != null ? data.empresaId : -1);
-            session.setEmpresaNombre(data.empresaNombre);
-            session.setSucursalId(data.sucursalId != null ? data.sucursalId : -1);
-            session.setSucursalNombre(data.sucursalNombre);
-        }
+        // Paridad frontend rpe_user: tokens + usuario + empresa/sucursal cifrados.
+        session.guardarDesdeLogin(data);
     }
 
     /**

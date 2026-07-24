@@ -17,6 +17,7 @@ import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.databinding.ActivityGenericListBinding;
 import pe.com.hermes.appmobile.ui.common.SimpleItem;
 import pe.com.hermes.appmobile.ui.common.SimpleListAdapter;
+import pe.com.hermes.appmobile.data.session.SessionManager;
 import pe.com.hermes.appmobile.ui.bienvenida.BienvenidaActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
 
@@ -58,7 +59,7 @@ public class SeleccionEmpresaActivity extends AppCompatActivity {
             empresaElegida = empresa;
             cargarSucursales(empresa);
         } else {
-            seleccionarSucursal(item.id);
+            seleccionarSucursal(item.id, item.titulo);
         }
     }
 
@@ -100,7 +101,11 @@ public class SeleccionEmpresaActivity extends AppCompatActivity {
                     return;
                 }
                 if (sucursales.size() == 1) {
-                    seleccionarSucursal(sucursales.get(0).id);
+                    SucursalDto unica = sucursales.get(0);
+                    String nombre = unica.nombre != null
+                            ? unica.nombre
+                            : (unica.codigo != null ? unica.codigo : "Sucursal " + unica.id);
+                    seleccionarSucursal(unica.id, nombre);
                     return;
                 }
                 List<SimpleItem> items = new ArrayList<>();
@@ -118,12 +123,20 @@ public class SeleccionEmpresaActivity extends AppCompatActivity {
         });
     }
 
-    private void seleccionarSucursal(long sucursalId) {
+    private void seleccionarSucursal(long sucursalId, String sucursalNombre) {
         if (empresaElegida == null) return;
         mostrarCargando(true);
         authRepository.seleccionarEmpresa(empresaElegida.empresaId, sucursalId, new ResultCallback<LoginResponse>() {
             @Override
             public void onSuccess(LoginResponse data) {
+                SessionManager session = AppUtils.app(SeleccionEmpresaActivity.this).getSession();
+                session.enriquecerContextoEmpresaSucursal(
+                        empresaElegida.empresaId,
+                        empresaElegida.codigo,
+                        empresaElegida.razonSocial,
+                        empresaElegida.ruc,
+                        sucursalId,
+                        sucursalNombre);
                 mostrarCargando(false);
                 startActivity(new Intent(SeleccionEmpresaActivity.this, BienvenidaActivity.class));
                 finish();

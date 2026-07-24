@@ -431,7 +431,7 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
             cargarSucursales(empresa);
             return;
         }
-        seleccionarSucursal(item.id);
+        seleccionarSucursal(item.id, item.titulo);
     }
 
     private void cargarEmpresas() {
@@ -491,7 +491,11 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                     return;
                 }
                 if (sucursales.size() == 1) {
-                    seleccionarSucursal(sucursales.get(0).id);
+                    SucursalDto unica = sucursales.get(0);
+                    String nombre = unica.nombre != null
+                            ? unica.nombre
+                            : (unica.codigo != null ? unica.codigo : "Sucursal " + unica.id);
+                    seleccionarSucursal(unica.id, nombre);
                     return;
                 }
                 List<SimpleItem> items = new ArrayList<>();
@@ -517,7 +521,7 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
         });
     }
 
-    private void seleccionarSucursal(long sucursalId) {
+    private void seleccionarSucursal(long sucursalId, String sucursalNombre) {
         if (empresaElegida == null || cancelandoSeleccion) {
             return;
         }
@@ -528,11 +532,19 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                 if (cancelandoSeleccion) {
                     return;
                 }
-                cerrarDialogSeleccion();
-                AppUtils.app(LoginActivity.this).getSession().aplicarPreferenciaGuardarSesion(
+                SessionManager session = AppUtils.app(LoginActivity.this).getSession();
+                session.enriquecerContextoEmpresaSucursal(
+                        empresaElegida.empresaId,
+                        empresaElegida.codigo,
+                        empresaElegida.razonSocial,
+                        empresaElegida.ruc,
+                        sucursalId,
+                        sucursalNombre);
+                session.aplicarPreferenciaGuardarSesion(
                         binding.switchGuardarSesion.isChecked(),
                         usuarioLogin,
                         claveLogin);
+                cerrarDialogSeleccion();
                 startActivity(new Intent(LoginActivity.this, BienvenidaActivity.class));
                 finish();
             }

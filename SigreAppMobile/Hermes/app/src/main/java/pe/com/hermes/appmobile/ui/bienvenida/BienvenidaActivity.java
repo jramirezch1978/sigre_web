@@ -57,12 +57,18 @@ public class BienvenidaActivity extends AppCompatActivity {
         binding.tvNombreEmpresa.setText(
                 empresa != null && !empresa.isBlank() ? empresa : getString(R.string.brand_name));
 
-        String sucursal = session.getSucursalNombre();
-        if (sucursal != null && !sucursal.isBlank()) {
-            binding.tvSucursal.setText(sucursal);
+        String contexto = session.etiquetaEmpresaSucursal();
+        if (!contexto.isEmpty()) {
+            binding.tvSucursal.setText(contexto);
             binding.tvSucursal.setVisibility(android.view.View.VISIBLE);
         } else {
-            binding.tvSucursal.setVisibility(android.view.View.GONE);
+            String sucursal = session.getSucursalNombre();
+            if (sucursal != null && !sucursal.isBlank()) {
+                binding.tvSucursal.setText(sucursal);
+                binding.tvSucursal.setVisibility(android.view.View.VISIBLE);
+            } else {
+                binding.tvSucursal.setVisibility(android.view.View.GONE);
+            }
         }
     }
 
