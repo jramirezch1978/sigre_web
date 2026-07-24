@@ -192,7 +192,7 @@ public interface AlmacenApi {
 
     @GET("almacen/maestros/tipos-movimiento-catalogo")
     Call<ApiResponse<PageData<TipoMovimientoListItemResponse>>> listarTiposMovimiento(
-            @Query("page") int page, @Query("size") int size);
+            @Query("page") int page, @Query("size") int size, @Query("sort") String sort);
 
     @GET("almacen/maestros/tipos-movimiento-catalogo/{id}")
     Call<ApiResponse<TipoMovimientoListItemResponse>> obtenerTipoMovimiento(@Path("id") long id);
