@@ -646,8 +646,8 @@ public class AlmacenRepository {
                                     .tituloCodigoNombre(a.codigo, a.nombre)
                                     .campo("Tipo", a.almacenTipoNombre)
                                     .campo("Sucursal", a.sucursalNombre)
-                                    .campo("Centro de costos",
-                                            ListItemBuilder.codigoNombre(a.centrosCostoCodigo, a.centrosCostoNombre))
+                                    // Backend ya envía "cencos — desc" en centrosCostoNombre.
+                                    .campo("Centro de costos", a.centrosCostoNombre)
                                     .estado(a.flagEstado)
                                     .build()
                     , "almacenes"));

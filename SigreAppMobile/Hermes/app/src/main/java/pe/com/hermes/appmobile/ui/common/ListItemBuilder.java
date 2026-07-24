@@ -102,15 +102,19 @@ public final class ListItemBuilder {
     public static String codigoNombre(String codigo, String nombre) {
         String c = codigo != null ? codigo.trim() : "";
         String n = nombre != null ? nombre.trim() : "";
-        if (!c.isEmpty() && !n.isEmpty()) {
-            return c + " — " + n;
+        if (c.isEmpty() && n.isEmpty()) {
+            return VACIO;
         }
-        if (!n.isEmpty()) {
+        if (c.isEmpty()) {
             return n;
         }
-        if (!c.isEmpty()) {
+        if (n.isEmpty()) {
             return c;
         }
-        return VACIO;
+        // Evita "COD — COD — DESC" cuando el backend ya formateó el nombre.
+        if (n.equals(c) || n.startsWith(c + " —") || n.startsWith(c + " -")) {
+            return n;
+        }
+        return c + " — " + n;
     }
 }
