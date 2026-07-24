@@ -2,6 +2,7 @@ package pe.com.hermes.appmobile.ui.menu;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -217,8 +218,17 @@ public class MenuActivity extends AppCompatActivity {
     private static void setKpi(View root, String label, String valor) {
         TextView tvLabel = root.findViewById(R.id.tvKpiLabel);
         TextView tvValor = root.findViewById(R.id.tvKpiValor);
-        if (tvLabel != null) tvLabel.setText(label);
-        if (tvValor != null) tvValor.setText(valor);
+        if (tvLabel != null) {
+            tvLabel.setText(label);
+            // Branding KPI: título centrado (no heredar start/end del tema).
+            tvLabel.setGravity(Gravity.CENTER_HORIZONTAL);
+            tvLabel.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        }
+        if (tvValor != null) {
+            tvValor.setText(valor);
+            tvValor.setGravity(Gravity.END);
+            tvValor.setTextAlignment(View.TEXT_ALIGNMENT_VIEW_END);
+        }
     }
 
     private void mostrarMenuUsuario() {
