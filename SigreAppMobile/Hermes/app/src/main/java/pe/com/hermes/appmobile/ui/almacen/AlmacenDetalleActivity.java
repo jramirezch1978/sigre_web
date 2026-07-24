@@ -283,7 +283,7 @@ public class AlmacenDetalleActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder();
         sb.append("Vale: ").append(nz(d.nroVale)).append('\n');
         sb.append("Fecha: ").append(nz(d.fechaMov)).append('\n');
-        sb.append("Estado: ").append(nz(d.flagEstado)).append('\n');
+        sb.append(pe.com.hermes.appmobile.util.FlagEstadoLabels.campoListado(d.flagEstado)).append('\n');
         sb.append("Almacén: ").append(nz(d.almacenNombre)).append(" (").append(d.almacenId).append(")\n");
         sb.append("Sucursal: ").append(nz(d.sucursalNombre)).append('\n');
         sb.append("Tipo mov.: ").append(nz(d.articuloMovTipoDescripcion)).append('\n');
@@ -308,7 +308,7 @@ public class AlmacenDetalleActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder();
         sb.append("Número: ").append(nz(d.numero)).append('\n');
         sb.append("Fecha: ").append(nz(d.fecha)).append('\n');
-        sb.append("Estado: ").append(nz(d.flagEstado)).append('\n');
+        sb.append(pe.com.hermes.appmobile.util.FlagEstadoLabels.campoListado(d.flagEstado)).append('\n');
         sb.append("Origen: ").append(d.almacenOrigenId).append('\n');
         sb.append("Destino: ").append(d.almacenDestinoId).append('\n');
         sb.append("Observación: ").append(nz(d.observacion)).append("\n\n");
@@ -329,7 +329,7 @@ public class AlmacenDetalleActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder();
         sb.append("Conteo #: ").append(d.nroConteo != null ? d.nroConteo : d.id).append('\n');
         sb.append("Fecha: ").append(nz(d.fechaConteo)).append('\n');
-        sb.append("Estado: ").append(nz(d.flagEstado)).append('\n');
+        sb.append(pe.com.hermes.appmobile.util.FlagEstadoLabels.campoListado(d.flagEstado)).append('\n');
         sb.append("Almacén: ").append(d.almacenId).append('\n');
         sb.append("Artículo: ").append(d.articuloId).append('\n');
         sb.append("Saldo sistema: ").append(num(d.saldoSistema)).append('\n');

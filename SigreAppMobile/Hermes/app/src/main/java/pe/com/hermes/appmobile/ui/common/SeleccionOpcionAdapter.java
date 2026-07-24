@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import pe.com.hermes.appmobile.databinding.ItemSeleccionOpcionBinding;
 
-/** Lista de opciones para modales de selección (empresa / sucursal) en login. */
+/** Lista de opciones para modales de selección (empresa / sucursal) — misma regla de filas pegadas. */
 public class SeleccionOpcionAdapter extends RecyclerView.Adapter<SeleccionOpcionAdapter.VH> {
 
     public interface OnItemClick {
@@ -29,16 +29,24 @@ public class SeleccionOpcionAdapter extends RecyclerView.Adapter<SeleccionOpcion
         notifyDataSetChanged();
     }
 
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        HermesListUi.aplicarListaContinua(recyclerView);
+    }
+
     @NonNull
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ItemSeleccionOpcionBinding binding = ItemSeleccionOpcionBinding.inflate(
                 LayoutInflater.from(parent.getContext()), parent, false);
+        HermesListUi.anularMargenesVerticales(binding.getRoot().getLayoutParams());
         return new VH(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
+        HermesListUi.anularMargenesVerticales(holder.itemView.getLayoutParams());
         holder.bind(items.get(position), onClick);
     }
 

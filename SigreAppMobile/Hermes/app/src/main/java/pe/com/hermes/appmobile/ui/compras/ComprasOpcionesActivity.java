@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -62,7 +61,6 @@ public class ComprasOpcionesActivity extends AppCompatActivity {
             items.add(new SimpleItem(i, v.nombre, v.codigoVentana + " · " + v.grupo));
         }
 
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerView.setAdapter(new SimpleListAdapter(items, item -> {
             if (item.id < 0) {
                 startActivity(intent(this, item.titulo.replace("▸ ", "").trim()));

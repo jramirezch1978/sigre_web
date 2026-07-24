@@ -26,3 +26,12 @@ Los alias `sigre_*` apuntan a estos tokens para no romper layouts legacy.
 - Toolbar: `@drawable/bg_toolbar_hermes`
 - Filas de lista: `@drawable/bg_list_item_hermes` + barra cobre
 - Tema app: `Theme.Hermes`
+
+## Listados (regla de branding — todas las ventanas)
+
+- Filas **continuas** tipo ListView: **sin margen/espacio vertical entre registros**.
+- Fondo de lista: un solo bloque `@color/hermes_surface_elevated`; divisor 1dp inferior por fila.
+- No usar cards flotantes ni `layout_marginTop/Bottom` en items de listado.
+- Helper: `HermesListUi.aplicarListaContinua(RecyclerView)` (lo aplica `SimpleListAdapter` / `SeleccionOpcionAdapter`).
+- `flag_estado`: `1` → **Activo**, `0` → **Inactivo** (`FlagEstadoLabels`), con etiqueta de campo (`Estado: …`).
+- Campos de negocio con label (`Sucursal:`, `Centro de costos:`, etc.) cuando el API los envía.

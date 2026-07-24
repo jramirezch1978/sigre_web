@@ -7,7 +7,6 @@ import android.view.View;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import pe.com.hermes.appmobile.R;
 import pe.com.hermes.appmobile.data.compras.ComprasVista;
 import pe.com.hermes.appmobile.data.compras.ComprasVistasCatalog;
@@ -54,7 +53,6 @@ public class ComprasListadoActivity extends AppCompatActivity {
         binding.toolbar.setNavigationIcon(android.R.drawable.ic_menu_revert);
         binding.toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SimpleListAdapter(item -> {
             if (item.id <= 0) return;
             if (detalleTipo == ComprasRepository.DetalleTipo.SOLICITUD) {

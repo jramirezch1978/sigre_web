@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +40,6 @@ public class SeleccionEmpresaActivity extends AppCompatActivity {
         authRepository = new AuthRepository(AppUtils.app(this).getApiClient(), AppUtils.app(this).getSession());
 
         binding.toolbar.setTitle(getString(R.string.empresa_titulo));
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SimpleListAdapter(this::onItemClick);
         binding.recyclerView.setAdapter(adapter);
         binding.swipeRefresh.setOnRefreshListener(this::cargarEmpresas);

@@ -14,7 +14,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +51,6 @@ public class ServidorListActivity extends AppCompatActivity {
 
         servidores.addAll(AppUtils.app(this).getConfig().listarServidores());
 
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SimpleListAdapter(item -> editarPorIndice((int) item.id));
         binding.recyclerView.setAdapter(adapter);
         refrescarLista();

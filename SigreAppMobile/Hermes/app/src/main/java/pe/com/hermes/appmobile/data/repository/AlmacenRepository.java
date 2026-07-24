@@ -454,7 +454,7 @@ public class AlmacenRepository {
                     .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (MotivoTrasladoListItemResponse m) -> new SimpleItem(
                             m.id,
                             nz(m.codigo) + " · " + nz(m.nombre != null ? m.nombre : m.descripcion),
-                            FlagEstadoLabels.campoListado(m.flagEstado)
+                            subtituloMotivo(m)
                     ), "motivos"));
             case LOTES -> apiClient.getAlmacenApi().listarLotes(0, 80)
                     .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (LotePalletListItemResponse l) -> new SimpleItem(
@@ -694,13 +694,18 @@ public class AlmacenRepository {
 
     /** Subtítulo de maestro almacenes (paridad columnas web). */
     private static String subtituloAlmacen(AlmacenMaestroResponse a) {
-        String tipo = nz(a.almacenTipoNombre);
-        String sucursal = nz(a.sucursalNombre);
-        String cc = centrosCostoLabel(a.centrosCostoCodigo, a.centrosCostoNombre);
-        return "Tipo: " + tipo
-                + "\nSucursal: " + sucursal
-                + "\nCentro de costos: " + cc
+        return "Tipo: " + nz(a.almacenTipoNombre)
+                + "\nSucursal: " + nz(a.sucursalNombre)
+                + "\nCentro de costos: " + centrosCostoLabel(a.centrosCostoCodigo, a.centrosCostoNombre)
                 + "\n" + FlagEstadoLabels.campoListado(a.flagEstado);
+    }
+
+    private static String subtituloMotivo(MotivoTrasladoListItemResponse m) {
+        String desc = m.descripcion != null && !m.descripcion.isBlank() ? m.descripcion.trim() : null;
+        if (desc != null && m.nombre != null && !desc.equalsIgnoreCase(m.nombre.trim())) {
+            return "Descripción: " + desc + "\n" + FlagEstadoLabels.campoListado(m.flagEstado);
+        }
+        return FlagEstadoLabels.campoListado(m.flagEstado);
     }
 
     private static String centrosCostoLabel(String codigo, String nombre) {
