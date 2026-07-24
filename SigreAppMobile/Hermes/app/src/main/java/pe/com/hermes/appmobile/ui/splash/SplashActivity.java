@@ -17,7 +17,6 @@ import pe.com.hermes.appmobile.data.repository.AuthRepository;
 import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.databinding.ActivitySplashBinding;
 import pe.com.hermes.appmobile.ui.login.LoginActivity;
-import pe.com.hermes.appmobile.ui.menu.MenuActivity;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
 import pe.com.hermes.appmobile.util.AppVersion;
@@ -26,7 +25,7 @@ import pe.com.hermes.appmobile.util.PlayAppUpdateHelper;
 import pe.com.hermes.common.util.AsyncRunner;
 
 /**
- * Pantalla de inicio: permisos → Google Play Update → servidor → registro dispositivo → login/menú.
+ * Pantalla de inicio: permisos → Google Play Update → servidor → registro dispositivo → login.
  * <p>
  * Actualización Play: aviso si hay 1–3 revisiones de atraso; si hay 4+ (ej. 268→276),
  * diálogo obligatorio con Aceptar y descarga/instalación inmediata.
@@ -225,10 +224,8 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void navegar() {
-        Class<?> destino = AppUtils.app(this).getSession().sesionCompleta()
-                ? MenuActivity.class
-                : LoginActivity.class;
-        startActivity(new Intent(this, destino));
+        // Siempre pedir credenciales: no saltar al dashboard por sesión residual.
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 }
