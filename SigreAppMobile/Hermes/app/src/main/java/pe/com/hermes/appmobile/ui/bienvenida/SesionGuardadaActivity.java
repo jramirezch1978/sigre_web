@@ -13,7 +13,7 @@ import pe.com.hermes.appmobile.util.AppUtils;
 import pe.com.hermes.appmobile.util.AppVersion;
 
 /**
- * Arranque con sesión cifrada guardada: continuar o cambiar de cuenta.
+ * Confirmación de sesión guardada: ¿eres tú? Continuar o limpiar y volver a login.
  */
 public class SesionGuardadaActivity extends AppCompatActivity {
 
@@ -43,6 +43,7 @@ public class SesionGuardadaActivity extends AppCompatActivity {
         binding.tvVersion.setText(AppVersion.etiqueta(this));
 
         binding.btnContinuar.setOnClickListener(v -> continuarConSesionGuardada());
+        // Link: ¿No eres tú? → limpia credenciales/sesión guardada y pide login de nuevo.
         binding.btnCambiarCuenta.setOnClickListener(v -> irALoginLimpiando(session));
     }
 
@@ -65,9 +66,12 @@ public class SesionGuardadaActivity extends AppCompatActivity {
         }).start();
     }
 
+    /** Borra sesión y credenciales cifradas; vuelve al login vacío. */
     private void irALoginLimpiando(SessionManager session) {
         session.limpiar();
-        startActivity(new Intent(this, LoginActivity.class));
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
     }
 
