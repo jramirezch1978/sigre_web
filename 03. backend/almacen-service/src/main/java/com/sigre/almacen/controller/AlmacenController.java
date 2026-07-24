@@ -3,8 +3,6 @@ package com.sigre.almacen.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.sigre.almacen.dto.AlmacenRequest;
@@ -45,7 +43,7 @@ public class AlmacenController {
 
     @GetMapping
     public ApiResponse<PageData<AlmacenResponse>> findAll(
-            @PageableDefault(sort = "codigo", direction = Sort.Direction.ASC) Pageable pageable) {
+            Pageable pageable) {
         var page = almacenService.findAll(pageable);
         return ApiResponse.ok(PageData.of(page, page.getContent().stream().map(this::toResponseEnriched).toList()));
     }
@@ -126,7 +124,7 @@ public class AlmacenController {
     @GetMapping("/{almacenId}/tipos-movimiento")
     public ApiResponse<PageData<AlmacenTipoMovResponse>> listarTiposMovPermitidos(
             @PathVariable Long almacenId,
-            @PageableDefault(sort = "articuloMovTipoId", direction = Sort.Direction.ASC) Pageable pageable,
+            Pageable pageable,
             @RequestParam(required = false) String flagEstado,
             @RequestParam(required = false) String tipoMov) {
         var page = almacenTipoMovService.listarPorAlmacen(almacenId, pageable, flagEstado, tipoMov);

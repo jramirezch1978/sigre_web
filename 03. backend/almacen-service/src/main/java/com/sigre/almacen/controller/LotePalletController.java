@@ -3,8 +3,6 @@ package com.sigre.almacen.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.sigre.almacen.dto.LotePalletRequest;
@@ -25,7 +23,7 @@ public class LotePalletController {
     @GetMapping
     public ApiResponse<PageData<LotePalletResponse>> buscar(
             @RequestParam(required = false) Long articuloId,
-            @PageableDefault(sort = "nroLote", direction = Sort.Direction.ASC) Pageable pageable) {
+            Pageable pageable) {
         var page = service.buscar(articuloId, pageable);
         return ApiResponse.ok(PageData.of(page, mapper.toResponseList(page.getContent())));
     }

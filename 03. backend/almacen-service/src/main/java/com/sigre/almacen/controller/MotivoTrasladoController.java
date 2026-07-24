@@ -3,8 +3,6 @@ package com.sigre.almacen.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.sigre.almacen.dto.MotivoTrasladoRequest;
@@ -24,7 +22,7 @@ public class MotivoTrasladoController {
 
     @GetMapping
     public ApiResponse<PageData<MotivoTrasladoResponse>> findAll(
-            @PageableDefault(sort = "codigo", direction = Sort.Direction.ASC) Pageable pageable) {
+            Pageable pageable) {
         var page = service.findAll(pageable);
         return ApiResponse.ok(PageData.of(page, mapper.toResponseList(page.getContent())));
     }

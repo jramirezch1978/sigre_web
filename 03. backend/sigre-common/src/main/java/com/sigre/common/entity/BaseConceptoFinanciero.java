@@ -1,5 +1,6 @@
 package com.sigre.common.entity;
 
+import com.sigre.common.maestro.BusinessUniqueKey;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @MappedSuperclass
 public abstract class BaseConceptoFinanciero extends BaseEntity {
 
+    @BusinessUniqueKey
     @Column(nullable = false, unique = true, length = 20)
     private String codigo;
 

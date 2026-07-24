@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.sigre.common.maestro.BusinessUniqueKey;
 import com.sigre.common.security.TenantContext;
 
 import java.time.OffsetDateTime;
@@ -23,6 +24,7 @@ public class AlmacenTipoMov {
     @Column(name = "almacen_id", nullable = false)
     private Long almacenId;
 
+    @BusinessUniqueKey
     @Column(name = "articulo_mov_tipo_id", nullable = false)
     private Long articuloMovTipoId;
 
