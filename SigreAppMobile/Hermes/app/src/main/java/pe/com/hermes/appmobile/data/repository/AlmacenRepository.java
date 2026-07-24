@@ -323,25 +323,30 @@ public class AlmacenRepository {
                     }
                 });
             }
-            case "almacenTipoId" -> apiClient.getAlmacenApi().listarTiposAlmacen(0, 200)
+            case "almacenTipoId" -> apiClient.getAlmacenApi()
+                    .listarTiposAlmacen(0, 500, "codigo,asc")
                     .enqueue(mapPageToSimpleItems(callback, "tipos de almacén",
                             (AlmacenTipoResponse t) -> new SimpleItem(t.id,
-                                    labelCodigoNombre(t.codigo, t.nombre), t.codigo)));
-            case "almacenId" -> apiClient.getAlmacenApi().listarAlmacenes(0, 200)
+                                    labelCodigoNombre(t.codigo, t.nombre), t.codigo),
+                            rows -> ordenarPorClave(rows, t -> t.codigo)));
+            case "almacenId" -> apiClient.getAlmacenApi()
+                    .listarAlmacenes(0, 500, "codigo,asc")
                     .enqueue(mapPageToSimpleItems(callback, "almacenes",
                             (AlmacenMaestroResponse a) -> new SimpleItem(a.id,
-                                    labelCodigoNombre(a.codigo, a.nombre), a.codigo)));
+                                    labelCodigoNombre(a.codigo, a.nombre), a.codigo),
+                            rows -> ordenarPorClave(rows, a -> a.codigo)));
             case "articuloMovTipoId" -> apiClient.getAlmacenApi()
                     .listarTiposMovimiento(0, 500, "tipoMov,asc")
                     .enqueue(mapPageToSimpleItems(callback, "tipos de movimiento",
                             (TipoMovimientoListItemResponse t) -> new SimpleItem(t.id,
                                     labelCodigoNombre(t.tipoMov, t.descTipoMov), t.tipoMov),
-                            AlmacenRepository::ordenarPorTipoMov));
+                            rows -> ordenarPorClave(rows, t -> t.tipoMov)));
             case "centrosCostoId" -> apiClient.getContabilidadApi()
                     .listarCentrosCosto(0, 500, "1")
                     .enqueue(mapPageToSimpleItems(callback, "centros de costo",
                             (CentroCostoDto c) -> new SimpleItem(c.id,
-                                    labelCodigoNombre(c.cencos, c.descCencos), c.cencos)));
+                                    labelCodigoNombre(c.cencos, c.descCencos), c.cencos),
+                            rows -> ordenarPorClave(rows, c -> c.cencos)));
             case "responsableUsuarioId" -> {
                 long empresaId = session.getEmpresaId();
                 if (empresaId <= 0) {
@@ -644,17 +649,19 @@ public class AlmacenRepository {
                                     .campo("Cantidad", s.cantidad)
                                     .build()
                     , "stock a la fecha"));
-            case ALMACENES -> apiClient.getAlmacenApi().listarAlmacenes(0, 80)
+            case ALMACENES -> apiClient.getAlmacenApi()
+                    .listarAlmacenes(0, 500, "codigo,asc")
                     .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (AlmacenMaestroResponse a) ->
-                            ListItemBuilder.of(a.id)
-                                    .tituloCodigoNombre(a.codigo, a.nombre)
-                                    .campo("Tipo", a.almacenTipoNombre)
-                                    .campo("Sucursal", a.sucursalNombre)
-                                    // Backend ya envía "cencos — desc" en centrosCostoNombre.
-                                    .campo("Centro de costos", a.centrosCostoNombre)
-                                    .estado(a.flagEstado)
-                                    .build()
-                    , "almacenes"));
+                                    ListItemBuilder.of(a.id)
+                                            .tituloCodigoNombre(a.codigo, a.nombre)
+                                            .campo("Tipo", a.almacenTipoNombre)
+                                            .campo("Sucursal", a.sucursalNombre)
+                                            // Backend ya envía "cencos — desc" en centrosCostoNombre.
+                                            .campo("Centro de costos", a.centrosCostoNombre)
+                                            .estado(a.flagEstado)
+                                            .build(),
+                            "almacenes",
+                            rows -> ordenarPorClave(rows, a -> a.codigo)));
             case TIPOS_MOVIMIENTO -> apiClient.getAlmacenApi()
                     .listarTiposMovimiento(0, 500, "tipoMov,asc")
                     .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (TipoMovimientoListItemResponse t) ->
@@ -663,25 +670,29 @@ public class AlmacenRepository {
                                             .estado(t.flagEstado)
                                             .build(),
                             "tipos de movimiento",
-                            AlmacenRepository::ordenarPorTipoMov));
-            case TIPOS_ALMACEN -> apiClient.getAlmacenApi().listarTiposAlmacen(0, 80)
+                            rows -> ordenarPorClave(rows, t -> t.tipoMov)));
+            case TIPOS_ALMACEN -> apiClient.getAlmacenApi()
+                    .listarTiposAlmacen(0, 500, "codigo,asc")
                     .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (AlmacenTipoResponse t) ->
-                            ListItemBuilder.of(t.id)
-                                    .tituloCodigoNombre(t.codigo, t.nombre)
-                                    .campo("Libro", t.libroNombre)
-                                    .estado(t.flagEstado)
-                                    .build()
-                    , "tipos de almacén"));
+                                    ListItemBuilder.of(t.id)
+                                            .tituloCodigoNombre(t.codigo, t.nombre)
+                                            .campo("Libro", t.libroNombre)
+                                            .estado(t.flagEstado)
+                                            .build(),
+                            "tipos de almacén",
+                            rows -> ordenarPorClave(rows, t -> t.codigo)));
             case UBICACIONES -> listarUbicacionesTodas(callback);
             case TIPOS_MOV_ALMACEN -> listarTiposMovAlmacenTodas(callback);
-            case MOTIVOS_TRASLADO -> apiClient.getAlmacenApi().listarMotivosTraslado(0, 80)
+            case MOTIVOS_TRASLADO -> apiClient.getAlmacenApi()
+                    .listarMotivosTraslado(0, 500, "codigo,asc")
                     .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (MotivoTrasladoListItemResponse m) ->
-                            ListItemBuilder.of(m.id)
-                                    .tituloCodigoNombre(m.codigo, m.nombre != null ? m.nombre : m.descripcion)
-                                    .campo("Descripción", m.descripcion)
-                                    .estado(m.flagEstado)
-                                    .build()
-                    , "motivos"));
+                                    ListItemBuilder.of(m.id)
+                                            .tituloCodigoNombre(m.codigo, m.nombre != null ? m.nombre : m.descripcion)
+                                            .campo("Descripción", m.descripcion)
+                                            .estado(m.flagEstado)
+                                            .build(),
+                            "motivos",
+                            rows -> ordenarPorClave(rows, m -> m.codigo)));
             case LOTES -> apiClient.getAlmacenApi().listarLotes(0, 80)
                     .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (LotePalletListItemResponse l) ->
                             ListItemBuilder.of(l.id)
@@ -758,12 +769,13 @@ public class AlmacenRepository {
     }
 
     private void listarUbicacionesTodas(ResultCallback<ListadoResult> callback) {
-        apiClient.getAlmacenApi().listarAlmacenes(0, 200).enqueue(new Callback<>() {
+        apiClient.getAlmacenApi().listarAlmacenes(0, 500, "codigo,asc").enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<ApiResponse<PageData<AlmacenMaestroResponse>>> call,
                                    Response<ApiResponse<PageData<AlmacenMaestroResponse>>> response) {
                 List<AlmacenMaestroResponse> almacenes = extractPage(response, callback, "almacenes");
                 if (almacenes == null) return;
+                almacenes = ordenarPorClave(almacenes, a -> a.codigo);
                 if (almacenes.isEmpty()) {
                     callback.onSuccess(new ListadoResult(List.of(), DetalleTipo.NINGUNO));
                     return;
@@ -778,7 +790,8 @@ public class AlmacenRepository {
                                                Response<ApiResponse<List<UbicacionAlmacenResponse>>> response) {
                             ApiResponse<List<UbicacionAlmacenResponse>> body = response.body();
                             if (response.isSuccessful() && body != null && body.success && body.data != null) {
-                                for (UbicacionAlmacenResponse u : body.data) {
+                                List<UbicacionAlmacenResponse> ubics = ordenarPorClave(body.data, u -> u.codigo);
+                                for (UbicacionAlmacenResponse u : ubics) {
                                     acc.add(ListItemBuilder.of(u.id)
                                             .titulo(nz(a.codigo) + " · " + nz(u.codigo) + " · " + nz(u.nombre))
                                             .campo("Pasillo", u.pasillo)
@@ -793,7 +806,11 @@ public class AlmacenRepository {
                                 if (acc.isEmpty() && errors.get() > 0) {
                                     callback.onError("No se pudieron cargar ubicaciones");
                                 } else {
-                                    callback.onSuccess(new ListadoResult(new ArrayList<>(acc), DetalleTipo.NINGUNO));
+                                    List<SimpleItem> ordenados = new ArrayList<>(acc);
+                                    ordenados.sort(Comparator.comparing(
+                                            i -> i.titulo != null ? i.titulo.toUpperCase(Locale.ROOT) : "",
+                                            String::compareTo));
+                                    callback.onSuccess(new ListadoResult(ordenados, DetalleTipo.NINGUNO));
                                 }
                             }
                         }
@@ -803,7 +820,13 @@ public class AlmacenRepository {
                             errors.incrementAndGet();
                             if (pending.decrementAndGet() == 0) {
                                 if (acc.isEmpty()) callback.onError(msg(t));
-                                else callback.onSuccess(new ListadoResult(new ArrayList<>(acc), DetalleTipo.NINGUNO));
+                                else {
+                                    List<SimpleItem> ordenados = new ArrayList<>(acc);
+                                    ordenados.sort(Comparator.comparing(
+                                            i -> i.titulo != null ? i.titulo.toUpperCase(Locale.ROOT) : "",
+                                            String::compareTo));
+                                    callback.onSuccess(new ListadoResult(ordenados, DetalleTipo.NINGUNO));
+                                }
                             }
                         }
                     });
@@ -818,12 +841,13 @@ public class AlmacenRepository {
     }
 
     private void listarTiposMovAlmacenTodas(ResultCallback<ListadoResult> callback) {
-        apiClient.getAlmacenApi().listarAlmacenes(0, 200).enqueue(new Callback<>() {
+        apiClient.getAlmacenApi().listarAlmacenes(0, 500, "codigo,asc").enqueue(new Callback<>() {
             @Override
             public void onResponse(Call<ApiResponse<PageData<AlmacenMaestroResponse>>> call,
                                    Response<ApiResponse<PageData<AlmacenMaestroResponse>>> response) {
                 List<AlmacenMaestroResponse> almacenes = extractPage(response, callback, "almacenes");
                 if (almacenes == null) return;
+                almacenes = ordenarPorClave(almacenes, a -> a.codigo);
                 if (almacenes.isEmpty()) {
                     callback.onSuccess(new ListadoResult(List.of(), DetalleTipo.NINGUNO));
                     return;
@@ -835,7 +859,8 @@ public class AlmacenRepository {
                         @Override
                         public void onResponse(Call<ApiResponse<PageData<AlmacenTipoMovResponse>>> call,
                                                Response<ApiResponse<PageData<AlmacenTipoMovResponse>>> response) {
-                            List<AlmacenTipoMovResponse> rows = extractPageQuiet(response);
+                            List<AlmacenTipoMovResponse> rows =
+                                    ordenarPorClave(extractPageQuiet(response), t -> t.tipoMov);
                             for (AlmacenTipoMovResponse t : rows) {
                                 acc.add(ListItemBuilder.of(t.id)
                                         .tituloCodigoNombre(a.codigo, t.tipoMov)
@@ -844,14 +869,22 @@ public class AlmacenRepository {
                                         .build());
                             }
                             if (pending.decrementAndGet() == 0) {
-                                callback.onSuccess(new ListadoResult(new ArrayList<>(acc), DetalleTipo.NINGUNO));
+                                List<SimpleItem> ordenados = new ArrayList<>(acc);
+                                ordenados.sort(Comparator.comparing(
+                                        i -> i.titulo != null ? i.titulo.toUpperCase(Locale.ROOT) : "",
+                                        String::compareTo));
+                                callback.onSuccess(new ListadoResult(ordenados, DetalleTipo.NINGUNO));
                             }
                         }
 
                         @Override
                         public void onFailure(Call<ApiResponse<PageData<AlmacenTipoMovResponse>>> call, Throwable t) {
                             if (pending.decrementAndGet() == 0) {
-                                callback.onSuccess(new ListadoResult(new ArrayList<>(acc), DetalleTipo.NINGUNO));
+                                List<SimpleItem> ordenados = new ArrayList<>(acc);
+                                ordenados.sort(Comparator.comparing(
+                                        i -> i.titulo != null ? i.titulo.toUpperCase(Locale.ROOT) : "",
+                                        String::compareTo));
+                                callback.onSuccess(new ListadoResult(ordenados, DetalleTipo.NINGUNO));
                             }
                         }
                     });
@@ -1037,11 +1070,14 @@ public class AlmacenRepository {
         };
     }
 
-    private static List<TipoMovimientoListItemResponse> ordenarPorTipoMov(
-            List<TipoMovimientoListItemResponse> rows) {
-        List<TipoMovimientoListItemResponse> out = new ArrayList<>(rows);
+    /** Orden por clave de negocio (codigo / tipoMov / cencos), no por id autoincremental. */
+    private static <T> List<T> ordenarPorClave(List<T> rows, java.util.function.Function<T, String> clave) {
+        List<T> out = new ArrayList<>(rows != null ? rows : List.of());
         out.sort(Comparator.comparing(
-                t -> t.tipoMov != null ? t.tipoMov.trim().toUpperCase(Locale.ROOT) : "",
+                t -> {
+                    String v = clave.apply(t);
+                    return v != null ? v.trim().toUpperCase(Locale.ROOT) : "";
+                },
                 String::compareTo));
         return out;
     }

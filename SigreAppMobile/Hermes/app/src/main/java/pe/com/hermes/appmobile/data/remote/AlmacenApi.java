@@ -144,7 +144,7 @@ public interface AlmacenApi {
 
     @GET("almacen/almacenes")
     Call<ApiResponse<PageData<AlmacenMaestroResponse>>> listarAlmacenes(
-            @Query("page") int page, @Query("size") int size);
+            @Query("page") int page, @Query("size") int size, @Query("sort") String sort);
 
     @GET("almacen/almacenes/{id}")
     Call<ApiResponse<AlmacenMaestroResponse>> obtenerAlmacen(@Path("id") long id);
@@ -178,7 +178,7 @@ public interface AlmacenApi {
 
     @GET("almacen/almacen-tipos")
     Call<ApiResponse<PageData<AlmacenTipoResponse>>> listarTiposAlmacen(
-            @Query("page") int page, @Query("size") int size);
+            @Query("page") int page, @Query("size") int size, @Query("sort") String sort);
 
     @GET("almacen/almacen-tipos/{id}")
     Call<ApiResponse<AlmacenTipoResponse>> obtenerTipoAlmacen(@Path("id") long id);
@@ -206,7 +206,7 @@ public interface AlmacenApi {
 
     @GET("almacen/maestros/motivos-traslado")
     Call<ApiResponse<PageData<MotivoTrasladoListItemResponse>>> listarMotivosTraslado(
-            @Query("page") int page, @Query("size") int size);
+            @Query("page") int page, @Query("size") int size, @Query("sort") String sort);
 
     @GET("almacen/maestros/motivos-traslado/{id}")
     Call<ApiResponse<MotivoTrasladoListItemResponse>> obtenerMotivoTraslado(@Path("id") long id);
