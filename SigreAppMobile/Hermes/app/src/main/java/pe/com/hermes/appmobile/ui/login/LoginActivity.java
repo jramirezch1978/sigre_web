@@ -32,7 +32,7 @@ import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.databinding.ActivityLoginBinding;
 import pe.com.hermes.appmobile.ui.common.SeleccionOpcionAdapter;
 import pe.com.hermes.appmobile.ui.common.SimpleItem;
-import pe.com.hermes.appmobile.ui.menu.MenuActivity;
+import pe.com.hermes.appmobile.ui.bienvenida.BienvenidaActivity;
 import pe.com.hermes.appmobile.ui.ping.PingMonitorDialog;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
@@ -512,7 +512,9 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                     return;
                 }
                 cerrarDialogSeleccion();
-                startActivity(new Intent(LoginActivity.this, MenuActivity.class));
+                AppUtils.app(LoginActivity.this).getSession()
+                        .setRecordarSesion(binding.switchGuardarSesion.isChecked());
+                startActivity(new Intent(LoginActivity.this, BienvenidaActivity.class));
                 finish();
             }
 

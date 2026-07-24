@@ -17,7 +17,7 @@ import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.databinding.ActivityGenericListBinding;
 import pe.com.hermes.appmobile.ui.common.SimpleItem;
 import pe.com.hermes.appmobile.ui.common.SimpleListAdapter;
-import pe.com.hermes.appmobile.ui.menu.MenuActivity;
+import pe.com.hermes.appmobile.ui.bienvenida.BienvenidaActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
 
 /** Segundo paso del login: elegir empresa y, si tiene mas de una, sucursal (el backend siempre
@@ -125,7 +125,7 @@ public class SeleccionEmpresaActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResponse data) {
                 mostrarCargando(false);
-                startActivity(new Intent(SeleccionEmpresaActivity.this, MenuActivity.class));
+                startActivity(new Intent(SeleccionEmpresaActivity.this, BienvenidaActivity.class));
                 finish();
             }
 

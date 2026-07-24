@@ -24,6 +24,8 @@ public class SessionManager {
     private static final String KEY_EMPRESA_NOMBRE = "empresa_nombre";
     private static final String KEY_SUCURSAL_ID = "sucursal_id";
     private static final String KEY_SUCURSAL_NOMBRE = "sucursal_nombre";
+    /** Preferencia del usuario: reutilizar sesión cifrada en el próximo arranque. */
+    private static final String KEY_RECORDAR_SESION = "recordar_sesion";
 
     private final SharedPreferences prefs;
 
@@ -78,6 +80,19 @@ public class SessionManager {
     public boolean sesionCompleta() {
         String token = getAccessToken();
         return token != null && !token.trim().isEmpty() && !isTemporal() && getSucursalId() > 0;
+    }
+
+    public boolean isRecordarSesion() {
+        return prefs.getBoolean(KEY_RECORDAR_SESION, false);
+    }
+
+    public void setRecordarSesion(boolean value) {
+        prefs.edit().putBoolean(KEY_RECORDAR_SESION, value).apply();
+    }
+
+    /** Sesión completa + el usuario pidió guardarla (EncryptedSharedPreferences). */
+    public boolean puedeReutilizarSesion() {
+        return sesionCompleta() && isRecordarSesion();
     }
 
     public void limpiar() {

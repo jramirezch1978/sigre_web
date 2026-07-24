@@ -16,6 +16,8 @@ import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
 import pe.com.hermes.appmobile.data.repository.AuthRepository;
 import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.databinding.ActivitySplashBinding;
+import pe.com.hermes.appmobile.data.session.SessionManager;
+import pe.com.hermes.appmobile.ui.bienvenida.SesionGuardadaActivity;
 import pe.com.hermes.appmobile.ui.login.LoginActivity;
 import pe.com.hermes.appmobile.ui.servidor.ServidorListActivity;
 import pe.com.hermes.appmobile.util.AppUtils;
@@ -25,7 +27,7 @@ import pe.com.hermes.appmobile.util.PlayAppUpdateHelper;
 import pe.com.hermes.common.util.AsyncRunner;
 
 /**
- * Pantalla de inicio: permisos → Google Play Update → servidor → registro dispositivo → login.
+ * Pantalla de inicio: permisos → Play Update → servidor → dispositivo → sesión guardada o login.
  * <p>
  * Actualización Play: aviso si hay 1–3 revisiones de atraso; si hay 4+ (ej. 268→276),
  * diálogo obligatorio con Aceptar y descarga/instalación inmediata.
@@ -224,8 +226,16 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void navegar() {
-        // Siempre pedir credenciales: no saltar al dashboard por sesión residual.
-        startActivity(new Intent(this, LoginActivity.class));
+        SessionManager session = AppUtils.app(this).getSession();
+        if (session.puedeReutilizarSesion()) {
+            startActivity(new Intent(this, SesionGuardadaActivity.class));
+        } else {
+            // Sin switch "guardar sesión": limpia tokens residuales y pide login.
+            if (session.getAccessToken() != null && !session.getAccessToken().isBlank()) {
+                session.limpiar();
+            }
+            startActivity(new Intent(this, LoginActivity.class));
+        }
         finish();
     }
 }
