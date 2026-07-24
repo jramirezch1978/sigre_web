@@ -25,4 +25,28 @@ public final class Ipv4 {
         }
         return ip;
     }
+
+    /** True si es loopback, link-local o RFC1918 (no geolocalizable de forma útil). */
+    public static boolean isPrivateOrLoopback(String ipv4) {
+        String ip = normalizeOrNull(ipv4);
+        if (ip == null) {
+            return true;
+        }
+        String[] p = ip.split("\\.");
+        int a = Integer.parseInt(p[0]);
+        int b = Integer.parseInt(p[1]);
+        if (a == 10 || a == 127) {
+            return true;
+        }
+        if (a == 192 && b == 168) {
+            return true;
+        }
+        if (a == 172 && b >= 16 && b <= 31) {
+            return true;
+        }
+        if (a == 169 && b == 254) {
+            return true;
+        }
+        return a == 0 || a >= 224;
+    }
 }

@@ -5,6 +5,9 @@ import com.sigre.common.util.Constants;
 import com.sigre.common.util.EmailListParser;
 import com.sigre.seguridad.dto.EmpresaRegistroEmailDto;
 import com.sigre.seguridad.dto.TenantDisponibilidadDto;
+import com.sigre.seguridad.geo.IpGeoLocation;
+import com.sigre.seguridad.geo.IpGeoLocationService;
+import com.sigre.seguridad.geo.MapPreviewUrls;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,6 +22,7 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -27,6 +31,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final JdbcTemplate jdbcTemplate;
+    private final IpGeoLocationService ipGeoLocationService;
 
     private static final String FROM = "no-reply@npssac.com.pe";
     private static final DateTimeFormatter FMT_FECHA =
@@ -43,6 +48,13 @@ public class EmailService {
     @org.springframework.beans.factory.annotation.Value(
             "${app.notificacion.email.soporte:" + Constants.NOTIFICACION_EMAIL_SOPORTE_DEFAULT + "}")
     private String emailsSoporteYaml;
+
+    /**
+     * Opcional: Google Maps Static API key para preview nativo de Google en el correo.
+     * Sin key se usa imagen OpenStreetMap + enlace a Google Maps.
+     */
+    @org.springframework.beans.factory.annotation.Value("${app.geo.maps.google-static-api-key:}")
+    private String googleStaticMapsApiKey;
 
     @Async
     public void enviarCodigoRecuperacion(String destinatario, String codigo) {
@@ -536,6 +548,9 @@ public class EmailService {
             return;
         }
         String subject = "SIGRE - Nuevo dispositivo móvil registrado";
+        Optional<IpGeoLocation> geo = ipGeoLocationService.resolve(ipPublica);
+        String ubicacionLabel = geo.map(IpGeoLocation::displayLabel).orElse("—");
+        String mapaHtml = geo.map(this::buildMapaHtml).orElse("");
         String body = """
                 <html><body style="font-family:'Segoe UI',Arial,sans-serif;max-width:640px;margin:0 auto;color:#2a3f54;">
                   <div style="background:#2a3f54;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;">
@@ -553,9 +568,11 @@ public class EmailService {
                       <tr><td style="padding:10px 14px;color:#64748b;">Software</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
                       <tr><td style="padding:10px 14px;color:#64748b;">IMEI</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
                       <tr><td style="padding:10px 14px;color:#64748b;">IP pública</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
+                      <tr><td style="padding:10px 14px;color:#64748b;">Ubicación (aprox.)</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
                       <tr><td style="padding:10px 14px;color:#64748b;">IP privada</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
                       <tr><td style="padding:10px 14px;color:#64748b;">Autorizado</td><td style="padding:10px 14px;text-align:right;font-weight:600;">%s</td></tr>
                     </table>
+                    %s
                     <p style="color:#888;font-size:12px;margin-top:20px;">Aviso automático de seguridad SIGRE. Revise /admin/dispositivos si debe revocar el equipo.</p>
                   </div>
                 </body></html>
@@ -568,11 +585,39 @@ public class EmailService {
                 escapeHtml(nz(software)),
                 escapeHtml(nz(imei)),
                 escapeHtml(nz(ipPublica)),
+                escapeHtml(ubicacionLabel),
                 escapeHtml(nz(ipPrivada)),
-                autorizado ? "Sí" : "No");
+                autorizado ? "Sí" : "No",
+                mapaHtml);
         for (String to : soporte) {
             enviarHtml(to, subject, body);
         }
+    }
+
+    private String buildMapaHtml(IpGeoLocation geo) {
+        String mapsLink = MapPreviewUrls.googleMapsLink(geo.latitude(), geo.longitude());
+        String imgUrl = MapPreviewUrls.staticMapImageUrl(
+                geo.latitude(), geo.longitude(), googleStaticMapsApiKey);
+        return """
+                <div style="margin-top:18px;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
+                  <div style="padding:12px 14px 8px;font-size:13px;color:#64748b;">
+                    Ubicación aproximada según IP pública (no es GPS exacto del dispositivo)
+                  </div>
+                  <a href="%s" target="_blank" rel="noopener noreferrer" style="display:block;text-decoration:none;">
+                    <img src="%s" width="600" height="280" alt="Mapa de ubicación aproximada"
+                         style="display:block;width:100%%;max-width:600px;height:auto;border:0;"/>
+                  </a>
+                  <div style="padding:10px 14px 14px;">
+                    <a href="%s" target="_blank" rel="noopener noreferrer"
+                       style="color:#1d4ed8;font-size:13px;font-weight:600;text-decoration:none;">
+                      Abrir en Google Maps →
+                    </a>
+                  </div>
+                </div>
+                """.formatted(
+                escapeHtml(mapsLink),
+                escapeHtml(imgUrl),
+                escapeHtml(mapsLink));
     }
 
     /** Listado de soporte: BD config.SOPORTE/EMAILS, si no YAML/default. */
