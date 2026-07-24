@@ -31,6 +31,7 @@ import pe.com.hermes.appmobile.data.repository.AuthRepository;
 import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.data.session.SessionManager;
 import pe.com.hermes.appmobile.databinding.ActivityLoginBinding;
+import pe.com.hermes.appmobile.ui.common.SeleccionListaFiltro;
 import pe.com.hermes.appmobile.ui.common.SeleccionOpcionAdapter;
 import pe.com.hermes.appmobile.ui.common.SimpleItem;
 import pe.com.hermes.appmobile.ui.bienvenida.BienvenidaActivity;
@@ -57,6 +58,7 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
 
     private AlertDialog dialogSeleccion;
     private SeleccionOpcionAdapter adapterSeleccion;
+    private SeleccionListaFiltro filtroSeleccion;
     private ProgressBar progressSeleccion;
     private View grupoVacioSeleccion;
     private TextView tvVacioMensaje;
@@ -362,7 +364,10 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
             if (tvPasoDialog != null) {
                 tvPasoDialog.setText(paso);
             }
-            if (adapterSeleccion != null) {
+            if (filtroSeleccion != null) {
+                filtroSeleccion.limpiarBusqueda();
+                filtroSeleccion.setCargando(true);
+            } else if (adapterSeleccion != null) {
                 adapterSeleccion.actualizar(Collections.emptyList());
             }
             setEstadoDialog(true, false, null);
@@ -384,6 +389,7 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
         recycler.setLayoutManager(new LinearLayoutManager(this));
         adapterSeleccion = new SeleccionOpcionAdapter(this::onItemSeleccionClick);
         recycler.setAdapter(adapterSeleccion);
+        filtroSeleccion = SeleccionListaFiltro.enlazar(view, adapterSeleccion);
 
         dialogSeleccion = new AlertDialog.Builder(this, R.style.Theme_Hermes_DialogSeleccion)
                 .setView(view)
@@ -406,6 +412,16 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
     private void setEstadoDialog(boolean cargando, boolean vacio, String mensajeVacio) {
         if (progressSeleccion != null) {
             progressSeleccion.setVisibility(cargando ? View.VISIBLE : View.GONE);
+        }
+        if (filtroSeleccion != null) {
+            if (cargando) {
+                filtroSeleccion.setCargando(true);
+                return;
+            }
+            if (vacio && mensajeVacio != null) {
+                filtroSeleccion.mostrarError(mensajeVacio);
+                return;
+            }
         }
         if (grupoVacioSeleccion != null) {
             grupoVacioSeleccion.setVisibility(!cargando && vacio ? View.VISIBLE : View.GONE);
@@ -456,7 +472,9 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                             : (e.codigo != null ? e.codigo : null);
                     items.add(new SimpleItem(e.empresaId, titulo, sub));
                 }
-                if (adapterSeleccion != null) {
+                if (filtroSeleccion != null) {
+                    filtroSeleccion.setItems(items, "No tiene empresas asignadas.");
+                } else if (adapterSeleccion != null) {
                     adapterSeleccion.actualizar(items);
                 }
                 setEstadoDialog(false, items.isEmpty(), "No tiene empresas asignadas.");
@@ -470,8 +488,12 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                 if (cancelandoSeleccion) {
                     return;
                 }
-                setEstadoDialog(false, true, mensaje != null ? mensaje : "No se pudieron cargar las empresas");
-                AppUtils.toast(LoginActivity.this, mensaje != null ? mensaje : "No se pudieron cargar las empresas");
+                String msg = mensaje != null ? mensaje : "No se pudieron cargar las empresas";
+                if (filtroSeleccion != null) {
+                    filtroSeleccion.mostrarError(msg);
+                }
+                setEstadoDialog(false, true, msg);
+                AppUtils.toast(LoginActivity.this, msg);
             }
         });
     }
@@ -503,11 +525,15 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                 }
                 List<SimpleItem> items = new ArrayList<>();
                 for (SucursalDto s : sucursales) {
-                    items.add(new SimpleItem(
-                            s.id,
-                            s.nombre != null ? s.nombre : (s.codigo != null ? s.codigo : "Sucursal " + s.id)));
+                    String titulo = s.nombre != null
+                            ? s.nombre
+                            : (s.codigo != null ? s.codigo : "Sucursal " + s.id);
+                    items.add(new SimpleItem(s.id, titulo, s.codigo));
                 }
-                if (adapterSeleccion != null) {
+                if (filtroSeleccion != null) {
+                    filtroSeleccion.limpiarBusqueda();
+                    filtroSeleccion.setItems(items, "La empresa no tiene sucursales asignadas.");
+                } else if (adapterSeleccion != null) {
                     adapterSeleccion.actualizar(items);
                 }
                 setEstadoDialog(false, false, null);
@@ -518,8 +544,12 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                 if (cancelandoSeleccion) {
                     return;
                 }
-                setEstadoDialog(false, true, mensaje != null ? mensaje : "No se pudieron cargar las sucursales");
-                AppUtils.toast(LoginActivity.this, mensaje != null ? mensaje : "No se pudieron cargar las sucursales");
+                String msg = mensaje != null ? mensaje : "No se pudieron cargar las sucursales";
+                if (filtroSeleccion != null) {
+                    filtroSeleccion.mostrarError(msg);
+                }
+                setEstadoDialog(false, true, msg);
+                AppUtils.toast(LoginActivity.this, msg);
             }
         });
     }
@@ -659,6 +689,7 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
             dialogSeleccion = null;
         }
         adapterSeleccion = null;
+        filtroSeleccion = null;
         progressSeleccion = null;
         grupoVacioSeleccion = null;
         tvVacioMensaje = null;

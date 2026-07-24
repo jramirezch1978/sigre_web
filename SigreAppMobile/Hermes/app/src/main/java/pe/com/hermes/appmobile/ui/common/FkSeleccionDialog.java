@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 import pe.com.hermes.appmobile.R;
 import pe.com.hermes.appmobile.data.repository.ResultCallback;
 
-/** Modal reutilizable: lista código — descripción (mismo look que empresa/sucursal). */
+/** Modal reutilizable: lista código — descripción con buscador. */
 public final class FkSeleccionDialog {
 
     public interface Loader {
@@ -34,8 +34,6 @@ public final class FkSeleccionDialog {
         TextView tvSubtitulo = view.findViewById(R.id.tvSubtituloDialog);
         TextView tvPaso = view.findViewById(R.id.tvPasoDialog);
         ProgressBar progress = view.findViewById(R.id.progressSeleccion);
-        View grupoVacio = view.findViewById(R.id.tvVacioSeleccion);
-        TextView tvVacioMensaje = view.findViewById(R.id.tvVacioMensaje);
         RecyclerView recycler = view.findViewById(R.id.recyclerSeleccion);
 
         tvTitulo.setText(titulo != null ? titulo : "Seleccionar");
@@ -55,6 +53,7 @@ public final class FkSeleccionDialog {
         });
         recycler.setLayoutManager(new LinearLayoutManager(activity));
         recycler.setAdapter(adapter);
+        SeleccionListaFiltro filtro = SeleccionListaFiltro.enlazar(view, adapter);
 
         view.findViewById(R.id.btnCancelarSeleccion).setOnClickListener(v -> dialog.dismiss());
         dialog.show();
@@ -67,8 +66,7 @@ public final class FkSeleccionDialog {
         }
 
         progress.setVisibility(View.VISIBLE);
-        grupoVacio.setVisibility(View.GONE);
-        adapter.actualizar(Collections.emptyList());
+        filtro.setCargando(true);
 
         loader.load(new ResultCallback<>() {
             @Override
@@ -76,23 +74,14 @@ public final class FkSeleccionDialog {
                 if (!dialog.isShowing()) return;
                 progress.setVisibility(View.GONE);
                 List<SimpleItem> items = data != null ? data : Collections.emptyList();
-                adapter.actualizar(items);
-                boolean vacio = items.isEmpty();
-                grupoVacio.setVisibility(vacio ? View.VISIBLE : View.GONE);
-                if (vacio && tvVacioMensaje != null) {
-                    tvVacioMensaje.setText("No hay registros para seleccionar");
-                }
+                filtro.setItems(items, "No hay registros para seleccionar");
             }
 
             @Override
             public void onError(String mensaje) {
                 if (!dialog.isShowing()) return;
                 progress.setVisibility(View.GONE);
-                adapter.actualizar(Collections.emptyList());
-                grupoVacio.setVisibility(View.VISIBLE);
-                if (tvVacioMensaje != null) {
-                    tvVacioMensaje.setText(mensaje != null ? mensaje : "Error al cargar");
-                }
+                filtro.mostrarError(mensaje != null ? mensaje : "Error al cargar");
             }
         });
     }
