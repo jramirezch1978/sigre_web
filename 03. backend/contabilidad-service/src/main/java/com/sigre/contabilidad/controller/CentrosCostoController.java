@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +32,7 @@ public class CentrosCostoController {
     public ApiResponse<PageData<CentrosCostoResponse>> findAll(
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String flagEstado,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @PageableDefault(size = 20, sort = "cencos", direction = Sort.Direction.ASC) Pageable pageable) {
         var page = service.findAll(q, flagEstado, pageable);
         return ApiResponse.ok(PageData.of(page, mapper.toResponseList(page.getContent())));
     }

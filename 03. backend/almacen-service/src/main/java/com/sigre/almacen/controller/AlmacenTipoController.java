@@ -3,6 +3,8 @@ package com.sigre.almacen.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.sigre.almacen.dto.AlmacenTipoRequest;
@@ -24,7 +26,8 @@ public class AlmacenTipoController {
     private final AlmacenTipoResponseEnricher almacenTipoResponseEnricher;
 
     @GetMapping
-    public ApiResponse<PageData<AlmacenTipoResponse>> findAll(Pageable pageable) {
+    public ApiResponse<PageData<AlmacenTipoResponse>> findAll(
+            @PageableDefault(sort = "codigo", direction = Sort.Direction.ASC) Pageable pageable) {
         var page = service.findAll(pageable);
         return ApiResponse.ok(PageData.of(page, page.getContent().stream().map(this::toResponseEnriched).toList()));
     }

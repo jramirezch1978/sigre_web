@@ -28,7 +28,7 @@ public class UbicacionAlmacenServiceImpl implements UbicacionAlmacenService {
     @Override
     public List<UbicacionAlmacen> findByAlmacenId(Long almacenId) {
         log.info("Listando ubicaciones para almacen id: {}", almacenId);
-        List<UbicacionAlmacen> list = repository.findByAlmacenId(almacenId);
+        List<UbicacionAlmacen> list = repository.findByAlmacenIdOrderByCodigoAsc(almacenId);
         log.info("Ubicaciones encontradas: {}", list.size());
         return list;
     }

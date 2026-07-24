@@ -46,13 +46,13 @@ class UbicacionAlmacenServiceImplTest {
 
     @Test
     void findByAlmacenId_devuelveLista() {
-        when(repository.findByAlmacenId(10L)).thenReturn(List.of(ubicacion));
+        when(repository.findByAlmacenIdOrderByCodigoAsc(10L)).thenReturn(List.of(ubicacion));
 
         List<UbicacionAlmacen> list = service.findByAlmacenId(10L);
 
         assertThat(list).hasSize(1);
         assertThat(list.get(0).getCodigo()).isEqualTo("U1");
-        verify(repository).findByAlmacenId(10L);
+        verify(repository).findByAlmacenIdOrderByCodigoAsc(10L);
     }
 
     @Test

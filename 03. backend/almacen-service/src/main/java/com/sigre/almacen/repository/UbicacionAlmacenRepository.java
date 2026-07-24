@@ -8,7 +8,8 @@ import java.util.Optional;
 
 public interface UbicacionAlmacenRepository extends JpaRepository<UbicacionAlmacen, Long> {
 
-    List<UbicacionAlmacen> findByAlmacenId(Long almacenId);
+    /** Unique key de negocio: (almacen_id, codigo) → orden por codigo. */
+    List<UbicacionAlmacen> findByAlmacenIdOrderByCodigoAsc(Long almacenId);
 
     boolean existsByAlmacenIdAndCodigoIgnoreCase(Long almacenId, String codigo);
 
