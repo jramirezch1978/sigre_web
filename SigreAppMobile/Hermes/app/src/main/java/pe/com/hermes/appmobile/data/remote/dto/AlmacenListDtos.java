@@ -59,6 +59,8 @@ public final class AlmacenListDtos {
         public String almacenTipoCodigo;
         public String almacenTipoNombre;
         public String sucursalNombre;
+        public String centrosCostoCodigo;
+        public String centrosCostoNombre;
         public String flagEstado;
     }
 
