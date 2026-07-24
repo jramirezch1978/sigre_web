@@ -215,7 +215,7 @@ public class ComprasDetalleActivity extends AppCompatActivity {
         StringBuilder sb = new StringBuilder();
         sb.append("Número: ").append(nz(d.numero)).append('\n');
         sb.append("Fecha: ").append(nz(d.fecha)).append('\n');
-        sb.append(pe.com.hermes.appmobile.util.FlagEstadoLabels.campoListado(d.flagEstado)).append('\n');
+        sb.append(pe.com.hermes.appmobile.ui.common.ListItemBuilder.textoEstado(d.flagEstado)).append('\n');
         sb.append("Prioridad: ").append(nz(d.prioridad)).append('\n');
         sb.append("Sucursal: ").append(d.sucursalId).append('\n');
         sb.append("Solicitante: ").append(d.solicitanteId).append('\n');

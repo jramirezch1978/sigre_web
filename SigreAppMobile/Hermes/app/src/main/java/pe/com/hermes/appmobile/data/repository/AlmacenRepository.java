@@ -48,7 +48,7 @@ import pe.com.hermes.appmobile.data.remote.dto.DashboardLogisticoResponse;
 import pe.com.hermes.appmobile.data.remote.dto.MovimientoListItemResponse;
 import pe.com.hermes.appmobile.data.remote.dto.PageData;
 import pe.com.hermes.appmobile.data.session.SessionManager;
-import pe.com.hermes.appmobile.util.FlagEstadoLabels;
+import pe.com.hermes.appmobile.ui.common.ListItemBuilder;
 import pe.com.hermes.appmobile.ui.common.SimpleItem;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -100,21 +100,25 @@ public class AlmacenRepository {
         if (fuente == AlmacenFuenteDatos.MOVIMIENTOS) {
             Long sucursalId = session.getSucursalId() > 0 ? session.getSucursalId() : null;
             apiClient.getAlmacenApi().listarMovimientos(sucursalId, estado, 0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.MOVIMIENTO, (MovimientoListItemResponse m) -> new SimpleItem(
-                            m.id,
-                            m.nroVale != null ? m.nroVale : "Movimiento " + m.id,
-                            nz(m.fechaMov) + " · " + FlagEstadoLabels.campoListado(m.flagEstado)
-                    ), "movimientos"));
+                    .enqueue(mapPage(callback, DetalleTipo.MOVIMIENTO, (MovimientoListItemResponse m) ->
+                            ListItemBuilder.of(m.id)
+                                    .titulo(m.nroVale != null ? m.nroVale : "Movimiento " + m.id)
+                                    .campo("Fecha", m.fechaMov)
+                                    .estado(m.flagEstado)
+                                    .build()
+                    , "movimientos"));
             return;
         }
         if (fuente == AlmacenFuenteDatos.ORDENES_TRASLADO) {
             apiClient.getAlmacenApi().listarOrdenesTraslado(estado, 0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.ORDEN_TRASLADO, (OrdenTrasladoListItemResponse o) -> new SimpleItem(
-                            o.id,
-                            o.numero != null ? o.numero : "OTR " + o.id,
-                            nz(o.fecha) + " · " + FlagEstadoLabels.campoListado(o.flagEstado)
-                                    + " · " + o.almacenOrigenId + " → " + o.almacenDestinoId
-                    ), "órdenes de traslado"));
+                    .enqueue(mapPage(callback, DetalleTipo.ORDEN_TRASLADO, (OrdenTrasladoListItemResponse o) ->
+                            ListItemBuilder.of(o.id)
+                                    .titulo(o.numero != null ? o.numero : "OTR " + o.id)
+                                    .campo("Fecha", o.fecha)
+                                    .estado(o.flagEstado)
+                                    .texto(o.almacenOrigenId + " → " + o.almacenDestinoId)
+                                    .build()
+                    , "órdenes de traslado"));
             return;
         }
         listarPorFuente(fuente, callback);
@@ -373,24 +377,31 @@ public class AlmacenRepository {
             case MOVIMIENTOS -> listarPorVista(null, AlmacenFuenteDatos.MOVIMIENTOS, callback);
             case ORDENES_TRASLADO -> listarPorVista(null, AlmacenFuenteDatos.ORDENES_TRASLADO, callback);
             case TOMAS_INVENTARIO -> apiClient.getAlmacenApi().listarTomasInventario(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.TOMA_INVENTARIO, (InventarioConteoListItemResponse t) -> new SimpleItem(
-                            t.id,
-                            "Conteo #" + (t.nroConteo != null ? t.nroConteo : t.id),
-                            nz(t.fechaConteo) + " · art " + t.articuloId + " · "
-                                    + FlagEstadoLabels.campoListado(t.flagEstado)
-                    ), "tomas de inventario"));
+                    .enqueue(mapPage(callback, DetalleTipo.TOMA_INVENTARIO, (InventarioConteoListItemResponse t) ->
+                            ListItemBuilder.of(t.id)
+                                    .titulo("Conteo #" + (t.nroConteo != null ? t.nroConteo : t.id))
+                                    .campo("Fecha", t.fechaConteo)
+                                    .campo("Artículo", t.articuloId)
+                                    .estado(t.flagEstado)
+                                    .build()
+                    , "tomas de inventario"));
             case STOCK -> apiClient.getAlmacenApi().listarStock(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (StockListItemResponse s) -> new SimpleItem(
-                            s.id,
-                            "Art " + s.articuloId + " · Alm " + s.almacenId,
-                            "Disp " + s.cantidadDisponible + " · Costo " + s.costoPromedio
-                    ), "stock"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (StockListItemResponse s) ->
+                            ListItemBuilder.of(s.id)
+                                    .titulo("Art " + s.articuloId + " · Alm " + s.almacenId)
+                                    .campo("Disponible", s.cantidadDisponible)
+                                    .campo("Costo", s.costoPromedio)
+                                    .build()
+                    , "stock"));
             case KARDEX -> apiClient.getAlmacenApi().listarKardex(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (KardexListItemResponse k) -> new SimpleItem(
-                            k.id,
-                            nz(k.articuloCodigo) + " · " + nz(k.articuloNombre),
-                            nz(k.fecha) + " · " + nz(k.tipo) + " · cant " + k.cantidad
-                    ), "kardex"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (KardexListItemResponse k) ->
+                            ListItemBuilder.of(k.id)
+                                    .tituloCodigoNombre(k.articuloCodigo, k.articuloNombre)
+                                    .campo("Fecha", k.fecha)
+                                    .campo("Tipo", k.tipo)
+                                    .campo("Cantidad", k.cantidad)
+                                    .build()
+                    , "kardex"));
             case DIAGNOSTICO -> apiClient.getAlmacenApi().diagnostico()
                     .enqueue(new Callback<>() {
                         @Override
@@ -405,10 +416,11 @@ public class AlmacenRepository {
                             List<DashboardLogisticoResponse.DiagnosticoAlmacenDto> data =
                                     body.data != null ? body.data : Collections.emptyList();
                             for (DashboardLogisticoResponse.DiagnosticoAlmacenDto d : data) {
-                                items.add(new SimpleItem(
-                                        d.almacenId,
-                                        nz(d.almacenCodigo) + " · " + nz(d.almacenNombre),
-                                        "Arts " + d.totalArticulos + " · Valor " + d.valorInventario));
+                                items.add(ListItemBuilder.of(d.almacenId)
+                                        .tituloCodigoNombre(d.almacenCodigo, d.almacenNombre)
+                                        .campo("Artículos", d.totalArticulos)
+                                        .campo("Valor", d.valorInventario)
+                                        .build());
                             }
                             callback.onSuccess(new ListadoResult(items, DetalleTipo.NINGUNO));
                         }
@@ -419,55 +431,75 @@ public class AlmacenRepository {
                         }
                     });
             case VALORIZACION -> apiClient.getAlmacenApi().valorizacion(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (ValorizacionListItemResponse v) -> new SimpleItem(
-                            v.articuloId != null ? v.articuloId : 0L,
-                            nz(v.articuloCodigo) + " · " + nz(v.articuloNombre),
-                            "Cant " + v.cantidadDisponible + " · Valor " + v.valorTotal
-                    ), "valorización"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (ValorizacionListItemResponse v) ->
+                            ListItemBuilder.of(v.articuloId != null ? v.articuloId : 0L)
+                                    .tituloCodigoNombre(v.articuloCodigo, v.articuloNombre)
+                                    .campo("Cantidad", v.cantidadDisponible)
+                                    .campo("Valor", v.valorTotal)
+                                    .build()
+                    , "valorización"));
             case STOCK_A_FECHA -> apiClient.getAlmacenApi().stockAFecha(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (StockAFechaListItemResponse s) -> new SimpleItem(
-                            s.articuloId != null ? s.articuloId : 0L,
-                            nz(s.articuloCodigo) + " · " + nz(s.articuloNombre),
-                            "Alm " + s.almacenId + " · Cant " + s.cantidad
-                    ), "stock a la fecha"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (StockAFechaListItemResponse s) ->
+                            ListItemBuilder.of(s.articuloId != null ? s.articuloId : 0L)
+                                    .tituloCodigoNombre(s.articuloCodigo, s.articuloNombre)
+                                    .campo("Almacén", s.almacenId)
+                                    .campo("Cantidad", s.cantidad)
+                                    .build()
+                    , "stock a la fecha"));
             case ALMACENES -> apiClient.getAlmacenApi().listarAlmacenes(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (AlmacenMaestroResponse a) -> new SimpleItem(
-                            a.id,
-                            nz(a.codigo) + " · " + nz(a.nombre),
-                            subtituloAlmacen(a)
-                    ), "almacenes"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (AlmacenMaestroResponse a) ->
+                            ListItemBuilder.of(a.id)
+                                    .tituloCodigoNombre(a.codigo, a.nombre)
+                                    .campo("Tipo", a.almacenTipoNombre)
+                                    .campo("Sucursal", a.sucursalNombre)
+                                    .campo("Centro de costos",
+                                            ListItemBuilder.codigoNombre(a.centrosCostoCodigo, a.centrosCostoNombre))
+                                    .estado(a.flagEstado)
+                                    .build()
+                    , "almacenes"));
             case TIPOS_MOVIMIENTO -> apiClient.getAlmacenApi().listarTiposMovimiento(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (TipoMovimientoListItemResponse t) -> new SimpleItem(
-                            t.id,
-                            nz(t.tipoMov) + " · " + nz(t.descTipoMov),
-                            FlagEstadoLabels.campoListado(t.flagEstado)
-                    ), "tipos de movimiento"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (TipoMovimientoListItemResponse t) ->
+                            ListItemBuilder.of(t.id)
+                                    .tituloCodigoNombre(t.tipoMov, t.descTipoMov)
+                                    .estado(t.flagEstado)
+                                    .build()
+                    , "tipos de movimiento"));
             case TIPOS_ALMACEN -> apiClient.getAlmacenApi().listarTiposAlmacen(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (AlmacenTipoResponse t) -> new SimpleItem(
-                            t.id,
-                            nz(t.codigo) + " · " + nz(t.nombre),
-                            "Libro: " + nz(t.libroNombre) + " · " + FlagEstadoLabels.campoListado(t.flagEstado)
-                    ), "tipos de almacén"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (AlmacenTipoResponse t) ->
+                            ListItemBuilder.of(t.id)
+                                    .tituloCodigoNombre(t.codigo, t.nombre)
+                                    .campo("Libro", t.libroNombre)
+                                    .estado(t.flagEstado)
+                                    .build()
+                    , "tipos de almacén"));
             case UBICACIONES -> listarUbicacionesTodas(callback);
             case TIPOS_MOV_ALMACEN -> listarTiposMovAlmacenTodas(callback);
             case MOTIVOS_TRASLADO -> apiClient.getAlmacenApi().listarMotivosTraslado(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (MotivoTrasladoListItemResponse m) -> new SimpleItem(
-                            m.id,
-                            nz(m.codigo) + " · " + nz(m.nombre != null ? m.nombre : m.descripcion),
-                            subtituloMotivo(m)
-                    ), "motivos"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (MotivoTrasladoListItemResponse m) ->
+                            ListItemBuilder.of(m.id)
+                                    .tituloCodigoNombre(m.codigo, m.nombre != null ? m.nombre : m.descripcion)
+                                    .campo("Descripción", m.descripcion)
+                                    .estado(m.flagEstado)
+                                    .build()
+                    , "motivos"));
             case LOTES -> apiClient.getAlmacenApi().listarLotes(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (LotePalletListItemResponse l) -> new SimpleItem(
-                            l.id,
-                            nz(l.codigo) + " · lote " + nz(l.nroLote),
-                            "Art " + l.articuloId + " · Alm " + l.almacenId
-                    ), "lotes"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (LotePalletListItemResponse l) ->
+                            ListItemBuilder.of(l.id)
+                                    .titulo(ListItemBuilder.unirTitulo(l.codigo, "lote " + nz(l.nroLote)))
+                                    .campo("Artículo", l.articuloId)
+                                    .campo("Almacén", l.almacenId)
+                                    .estado(l.flagEstado)
+                                    .build()
+                    , "lotes"));
             case CONVERSIONES -> apiClient.getCoreApi().listarConversiones(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (ConversionUnidadResponse c) -> new SimpleItem(
-                            c.id,
-                            nz(c.umOrigenCodigo) + " → " + nz(c.umDestinoCodigo),
-                            nz(c.umOrigenNombre) + " / " + nz(c.umDestinoNombre) + " · factor " + c.factorConversion
-                    ), "conversiones"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (ConversionUnidadResponse c) ->
+                            ListItemBuilder.of(c.id)
+                                    .titulo(nz(c.umOrigenCodigo) + " → " + nz(c.umDestinoCodigo))
+                                    .campo("Origen", c.umOrigenNombre)
+                                    .campo("Destino", c.umDestinoNombre)
+                                    .campo("Factor", c.factorConversion)
+                                    .build()
+                    , "conversiones"));
             case NUMERACION_VALES -> apiClient.getCoreApi()
                     .listarNumeradores("almacen.vale_mov", 0, 80)
                     .enqueue(mapPage(callback, DetalleTipo.NINGUNO, this::mapNumerador, "numeración vales"));
@@ -476,17 +508,21 @@ public class AlmacenRepository {
                     .enqueue(mapPage(callback, DetalleTipo.NINGUNO, this::mapNumerador, "numeración OTR"));
             case PARAMETROS -> listarParametros(callback);
             case GUIAS_REMISION -> apiClient.getAlmacenApi().listarGuias(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (GuiaRemisionListItemResponse g) -> new SimpleItem(
-                            g.id,
-                            g.numero != null ? g.numero : "Guía " + g.id,
-                            nz(g.fecha) + " · " + FlagEstadoLabels.campoListado(g.flagEstado)
-                    ), "guías"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (GuiaRemisionListItemResponse g) ->
+                            ListItemBuilder.of(g.id)
+                                    .titulo(g.numero != null ? g.numero : "Guía " + g.id)
+                                    .campo("Fecha", g.fecha)
+                                    .estado(g.flagEstado)
+                                    .build()
+                    , "guías"));
             case SOLICITUDES_SALIDA -> apiClient.getAlmacenApi().listarSolicitudesSalida(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (SolicitudSalidaListItemResponse s) -> new SimpleItem(
-                            s.id,
-                            s.numero != null ? s.numero : "Solicitud " + s.id,
-                            nz(s.fecha) + " · " + FlagEstadoLabels.campoListado(s.flagEstado)
-                    ), "solicitudes"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (SolicitudSalidaListItemResponse s) ->
+                            ListItemBuilder.of(s.id)
+                                    .titulo(s.numero != null ? s.numero : "Solicitud " + s.id)
+                                    .campo("Fecha", s.fecha)
+                                    .estado(s.flagEstado)
+                                    .build()
+                    , "solicitudes"));
             default -> callback.onError("Fuente no soportada en móvil");
         }
     }
@@ -543,11 +579,12 @@ public class AlmacenRepository {
                             ApiResponse<List<UbicacionAlmacenResponse>> body = response.body();
                             if (response.isSuccessful() && body != null && body.success && body.data != null) {
                                 for (UbicacionAlmacenResponse u : body.data) {
-                                    acc.add(new SimpleItem(
-                                            u.id,
-                                            nz(a.codigo) + " · " + nz(u.codigo) + " · " + nz(u.nombre),
-                                            "Pasillo " + nz(u.pasillo) + " / Est " + nz(u.estante) + " / Niv " + nz(u.nivel)
-                                    ));
+                                    acc.add(ListItemBuilder.of(u.id)
+                                            .titulo(nz(a.codigo) + " · " + nz(u.codigo) + " · " + nz(u.nombre))
+                                            .campo("Pasillo", u.pasillo)
+                                            .campo("Estante", u.estante)
+                                            .campo("Nivel", u.nivel)
+                                            .build());
                                 }
                             } else {
                                 errors.incrementAndGet();
@@ -600,11 +637,11 @@ public class AlmacenRepository {
                                                Response<ApiResponse<PageData<AlmacenTipoMovResponse>>> response) {
                             List<AlmacenTipoMovResponse> rows = extractPageQuiet(response);
                             for (AlmacenTipoMovResponse t : rows) {
-                                acc.add(new SimpleItem(
-                                        t.id,
-                                        nz(a.codigo) + " · " + nz(t.tipoMov),
-                                        nz(t.descTipoMov) + " · " + FlagEstadoLabels.campoListado(t.flagEstado)
-                                ));
+                                acc.add(ListItemBuilder.of(t.id)
+                                        .tituloCodigoNombre(a.codigo, t.tipoMov)
+                                        .campo("Descripción", t.descTipoMov)
+                                        .estado(t.flagEstado)
+                                        .build());
                             }
                             if (pending.decrementAndGet() == 0) {
                                 callback.onSuccess(new ListadoResult(new ArrayList<>(acc), DetalleTipo.NINGUNO));
@@ -675,52 +712,22 @@ public class AlmacenRepository {
         long i = 1;
         for (ConfigClaveResponse c : claves) {
             Object val = valores.get(c.clave);
-            items.add(new SimpleItem(
-                    i++,
-                    nz(c.clave),
-                    nz(c.descripcion) + " · " + (val != null ? String.valueOf(val) : "—")
-            ));
+            items.add(ListItemBuilder.of(i++)
+                    .titulo(nz(c.clave))
+                    .campo("Descripción", c.descripcion)
+                    .campo("Valor", val != null ? String.valueOf(val) : null)
+                    .build());
         }
         return items;
     }
 
     private SimpleItem mapNumerador(NumeradorDocumentoResponse n) {
-        return new SimpleItem(
-                n.sucursalId != null ? n.sucursalId : 0L,
-                nz(n.sucursalCodigo) + " · " + nz(n.sucursalNombre),
-                "Año " + n.ano + " · próximo " + n.ultNro + " · " + FlagEstadoLabels.campoListado(n.flagEstado)
-        );
-    }
-
-    /** Subtítulo de maestro almacenes (paridad columnas web). */
-    private static String subtituloAlmacen(AlmacenMaestroResponse a) {
-        return "Tipo: " + nz(a.almacenTipoNombre)
-                + "\nSucursal: " + nz(a.sucursalNombre)
-                + "\nCentro de costos: " + centrosCostoLabel(a.centrosCostoCodigo, a.centrosCostoNombre)
-                + "\n" + FlagEstadoLabels.campoListado(a.flagEstado);
-    }
-
-    private static String subtituloMotivo(MotivoTrasladoListItemResponse m) {
-        String desc = m.descripcion != null && !m.descripcion.isBlank() ? m.descripcion.trim() : null;
-        if (desc != null && m.nombre != null && !desc.equalsIgnoreCase(m.nombre.trim())) {
-            return "Descripción: " + desc + "\n" + FlagEstadoLabels.campoListado(m.flagEstado);
-        }
-        return FlagEstadoLabels.campoListado(m.flagEstado);
-    }
-
-    private static String centrosCostoLabel(String codigo, String nombre) {
-        String c = codigo != null ? codigo.trim() : "";
-        String n = nombre != null ? nombre.trim() : "";
-        if (!c.isEmpty() && !n.isEmpty()) {
-            return c + " — " + n;
-        }
-        if (!n.isEmpty()) {
-            return n;
-        }
-        if (!c.isEmpty()) {
-            return c;
-        }
-        return "—";
+        return ListItemBuilder.of(n.sucursalId != null ? n.sucursalId : 0L)
+                .tituloCodigoNombre(n.sucursalCodigo, n.sucursalNombre)
+                .campo("Año", n.ano)
+                .campo("Próximo", n.ultNro)
+                .estado(n.flagEstado)
+                .build();
     }
 
     private interface Mapper<T> {

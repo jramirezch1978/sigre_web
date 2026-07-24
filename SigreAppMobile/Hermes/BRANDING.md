@@ -2,6 +2,35 @@
 
 Identidad visual de la app móvil Hermes (mensajero / logística).
 
+## Dónde cambiar (patrón centralizado)
+
+| Qué quieres cambiar | Archivo(s) único(s) |
+|---|---|
+| Colores / tipografía | `res/values/colors.xml`, `styles.xml`, fuentes |
+| Aspecto de fila (gaps, barra, fondo) | `item_simple_texto.xml`, `bg_list_item_hermes.xml`, `HermesListUi` |
+| Formato de subtítulo (multilínea vs `·`, labels) | **`ListItemBuilder`** (constantes `SEP_*`) |
+| Textos Activo / Inactivo | **`FlagEstadoLabels`** |
+| Datos de una fila concreta | Solo el mapper del repositorio (`.campo(...)` / `.estado(...)`) |
+
+**No** tocar Activities ni layouts de cada ventana para un cambio de branding de listados.
+
+## Patrones usados
+
+1. **Facade + Adapter** — `SimpleListAdapter` / `SeleccionOpcionAdapter` aplican `HermesListUi` al engancharse al `RecyclerView` (estilo visual global).
+2. **Builder** — `ListItemBuilder` arma título/subtítulo; repositorios declaran campos, no formatean.
+3. **Strategy** — `FlagEstadoLabels` traduce `flag_estado` (listado vs formulario).
+
+Ejemplo en repositorio:
+
+```java
+ListItemBuilder.of(a.id)
+    .tituloCodigoNombre(a.codigo, a.nombre)
+    .campo("Sucursal", a.sucursalNombre)
+    .campo("Centro de costos", ListItemBuilder.codigoNombre(a.centrosCostoCodigo, a.centrosCostoNombre))
+    .estado(a.flagEstado)
+    .build();
+```
+
 ## Paleta
 
 | Token | Hex | Uso |
@@ -27,11 +56,8 @@ Los alias `sigre_*` apuntan a estos tokens para no romper layouts legacy.
 - Filas de lista: `@drawable/bg_list_item_hermes` + barra cobre
 - Tema app: `Theme.Hermes`
 
-## Listados (regla de branding — todas las ventanas)
+## Listados
 
-- Filas **continuas** tipo ListView: **sin margen/espacio vertical entre registros**.
-- Fondo de lista: un solo bloque `@color/hermes_surface_elevated`; divisor 1dp inferior por fila.
-- No usar cards flotantes ni `layout_marginTop/Bottom` en items de listado.
-- Helper: `HermesListUi.aplicarListaContinua(RecyclerView)` (lo aplica `SimpleListAdapter` / `SeleccionOpcionAdapter`).
-- `flag_estado`: `1` → **Activo**, `0` → **Inactivo** (`FlagEstadoLabels`), con etiqueta de campo (`Estado: …`).
-- Campos de negocio con label (`Sucursal:`, `Centro de costos:`, etc.) cuando el API los envía.
+- Filas **continuas** (sin margen vertical entre registros).
+- `flag_estado`: `1` → Activo, `0` → Inactivo.
+- Campos con etiqueta vía `ListItemBuilder.campo(...)`.

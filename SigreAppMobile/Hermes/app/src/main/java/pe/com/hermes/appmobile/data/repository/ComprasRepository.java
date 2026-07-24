@@ -21,8 +21,8 @@ import pe.com.hermes.appmobile.data.remote.dto.ComprasDtos.TipoEntidadRequest;
 import pe.com.hermes.appmobile.data.remote.dto.PageData;
 import pe.com.hermes.appmobile.data.remote.dto.SolicitudCompraResponse;
 import pe.com.hermes.appmobile.data.session.SessionManager;
+import pe.com.hermes.appmobile.ui.common.ListItemBuilder;
 import pe.com.hermes.appmobile.ui.common.SimpleItem;
-import pe.com.hermes.appmobile.util.FlagEstadoLabels;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -60,63 +60,81 @@ public class ComprasRepository {
             case SOLICITUDES -> {
                 Long suc = session.getSucursalId() > 0 ? session.getSucursalId() : null;
                 apiClient.getComprasApi().listarSolicitudes(suc, null, 0, 80)
-                        .enqueue(mapPage(callback, DetalleTipo.SOLICITUD, (SolicitudCompraResponse s) -> new SimpleItem(
-                                s.id,
-                                s.numero != null ? s.numero : "Solicitud " + s.id,
-                                nz(s.fecha) + " · " + nz(s.prioridad) + " · "
-                                        + FlagEstadoLabels.campoListado(s.flagEstado)
-                                        + " · ítems " + s.totalItems
-                        ), "solicitudes"));
+                        .enqueue(mapPage(callback, DetalleTipo.SOLICITUD, (SolicitudCompraResponse s) ->
+                                ListItemBuilder.of(s.id)
+                                        .titulo(s.numero != null ? s.numero : "Solicitud " + s.id)
+                                        .campo("Fecha", s.fecha)
+                                        .campo("Prioridad", s.prioridad)
+                                        .estado(s.flagEstado)
+                                        .campo("Ítems", s.totalItems)
+                                        .build()
+                        , "solicitudes"));
             }
             case PROVEEDORES -> apiClient.getCoreApi().listarProveedores(true, 0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (ProveedorDto p) -> new SimpleItem(
-                            p.id,
-                            nz(p.nroDocumento) + " · " + nz(p.razonSocial),
-                            nz(p.telefono) + " · " + FlagEstadoLabels.campoListado(p.flagEstado)
-                    ), "proveedores"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (ProveedorDto p) ->
+                            ListItemBuilder.of(p.id)
+                                    .tituloCodigoNombre(p.nroDocumento, p.razonSocial)
+                                    .campo("Teléfono", p.telefono)
+                                    .estado(p.flagEstado)
+                                    .build()
+                    , "proveedores"));
             case TIPOS_PROVEEDOR -> apiClient.getComprasApi().listarTiposProveedor(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (TipoEntidadDto t) -> new SimpleItem(
-                            t.id,
-                            nz(t.tipo) + " · " + nz(t.descripcion),
-                            FlagEstadoLabels.campoListado(t.flagEstado)
-                    ), "tipos proveedor"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, (TipoEntidadDto t) ->
+                            ListItemBuilder.of(t.id)
+                                    .tituloCodigoNombre(t.tipo, t.descripcion)
+                                    .estado(t.flagEstado)
+                                    .build()
+                    , "tipos proveedor"));
             case MARCAS -> apiClient.getCoreApi().listarMarcas(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c -> new SimpleItem(
-                            c.id, nz(c.codigo) + " · " + nz(c.nombre),
-                            FlagEstadoLabels.campoListado(c.flagEstado)
-                    ), "marcas"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c ->
+                            ListItemBuilder.of(c.id)
+                                    .tituloCodigoNombre(c.codigo, c.nombre)
+                                    .estado(c.flagEstado)
+                                    .build()
+                    , "marcas"));
             case COLORES -> apiClient.getCoreApi().listarColores(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c -> new SimpleItem(
-                            c.id, nz(c.codigo) + " · " + nz(c.nombre),
-                            FlagEstadoLabels.campoListado(c.flagEstado)
-                    ), "colores"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c ->
+                            ListItemBuilder.of(c.id)
+                                    .tituloCodigoNombre(c.codigo, c.nombre)
+                                    .estado(c.flagEstado)
+                                    .build()
+                    , "colores"));
             case CLASES_ARTICULO -> apiClient.getCoreApi().listarClases(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c -> new SimpleItem(
-                            c.id,
-                            nz(c.codClase != null ? c.codClase : c.codigo) + " · "
-                                    + nz(c.descClase != null ? c.descClase : c.nombre),
-                            FlagEstadoLabels.campoListado(c.flagEstado)
-                    ), "clases"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c ->
+                            ListItemBuilder.of(c.id)
+                                    .tituloCodigoNombre(
+                                            c.codClase != null ? c.codClase : c.codigo,
+                                            c.descClase != null ? c.descClase : c.nombre)
+                                    .estado(c.flagEstado)
+                                    .build()
+                    , "clases"));
             case CATEGORIAS -> apiClient.getCoreApi().listarCategorias(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c -> new SimpleItem(
-                            c.id,
-                            nz(c.catArt != null ? c.catArt : c.codigo) + " · "
-                                    + nz(c.descCateg != null ? c.descCateg : c.nombre),
-                            FlagEstadoLabels.campoListado(c.flagEstado)
-                    ), "categorías"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c ->
+                            ListItemBuilder.of(c.id)
+                                    .tituloCodigoNombre(
+                                            c.catArt != null ? c.catArt : c.codigo,
+                                            c.descCateg != null ? c.descCateg : c.nombre)
+                                    .estado(c.flagEstado)
+                                    .build()
+                    , "categorías"));
             case SUB_CATEGORIAS -> apiClient.getCoreApi().listarSubCategorias(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c -> new SimpleItem(
-                            c.id,
-                            nz(c.codSubCat != null ? c.codSubCat : c.codigo) + " · "
-                                    + nz(c.descSubcateg != null ? c.descSubcateg : c.nombre),
-                            "Cat " + c.articuloCategId + " · " + FlagEstadoLabels.campoListado(c.flagEstado)
-                    ), "subcategorías"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c ->
+                            ListItemBuilder.of(c.id)
+                                    .tituloCodigoNombre(
+                                            c.codSubCat != null ? c.codSubCat : c.codigo,
+                                            c.descSubcateg != null ? c.descSubcateg : c.nombre)
+                                    .campo("Categoría", c.articuloCategId)
+                                    .estado(c.flagEstado)
+                                    .build()
+                    , "subcategorías"));
             case ARTICULOS -> apiClient.getCoreApi().listarArticulos(0, 80)
-                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c -> new SimpleItem(
-                            c.id,
-                            nz(c.codigo) + " · " + nz(c.nombre),
-                            "Tipo: " + nz(c.tipo) + " · " + FlagEstadoLabels.campoListado(c.flagEstado)
-                    ), "artículos"));
+                    .enqueue(mapPage(callback, DetalleTipo.NINGUNO, c ->
+                            ListItemBuilder.of(c.id)
+                                    .tituloCodigoNombre(c.codigo, c.nombre)
+                                    .campo("Tipo", c.tipo)
+                                    .estado(c.flagEstado)
+                                    .build()
+                    , "artículos"));
             default -> callback.onError("Fuente Compras no soportada");
         }
     }
