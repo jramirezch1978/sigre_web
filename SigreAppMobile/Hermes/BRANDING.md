@@ -59,5 +59,8 @@ Los alias `sigre_*` apuntan a estos tokens para no romper layouts legacy.
 ## Listados
 
 - Filas **continuas** (sin margen vertical entre registros).
-- `flag_estado`: `1` → Activo, `0` → Inactivo.
+- `flag_estado` (DDL `00-convenciones-generales.sql` / `FlagEstadoLabels`):
+  - `0` Anulado · `1` Activo · `2` Cerrado · `3` Pendiente
+  - `4` Pagado parcial · `5` Pagado total · `6` En proceso
+  - `7` Devuelto · `8` Suspendido · `9` Observado
 - Campos con etiqueta vía `ListItemBuilder.campo(...)`.

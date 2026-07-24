@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TablaColumna } from '../models/api-page.model';
 import { ErpExportService, ExportFormato } from '../utils/erp-export.service';
+import { esFlagEstadoActivo, etiquetaFlagEstado } from '../utils/flag-estado.util';
 
 @Component({
   selector: 'app-erp-data-table',
@@ -174,7 +175,7 @@ export class ErpDataTableComponent implements OnChanges {
 
     switch (col.format) {
       case 'estado':
-        return raw === '1' || raw === 1 || raw === true ? 'Activo' : 'Inactivo';
+        return etiquetaFlagEstado(raw);
       case 'fecha': {
         const d = new Date(String(raw));
         if (isNaN(d.getTime())) return String(raw);
@@ -194,7 +195,29 @@ export class ErpDataTableComponent implements OnChanges {
   }
 
   estaActivoValor(valor: unknown): boolean {
-    return valor === '1' || valor === 1 || valor === true;
+    return esFlagEstadoActivo(valor);
+  }
+
+  etiquetaEstado(valor: unknown): string {
+    return etiquetaFlagEstado(valor);
+  }
+
+  /** Clase badge según catálogo DDL flag_estado. */
+  claseBadgeEstado(valor: unknown): string {
+    const v = String(valor ?? '').trim();
+    if (v === '1' || valor === true) {
+      return 'bg-success-subtle text-success border-success-subtle';
+    }
+    if (v === '0' || valor === false) {
+      return 'bg-danger-subtle text-danger border-danger-subtle';
+    }
+    if (v === '3' || v === '9') {
+      return 'bg-warning-subtle text-warning border-warning-subtle';
+    }
+    if (v === '2' || v === '5') {
+      return 'bg-secondary-subtle text-secondary border-secondary-subtle';
+    }
+    return 'bg-info-subtle text-info border-info-subtle';
   }
 
   irAPagina(pagina: number): void {

@@ -78,17 +78,15 @@
               @for (col of columnas; track col.key) {
                 <td>
                   @if (col.format === 'estado') {
-                    @if (estaActivoValor(row[col.key])) {
-                      <span class="lable-table bg-success-subtle text-success rounded border border-success-subtle font-text2 fw-bold">
-                        Activo
+                    <span class="lable-table rounded border font-text2 fw-bold"
+                          [ngClass]="claseBadgeEstado(row[col.key])">
+                      {{ etiquetaEstado(row[col.key]) }}
+                      @if (estaActivoValor(row[col.key])) {
                         <i class="material-icons-outlined sigre-metoxi-table__badge-icon">check</i>
-                      </span>
-                    } @else {
-                      <span class="lable-table bg-danger-subtle text-danger rounded border border-danger-subtle font-text2 fw-bold">
-                        Inactivo
+                      } @else if (row[col.key] === '0' || row[col.key] === 0 || row[col.key] === false) {
                         <i class="material-icons-outlined sigre-metoxi-table__badge-icon">close</i>
-                      </span>
-                    }
+                      }
+                    </span>
                   } @else if (col.format === 'flag') {
                     <span class="sigre-flag-switch" [class.sigre-flag-switch--on]="estaActivoValor(row[col.key])"
                           [title]="estaActivoValor(row[col.key]) ? 'Sí' : 'No'" role="img"
