@@ -27,14 +27,16 @@ public final class AlmacenFormHelper {
         public final String key;
         public final String tituloDialog;
         public final String ayudaDialog;
+        public final TextInputLayout layout;
         public final TextInputEditText valueEdit;
         public final TextInputEditText displayEdit;
 
-        FkCampo(String key, String tituloDialog, String ayudaDialog,
+        FkCampo(String key, String tituloDialog, String ayudaDialog, TextInputLayout layout,
                 TextInputEditText valueEdit, TextInputEditText displayEdit) {
             this.key = key;
             this.tituloDialog = tituloDialog;
             this.ayudaDialog = ayudaDialog;
+            this.layout = layout;
             this.valueEdit = valueEdit;
             this.displayEdit = displayEdit;
         }
@@ -211,9 +213,8 @@ public final class AlmacenFormHelper {
         til.addView(et);
         container.addView(til);
         edits.put(key, et);
-        if (!soloLectura) {
-            ValidInputHelper.bindTextInputLayout(til, ValidInputHelper.notBlank(), true);
-        }
+        // Checks verdes también en solo lectura (ID / código) cuando ya hay valor.
+        ValidInputHelper.bindTextInputLayout(til, ValidInputHelper.notBlank(), true);
     }
 
     private static void addReadonly(Context ctx, LinearLayout container,
@@ -235,8 +236,6 @@ public final class AlmacenFormHelper {
         edits.put(key, valueEt);
 
         TextInputLayout til = newTil(ctx, label);
-        til.setEndIconMode(TextInputLayout.END_ICON_CUSTOM);
-        til.setEndIconDrawable(R.drawable.ic_chevron_right);
         TextInputEditText display = new TextInputEditText(til.getContext());
         display.setInputType(InputType.TYPE_CLASS_TEXT);
         display.setFocusable(false);
@@ -251,7 +250,9 @@ public final class AlmacenFormHelper {
         }
         til.addView(display);
         container.addView(til);
-        fks.add(new FkCampo(key, tituloDialog, ayuda, valueEt, display));
+        // Mismo check verde Hermes; el click abre el modal (chevron ya no pisa el check).
+        ValidInputHelper.bindTextInputLayout(til, ValidInputHelper.notBlank(), true);
+        fks.add(new FkCampo(key, tituloDialog, ayuda, til, valueEt, display));
     }
 
     private static void addEstado(Context ctx, LinearLayout container,

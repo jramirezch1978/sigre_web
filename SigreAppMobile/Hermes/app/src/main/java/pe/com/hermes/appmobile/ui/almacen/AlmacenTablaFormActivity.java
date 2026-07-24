@@ -139,9 +139,8 @@ public class AlmacenTablaFormActivity extends AppCompatActivity {
                     callback -> repository.listarOpcionesFk(fk.key, callback),
                     item -> fk.aplicarSeleccion(item.id, item.titulo));
             fk.displayEdit.setOnClickListener(open);
-            View parent = (View) fk.displayEdit.getParent();
-            if (parent instanceof com.google.android.material.textfield.TextInputLayout til) {
-                til.setEndIconOnClickListener(open);
+            if (fk.layout != null) {
+                fk.layout.setEndIconOnClickListener(open);
             }
         }
     }
