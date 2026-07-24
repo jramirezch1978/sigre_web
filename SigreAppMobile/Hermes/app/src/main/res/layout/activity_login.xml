@@ -3,29 +3,81 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_hermes_atmosphere"
     android:fillViewport="true"
-    android:background="@color/login_background"
     android:scrollbars="none">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="28dp">
 
-        <!-- Marco/card principal — igual que CardView de FastSales (borde + elevacion) -->
+        <!-- Marca hero: sin card — logo + HERMES + tagline -->
+        <ImageView
+            android:layout_width="112dp"
+            android:layout_height="112dp"
+            android:contentDescription="@string/brand_name"
+            android:src="@drawable/logo_hermes" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:letterSpacing="0.12"
+            android:text="@string/brand_name"
+            android:textAppearance="@style/TextAppearance.Hermes.Brand" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="3dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_brand_accent_bar" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/brand_tagline"
+            android:textAppearance="@style/TextAppearance.Hermes.Caption"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvVersion"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="start"
+                android:text="Version: —"
+                android:textAppearance="@style/TextAppearance.Hermes.Caption" />
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:contentDescription="Perú"
+                android:src="@drawable/logo_peru" />
+        </LinearLayout>
+
+        <!-- Formulario (interacción) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="24dp"
-            app:cardBackgroundColor="@color/sigre_surface"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
-            app:strokeColor="@color/login_card_stroke"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/hermes_surface_elevated"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/hermes_line"
             app:strokeWidth="1dp">
 
             <FrameLayout
@@ -36,73 +88,72 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="24dp">
-
-                    <!-- Espacio superior para badge + marca Peru flotantes -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="48dp" />
+                    android:padding="20dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_horizontal"
-                        android:orientation="vertical">
-
-                        <ImageView
-                            android:layout_width="140dp"
-                            android:layout_height="140dp"
-                            android:contentDescription="@string/app_name"
-                            android:src="@drawable/logo_hermes" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
                         <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/login_titulo"
+                            android:textAppearance="@style/TextAppearance.Hermes.Title" />
+
+                        <LinearLayout
+                            android:id="@+id/badgeConexion"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/menu_titulo"
-                            android:textColor="@color/sigre_text_secondary"
-                            android:textSize="16sp" />
+                            android:background="@drawable/badge_disconnected_bg"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingStart="10dp"
+                            android:paddingTop="5dp"
+                            android:paddingEnd="10dp"
+                            android:paddingBottom="5dp">
 
-                        <TextView
-                            android:id="@+id/tvVersion"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginBottom="4dp"
-                            android:gravity="end"
-                            android:text="Version: —"
-                            android:textColor="@color/sigre_text_secondary"
-                            android:textSize="12sp" />
+                            <ImageView
+                                android:id="@+id/ivEstadoConexion"
+                                android:layout_width="14dp"
+                                android:layout_height="14dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_wifi_disconnected" />
 
-                        <TextView
-                            android:id="@+id/tvNroRegistro"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:gravity="end"
-                            android:text="@string/login_nro_registro_pendiente"
-                            android:textColor="@color/sigre_text_secondary"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginBottom="12dp"
-                            android:text="Iniciar Sesión"
-                            android:textColor="@color/sigre_text_primary"
-                            android:textSize="20sp"
-                            android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/tvBadgeConexion"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:text="Verificando…"
+                                android:textColor="#F44336"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
                     </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvNroRegistro"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="end"
+                        android:text="@string/login_nro_registro_pendiente"
+                        android:textAppearance="@style/TextAppearance.Hermes.Caption"
+                        android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilUsuario"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.Hermes.TextInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        app:startIconDrawable="@drawable/ic_person">
+                        android:layout_marginTop="12dp"
+                        app:startIconDrawable="@drawable/ic_person"
+                        app:startIconTint="@color/hermes_teal">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etUsuario"
@@ -114,13 +165,14 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/tilClave"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        style="@style/Widget.Hermes.TextInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         app:endIconMode="password_toggle"
                         app:passwordToggleEnabled="true"
-                        app:startIconDrawable="@drawable/ic_lock">
+                        app:startIconDrawable="@drawable/ic_lock"
+                        app:startIconTint="@color/hermes_teal">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etClave"
@@ -135,9 +187,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
                         android:layout_marginBottom="8dp"
-                        android:text="Configuración de Conexión"
-                        android:textColor="@color/sigre_text_secondary"
-                        android:textSize="13sp"
+                        android:text="@string/login_servidor_titulo"
+                        android:textAppearance="@style/TextAppearance.Hermes.Caption"
                         android:textStyle="bold" />
 
                     <LinearLayout
@@ -147,17 +198,9 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Servidor:"
-                            android:textColor="@color/sigre_text_secondary"
-                            android:textSize="13sp" />
-
-                        <TextView
                             android:id="@+id/tvServidorNombre"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_box_outline"
@@ -165,7 +208,7 @@
                             android:paddingTop="10dp"
                             android:paddingBottom="10dp"
                             android:text="(sin configurar)"
-                            android:textColor="@color/sigre_text_primary"
+                            android:textColor="@color/hermes_text"
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
@@ -175,7 +218,7 @@
                             android:layout_height="40dp"
                             android:layout_marginEnd="8dp"
                             android:background="@drawable/bg_badge_neutral"
-                            android:backgroundTint="@color/sigre_primary"
+                            android:backgroundTint="@color/hermes_ink"
                             android:contentDescription="Cambiar servidor"
                             android:padding="9dp"
                             android:src="@drawable/ic_swap" />
@@ -185,7 +228,7 @@
                             android:layout_width="40dp"
                             android:layout_height="40dp"
                             android:background="@drawable/bg_badge_neutral"
-                            android:backgroundTint="@color/sigre_primary"
+                            android:backgroundTint="@color/hermes_ink"
                             android:contentDescription="Refrescar perfiles de conexión"
                             android:padding="9dp"
                             android:src="@drawable/ic_refresh" />
@@ -198,16 +241,15 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
                         android:layout_marginTop="4dp"
+                        android:indeterminateTint="@color/hermes_teal"
                         android:visibility="gone" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnLogin"
+                        style="@style/Widget.Hermes.Button.Accent"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
-                        android:backgroundTint="@color/sigre_primary"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp"
+                        android:layout_marginTop="22dp"
                         android:text="@string/login_boton" />
 
                     <ProgressBar
@@ -216,62 +258,10 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="16dp"
+                        android:indeterminateTint="@color/hermes_teal"
                         android:visibility="gone" />
 
                 </LinearLayout>
-
-                <!-- Badge + marca Peru flotantes (arriba derecha), como FastSales -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top|end"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="12dp"
-                    android:gravity="end"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:id="@+id/badgeConexion"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/badge_disconnected_bg"
-                        android:clickable="true"
-                        android:elevation="6dp"
-                        android:focusable="true"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingStart="10dp"
-                        android:paddingTop="5dp"
-                        android:paddingEnd="10dp"
-                        android:paddingBottom="5dp">
-
-                        <ImageView
-                            android:id="@+id/ivEstadoConexion"
-                            android:layout_width="14dp"
-                            android:layout_height="14dp"
-                            android:contentDescription="@null"
-                            android:src="@drawable/ic_wifi_disconnected" />
-
-                        <TextView
-                            android:id="@+id/tvBadgeConexion"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="6dp"
-                            android:text="Verificando…"
-                            android:textColor="#F44336"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:adjustViewBounds="true"
-                        android:contentDescription="Perú"
-                        android:src="@drawable/logo_peru" />
-                </LinearLayout>
-
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
