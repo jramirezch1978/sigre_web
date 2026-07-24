@@ -91,8 +91,10 @@ public class ApiClient {
                 session.limpiar();
                 return null;
             }
-            session.setAccessToken(nuevoToken);
-            if (nuevoRefresh != null && !nuevoRefresh.trim().isEmpty()) session.setRefreshToken(nuevoRefresh);
+            String refresh = (nuevoRefresh != null && !nuevoRefresh.trim().isEmpty())
+                    ? nuevoRefresh
+                    : session.getRefreshToken();
+            session.guardarTokens(nuevoToken, refresh, false);
 
             return response.request().newBuilder()
                     .header("Authorization", "Bearer " + nuevoToken)

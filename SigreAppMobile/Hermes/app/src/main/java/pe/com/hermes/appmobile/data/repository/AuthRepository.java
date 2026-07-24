@@ -250,9 +250,8 @@ public class AuthRepository {
     }
 
     private void guardarSesionParcial(LoginResponse data) {
-        session.setAccessToken(data.accessToken);
-        session.setRefreshToken(data.refreshToken);
-        session.setTemporal(data.temporal);
+        // Token temporal o definitivo + refresh, siempre en EncryptedSharedPreferences.
+        session.guardarTokens(data.accessToken, data.refreshToken, data.temporal);
         session.setUserId(data.userId != null ? data.userId : -1);
         session.setNombreCompleto(data.nombreCompleto);
         session.setEmail(data.email);

@@ -29,6 +29,7 @@ import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SucursalDto;
 import pe.com.hermes.appmobile.data.repository.AuthRepository;
 import pe.com.hermes.appmobile.data.repository.ResultCallback;
+import pe.com.hermes.appmobile.data.session.SessionManager;
 import pe.com.hermes.appmobile.databinding.ActivityLoginBinding;
 import pe.com.hermes.appmobile.ui.common.SeleccionOpcionAdapter;
 import pe.com.hermes.appmobile.ui.common.SimpleItem;
@@ -66,6 +67,8 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
     private List<EmpresaUsuarioDto> empresas = Collections.emptyList();
     private EmpresaUsuarioDto empresaElegida;
     private boolean cancelandoSeleccion;
+    private String usuarioLogin;
+    private String claveLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +91,19 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
         binding.btnRefrescarServidor.setOnClickListener(v -> refrescarServidorYSesion());
         binding.badgeConexion.setOnClickListener(v -> mostrarDiagnosticoConexion());
 
+        precargarCredencialesCifradas();
         aplicarEstadoDispositivo();
+    }
+
+    /** Rellena usuario/clave desde el almacén cifrado si el usuario guardó sesión. */
+    private void precargarCredencialesCifradas() {
+        SessionManager session = AppUtils.app(this).getSession();
+        if (!session.tieneCredencialesGuardadas()) {
+            return;
+        }
+        binding.etUsuario.setText(session.getLoginUsuario());
+        binding.etClave.setText(session.getLoginPassword());
+        binding.switchGuardarSesion.setChecked(true);
     }
 
     @Override
@@ -299,6 +314,8 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
             return;
         }
 
+        usuarioLogin = usuario;
+        claveLogin = clave;
         mostrarCargando(true);
         ejecutarLogin(usuario, clave, registry.getNroRegistro());
     }
@@ -512,8 +529,10 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
                     return;
                 }
                 cerrarDialogSeleccion();
-                AppUtils.app(LoginActivity.this).getSession()
-                        .setRecordarSesion(binding.switchGuardarSesion.isChecked());
+                AppUtils.app(LoginActivity.this).getSession().aplicarPreferenciaGuardarSesion(
+                        binding.switchGuardarSesion.isChecked(),
+                        usuarioLogin,
+                        claveLogin);
                 startActivity(new Intent(LoginActivity.this, BienvenidaActivity.class));
                 finish();
             }
