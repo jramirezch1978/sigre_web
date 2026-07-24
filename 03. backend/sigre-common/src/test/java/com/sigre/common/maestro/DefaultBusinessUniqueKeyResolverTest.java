@@ -77,7 +77,7 @@ class DefaultBusinessUniqueKeyResolverTest {
     }
 
     @Entity
-    @NoBusinessUniqueKeySort
+    @NoDefaultBusinessSort
     static class ConOptOut {
         @Id
         Long id;

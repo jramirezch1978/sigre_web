@@ -12,6 +12,7 @@ import com.sigre.almacen.repository.UbicacionAlmacenRepository;
 import com.sigre.almacen.service.UbicacionAlmacenService;
 import com.sigre.common.exception.BusinessException;
 import com.sigre.common.exception.ResourceNotFoundException;
+import com.sigre.common.maestro.UniqueKeyPageables;
 
 import java.util.List;
 
@@ -28,7 +29,8 @@ public class UbicacionAlmacenServiceImpl implements UbicacionAlmacenService {
     @Override
     public List<UbicacionAlmacen> findByAlmacenId(Long almacenId) {
         log.info("Listando ubicaciones para almacen id: {}", almacenId);
-        List<UbicacionAlmacen> list = repository.findByAlmacenIdOrderByCodigoAsc(almacenId);
+        List<UbicacionAlmacen> list = repository.findByAlmacenId(
+                almacenId, UniqueKeyPageables.sortOf(UbicacionAlmacen.class));
         log.info("Ubicaciones encontradas: {}", list.size());
         return list;
     }

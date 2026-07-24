@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import com.sigre.rrhh.dto.response.PageData;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.sigre.common.dto.ApiResponse;
@@ -32,7 +30,7 @@ public class PeriodoGratificacionController {
             @RequestParam(required = false) String codigo,
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) String flagEstado,
-            @PageableDefault(sort = "codigo", direction = Sort.Direction.ASC) Pageable pageable) {
+            Pageable pageable) {
         Page<PeriodoGratificacionResponse> page = service.listar(codigo, nombre, flagEstado, pageable);
         return ApiResponse.ok(PageData.of(page, page.getContent()));
     }

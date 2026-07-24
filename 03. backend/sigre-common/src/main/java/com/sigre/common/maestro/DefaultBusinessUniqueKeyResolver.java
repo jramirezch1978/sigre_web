@@ -33,7 +33,7 @@ public final class DefaultBusinessUniqueKeyResolver implements BusinessUniqueKey
 
     @Override
     public Optional<String> resolveProperty(Class<?> entityClass) {
-        if (entityClass == null || entityClass.isAnnotationPresent(NoBusinessUniqueKeySort.class)) {
+        if (entityClass == null || entityClass.isAnnotationPresent(NoDefaultBusinessSort.class)) {
             return Optional.empty();
         }
         return cache.computeIfAbsent(entityClass, this::resolveUncached);

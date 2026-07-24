@@ -1,5 +1,6 @@
 package com.sigre.almacen.repository;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.sigre.almacen.entity.UbicacionAlmacen;
 
@@ -8,8 +9,7 @@ import java.util.Optional;
 
 public interface UbicacionAlmacenRepository extends JpaRepository<UbicacionAlmacen, Long> {
 
-    /** Unique key de negocio: (almacen_id, codigo) → orden por codigo. */
-    List<UbicacionAlmacen> findByAlmacenIdOrderByCodigoAsc(Long almacenId);
+    List<UbicacionAlmacen> findByAlmacenId(Long almacenId, Sort sort);
 
     boolean existsByAlmacenIdAndCodigoIgnoreCase(Long almacenId, String codigo);
 

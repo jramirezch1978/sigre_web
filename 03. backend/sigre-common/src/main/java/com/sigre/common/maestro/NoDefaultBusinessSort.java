@@ -9,11 +9,11 @@ import java.lang.annotation.Target;
 
 /**
  * Opt-out: la entidad no recibe sort automático por unique key de negocio
- * (p. ej. documentos/transacciones cuyo listado debe ordenarse por fecha).
+ * (p. ej. transacciones cuyo listado debe ordenarse por fecha vía sort del controller).
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-public @interface NoBusinessUniqueKeySort {
+public @interface NoDefaultBusinessSort {
 }

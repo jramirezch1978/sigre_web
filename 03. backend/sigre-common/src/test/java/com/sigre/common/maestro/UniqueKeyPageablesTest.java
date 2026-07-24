@@ -32,8 +32,30 @@ class UniqueKeyPageablesTest {
         assertEquals(Sort.Direction.DESC, ensured.getSort().iterator().next().getDirection());
     }
 
+    @Test
+    void sortOfDevuelveUniqueKey() {
+        Sort sort = UniqueKeyPageables.sortOf(EntidadCodigo.class);
+        assertEquals("codigo", sort.iterator().next().getProperty());
+    }
+
+    @Test
+    void noAlteraSiEntidadConOptOut() {
+        Pageable pageable = PageRequest.of(0, 20);
+        Pageable ensured = UniqueKeyPageables.ensure(EntidadOptOut.class, pageable);
+        assertTrue(ensured.getSort().isUnsorted());
+    }
+
     @Entity
     static class EntidadCodigo {
+        @Id
+        Long id;
+        @Column(unique = true)
+        String codigo;
+    }
+
+    @Entity
+    @NoDefaultBusinessSort
+    static class EntidadOptOut {
         @Id
         Long id;
         @Column(unique = true)
