@@ -3,11 +3,13 @@ package pe.com.hermes.appmobile.data.repository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import pe.com.hermes.appmobile.data.almacen.AlmacenFuenteDatos;
 import pe.com.hermes.appmobile.data.remote.ApiClient;
+import pe.com.hermes.appmobile.data.remote.dto.SucursalDto;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.AlmacenMaestroResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenRequest;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenTipoMovAsignarRequest;
@@ -179,6 +181,166 @@ public class AlmacenRepository {
             });
         } catch (Exception e) {
             callback.onError(e.getMessage() != null ? e.getMessage() : "Datos inválidos");
+        }
+    }
+
+    /** Carga campos del formulario de tabla (GET by id) para edición. */
+    public void cargarCamposTabla(AlmacenFuenteDatos fuente, long id,
+                                  ResultCallback<Map<String, String>> callback) {
+        if (id <= 0) {
+            callback.onError("ID inválido");
+            return;
+        }
+        switch (fuente) {
+            case ALMACENES -> apiClient.getAlmacenApi().obtenerAlmacen(id).enqueue(new Callback<>() {
+                @Override
+                public void onResponse(Call<ApiResponse<AlmacenMaestroResponse>> call,
+                                       Response<ApiResponse<AlmacenMaestroResponse>> response) {
+                    AlmacenMaestroResponse a = dataOrError(response, callback, "detalle almacén");
+                    if (a == null) return;
+                    Map<String, String> m = new LinkedHashMap<>();
+                    put(m, "id", String.valueOf(a.id));
+                    put(m, "sucursalId", strLong(a.sucursalId));
+                    put(m, "sucursalId__label", labelCodigoNombre(a.sucursalCodigo, a.sucursalNombre));
+                    put(m, "codigo", a.codigo);
+                    put(m, "nombre", a.nombre);
+                    put(m, "almacenTipoId", strLong(a.almacenTipoId));
+                    put(m, "almacenTipoId__label",
+                            labelCodigoNombre(a.almacenTipoCodigo, a.almacenTipoNombre));
+                    put(m, "flagEstado", orDefault(a.flagEstado, "1"));
+                    callback.onSuccess(m);
+                }
+
+                @Override
+                public void onFailure(Call<ApiResponse<AlmacenMaestroResponse>> call, Throwable t) {
+                    callback.onError(msg(t));
+                }
+            });
+            case TIPOS_MOVIMIENTO -> apiClient.getAlmacenApi().obtenerTipoMovimiento(id)
+                    .enqueue(new Callback<>() {
+                        @Override
+                        public void onResponse(Call<ApiResponse<TipoMovimientoListItemResponse>> call,
+                                               Response<ApiResponse<TipoMovimientoListItemResponse>> response) {
+                            TipoMovimientoListItemResponse r =
+                                    dataOrError(response, callback, "detalle tipo movimiento");
+                            if (r == null) return;
+                            Map<String, String> m = new LinkedHashMap<>();
+                            put(m, "id", String.valueOf(r.id));
+                            put(m, "tipoMov", r.tipoMov);
+                            put(m, "descTipoMov", r.descTipoMov);
+                            put(m, "factorSldoTotal",
+                                    r.factorSldoTotal != null ? r.factorSldoTotal.toPlainString() : "");
+                            put(m, "flagEstado", orDefault(r.flagEstado, "1"));
+                            callback.onSuccess(m);
+                        }
+
+                        @Override
+                        public void onFailure(Call<ApiResponse<TipoMovimientoListItemResponse>> call,
+                                              Throwable t) {
+                            callback.onError(msg(t));
+                        }
+                    });
+            case TIPOS_ALMACEN -> apiClient.getAlmacenApi().obtenerTipoAlmacen(id)
+                    .enqueue(new Callback<>() {
+                        @Override
+                        public void onResponse(Call<ApiResponse<AlmacenTipoResponse>> call,
+                                               Response<ApiResponse<AlmacenTipoResponse>> response) {
+                            AlmacenTipoResponse r = dataOrError(response, callback, "detalle tipo almacén");
+                            if (r == null) return;
+                            Map<String, String> m = new LinkedHashMap<>();
+                            put(m, "id", String.valueOf(r.id));
+                            put(m, "codigo", r.codigo);
+                            put(m, "nombre", r.nombre);
+                            put(m, "cntblLibroId", strLong(r.cntblLibroId));
+                            put(m, "cntblLibroId__label",
+                                    labelCodigoNombre(r.libroCodigo, r.libroNombre));
+                            put(m, "flagEstado", orDefault(r.flagEstado, "1"));
+                            callback.onSuccess(m);
+                        }
+
+                        @Override
+                        public void onFailure(Call<ApiResponse<AlmacenTipoResponse>> call, Throwable t) {
+                            callback.onError(msg(t));
+                        }
+                    });
+            case MOTIVOS_TRASLADO -> apiClient.getAlmacenApi().obtenerMotivoTraslado(id)
+                    .enqueue(new Callback<>() {
+                        @Override
+                        public void onResponse(Call<ApiResponse<MotivoTrasladoListItemResponse>> call,
+                                               Response<ApiResponse<MotivoTrasladoListItemResponse>> response) {
+                            MotivoTrasladoListItemResponse r =
+                                    dataOrError(response, callback, "detalle motivo");
+                            if (r == null) return;
+                            Map<String, String> m = new LinkedHashMap<>();
+                            put(m, "id", String.valueOf(r.id));
+                            put(m, "codigo", r.codigo);
+                            put(m, "nombre", r.nombre);
+                            put(m, "flagEstado", orDefault(r.flagEstado, "1"));
+                            callback.onSuccess(m);
+                        }
+
+                        @Override
+                        public void onFailure(Call<ApiResponse<MotivoTrasladoListItemResponse>> call,
+                                              Throwable t) {
+                            callback.onError(msg(t));
+                        }
+                    });
+            default -> callback.onError("Edición con carga de detalle no disponible para esta tabla");
+        }
+    }
+
+    /** Opciones de catálogo para campos FK del formulario. */
+    public void listarOpcionesFk(String campoFk, ResultCallback<List<SimpleItem>> callback) {
+        if (campoFk == null) {
+            callback.onError("Campo FK inválido");
+            return;
+        }
+        switch (campoFk) {
+            case "sucursalId" -> {
+                long empresaId = session.getEmpresaId();
+                if (empresaId <= 0) {
+                    callback.onError("Empresa no seleccionada");
+                    return;
+                }
+                apiClient.getAuthApi().listarSucursales(empresaId).enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<List<SucursalDto>>> call,
+                                           Response<ApiResponse<List<SucursalDto>>> response) {
+                        ApiResponse<List<SucursalDto>> body = response.body();
+                        if (!response.isSuccessful() || body == null || !body.success) {
+                            callback.onError(body != null && body.message != null
+                                    ? body.message : "No se pudieron cargar sucursales");
+                            return;
+                        }
+                        List<SimpleItem> items = new ArrayList<>();
+                        if (body.data != null) {
+                            for (SucursalDto s : body.data) {
+                                items.add(new SimpleItem(s.id,
+                                        labelCodigoNombre(s.codigo, s.nombre), s.codigo));
+                            }
+                        }
+                        callback.onSuccess(items);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<List<SucursalDto>>> call, Throwable t) {
+                        callback.onError(msg(t));
+                    }
+                });
+            }
+            case "almacenTipoId" -> apiClient.getAlmacenApi().listarTiposAlmacen(0, 200)
+                    .enqueue(mapPageToSimpleItems(callback, "tipos de almacén",
+                            (AlmacenTipoResponse t) -> new SimpleItem(t.id,
+                                    labelCodigoNombre(t.codigo, t.nombre), t.codigo)));
+            case "almacenId" -> apiClient.getAlmacenApi().listarAlmacenes(0, 200)
+                    .enqueue(mapPageToSimpleItems(callback, "almacenes",
+                            (AlmacenMaestroResponse a) -> new SimpleItem(a.id,
+                                    labelCodigoNombre(a.codigo, a.nombre), a.codigo)));
+            case "articuloMovTipoId" -> apiClient.getAlmacenApi().listarTiposMovimiento(0, 200)
+                    .enqueue(mapPageToSimpleItems(callback, "tipos de movimiento",
+                            (TipoMovimientoListItemResponse t) -> new SimpleItem(t.id,
+                                    labelCodigoNombre(t.tipoMov, t.descTipoMov), t.tipoMov)));
+            default -> callback.onError("Selector no disponible para " + campoFk);
         }
     }
 
@@ -788,6 +950,52 @@ public class AlmacenRepository {
                 callback.onError(msg(t));
             }
         };
+    }
+
+    private <T> T dataOrError(Response<ApiResponse<T>> response, ResultCallback<?> callback, String label) {
+        ApiResponse<T> body = response.body();
+        if (!response.isSuccessful() || body == null || !body.success || body.data == null) {
+            callback.onError(body != null && body.message != null ? body.message : "No se pudo cargar " + label);
+            return null;
+        }
+        return body.data;
+    }
+
+    private <T> Callback<ApiResponse<PageData<T>>> mapPageToSimpleItems(
+            ResultCallback<List<SimpleItem>> callback, String label, Mapper<T> mapper) {
+        return new Callback<>() {
+            @Override
+            public void onResponse(Call<ApiResponse<PageData<T>>> call,
+                                   Response<ApiResponse<PageData<T>>> response) {
+                List<T> data = extractPage(response, callback, label);
+                if (data == null) return;
+                List<SimpleItem> items = new ArrayList<>();
+                for (T row : data) items.add(mapper.map(row));
+                callback.onSuccess(items);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<PageData<T>>> call, Throwable t) {
+                callback.onError(msg(t));
+            }
+        };
+    }
+
+    private static void put(Map<String, String> m, String key, String value) {
+        if (value != null) m.put(key, value);
+    }
+
+    private static String strLong(Long v) {
+        return v != null ? String.valueOf(v) : "";
+    }
+
+    public static String labelCodigoNombre(String codigo, String nombre) {
+        String c = codigo != null ? codigo.trim() : "";
+        String n = nombre != null ? nombre.trim() : "";
+        if (c.isEmpty() && n.isEmpty()) return "";
+        if (c.isEmpty()) return n;
+        if (n.isEmpty()) return c;
+        return c + " — " + n;
     }
 
     private <T> Callback<ApiResponse<PageData<T>>> pageCallback(ResultCallback<List<T>> callback, String err) {

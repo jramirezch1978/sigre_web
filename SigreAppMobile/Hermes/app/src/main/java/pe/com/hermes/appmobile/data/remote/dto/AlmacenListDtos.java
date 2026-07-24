@@ -54,11 +54,14 @@ public final class AlmacenListDtos {
 
     public static class AlmacenMaestroResponse {
         public long id;
+        public Long sucursalId;
+        public String sucursalCodigo;
+        public String sucursalNombre;
+        public Long almacenTipoId;
         public String codigo;
         public String nombre;
         public String almacenTipoCodigo;
         public String almacenTipoNombre;
-        public String sucursalNombre;
         public String centrosCostoCodigo;
         public String centrosCostoNombre;
         public String flagEstado;
@@ -68,6 +71,7 @@ public final class AlmacenListDtos {
         public long id;
         public String tipoMov;
         public String descTipoMov;
+        public BigDecimal factorSldoTotal;
         public String flagEstado;
     }
 
@@ -159,6 +163,8 @@ public final class AlmacenListDtos {
         public long id;
         public String codigo;
         public String nombre;
+        public Long cntblLibroId;
+        public String libroCodigo;
         public String libroNombre;
         public String flagEstado;
     }

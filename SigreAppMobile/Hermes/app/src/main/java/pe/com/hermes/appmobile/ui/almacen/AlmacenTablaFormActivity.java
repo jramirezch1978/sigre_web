@@ -13,6 +13,7 @@ import pe.com.hermes.appmobile.data.almacen.AlmacenFuenteDatos;
 import pe.com.hermes.appmobile.data.repository.AlmacenRepository;
 import pe.com.hermes.appmobile.data.repository.ResultCallback;
 import pe.com.hermes.appmobile.databinding.ActivityAlmacenFormBinding;
+import pe.com.hermes.appmobile.ui.common.FkSeleccionDialog;
 import pe.com.hermes.appmobile.util.AppUtils;
 
 /** Alta/edición de tablas maestras Almacén (AL001–AL012). */
@@ -28,6 +29,7 @@ public class AlmacenTablaFormActivity extends AppCompatActivity {
     private AlmacenFuenteDatos fuente;
     private long id;
     private Map<String, TextInputEditText> edits;
+    private AlmacenFormHelper.TablaForm form;
 
     public static Intent intent(Context ctx, AlmacenFuenteDatos fuente, long id, String titulo,
                                 Map<String, String> prefill) {
@@ -58,7 +60,16 @@ public class AlmacenTablaFormActivity extends AppCompatActivity {
         binding.toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         repository = new AlmacenRepository(AppUtils.app(this).getApiClient(), AppUtils.app(this).getSession());
+        binding.btnGuardar.setOnClickListener(v -> guardar());
 
+        if (id > 0 && AlmacenFormHelper.soportaCargaDetalle(fuente)) {
+            cargarDetalleYMostrar();
+        } else {
+            mostrarFormulario(leerPrefill());
+        }
+    }
+
+    private Map<String, String> leerPrefill() {
         Map<String, String> prefill = new HashMap<>();
         String[] keys = getIntent().getStringArrayExtra(EXTRA_PREFILL + ".keys");
         if (keys != null) {
@@ -68,18 +79,75 @@ public class AlmacenTablaFormActivity extends AppCompatActivity {
             }
         }
         if (!prefill.containsKey("sucursalId") && AppUtils.app(this).getSession().getSucursalId() > 0) {
-            prefill.put("sucursalId", String.valueOf(AppUtils.app(this).getSession().getSucursalId()));
+            long sucId = AppUtils.app(this).getSession().getSucursalId();
+            prefill.put("sucursalId", String.valueOf(sucId));
+            String sucNombre = AppUtils.app(this).getSession().getSucursalNombre();
+            String label = AlmacenRepository.labelCodigoNombre(null, sucNombre);
+            if (!label.isBlank()) {
+                prefill.put("sucursalId__label", label);
+            }
         }
         if (!prefill.containsKey("flagEstado")) prefill.put("flagEstado", "1");
         if (!prefill.containsKey("ano")) {
             prefill.put("ano", String.valueOf(java.time.Year.now().getValue()));
         }
+        return prefill;
+    }
 
-        edits = AlmacenFormHelper.construirCamposTabla(this, binding.formContainer, fuente, prefill);
-        binding.btnGuardar.setOnClickListener(v -> guardar());
+    private void cargarDetalleYMostrar() {
+        binding.progressBar.setVisibility(View.VISIBLE);
+        binding.btnGuardar.setEnabled(false);
+        repository.cargarCamposTabla(fuente, id, new ResultCallback<>() {
+            @Override
+            public void onSuccess(Map<String, String> data) {
+                binding.progressBar.setVisibility(View.GONE);
+                binding.btnGuardar.setEnabled(true);
+                Map<String, String> valores = data != null ? new HashMap<>(data) : new HashMap<>();
+                if (!valores.containsKey("id")) {
+                    valores.put("id", String.valueOf(id));
+                }
+                mostrarFormulario(valores);
+            }
+
+            @Override
+            public void onError(String mensaje) {
+                binding.progressBar.setVisibility(View.GONE);
+                binding.btnGuardar.setEnabled(true);
+                AppUtils.toast(AlmacenTablaFormActivity.this,
+                        mensaje != null ? mensaje : getString(R.string.lista_error));
+                Map<String, String> fallback = leerPrefill();
+                fallback.put("id", String.valueOf(id));
+                mostrarFormulario(fallback);
+            }
+        });
+    }
+
+    private void mostrarFormulario(Map<String, String> valores) {
+        form = AlmacenFormHelper.construirCamposTabla(
+                this, binding.formContainer, fuente, valores, id > 0);
+        edits = form.edits;
+        cablearFk();
+    }
+
+    private void cablearFk() {
+        if (form == null || form.fks == null) return;
+        for (AlmacenFormHelper.FkCampo fk : form.fks) {
+            View.OnClickListener open = v -> FkSeleccionDialog.mostrar(
+                    this,
+                    fk.tituloDialog,
+                    fk.ayudaDialog,
+                    callback -> repository.listarOpcionesFk(fk.key, callback),
+                    item -> fk.aplicarSeleccion(item.id, item.titulo));
+            fk.displayEdit.setOnClickListener(open);
+            View parent = (View) fk.displayEdit.getParent();
+            if (parent instanceof com.google.android.material.textfield.TextInputLayout til) {
+                til.setEndIconOnClickListener(open);
+            }
+        }
     }
 
     private void guardar() {
+        if (edits == null) return;
         Map<String, String> campos = AlmacenFormHelper.leer(edits);
         binding.progressBar.setVisibility(View.VISIBLE);
         binding.btnGuardar.setEnabled(false);

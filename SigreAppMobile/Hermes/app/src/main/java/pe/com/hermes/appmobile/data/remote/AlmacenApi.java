@@ -180,6 +180,9 @@ public interface AlmacenApi {
     Call<ApiResponse<PageData<AlmacenTipoResponse>>> listarTiposAlmacen(
             @Query("page") int page, @Query("size") int size);
 
+    @GET("almacen/almacen-tipos/{id}")
+    Call<ApiResponse<AlmacenTipoResponse>> obtenerTipoAlmacen(@Path("id") long id);
+
     @POST("almacen/almacen-tipos")
     Call<ApiResponse<AlmacenTipoResponse>> crearTipoAlmacen(@Body AlmacenTipoRequest body);
 
@@ -191,6 +194,9 @@ public interface AlmacenApi {
     Call<ApiResponse<PageData<TipoMovimientoListItemResponse>>> listarTiposMovimiento(
             @Query("page") int page, @Query("size") int size);
 
+    @GET("almacen/maestros/tipos-movimiento-catalogo/{id}")
+    Call<ApiResponse<TipoMovimientoListItemResponse>> obtenerTipoMovimiento(@Path("id") long id);
+
     @POST("almacen/maestros/tipos-movimiento-catalogo")
     Call<ApiResponse<TipoMovimientoListItemResponse>> crearTipoMovimiento(@Body ArticuloMovTipoRequest body);
 
@@ -201,6 +207,9 @@ public interface AlmacenApi {
     @GET("almacen/maestros/motivos-traslado")
     Call<ApiResponse<PageData<MotivoTrasladoListItemResponse>>> listarMotivosTraslado(
             @Query("page") int page, @Query("size") int size);
+
+    @GET("almacen/maestros/motivos-traslado/{id}")
+    Call<ApiResponse<MotivoTrasladoListItemResponse>> obtenerMotivoTraslado(@Path("id") long id);
 
     @POST("almacen/maestros/motivos-traslado")
     Call<ApiResponse<MotivoTrasladoListItemResponse>> crearMotivoTraslado(@Body MotivoTrasladoRequest body);
