@@ -42,11 +42,27 @@ public class SesionGuardadaActivity extends AppCompatActivity {
                 getString(R.string.sesion_guardada_empresa_sucursal, empresa, sucursal));
         binding.tvVersion.setText(AppVersion.etiqueta(this));
 
-        binding.btnContinuar.setOnClickListener(v -> {
-            startActivity(new Intent(this, BienvenidaActivity.class));
-            finish();
-        });
+        binding.btnContinuar.setOnClickListener(v -> continuarConSesionGuardada());
         binding.btnCambiarCuenta.setOnClickListener(v -> irALoginLimpiando(session));
+    }
+
+    /** Obtiene access en memoria (reuso backend) y entra a bienvenida. */
+    private void continuarConSesionGuardada() {
+        binding.btnContinuar.setEnabled(false);
+        binding.btnCambiarCuenta.setEnabled(false);
+        new Thread(() -> {
+            String token = AppUtils.app(this).getApiClient().asegurarAccessToken();
+            runOnUiThread(() -> {
+                if (token == null || token.isBlank()) {
+                    binding.btnContinuar.setEnabled(true);
+                    binding.btnCambiarCuenta.setEnabled(true);
+                    irALoginLimpiando(AppUtils.app(this).getSession());
+                    return;
+                }
+                startActivity(new Intent(this, BienvenidaActivity.class));
+                finish();
+            });
+        }).start();
     }
 
     private void irALoginLimpiando(SessionManager session) {

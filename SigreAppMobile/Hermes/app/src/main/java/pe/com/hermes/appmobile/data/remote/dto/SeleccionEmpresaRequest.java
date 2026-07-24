@@ -8,8 +8,11 @@ public class SeleccionEmpresaRequest {
     public String ipPrivada;
     public String browser = "Hermes Android";
     public String sistemaOperativo = "Android";
+    /** Login (correo o usuario). Con password permite llamar sin Bearer. */
     public String email;
+    /** Contraseña cifrada AES (PasswordCrypto), igual que /auth/login. */
     public String password;
+    public String passwordHash;
 
     public SeleccionEmpresaRequest(long empresaId, long sucursalId) {
         this.empresaId = empresaId;

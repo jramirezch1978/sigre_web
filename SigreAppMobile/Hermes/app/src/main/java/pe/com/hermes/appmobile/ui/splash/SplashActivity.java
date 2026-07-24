@@ -230,10 +230,8 @@ public class SplashActivity extends AppCompatActivity {
         if (session.puedeReutilizarSesion()) {
             startActivity(new Intent(this, SesionGuardadaActivity.class));
         } else {
-            // Sin switch "guardar sesión": limpia tokens residuales y pide login.
-            if (session.getAccessToken() != null && !session.getAccessToken().isBlank()) {
-                session.limpiar();
-            }
+            // Sin sesión reutilizable: limpia residuales y pide login.
+            session.limpiar();
             startActivity(new Intent(this, LoginActivity.class));
         }
         finish();
