@@ -17,6 +17,7 @@ import pe.com.hermes.appmobile.data.remote.dto.RefreshTokenResponse;
 import pe.com.hermes.appmobile.data.remote.dto.RegistrarDispositivoRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SeleccionEmpresaRequest;
 import pe.com.hermes.appmobile.data.remote.dto.SucursalDto;
+import pe.com.hermes.appmobile.data.remote.dto.UsuarioEmpresaDto;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -76,4 +77,8 @@ public interface AuthApi {
     /** Menú efectivo del usuario (mismo del ERP web). */
     @GET("auth/seguridad/mi-menu")
     Call<ApiResponse<MiMenuResponse>> miMenu();
+
+    /** Usuarios de la empresa (FK Responsable, igual que el ERP web). */
+    @GET("auth/seguridad/empresas/{empresaId}/usuarios")
+    Call<ApiResponse<List<UsuarioEmpresaDto>>> listarUsuariosEmpresa(@Path("empresaId") long empresaId);
 }

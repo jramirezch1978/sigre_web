@@ -62,8 +62,10 @@ public final class AlmacenListDtos {
         public String nombre;
         public String almacenTipoCodigo;
         public String almacenTipoNombre;
+        public Long centrosCostoId;
         public String centrosCostoCodigo;
         public String centrosCostoNombre;
+        public Long responsableUsuarioId;
         public String flagEstado;
     }
 

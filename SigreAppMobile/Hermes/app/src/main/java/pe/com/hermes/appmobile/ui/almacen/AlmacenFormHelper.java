@@ -102,6 +102,10 @@ public final class AlmacenFormHelper {
                         valores, false);
                 addFk(ctx, container, edits, fks, "almacenTipoId", "Tipo de almacén",
                         "Seleccionar tipo", "Código y descripción del tipo", valores);
+                addFk(ctx, container, edits, fks, "centrosCostoId", "Centro de costo",
+                        "Seleccionar centro de costo", "Código y descripción del centro", valores);
+                addFk(ctx, container, edits, fks, "responsableUsuarioId", "Responsable",
+                        "Seleccionar responsable", "Usuario responsable del almacén", valores);
                 addEstado(ctx, container, edits, valores);
             }
             case TIPOS_MOVIMIENTO -> {

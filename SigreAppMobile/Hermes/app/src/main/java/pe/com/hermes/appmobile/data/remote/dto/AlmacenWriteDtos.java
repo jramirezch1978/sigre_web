@@ -13,6 +13,8 @@ public final class AlmacenWriteDtos {
         public String codigo;
         public String nombre;
         public Long almacenTipoId;
+        public Long centrosCostoId;
+        public Long responsableUsuarioId;
         public String flagEstado;
     }
 

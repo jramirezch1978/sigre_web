@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import pe.com.hermes.appmobile.data.almacen.AlmacenFuenteDatos;
 import pe.com.hermes.appmobile.data.remote.ApiClient;
+import pe.com.hermes.appmobile.data.remote.dto.CentroCostoDto;
 import pe.com.hermes.appmobile.data.remote.dto.SucursalDto;
+import pe.com.hermes.appmobile.data.remote.dto.UsuarioEmpresaDto;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenListDtos.AlmacenMaestroResponse;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenRequest;
 import pe.com.hermes.appmobile.data.remote.dto.AlmacenWriteDtos.AlmacenTipoMovAsignarRequest;
@@ -198,17 +200,8 @@ public class AlmacenRepository {
                                        Response<ApiResponse<AlmacenMaestroResponse>> response) {
                     AlmacenMaestroResponse a = dataOrError(response, callback, "detalle almacén");
                     if (a == null) return;
-                    Map<String, String> m = new LinkedHashMap<>();
-                    put(m, "id", String.valueOf(a.id));
-                    put(m, "sucursalId", strLong(a.sucursalId));
-                    put(m, "sucursalId__label", labelCodigoNombre(a.sucursalCodigo, a.sucursalNombre));
-                    put(m, "codigo", a.codigo);
-                    put(m, "nombre", a.nombre);
-                    put(m, "almacenTipoId", strLong(a.almacenTipoId));
-                    put(m, "almacenTipoId__label",
-                            labelCodigoNombre(a.almacenTipoCodigo, a.almacenTipoNombre));
-                    put(m, "flagEstado", orDefault(a.flagEstado, "1"));
-                    callback.onSuccess(m);
+                    Map<String, String> m = mapAlmacenCampos(a);
+                    completarLabelResponsable(m, a.responsableUsuarioId, callback);
                 }
 
                 @Override
@@ -340,6 +333,43 @@ public class AlmacenRepository {
                     .enqueue(mapPageToSimpleItems(callback, "tipos de movimiento",
                             (TipoMovimientoListItemResponse t) -> new SimpleItem(t.id,
                                     labelCodigoNombre(t.tipoMov, t.descTipoMov), t.tipoMov)));
+            case "centrosCostoId" -> apiClient.getContabilidadApi()
+                    .listarCentrosCosto(0, 500, "1")
+                    .enqueue(mapPageToSimpleItems(callback, "centros de costo",
+                            (CentroCostoDto c) -> new SimpleItem(c.id,
+                                    labelCodigoNombre(c.cencos, c.descCencos), c.cencos)));
+            case "responsableUsuarioId" -> {
+                long empresaId = session.getEmpresaId();
+                if (empresaId <= 0) {
+                    callback.onError("Empresa no seleccionada");
+                    return;
+                }
+                apiClient.getAuthApi().listarUsuariosEmpresa(empresaId).enqueue(new Callback<>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse<List<UsuarioEmpresaDto>>> call,
+                                           Response<ApiResponse<List<UsuarioEmpresaDto>>> response) {
+                        ApiResponse<List<UsuarioEmpresaDto>> body = response.body();
+                        if (!response.isSuccessful() || body == null || !body.success) {
+                            callback.onError(body != null && body.message != null
+                                    ? body.message : "No se pudieron cargar usuarios");
+                            return;
+                        }
+                        List<SimpleItem> items = new ArrayList<>();
+                        if (body.data != null) {
+                            for (UsuarioEmpresaDto u : body.data) {
+                                if (u.activo != null && !u.activo) continue;
+                                items.add(new SimpleItem(u.id, labelUsuario(u), u.username));
+                            }
+                        }
+                        callback.onSuccess(items);
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse<List<UsuarioEmpresaDto>>> call, Throwable t) {
+                        callback.onError(msg(t));
+                    }
+                });
+            }
             default -> callback.onError("Selector no disponible para " + campoFk);
         }
     }
@@ -353,6 +383,8 @@ public class AlmacenRepository {
                 r.codigo = req(campos, "codigo");
                 r.nombre = req(campos, "nombre");
                 r.almacenTipoId = longOrNull(campos.get("almacenTipoId"));
+                r.centrosCostoId = longOrNull(campos.get("centrosCostoId"));
+                r.responsableUsuarioId = longOrNull(campos.get("responsableUsuarioId"));
                 r.flagEstado = orDefault(campos.get("flagEstado"), "1");
                 yield crear ? apiClient.getAlmacenApi().crearAlmacen(r)
                         : apiClient.getAlmacenApi().actualizarAlmacen(id, r);
@@ -995,7 +1027,80 @@ public class AlmacenRepository {
         if (c.isEmpty() && n.isEmpty()) return "";
         if (c.isEmpty()) return n;
         if (n.isEmpty()) return c;
+        // El enricher del backend a veces ya envía "COD — DESC" en el nombre.
+        if (n.equals(c) || n.startsWith(c + " —") || n.startsWith(c + " -")) {
+            return n;
+        }
         return c + " — " + n;
+    }
+
+    private Map<String, String> mapAlmacenCampos(AlmacenMaestroResponse a) {
+        Map<String, String> m = new LinkedHashMap<>();
+        put(m, "id", String.valueOf(a.id));
+        put(m, "sucursalId", strLong(a.sucursalId));
+        put(m, "sucursalId__label", labelCodigoNombre(a.sucursalCodigo, a.sucursalNombre));
+        put(m, "codigo", a.codigo);
+        put(m, "nombre", a.nombre);
+        put(m, "almacenTipoId", strLong(a.almacenTipoId));
+        put(m, "almacenTipoId__label",
+                labelCodigoNombre(a.almacenTipoCodigo, a.almacenTipoNombre));
+        put(m, "centrosCostoId", strLong(a.centrosCostoId));
+        put(m, "centrosCostoId__label",
+                labelCodigoNombre(a.centrosCostoCodigo, a.centrosCostoNombre));
+        put(m, "responsableUsuarioId", strLong(a.responsableUsuarioId));
+        put(m, "flagEstado", orDefault(a.flagEstado, "1"));
+        return m;
+    }
+
+    private void completarLabelResponsable(Map<String, String> m, Long responsableId,
+                                           ResultCallback<Map<String, String>> callback) {
+        if (responsableId == null || responsableId <= 0) {
+            callback.onSuccess(m);
+            return;
+        }
+        long empresaId = session.getEmpresaId();
+        if (empresaId <= 0) {
+            put(m, "responsableUsuarioId__label", "Usuario " + responsableId);
+            callback.onSuccess(m);
+            return;
+        }
+        apiClient.getAuthApi().listarUsuariosEmpresa(empresaId).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<UsuarioEmpresaDto>>> call,
+                                   Response<ApiResponse<List<UsuarioEmpresaDto>>> response) {
+                ApiResponse<List<UsuarioEmpresaDto>> body = response.body();
+                String label = "Usuario " + responsableId;
+                if (response.isSuccessful() && body != null && body.success && body.data != null) {
+                    for (UsuarioEmpresaDto u : body.data) {
+                        if (u.id == responsableId) {
+                            label = labelUsuario(u);
+                            break;
+                        }
+                    }
+                }
+                put(m, "responsableUsuarioId__label", label);
+                callback.onSuccess(m);
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<UsuarioEmpresaDto>>> call, Throwable t) {
+                put(m, "responsableUsuarioId__label", "Usuario " + responsableId);
+                callback.onSuccess(m);
+            }
+        });
+    }
+
+    private static String labelUsuario(UsuarioEmpresaDto u) {
+        if (u == null) return "";
+        if (u.nombreCompleto != null && !u.nombreCompleto.isBlank()) {
+            return u.nombreCompleto.trim();
+        }
+        String nombres = ((u.nombres != null ? u.nombres : "") + " "
+                + (u.apellidos != null ? u.apellidos : "")).trim();
+        if (!nombres.isEmpty()) return nombres;
+        if (u.username != null && !u.username.isBlank()) return u.username.trim();
+        if (u.email != null && !u.email.isBlank()) return u.email.trim();
+        return String.valueOf(u.id);
     }
 
     private <T> Callback<ApiResponse<PageData<T>>> pageCallback(ResultCallback<List<T>> callback, String err) {

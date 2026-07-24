@@ -332,6 +332,7 @@ public class ApiClient {
     public AuthApi getAuthApi() { return retrofit().create(AuthApi.class); }
     public AlmacenApi getAlmacenApi() { return retrofit().create(AlmacenApi.class); }
     public CoreApi getCoreApi() { return retrofit().create(CoreApi.class); }
+    public ContabilidadApi getContabilidadApi() { return retrofit().create(ContabilidadApi.class); }
     public ComprasApi getComprasApi() { return retrofit().create(ComprasApi.class); }
 
     private static final class Credenciales {
