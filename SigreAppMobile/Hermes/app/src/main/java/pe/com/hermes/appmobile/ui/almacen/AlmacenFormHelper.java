@@ -211,12 +211,12 @@ public final class AlmacenFormHelper {
         if (valores != null && valores.get(key) != null) {
             et.setText(valores.get(key));
         }
-        if (soloLectura) {
-            aplicarSoloLectura(et);
-        }
         til.addView(et);
         container.addView(til);
         edits.put(key, et);
+        if (soloLectura) {
+            aplicarSoloLectura(til, et);
+        }
         // Checks verdes también en solo lectura (ID / código) cuando ya hay valor.
         ValidInputHelper.bindTextInputLayout(til, ValidInputHelper.notBlank(), true);
     }
@@ -307,14 +307,24 @@ public final class AlmacenFormHelper {
         return til;
     }
 
-    private static void aplicarSoloLectura(TextInputEditText et) {
+    /** PK / código: no editable ni enfocable; fondo distinto al resto. */
+    private static void aplicarSoloLectura(TextInputLayout til, TextInputEditText et) {
         et.setFocusable(false);
         et.setFocusableInTouchMode(false);
         et.setClickable(false);
-        et.setCursorVisible(false);
         et.setLongClickable(false);
+        et.setCursorVisible(false);
         et.setInputType(InputType.TYPE_NULL);
         et.setKeyListener(null);
+        et.setTextIsSelectable(false);
+        // No deshabilitar el TIL: mantiene el check verde; el EditText sí queda bloqueado.
+        et.setEnabled(false);
+        til.setBoxBackgroundColor(ctxColor(til, R.color.hermes_mist_deep));
+        et.setTextColor(ctxColor(til, R.color.hermes_text_muted));
+    }
+
+    private static int ctxColor(View host, int colorRes) {
+        return host.getContext().getColor(colorRes);
     }
 
     private static int dp(Context ctx, int value) {
