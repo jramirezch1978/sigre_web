@@ -330,6 +330,9 @@ public class LoginActivity extends AppCompatActivity implements ConnectionMonito
             @Override
             public void onSuccess(LoginResponse data) {
                 mostrarCargando(false);
+                // Credenciales en RAM: cada API (empresas/sucursales) pedirá token de nuevo.
+                AppUtils.app(LoginActivity.this).getSession()
+                        .setCredencialesEnMemoria(usuario, clave);
                 pingHistory.clear();
                 empresaElegida = null;
                 empresas = Collections.emptyList();

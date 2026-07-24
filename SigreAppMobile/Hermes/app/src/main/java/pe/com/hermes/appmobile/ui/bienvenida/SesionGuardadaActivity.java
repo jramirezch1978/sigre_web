@@ -46,7 +46,7 @@ public class SesionGuardadaActivity extends AppCompatActivity {
         binding.btnCambiarCuenta.setOnClickListener(v -> irALoginLimpiando(session));
     }
 
-    /** Obtiene access en memoria (reuso backend) y entra a bienvenida. */
+    /** Pide access definitivo al backend y entra a bienvenida. */
     private void continuarConSesionGuardada() {
         binding.btnContinuar.setEnabled(false);
         binding.btnCambiarCuenta.setEnabled(false);

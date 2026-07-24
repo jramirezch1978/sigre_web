@@ -23,8 +23,8 @@ public class SigreApplication extends Application {
         super.onCreate();
         session = new SessionManager(this);
         config = new AppConfig(this);
-        apiClient = new ApiClient(config, session);
         deviceRegistry = new DeviceRegistry(this);
+        apiClient = new ApiClient(config, session, deviceRegistry);
 
         // Edge-to-edge obligatorio desde Android 15 (targetSdk 35) — desde la libreria
         // reutilizable common-ui, se aplica a todas las Activities automaticamente.

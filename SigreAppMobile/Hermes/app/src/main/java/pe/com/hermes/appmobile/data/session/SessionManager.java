@@ -2,29 +2,23 @@ package pe.com.hermes.appmobile.data.session;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Base64;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import pe.com.hermes.appmobile.data.remote.dto.LoginResponse;
 
 /**
  * Sesión Hermes cifrada (EncryptedSharedPreferences AES-256).
  * <p>
- * Persistido: refresh, datos de usuario/empresa/sucursal y (opcional) credenciales.
- * Access token (temporal o definitivo) solo vive en memoria: se obtiene al llamar APIs;
- * el backend reutiliza el JWT definitivo en {@code tokens_session}.
+ * Persistido: datos de usuario/empresa/sucursal y (opcional) credenciales.
+ * Access (temporal o definitivo) no se persiste: se pide al backend en cada API.
+ * No se usa refresh en Hermes.
  */
 public class SessionManager {
 
     private static final String PREFS_NAME = "hermes_session_secure";
-    private static final Pattern JWT_EXP = Pattern.compile("\"exp\"\\s*:\\s*(\\d+)");
 
-    private static final String KEY_REFRESH_TOKEN = "refresh_token";
     private static final String KEY_TEMPORAL = "temporal";
     private static final String KEY_USER_ID = "user_id";
     private static final String KEY_EMAIL = "email";
@@ -50,6 +44,13 @@ public class SessionManager {
     private volatile String accessTokenMemoria;
     private volatile boolean accessTemporalMemoria;
 
+    /**
+     * Credenciales en RAM para pedir token en cada API durante la sesión activa.
+     * En disco solo si el usuario activó "Guardar sesión".
+     */
+    private volatile String loginUsuarioMemoria;
+    private volatile String loginPasswordMemoria;
+
     public SessionManager(Context context) {
         try {
             MasterKey masterKey = new MasterKey.Builder(context)
@@ -63,15 +64,15 @@ public class SessionManager {
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             );
             migrarDesdePrefsLegacySiExiste(context, masterKey);
-            // Por política: nunca reutilizar access persistido de versiones anteriores.
-            prefs.edit().remove("access_token").apply();
+            // Por política: no persistir access ni refresh.
+            prefs.edit().remove("access_token").remove("refresh_token").apply();
         } catch (GeneralSecurityException | IOException e) {
             throw new RuntimeException("No se pudo inicializar la sesion cifrada", e);
         }
     }
 
     private void migrarDesdePrefsLegacySiExiste(Context context, MasterKey masterKey) {
-        if (prefs.contains(KEY_REFRESH_TOKEN) || prefs.contains(KEY_LOGIN_USUARIO) || prefs.contains(KEY_EMPRESA_ID)) {
+        if (prefs.contains(KEY_LOGIN_USUARIO) || prefs.contains(KEY_EMPRESA_ID)) {
             return;
         }
         try {
@@ -87,8 +88,8 @@ public class SessionManager {
             }
             SharedPreferences.Editor editor = prefs.edit();
             for (String key : legacy.getAll().keySet()) {
-                if ("access_token".equals(key)) {
-                    continue; // no migrar access definitivo/temporal
+                if ("access_token".equals(key) || "refresh_token".equals(key)) {
+                    continue;
                 }
                 Object value = legacy.getAll().get(key);
                 if (value instanceof String) {
@@ -122,44 +123,6 @@ public class SessionManager {
         this.accessTemporalMemoria = false;
     }
 
-    /** true si hay access en memoria y no vence en {@code margenSegundos}. */
-    public boolean tieneAccessValidoEnMemoria(int margenSegundos) {
-        String token = accessTokenMemoria;
-        return token != null && !token.isBlank() && !jwtVenceEnSegundos(token, margenSegundos);
-    }
-
-    public static boolean jwtVenceEnSegundos(String jwt, int margenSegundos) {
-        if (jwt == null || jwt.isBlank()) {
-            return true;
-        }
-        try {
-            String[] parts = jwt.split("\\.");
-            if (parts.length < 2) {
-                return true;
-            }
-            String payload = parts[1];
-            int pad = (4 - payload.length() % 4) % 4;
-            if (pad > 0) {
-                payload = payload + "====".substring(0, pad);
-            }
-            String json = new String(
-                    Base64.decode(payload, Base64.URL_SAFE | Base64.NO_WRAP),
-                    StandardCharsets.UTF_8);
-            Matcher m = JWT_EXP.matcher(json);
-            if (!m.find()) {
-                return true;
-            }
-            long exp = Long.parseLong(m.group(1));
-            long ahora = System.currentTimeMillis() / 1000L;
-            return ahora >= (exp - margenSegundos);
-        } catch (Exception e) {
-            return true;
-        }
-    }
-
-    public String getRefreshToken() { return prefs.getString(KEY_REFRESH_TOKEN, null); }
-    public void setRefreshToken(String value) { prefs.edit().putString(KEY_REFRESH_TOKEN, value).apply(); }
-
     public boolean isTemporal() {
         if (accessTokenMemoria != null) {
             return accessTemporalMemoria;
@@ -169,19 +132,14 @@ public class SessionManager {
 
     public void setTemporal(boolean value) { prefs.edit().putBoolean(KEY_TEMPORAL, value).apply(); }
 
-    /**
-     * Actualiza tokens en memoria; solo el refresh se persiste cifrado.
-     * El access definitivo/temporal NO se guarda en disco.
-     */
+    /** Access solo en memoria. No se persiste access ni refresh. */
     public void guardarTokens(String accessToken, String refreshToken, boolean temporal) {
         setAccessTokenMemoria(accessToken, temporal);
-        SharedPreferences.Editor editor = prefs.edit()
+        prefs.edit()
                 .putBoolean(KEY_TEMPORAL, temporal)
-                .remove("access_token");
-        if (refreshToken != null && !refreshToken.isBlank()) {
-            editor.putString(KEY_REFRESH_TOKEN, refreshToken);
-        }
-        editor.apply();
+                .remove("access_token")
+                .remove("refresh_token")
+                .apply();
     }
 
     public long getUserId() { return prefs.getLong(KEY_USER_ID, -1); }
@@ -223,6 +181,7 @@ public class SessionManager {
 
         SharedPreferences.Editor editor = prefs.edit()
                 .remove("access_token")
+                .remove("refresh_token")
                 .putBoolean(KEY_TEMPORAL, data.temporal)
                 .putLong(KEY_USER_ID, data.userId != null ? data.userId : -1L)
                 .putString(KEY_EMAIL, data.email)
@@ -232,10 +191,6 @@ public class SessionManager {
                 .putString(KEY_NOMBRE, data.nombreCompleto)
                 .putBoolean(KEY_ADMIN_SISTEMA, Boolean.TRUE.equals(data.adminSistema))
                 .putString(KEY_TIPO_SALES, data.tipoSales);
-
-        if (data.refreshToken != null && !data.refreshToken.isBlank()) {
-            editor.putString(KEY_REFRESH_TOKEN, data.refreshToken);
-        }
 
         if (data.temporal) {
             editor.putLong(KEY_EMPRESA_ID, -1L)
@@ -301,10 +256,28 @@ public class SessionManager {
         return "";
     }
 
-    public String getLoginUsuario() { return prefs.getString(KEY_LOGIN_USUARIO, null); }
-    public String getLoginPassword() { return prefs.getString(KEY_LOGIN_PASSWORD, null); }
+    public String getLoginUsuario() {
+        if (loginUsuarioMemoria != null && !loginUsuarioMemoria.isBlank()) {
+            return loginUsuarioMemoria;
+        }
+        return prefs.getString(KEY_LOGIN_USUARIO, null);
+    }
+
+    public String getLoginPassword() {
+        if (loginPasswordMemoria != null && !loginPasswordMemoria.isEmpty()) {
+            return loginPasswordMemoria;
+        }
+        return prefs.getString(KEY_LOGIN_PASSWORD, null);
+    }
+
+    /** Credenciales en RAM (obligatorias para pedir token en cada API). */
+    public void setCredencialesEnMemoria(String usuario, String password) {
+        this.loginUsuarioMemoria = usuario != null ? usuario : null;
+        this.loginPasswordMemoria = password != null ? password : null;
+    }
 
     public void guardarCredenciales(String usuario, String password) {
+        setCredencialesEnMemoria(usuario, password);
         prefs.edit()
                 .putString(KEY_LOGIN_USUARIO, usuario != null ? usuario : "")
                 .putString(KEY_LOGIN_PASSWORD, password != null ? password : "")
@@ -312,6 +285,8 @@ public class SessionManager {
     }
 
     public void limpiarCredenciales() {
+        loginUsuarioMemoria = null;
+        loginPasswordMemoria = null;
         prefs.edit()
                 .remove(KEY_LOGIN_USUARIO)
                 .remove(KEY_LOGIN_PASSWORD)
@@ -325,13 +300,12 @@ public class SessionManager {
                 && password != null && !password.isEmpty();
     }
 
-    /** Contexto de negocio listo (empresa+sucursal) y forma de recuperar access (credenciales o refresh). */
+    /** Contexto listo + credenciales para pedir token en cada API. */
     public boolean sesionCompleta() {
         return getEmpresaId() > 0
                 && getSucursalId() > 0
                 && !prefs.getBoolean(KEY_TEMPORAL, false)
-                && (tieneCredencialesGuardadas()
-                || (getRefreshToken() != null && !getRefreshToken().isBlank()));
+                && tieneCredencialesGuardadas();
     }
 
     public boolean isRecordarSesion() {
@@ -342,12 +316,23 @@ public class SessionManager {
         prefs.edit().putBoolean(KEY_RECORDAR_SESION, value).apply();
     }
 
+    /**
+     * Siempre deja credenciales en RAM para pedir token.
+     * En disco solo si {@code recordar} (próximos arranques).
+     */
     public void aplicarPreferenciaGuardarSesion(boolean recordar, String usuario, String password) {
         setRecordarSesion(recordar);
+        setCredencialesEnMemoria(usuario, password);
         if (recordar) {
-            guardarCredenciales(usuario, password);
+            prefs.edit()
+                    .putString(KEY_LOGIN_USUARIO, usuario != null ? usuario : "")
+                    .putString(KEY_LOGIN_PASSWORD, password != null ? password : "")
+                    .apply();
         } else {
-            limpiarCredenciales();
+            prefs.edit()
+                    .remove(KEY_LOGIN_USUARIO)
+                    .remove(KEY_LOGIN_PASSWORD)
+                    .apply();
         }
     }
 
@@ -357,6 +342,8 @@ public class SessionManager {
 
     public void limpiar() {
         limpiarAccessMemoria();
+        loginUsuarioMemoria = null;
+        loginPasswordMemoria = null;
         prefs.edit().clear().apply();
     }
 }

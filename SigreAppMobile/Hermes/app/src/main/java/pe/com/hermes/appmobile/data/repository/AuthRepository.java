@@ -148,7 +148,21 @@ public class AuthRepository {
     }
 
     public void seleccionarEmpresa(long empresaId, long sucursalId, ResultCallback<LoginResponse> callback) {
-        apiClient.getAuthApi().seleccionarEmpresa(new SeleccionEmpresaRequest(empresaId, sucursalId))
+        SeleccionEmpresaRequest request = new SeleccionEmpresaRequest(empresaId, sucursalId);
+        // Si hay credenciales, el backend puede emitir/reutilizar JWT sin depender solo del Bearer.
+        if (session.tieneCredencialesGuardadas()) {
+            String usuario = session.getEmail();
+            if (usuario == null || usuario.isBlank()) {
+                usuario = session.getLoginUsuario();
+            }
+            String plain = session.getLoginPassword();
+            if (usuario != null && !usuario.isBlank() && plain != null && !plain.isEmpty()) {
+                request.email = usuario.trim();
+                request.password = PasswordCrypto.encrypt(plain);
+                request.passwordHash = PasswordCrypto.sha256Hex(plain);
+            }
+        }
+        apiClient.getAuthApi().seleccionarEmpresa(request)
                 .enqueue(new Callback<ApiResponse<LoginResponse>>() {
                     @Override
                     public void onResponse(Call<ApiResponse<LoginResponse>> call, Response<ApiResponse<LoginResponse>> response) {
